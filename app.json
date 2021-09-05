@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "seeyot",
+    "slug": "seeyot",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "seeyot"
+}
