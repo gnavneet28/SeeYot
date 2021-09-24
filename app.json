@@ -3,9 +3,40 @@
     "name": "seeyot",
     "slug": "seeyot",
     "version": "1.0.0",
-    "assetBundlePatterns": [
-      "**/*"
-    ]
+    "orientation": "portrait",
+
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "androidMode": "default",
+          "icon": "./app/assets/notificationicon.png",
+          "color": "#6F009E"
+        }
+      ]
+    ],
+
+    "ios": {
+      "supportsTablet": true,
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-3410683473491694~5850728603"
+      }
+    },
+    "android": {
+      "icon": "./assets/app-logo.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./app/assets/user.png",
+        "backgroundColor": "#000000"
+      },
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-3410683473491694~8016350220"
+      }
+    },
+    "assetBundlePatterns": ["**/*"]
   },
   "name": "seeyot"
 }

@@ -1,0 +1,15 @@
+export default {
+  blue: "#1E90FF",
+  bottomIcons: "#E80000",
+  danger: "#FF0000",
+  dark: "#000000",
+  darkGreen: "#006400",
+  light: "#F7F4F4",
+  lightGrey: "#D3D3D3",
+  placeholder: "#6B6B6B",
+  primary: "#210033",
+  secondary: "#6F009E",
+  white: "#FFFFFF",
+  yellow_Variant: "#FFCC00",
+  yellow: "#FFF93D",
+};

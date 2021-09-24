@@ -1,0 +1,25 @@
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+
+import BlockedUsersScreen from "../screens/BlockedUsersScreen";
+import ProfileScreen from "../screens/ProfileScreen";
+import SubscriptionNavigator from "./SubscriptionNavigator";
+
+const Tab = createBottomTabNavigator();
+
+function ProfileNavigator(props) {
+  return (
+    <Tab.Navigator
+      screenOptions={{ headerShown: false, tabBarStyle: { display: "none" } }}
+    >
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Blocked" component={BlockedUsersScreen} />
+      <Tab.Screen
+        name="SubscriptionNavigator"
+        component={SubscriptionNavigator}
+      />
+    </Tab.Navigator>
+  );
+}
+
+export default ProfileNavigator;

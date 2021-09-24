@@ -11,8 +11,10 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
-import com.seeyot.generated.BasePackageList;
+// added for async storage
+import com.facebook.react.modules.storage.ReactDatabaseSupplier;
 
+import com.seeyot.generated.BasePackageList;
 import org.unimodules.adapters.react.ReactAdapterPackage;
 import org.unimodules.adapters.react.ModuleRegistryAdapter;
 import org.unimodules.adapters.react.ReactModuleRegistryProvider;
@@ -84,6 +86,8 @@ public class MainApplication extends Application implements ReactApplication {
   public void onCreate() {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
+    long size = 50L * 1024L * 1024L; // 50 MB
+    com.facebook.react.modules.storage.ReactDatabaseSupplier.getInstance(getApplicationContext()).setMaximumSize(size);
 
     if (!BuildConfig.DEBUG) {
       UpdatesController.initialize(this);

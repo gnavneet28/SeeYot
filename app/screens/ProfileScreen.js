@@ -1,0 +1,543 @@
+import React, { useState, useCallback } from "react";
+import {
+  Modal,
+  ScrollView,
+  Share,
+  StyleSheet,
+  TouchableHighlight,
+  View,
+} from "react-native";
+
+import AddPicture from "../components/AddPicture";
+import ApiActivity from "../components/ApiActivity";
+import AppButton from "../components/AppButton";
+import AppHeader from "../components/AppHeader";
+import AppText from "../components/AppText";
+import AppTextInput from "../components/AppTextInput";
+import InfoAlert from "../components/InfoAlert";
+import LoadingIndicator from "../components/LoadingIndicator";
+import ProfileOption from "../components/ProfileOption";
+import Screen from "../components/Screen";
+import Selection from "../components/Selection";
+import UserDetailsCard from "../components/UserDetailsCard";
+
+import useAuth from "../auth/useAuth";
+
+import asyncStorage from "../utilities/cache";
+import apiFlow from "../utilities/ApiActivityStatus";
+
+import expoPushTokensApi from "../api/expoPushTokens";
+import problemsApi from "../api/problems";
+import usersApi from "../api/users";
+
+import defaultStyles from "../config/styles";
+import Alert from "../components/Alert";
+
+const height = defaultStyles.height;
+
+function ProfileScreen({ navigation }) {
+  const { user, setUser, logOut } = useAuth();
+  const { apiActivityStatus, initialApiActivity } = apiFlow;
+
+  // STATES
+  const [visible, setVisible] = useState(false);
+  const [openReport, setOpenReport] = useState(false);
+  const [problemDescription, setProblemDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [infoAlert, setInfoAlert] = useState({
+    infoAlertMessage: "",
+    showInfoAlert: false,
+  });
+  const [apiActivity, setApiActivity] = useState({
+    message: "",
+    processing: true,
+    visible: false,
+    success: false,
+  });
+  const [showLogOut, setShowLogOut] = useState(false);
+
+  //LOG OUT ACTION
+  const handleCloseLogout = useCallback(() => setShowLogOut(false), []);
+
+  const handleOpenLogout = useCallback(() => setShowLogOut(true), []);
+
+  // API ACTIVITY ACTIONS
+  const handleApiActivityClose = useCallback(
+    () => setApiActivity({ ...apiActivity, visible: false }),
+    []
+  );
+
+  // HEADER ACTION
+  const handleBack = useCallback(() => {
+    navigation.goBack();
+  }, []);
+
+  const handleRightHeaderPress = useCallback(() => setVisible(true), []);
+
+  // INFO ALERT ACTION
+  const handleCloseInfoAlert = useCallback(
+    () => setInfoAlert({ ...infoAlert, showInfoAlert: false }),
+    []
+  );
+
+  // SETTING OPTION AND ACTION
+  const handleBlockListPress = useCallback(() => {
+    setVisible(false);
+    navigation.navigate("Blocked");
+  }, []);
+
+  const handleSubscriptionPress = useCallback(() => {
+    setVisible(false);
+    navigation.navigate("SubscriptionNavigator", { from: "Profile" });
+  }, []);
+
+  const handleReportPress = useCallback(() => {
+    setVisible(false);
+    setOpenReport(true);
+  }, [problemDescription]);
+
+  const handleProblemSubmitPress = useCallback(async () => {
+    setOpenReport(false);
+    setIsLoading(true);
+
+    const { ok, data, problem } = await problemsApi.registerProblem(
+      problemDescription
+    );
+
+    if (ok) {
+      setIsLoading(false);
+      setProblemDescription("");
+      return setInfoAlert({
+        ...infoAlert,
+        infoAlertMessage: data.message,
+        showInfoAlert: true,
+      });
+    }
+
+    setIsLoading(false);
+    setInfoAlert({
+      ...infoAlert,
+      infoAlertMessage: problem,
+      showInfoAlert: true,
+    });
+  }, [problemDescription]);
+
+  const handleLogOutPress = useCallback(async () => {
+    const { ok } = await expoPushTokensApi.removeToken();
+    if (ok) {
+      return logOut();
+    }
+    setInfoAlert({
+      infoAlertMessage: "Action failed! Please try again.",
+      showInfoAlert: true,
+    });
+  }, []);
+
+  const handleHelpPress = useCallback(() => {
+    console.log("Help");
+  }, []);
+
+  // PICTURE CHANGE ACTION
+  const handleImageChange = useCallback(
+    async (image) => {
+      initialApiActivity(setApiActivity, "Updating your picture...");
+
+      let modifiedUser = { ...user };
+      let cachedUserDetails = {
+        _id: user._id,
+        name: user.name,
+        picture: user.picture,
+        phoneNumber: user.phoneNumber,
+      };
+      let picture = image;
+
+      const response = await usersApi.updateCurrentUserPhoto(picture);
+      if (response.ok) {
+        modifiedUser.picture = response.data.picture;
+        cachedUserDetails.picture = response.data.data;
+        setUser(modifiedUser);
+        await asyncStorage.store("userDetails", cachedUserDetails);
+      }
+      return apiActivityStatus(response, setApiActivity);
+    },
+    [user]
+  );
+
+  // ECHO CONDITION ACTION
+  const handleMessageSelection = useCallback(async () => {
+    setIsLoading(true);
+    let modifiedUser = { ...user };
+
+    const { data, ok, problem } = await usersApi.updateEchoWhenMessage();
+
+    if (ok) {
+      modifiedUser.echoWhen = data;
+      await asyncStorage.store("userEchoWhen", data);
+      setUser(modifiedUser);
+      return setIsLoading(false);
+    }
+
+    if (data) {
+      setIsLoading(false);
+      return setInfoAlert({
+        ...infoAlert,
+        infoAlertMessage: data.message,
+        showInfoAlert: true,
+      });
+    }
+
+    setIsLoading(false);
+    return setInfoAlert({
+      ...infoAlert,
+      infoAlertMessage: problem,
+      showInfoAlert: true,
+    });
+  }, [user]);
+
+  const handlePhotoTapSelection = useCallback(async () => {
+    setIsLoading(true);
+    let modifiedUser = { ...user };
+
+    const { data, ok, problem } = await usersApi.updateEchoWhenPhotoTap();
+
+    if (ok) {
+      modifiedUser.echoWhen = data;
+      await asyncStorage.store("userEchoWhen", data);
+      setUser(modifiedUser);
+      return setIsLoading(false);
+    }
+
+    if (data) {
+      setIsLoading(false);
+      return setInfoAlert({
+        infoAlertMessage: data.message,
+        showInfoAlert: true,
+      });
+    }
+
+    setIsLoading(false);
+    return setInfoAlert({
+      infoAlertMessage: problem,
+      showInfoAlert: true,
+    });
+  }, [user]);
+
+  // NAME CHANGE ACTION
+  const handleNameChange = useCallback(
+    async (name) => {
+      initialApiActivity(setApiActivity, "Updating your name...");
+      let modifiedUser = { ...user };
+      let cachedUserDetails = {
+        _id: user._id,
+        name: user.name,
+        picture: user.picture,
+        phoneNumber: user.phoneNumber,
+      };
+
+      const response = await usersApi.updateCurrentUserName(name);
+
+      if (response.ok) {
+        modifiedUser.name = response.data.name;
+        cachedUserDetails.name = response.data.name;
+        await asyncStorage.store("userDetails", cachedUserDetails);
+        setUser(modifiedUser);
+      }
+      return apiActivityStatus(response, setApiActivity);
+    },
+    [user]
+  );
+
+  // INVITE ACTION
+  const handleInvitePress = useCallback(async () => {
+    try {
+      const result = await Share.share({
+        message:
+          "Join this awesome place and not hold anything back. Just say it",
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  }, []);
+
+  return (
+    <>
+      <Screen style={styles.container}>
+        <AppHeader
+          fwr={true}
+          leftIcon="arrow-back"
+          onPressLeft={handleBack}
+          onPressRight={handleRightHeaderPress}
+          rightIcon="gear"
+          title="Profile"
+        />
+        <ApiActivity
+          message={apiActivity.message}
+          onDoneButtonPress={handleApiActivityClose}
+          onRequestClose={handleApiActivityClose}
+          processing={apiActivity.processing}
+          success={apiActivity.success}
+          visible={apiActivity.visible}
+        />
+        <Alert
+          visible={showLogOut}
+          title="Log Out"
+          description="Are you sure you want to logout?"
+          onRequestClose={handleCloseLogout}
+          leftOption="Cancel"
+          rightOption="Yes"
+          leftPress={handleCloseLogout}
+          rightPress={handleLogOutPress}
+        />
+        <LoadingIndicator visible={isLoading} />
+        <InfoAlert
+          leftPress={handleCloseInfoAlert}
+          description={infoAlert.infoAlertMessage}
+          visible={infoAlert.showInfoAlert}
+        />
+        <ScrollView style={{ width: "100%" }}>
+          <View style={styles.container}>
+            <AddPicture
+              icon={user.picture ? "edit" : "camera-alt"}
+              image={user.picture}
+              imageView={true}
+              onChangeImage={handleImageChange}
+              style={styles.addPicture}
+            />
+            <UserDetailsCard
+              data={user.name}
+              editable={true}
+              fw={true}
+              iconName="user-o"
+              onNameChange={handleNameChange}
+              size={height * 0.027}
+              style={styles.userDetailsName}
+              title="Name"
+              userName={user.name}
+            />
+            <UserDetailsCard
+              data={user.phoneNumber.toString().slice(-10)}
+              fw={true}
+              iconName="phone"
+              size={height * 0.027}
+              title="Phone Number"
+            />
+            <View style={styles.echoBox}>
+              <AppText style={styles.echoWhen}>Echo when?</AppText>
+              <Selection
+                onPress={handleMessageSelection}
+                opted={user.echoWhen.message}
+                value="Someone sends you their thoughts."
+              />
+              <Selection
+                onPress={handlePhotoTapSelection}
+                opted={user.echoWhen.photoTap}
+                value="Someone taps on your profile picture."
+              />
+            </View>
+            <AppText onPress={handleInvitePress} style={styles.inviteText}>
+              Invite friends
+            </AppText>
+          </View>
+        </ScrollView>
+      </Screen>
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setVisible(false)}
+        transparent={true}
+        visible={visible}
+      >
+        <TouchableHighlight style={styles.optionsContainerBackground}>
+          <View style={styles.optionsContainer}>
+            <AppText
+              style={[styles.closeButton, { fontFamily: "Comic-Bold" }]}
+              onPress={() => setVisible(false)}
+            >
+              Close
+            </AppText>
+            <ProfileOption
+              icon="block"
+              onPress={handleBlockListPress}
+              title="Blocklist"
+            />
+            <ProfileOption
+              icon="subscriptions"
+              onPress={handleSubscriptionPress}
+              title="Subscriptions"
+            />
+
+            <ProfileOption
+              icon="report-problem"
+              onPress={handleReportPress}
+              title="Report problem"
+            />
+
+            <ProfileOption
+              icon="help-center"
+              onPress={handleHelpPress}
+              title="Help"
+            />
+
+            <ProfileOption
+              icon="logout"
+              onPress={handleOpenLogout}
+              title="Log Out"
+            />
+          </View>
+        </TouchableHighlight>
+      </Modal>
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setOpenReport(false)}
+        transparent={true}
+        visible={openReport}
+      >
+        <TouchableHighlight
+          style={{ flex: 1, width: "100%", backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <View style={styles.optionsContainerReport}>
+            <AppText
+              style={[styles.closeButton, { fontFamily: "Comic-Bold" }]}
+              onPress={() => setOpenReport(false)}
+            >
+              Close
+            </AppText>
+            <AppTextInput
+              maxLength={250}
+              multiline={true}
+              onChangeText={setProblemDescription}
+              placeholder="Describe your problem..."
+              subStyle={styles.inputProblem}
+              style={styles.problemInput}
+            />
+            <View style={styles.actionContainer}>
+              <AppText>{problemDescription.length}/250</AppText>
+              <AppButton
+                disabled={problemDescription ? false : true}
+                onPress={handleProblemSubmitPress}
+                style={styles.submitProblemButton}
+                title="Submit"
+              />
+            </View>
+          </View>
+        </TouchableHighlight>
+      </Modal>
+    </>
+  );
+}
+const styles = StyleSheet.create({
+  actionContainer: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 5,
+    width: "100%",
+  },
+  addPicture: {
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  container: {
+    alignItems: "center",
+    width: "100%",
+  },
+  closeButton: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    color: defaultStyles.colors.danger,
+    fontSize: 18,
+    height: 40,
+    textAlign: "center",
+    textAlignVertical: "center",
+    width: "100%",
+  },
+  echoBox: {
+    alignItems: "center",
+    borderColor: defaultStyles.colors.light,
+    borderTopWidth: 1,
+    marginTop: 5,
+    paddingTop: 10,
+    width: "95%",
+  },
+  echoWhen: {
+    alignSelf: "flex-start",
+    fontSize: height * 0.023,
+    paddingHorizontal: 10,
+  },
+  inputProblem: {
+    fontSize: 18,
+    height: "100%",
+    textAlignVertical: "top",
+  },
+  inviteText: {
+    backgroundColor: defaultStyles.colors.blue,
+    borderRadius: 5,
+    color: defaultStyles.colors.white,
+    letterSpacing: 1,
+    marginTop: 30,
+    paddingHorizontal: 10,
+    textAlign: "center",
+  },
+  optionsContainerBackground: {
+    flex: 1,
+    width: "100%",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  optionsContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderLeftColor: defaultStyles.colors.light,
+    borderLeftWidth: 1,
+    borderRightColor: defaultStyles.colors.light,
+    borderRightWidth: 1,
+    borderTopColor: defaultStyles.colors.light,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
+    borderTopWidth: 1,
+    bottom: 0,
+    height: 300,
+    position: "absolute",
+    width: "100%",
+  },
+  optionsContainerReport: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderLeftColor: defaultStyles.colors.light,
+    borderLeftWidth: 1,
+    borderRightColor: defaultStyles.colors.light,
+    borderRightWidth: 1,
+    borderTopColor: defaultStyles.colors.light,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
+    borderTopWidth: 1,
+    bottom: 0,
+    height: 220,
+    paddingHorizontal: 10,
+    position: "absolute",
+    width: "100%",
+  },
+  problemInput: {
+    backgroundColor: defaultStyles.colors.light,
+    height: 100,
+    marginBottom: 10,
+    padding: 5,
+  },
+  submitProblemButton: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    height: 35,
+    width: 80,
+  },
+  userDetailsName: {
+    borderBottomWidth: 1,
+  },
+});
+
+export default ProfileScreen;

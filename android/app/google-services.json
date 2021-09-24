@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "829673958507",
+    "project_id": "seeyot-d4030",
+    "storage_bucket": "seeyot-d4030.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:829673958507:android:64ebc986c3713c84b3152e",
+        "android_client_info": {
+          "package_name": "com.seeyot"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "829673958507-0nerepqmkr5abbo0l9pe9qiii4kh62ll.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.seeyot",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "829673958507-efvuf4hvrpgu64gscgq8epmdojdi4qhe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmAhKkVXPRMDMQ7bua0E7lPPibNWLxB4k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "829673958507-efvuf4hvrpgu64gscgq8epmdojdi4qhe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
