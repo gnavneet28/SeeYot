@@ -47,7 +47,11 @@ function RegisterDetailsScreen({ route }) {
 
     if (!image) {
       const { ok, problem, data, headers } =
-        await usersApi.registerUserWithoutPicture(number, name, verifiedId);
+        await usersApi.registerUserWithoutPicture(
+          parseInt(number),
+          name,
+          verifiedId
+        );
 
       if (ok) {
         const authToken = headers["x-auth-token"];
@@ -73,7 +77,12 @@ function RegisterDetailsScreen({ route }) {
     }
 
     const { ok, problem, data, headers } =
-      await usersApi.registerUserWithPicture(number, picture, name, verifiedId);
+      await usersApi.registerUserWithPicture(
+        parseInt(number),
+        picture,
+        name,
+        verifiedId
+      );
 
     if (ok) {
       const authToken = headers["x-auth-token"];

@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     width: "75%",
   },
   numberSub: {
-    letterSpacing: 2,
+    letterSpacing: 1,
   },
   otpSentInfo: {
     color: defaultStyles.colors.white,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   },
   submitButtonSub: {
     color: defaultStyles.colors.primary,
-    letterSpacing: 2,
+    letterSpacing: 1,
   },
   verifyInfo: {
     color: defaultStyles.colors.white,
