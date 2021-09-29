@@ -13,6 +13,7 @@ import VipAdCard from "../components/VipAdCard";
 
 import asyncStorage from "../utilities/cache";
 import apiFlow from "../utilities/ApiActivityStatus";
+import debounce from "../utilities/debounce";
 
 import defaultStyles from "../config/styles";
 
@@ -53,7 +54,7 @@ function NotificationScreen({ navigation }) {
   );
 
   const updateNotifications = useCallback(async () => {
-    const { ok, data } = await myApi.setNotificationSeen();
+    const { ok, data, problem } = await myApi.setNotificationSeen();
     if (ok) {
       let modifiedUser = { ...user };
       modifiedUser.notifications = data;
@@ -61,6 +62,11 @@ function NotificationScreen({ navigation }) {
       await asyncStorage.store("userNotifications", data);
       return setIsReady(true);
     }
+    setIsReady(true);
+    return setInfoAlert({
+      infoAlertMessage: "Something went wrong! Please try again.",
+      showInfoAlert: true,
+    });
   }, [user]);
 
   useEffect(() => {
@@ -70,9 +76,16 @@ function NotificationScreen({ navigation }) {
   }, [isFocused]);
 
   // HEADER ACTION
-  const handleBack = useCallback(() => {
-    navigation.goBack();
-  }, []);
+  const handleBack = useCallback(
+    debounce(
+      () => {
+        navigation.goBack();
+      },
+      500,
+      true
+    ),
+    []
+  );
 
   // NOTIFICATION ACTION
   const handleClearAllPress = useCallback(async () => {

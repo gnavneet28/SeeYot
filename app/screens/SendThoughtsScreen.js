@@ -20,6 +20,7 @@ import usersApi from "../api/users";
 
 import apiFlow from "../utilities/ApiActivityStatus";
 import asyncStorage from "../utilities/cache";
+import debounce from "../utilities/debounce";
 
 const filterThoughts = (thoughts = [], recipient, creator) => {
   return thoughts
@@ -59,9 +60,16 @@ function SendThoughtsScreen({ navigation, route }) {
   });
 
   // HEADER ACTIONS
-  const handleBack = useCallback(() => {
-    navigation.goBack();
-  }, []);
+  const handleBack = useCallback(
+    debounce(
+      () => {
+        navigation.goBack();
+      },
+      500,
+      true
+    ),
+    []
+  );
 
   const handleOptionsPress = useCallback(() => {
     setIsVisible(true);

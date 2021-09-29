@@ -5,9 +5,9 @@ const storeDetails = async (data) => {
     _id: data._id,
     name: data.name,
     picture: data.picture,
-    vip: data.vip,
     phoneNumber: data.phoneNumber,
   };
+  await asyncStorage.store("vip", data.vip);
   await asyncStorage.store("blocked", data.blocked);
   await asyncStorage.store("userContacts", data.contacts);
   await asyncStorage.store("userDetails", userDetails);
@@ -17,6 +17,7 @@ const storeDetails = async (data) => {
   await asyncStorage.store("userThoughts", data.thoughts);
   await asyncStorage.store("userSearchHistory", data.searchHistory);
   await asyncStorage.store("userPhoneContacts", data.phoneContacts);
+  await asyncStorage.store("userPoints", data.points);
 };
 
 export default storeDetails;

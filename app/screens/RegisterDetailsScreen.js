@@ -13,6 +13,8 @@ import usersApi from "../api/users";
 import useAuth from "../auth/useAuth";
 import authStorage from "../auth/storage";
 
+import storeDetails from "../utilities/storeDetails";
+
 import defaultStyles from "../config/styles";
 import { useKeyboard } from "@react-native-community/hooks";
 
@@ -23,8 +25,6 @@ function RegisterDetailsScreen({ route }) {
   const { number, verifiedId } = route.params;
 
   const { keyboardShown } = useKeyboard();
-
-  console.log(number, verifiedId);
 
   // STATES
   const [image, setImage] = useState("");
@@ -56,6 +56,7 @@ function RegisterDetailsScreen({ route }) {
       if (ok) {
         const authToken = headers["x-auth-token"];
         await authStorage.storeToken(authToken);
+        await storeDetails(data);
         setIsLoading(false);
         return logIn(data);
       }
@@ -87,6 +88,7 @@ function RegisterDetailsScreen({ route }) {
     if (ok) {
       const authToken = headers["x-auth-token"];
       await authStorage.storeToken(authToken);
+      await storeDetails(data);
       setIsLoading(false);
       return logIn(data);
     }

@@ -25,6 +25,7 @@ import useAuth from "../auth/useAuth";
 
 import asyncStorage from "../utilities/cache";
 import apiFlow from "../utilities/ApiActivityStatus";
+import debounce from "../utilities/debounce";
 
 import expoPushTokensApi from "../api/expoPushTokens";
 import problemsApi from "../api/problems";
@@ -68,9 +69,16 @@ function ProfileScreen({ navigation }) {
   );
 
   // HEADER ACTION
-  const handleBack = useCallback(() => {
-    navigation.goBack();
-  }, []);
+  const handleBack = useCallback(
+    debounce(
+      () => {
+        navigation.goBack();
+      },
+      500,
+      true
+    ),
+    []
+  );
 
   const handleRightHeaderPress = useCallback(() => setVisible(true), []);
 

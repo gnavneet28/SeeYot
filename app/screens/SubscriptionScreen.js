@@ -10,13 +10,21 @@ import Screen from "../components/Screen";
 import VipAdCard from "../components/VipAdCard";
 
 import defaultStyles from "../config/styles";
-import { AdMobRewarded } from "expo-ads-admob";
+
+import debounce from "../utilities/debounce";
 
 function SubscriptionScreen({ navigation, route }) {
   // HEADER ACTION
-  const hanldeHeaderLeftPress = useCallback(() => {
-    navigation.goBack();
-  }, []);
+  const hanldeHeaderLeftPress = useCallback(
+    debounce(
+      () => {
+        navigation.goBack();
+      },
+      500,
+      true
+    ),
+    []
+  );
 
   const handleManageSubscriptionPress = useCallback(() => {
     navigation.navigate("Manager");
@@ -24,10 +32,6 @@ function SubscriptionScreen({ navigation, route }) {
 
   const handleCollectButtonPress = useCallback(() => {
     navigation.navigate("PointsScreen");
-    // Display a rewarded ad
-    // await AdMobRewarded.setAdUnitID("ca-app-pub-3940256099942544/5224354917"); // Test admob ID
-    // await AdMobRewarded.requestAdAsync();
-    // await AdMobRewarded.showAdAsync();
   }, []);
 
   return (
@@ -66,21 +70,21 @@ function SubscriptionScreen({ navigation, route }) {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <PlanCard planName="Plan A" planRate={250} planDuration="1 Month" />
             <PlanCard
+              planDuration="2 Months"
               planName="Plan B"
               planRate={450}
-              planDuration="2 Months"
             />
             <PlanCard
-              planName="Plan C"
-              planRate={600}
               planDuration="3 Months"
+              planName="Plan C"
+              planRate={700}
             />
             <PlanCard
-              planName="Plan D"
-              planRate={1150}
               planDuration="6 Months"
+              planName="Plan D"
+              planRate={1250}
             />
-            <PlanCard planName="Plan E" planRate={2600} planDuration="1 Year" />
+            <PlanCard planName="Plan E" planRate={2450} planDuration="1 Year" />
           </ScrollView>
           <AppText style={styles.selectPlanText}>Or Collect Points</AppText>
           <AppButton
@@ -105,10 +109,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   collectPoints: {
+    backgroundColor: defaultStyles.colors.primary,
+    height: 35,
     marginVertical: 5,
     width: "90%",
-    backgroundColor: defaultStyles.colors.yellow_Variant,
-    height: 35,
   },
   scrollView: {
     alignItems: "center",
@@ -116,10 +120,10 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   selectPlanText: {
-    marginVertical: 10,
-    fontSize: 20,
-    color: defaultStyles.colors.secondary,
     alignSelf: "flex-start",
+    color: defaultStyles.colors.secondary,
+    fontSize: 20,
+    marginVertical: 10,
   },
   vipAdCard: {
     marginVertical: 5,

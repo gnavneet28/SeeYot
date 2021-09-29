@@ -9,6 +9,8 @@ import defaultStyles from "../config/styles";
 
 const height = defaultStyles.height;
 
+import debounce from "../utilities/debounce";
+
 function AppHeader({
   fwl,
   fwr,

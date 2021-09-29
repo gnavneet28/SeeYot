@@ -1,18 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
-import {
-  View,
-  StyleSheet,
-  TextInput,
-  ImageBackground,
-  Text,
-} from "react-native";
-import auth from "@react-native-firebase/auth";
+import React, { useState } from "react";
+import { View, StyleSheet, ImageBackground, Text } from "react-native";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
 import InfoAlert from "../components/InfoAlert";
 import LoadingIndicator from "../components/LoadingIndicator";
-import OtpCodeInput from "../components/OtpCodeInput";
 
 import {
   CodeField,
@@ -29,18 +21,8 @@ const height = defaultStyles.height;
 
 export default function VerifyOtpScreen({ navigation, route }) {
   const { phoneNumber, verificationId } = route.params;
-
-  const [value, setValue] = useState("");
-  const ref = useBlurOnFulfill({ value, cellCount: 6 });
-  const [props, getCellOnLayoutHandler] = useClearByFocusCell({
-    value,
-    setValue,
-  });
-
   let number = phoneNumber;
   let verifiedId = verificationId;
-
-  console.log(verifiedId, verificationId);
 
   // STATES
   const [disabled, setDisabled] = useState(false);
@@ -48,6 +30,12 @@ export default function VerifyOtpScreen({ navigation, route }) {
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
+  });
+  const [value, setValue] = useState("");
+  const ref = useBlurOnFulfill({ value, cellCount: 6 });
+  const [props, getCellOnLayoutHandler] = useClearByFocusCell({
+    value,
+    setValue,
   });
 
   // INFO ALERT ACTION
@@ -187,16 +175,14 @@ const styles = StyleSheet.create({
   codeFieldRoot: { marginTop: 20 },
   cell: {
     backgroundColor: defaultStyles.colors.white,
-    width: 45,
+    borderRadius: 5,
+    fontSize: 20,
     height: 45,
     lineHeight: 38,
-    fontSize: 20,
-    borderWidth: 2,
-    borderColor: "#00000030",
-    textAlign: "center",
     marginHorizontal: 5,
-    borderRadius: 5,
+    textAlign: "center",
     textAlignVertical: "center",
+    width: 45,
   },
   enterOtpText: {
     color: defaultStyles.colors.white,
@@ -230,10 +216,6 @@ const styles = StyleSheet.create({
     bottom: 20,
     justifyContent: "center",
     width: "100%",
-  },
-  inputBox: {
-    borderRadius: 30,
-    marginBottom: 20,
   },
   infoText: {
     color: defaultStyles.colors.white,

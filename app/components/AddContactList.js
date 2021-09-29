@@ -68,7 +68,9 @@ class AddContactList extends React.Component {
       );
       return this.setState({
         ...this.state,
-        dataProvider: newData,
+        dataProvider: newData.getSize()
+          ? newData
+          : this.state.dataProvider.cloneWithRows(defaultListItemWhenEmpty),
       });
     }
 
@@ -113,7 +115,9 @@ class AddContactList extends React.Component {
     if (prevProps.users.length != this.props.users.length) {
       return this.setState({
         ...this.state,
-        dataProvider: this.state.dataProvider.cloneWithRows(this.props.users),
+        dataProvider: this.props.users.length
+          ? this.state.dataProvider.cloneWithRows(this.props.users)
+          : this.state.dataProvider.cloneWithRows(defaultListItemWhenEmpty),
       });
     }
   }
@@ -134,11 +138,6 @@ class AddContactList extends React.Component {
               style={styles.inputBox}
             />
           </View>
-          {/* {this.props.users.length < 1 && this.state.searchTerm ? (
-            <AppText subStyle={{ textAlign: "center" }}>
-              No result found!
-            </AppText>
-          ) : null} */}
         </View>
         <View style={styles.listView}>
           <RecyclerListView

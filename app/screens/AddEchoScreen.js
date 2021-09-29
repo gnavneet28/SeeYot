@@ -16,6 +16,7 @@ import InfoAlert from "../components/InfoAlert";
 
 import asyncStorage from "../utilities/cache";
 import apiFlow from "../utilities/ApiActivityStatus";
+import debounce from "../utilities/debounce";
 
 import useAuth from "../auth/useAuth";
 
@@ -137,10 +138,16 @@ function AddEchoScreen({ navigation, route }) {
   }, [message, recipient._id, user]);
 
   // HEADER ACTIONS
-  const hanldeBack = useCallback(() => {
-    navigation.goBack();
-  }, []);
-
+  const handleBack = useCallback(
+    debounce(
+      () => {
+        navigation.goBack();
+      },
+      500,
+      true
+    ),
+    []
+  );
   const handleHelpPress = useCallback(() => {
     setShowHelp(true);
   }, []);
@@ -185,7 +192,7 @@ function AddEchoScreen({ navigation, route }) {
         <AppHeader
           title="Add Echo"
           leftIcon="arrow-back"
-          onPressLeft={hanldeBack}
+          onPressLeft={handleBack}
           rightIcon="help-outline"
           onPressRight={handleHelpPress}
         />

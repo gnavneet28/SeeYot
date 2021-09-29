@@ -19,12 +19,18 @@ import useAuth from "../auth/useAuth";
 
 import asyncStorage from "../utilities/cache";
 import apiFlow from "../utilities/ApiActivityStatus";
+import debounce from "../utilities/debounce";
 
 const height = defaultStyles.height;
 
 function AddContactsScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const { apiActivityStatus, initialApiActivity } = apiFlow;
+
+  const permission = async () => {
+    const { granted } = await Contacts.getPermissionsAsync();
+    return granted;
+  };
 
   // STATES
   const [isReady, setIsReady] = useState(false);
@@ -133,9 +139,16 @@ function AddContactsScreen({ navigation }) {
   }, []);
 
   // HEADER ACTIONS
-  const handleBack = useCallback(() => {
-    navigation.goBack();
-  }, []);
+  const handleBack = useCallback(
+    debounce(
+      () => {
+        navigation.goBack();
+      },
+      500,
+      true
+    ),
+    []
+  );
 
   const handleRightPress = useCallback(() => {
     navigation.navigate("Vip");
@@ -143,6 +156,11 @@ function AddContactsScreen({ navigation }) {
 
   // INFO ALERT ACTIONS
   const handleCloseInfoAlert = useCallback(async () => {
+    const contactIsAccessible = await permission();
+
+    if (contactIsAccessible == true) {
+      return setInfoAlert({ showInfoAlert: false });
+    }
     setInfoAlert({ showInfoAlert: false });
     await Linking.openSettings();
   }, []);

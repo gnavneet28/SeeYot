@@ -10,6 +10,7 @@ import Screen from "../components/Screen";
 
 import asyncStorage from "../utilities/cache";
 import apiFlow from "../utilities/ApiActivityStatus";
+import debounce from "../utilities/debounce";
 
 import useAuth from "../auth/useAuth";
 
@@ -61,9 +62,16 @@ function BlockedUsersScreen({ navigation }) {
   };
 
   // HAEDER ACTION
-  const hanldeBackPress = useCallback(() => {
-    navigation.goBack();
-  }, []);
+  const handleBackPress = useCallback(
+    debounce(
+      () => {
+        navigation.goBack();
+      },
+      500,
+      true
+    ),
+    []
+  );
 
   // BLOCK LIST ACTION
   const handleRefresh = async () => {
@@ -95,7 +103,7 @@ function BlockedUsersScreen({ navigation }) {
     <Screen style={styles.container}>
       <AppHeader
         leftIcon="arrow-back"
-        onPressLeft={hanldeBackPress}
+        onPressLeft={handleBackPress}
         title="Blocklist"
       />
       <ApiActivity

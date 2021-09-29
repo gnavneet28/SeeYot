@@ -1,5 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
+import LottieView from "lottie-react-native";
 
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
@@ -32,7 +33,12 @@ function AddContactCard({
   if (!name)
     return (
       <View style={styles.emptyData}>
-        <AppText>No contacts to show!</AppText>
+        <LottieView
+          autoPlay
+          loop
+          source={require("../assets/animations/noresults.json")}
+          style={{ flex: 1 }}
+        />
       </View>
     );
 

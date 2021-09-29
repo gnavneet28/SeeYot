@@ -10,6 +10,8 @@ const getDetails = async () => {
   const notifications = await asyncStorage.get("userNotifications");
   const searchHistory = await asyncStorage.get("userSearchHistory");
   const blocked = await asyncStorage.get("blocked");
+  const points = await asyncStorage.get("userPoints");
+  const vip = await asyncStorage.get("vip");
   let cachedUser = {
     _id: currentUser._id,
     blocked,
@@ -19,9 +21,10 @@ const getDetails = async () => {
     name: currentUser.name,
     notifications: notifications,
     phoneNumber: currentUser.phoneNumber,
+    points,
     picture: currentUser.picture,
     thoughts: thoughts,
-    vip: users.vip,
+    vip,
     searchHistory: searchHistory,
   };
 

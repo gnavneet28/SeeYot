@@ -17,6 +17,8 @@ const registerUserWithoutPicture = (phoneNumber, name, verificationId) =>
     verificationId,
   });
 
+const updatePoints = () => apiClient.put(endPoint + "/me/points/add", {});
+
 const searchUser = (searchQuery) =>
   apiClient.get(endPoint + "/search", { searchQuery });
 
@@ -70,11 +72,15 @@ const setPrivacyMessage = () =>
 const syncContacts = (phoneContacts) =>
   apiClient.put(endPoint + "/sync/contacts", { phoneContacts });
 
+const redeemPoints = (pointsToRedeem) =>
+  apiClient.put(endPoint + "/me/redeem", { pointsToRedeem });
+
 export default {
   addContact,
   addToSearchHstory,
   blockContact,
   getCurrentUser,
+  redeemPoints,
   registerUserWithoutPicture,
   registerUserWithPicture,
   removeContact,
@@ -89,6 +95,7 @@ export default {
   updateEcho,
   updateEchoWhenMessage,
   updateEchoWhenPhotoTap,
+  updatePoints,
   vipSubscribe,
   vipUnSubscribe,
 };

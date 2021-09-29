@@ -14,6 +14,7 @@ import defaultStyles from "../config/styles";
 import usersApi from "../api/users";
 
 import asyncStorage from "../utilities/cache";
+import debounce from "../utilities/debounce";
 
 import useAuth from "../auth/useAuth";
 
@@ -45,9 +46,16 @@ function VipSearchScreen({ navigation }) {
   );
 
   // HEADER ACTION
-  const handleLeftPress = useCallback(() => {
-    navigation.goBack();
-  }, []);
+  const handleLeftPress = useCallback(
+    debounce(
+      () => {
+        navigation.goBack();
+      },
+      500,
+      true
+    ),
+    []
+  );
 
   // SEARCH HISTORY ACTION
   const handleThougthCardPress = useCallback((user) => {
@@ -74,7 +82,6 @@ function VipSearchScreen({ navigation }) {
           });
         }
 
-        setInfoAlertMessage(problem);
         setIsLoading(false);
         return setInfoAlert({
           ...infoAlert,

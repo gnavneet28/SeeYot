@@ -15,6 +15,7 @@ public class BasePackageList {
         new expo.modules.filesystem.FileSystemPackage(),
         new expo.modules.font.FontLoaderPackage(),
         new expo.modules.imageloader.ImageLoaderPackage(),
+        new expo.modules.inapppurchases.InAppPurchasesPackage(),
         new expo.modules.keepawake.KeepAwakePackage(),
         new expo.modules.notifications.NotificationsPackage(),
         new expo.modules.securestore.SecureStorePackage(),

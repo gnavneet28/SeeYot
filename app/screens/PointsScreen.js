@@ -8,29 +8,58 @@ import { AdMobRewarded } from "expo-ads-admob";
 import useAuth from "../auth/useAuth";
 
 import defaultStyles from "../config/styles";
+
+import ApiActivity from "../components/ApiActivity";
+import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
 import AppTextInput from "../components/AppTextInput";
-import AppButton from "../components/AppButton";
+import Details from "../components/Details";
 import InfoAlert from "../components/InfoAlert";
 import LoadingIndicator from "../components/LoadingIndicator";
 
+import apiFlow from "../utilities/ApiActivityStatus";
+import asyncStorage from "../utilities/cache";
+import debounce from "../utilities/debounce";
+
+import usersApi from "../api/users";
+
 const Points = {
-  totalPoints: 20,
+  totalPoints: 0,
 };
 
 function PointsScreen({ navigation }) {
   const { user, setUser } = useAuth();
+  const { apiActivityStatus, initialApiActivity } = apiFlow;
 
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
   });
-
   const [pointsToRedeem, setPointsToRedeem] = useState(null);
-
   const [isLoading, setIsLoading] = useState(false);
+  const [apiActivity, setApiActivity] = useState({
+    message: "",
+    processing: true,
+    visible: false,
+    success: false,
+  });
 
-  const handleBack = useCallback(() => navigation.goBack(), []);
+  // API ACTIVITY ACTIONS
+  const handleApiActivityClose = useCallback(
+    () => setApiActivity({ ...apiActivity, visible: false }),
+    []
+  );
+
+  const handleBack = useCallback(
+    debounce(
+      () => {
+        navigation.goBack();
+      },
+      500,
+      true
+    ),
+    []
+  );
 
   const handleCloseInfoAlert = useCallback(
     () => setInfoAlert({ infoAlertMessage: "", showInfoAlert: false }),
@@ -41,36 +70,56 @@ function PointsScreen({ navigation }) {
     const result = await AdMobRewarded.removeAllListeners();
   };
 
+  const updatePoints = async () => {
+    let modifiedUser = { ...user };
+    const { ok, problem, data } = await usersApi.updatePoints();
+    if (ok) {
+      modifiedUser.points = data.points;
+      setUser(modifiedUser);
+      await asyncStorage.store("userPoints", data.points);
+      return setInfoAlert({
+        infoAlertMessage: "Congrats! You earned two points.",
+        showInfoAlert: true,
+      });
+    }
+
+    if (problem) {
+      if (data) {
+        return setInfoAlert({
+          infoAlertMessage: data.message,
+          showInfoAlert: true,
+        });
+      }
+      return setInfoAlert({
+        infoAlertMessage: "Something went wrong! Please try again.",
+        showInfoAlert: true,
+      });
+    }
+  };
+
   const subscription1 = async () =>
     await AdMobRewarded.addEventListener(
       "rewardedVideoUserDidEarnReward",
       () => {
         setIsLoading(false);
-        setInfoAlert({
-          infoAlertMessage: "Congrats! You earned two points.",
-          showInfoAlert: true,
-        });
-        return console.log("Points earned!");
+        return updatePoints();
       }
     );
 
   const subsciption2 = async () =>
     await AdMobRewarded.addEventListener("rewardedVideoDidFailToLoad", () => {
       setIsLoading(false);
-      return console.log("Ad failed to load");
+      return setInfoAlert({
+        infoAlertMessage: "Something went wrong! Please try again.",
+        showInfoAlert: true,
+      });
     });
 
-  const subsciption3 = async () =>
-    await AdMobRewarded.addEventListener("rewardedVideoDidDismiss", () => {
-      setIsLoading(false);
-      return console.log("Ad was dismissed");
-    });
   useEffect(() => {
     let listenEvents = true;
     if (listenEvents) {
       subscription1();
       subsciption2();
-      subsciption3();
     }
 
     return () => removeAllListeners();
@@ -78,9 +127,42 @@ function PointsScreen({ navigation }) {
 
   const handleShowAd = async () => {
     setIsLoading(true);
-    await AdMobRewarded.setAdUnitID("ca-app-pub-3940256099942544/5224354917"); // Test admob ID
-    await AdMobRewarded.requestAdAsync();
-    await AdMobRewarded.showAdAsync();
+    try {
+      await AdMobRewarded.setAdUnitID("ca-app-pub-3940256099942544/5224354917"); // Test admob ID
+      await AdMobRewarded.requestAdAsync();
+      await AdMobRewarded.showAdAsync();
+    } catch (error) {
+      setIsLoading(false);
+      setInfoAlert({
+        infoAlertMessage:
+          "Problem has occured while loading the ad. Please try again.",
+        showInfoAlert: true,
+      });
+    }
+  };
+
+  const calculateTotalRedeemablePoints = (points) => {
+    let totalPoints = points;
+    let totalUnRedeemablePoints = points % 20;
+
+    return totalPoints - totalUnRedeemablePoints;
+  };
+
+  const handleRedeemPoints = async () => {
+    initialApiActivity(setApiActivity, "Redeeming Points...");
+    let modifiedUser = { ...user };
+
+    const response = await usersApi.redeemPoints(pointsToRedeem);
+
+    if (response.ok) {
+      setPointsToRedeem(null);
+      modifiedUser.vip = response.data.vip;
+      modifiedUser.points = response.data.points;
+      setUser(modifiedUser);
+      await asyncStorage.store("vip", response.data.vip);
+      await asyncStorage.store("userPoints", response.data.points);
+    }
+    return apiActivityStatus(response, setApiActivity);
   };
 
   return (
@@ -95,20 +177,26 @@ function PointsScreen({ navigation }) {
         visible={infoAlert.showInfoAlert}
         leftPress={handleCloseInfoAlert}
       />
+      <ApiActivity
+        message={apiActivity.message}
+        onDoneButtonPress={handleApiActivityClose}
+        onRequestClose={handleApiActivityClose}
+        processing={apiActivity.processing}
+        success={apiActivity.success}
+        visible={apiActivity.visible}
+      />
       <LoadingIndicator visible={isLoading} />
       <ScrollView contentContainerStyle={styles.container}>
         <AppText style={styles.infoText}>
           Collect points to avail Subscription to SeeYot Vip.
         </AppText>
 
-        <View style={styles.descriptionContainer}>
-          <AppText style={styles.descriptionTitle}>Total Points:</AppText>
-          <AppText>{Points.totalPoints}</AppText>
-        </View>
-        <View style={[styles.descriptionContainer, { marginBottom: 20 }]}>
-          <AppText style={styles.descriptionTitle}>Redeemable Points:</AppText>
-          <AppText>{Points.totalPoints}</AppText>
-        </View>
+        <Details title="Total Points:" value={user.points.totalPoints} />
+        <Details
+          style={{ marginBottom: 20 }}
+          title="Redeemable Points:"
+          value={calculateTotalRedeemablePoints(user.points.totalPoints)}
+        />
 
         <View style={styles.redeemConatainer}>
           <AppText style={styles.redeemInfo}>
@@ -118,11 +206,14 @@ function PointsScreen({ navigation }) {
 
           <View style={styles.actionConatiner}>
             <AppTextInput
+              keyboardType="numeric"
+              onChangeText={setPointsToRedeem}
               subStyle={styles.inputSub}
               style={styles.input}
               placeholder="Enter no. of points to redeem"
             />
             <AppButton
+              onPress={handleRedeemPoints}
               title="Redeem"
               style={styles.redeemButton}
               subStyle={styles.redeemButtonSub}
@@ -166,29 +257,13 @@ const styles = StyleSheet.create({
   },
   collectPointsInfo: {
     color: defaultStyles.colors.blue,
+    fontSize: 15,
     textAlign: "center",
-    width: "60%",
+    width: "70%",
   },
   container: {
     alignItems: "center",
     flexGrow: 1,
-  },
-  descriptionContainer: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
-    borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: 5,
-    borderWidth: 1,
-    flexDirection: "row",
-    height: 40,
-    justifyContent: "space-between",
-    marginBottom: 10,
-    marginTop: 10,
-    paddingHorizontal: 20,
-    width: "85%",
-  },
-  descriptionTitle: {
-    color: defaultStyles.colors.secondary,
   },
   infoText: {
     borderBottomWidth: 1,
@@ -207,6 +282,7 @@ const styles = StyleSheet.create({
   },
   inputSub: {
     fontSize: 18,
+    textAlign: "center",
   },
   redeemConatainer: {
     alignItems: "center",
@@ -229,7 +305,7 @@ const styles = StyleSheet.create({
     width: "20%",
   },
   redeemButtonSub: {
-    color: defaultStyles.colors.dark,
+    color: defaultStyles.colors.secondary,
     fontSize: 16,
   },
 });

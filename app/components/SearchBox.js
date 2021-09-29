@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import LottieView from "lottie-react-native";
 
 import AppText from "./AppText";
 import AppTextInput from "./AppTextInput";
@@ -13,7 +14,7 @@ function SearchBox({
   placeholder = "Search contacts...",
   style,
 }) {
-  const [searchTerm, setSearchTerm] = useState();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleChange = (text) => {
     setSearchTerm(text);
@@ -33,8 +34,15 @@ function SearchBox({
           style={styles.inputBox}
         />
       </View>
-      {list.length < 1 && searchTerm ? (
-        <AppText subStyle={{ textAlign: "center" }}>No result found!</AppText>
+      {list.length < 1 && searchTerm.length >= 3 ? (
+        <View style={styles.emptyData}>
+          <LottieView
+            autoPlay
+            loop
+            source={require("../assets/animations/noresults.json")}
+            style={{ flex: 1 }}
+          />
+        </View>
       ) : null}
     </View>
   );
@@ -46,6 +54,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginVertical: 5,
     overflow: "hidden",
+    width: "95%",
+  },
+  emptyData: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: 5,
+    height: 70,
+    justifyContent: "center",
     width: "95%",
   },
   inputBoxContainer: {
