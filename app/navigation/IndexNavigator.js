@@ -8,6 +8,7 @@ import { StyleSheet } from "react-native";
 import AddContactScreen from "../screens/AddContactsScreen";
 import HomeScreen from "../screens/HomeScreen";
 import NotificationScreen from "../screens/NotificationScreen";
+import Constant from "./NavigationConstants";
 
 import defaultstyles from "../config/styles";
 
@@ -60,7 +61,7 @@ function IndexNavigator(props) {
           tabBarActiveTintColor: defaultstyles.colors.yellow,
           tabBarInactiveTintColor: defaultstyles.colors.white,
         }}
-        name="Home"
+        name={Constant.HOME_SCREEN}
         component={HomeScreen}
       />
       <Tab.Screen
@@ -90,7 +91,7 @@ function IndexNavigator(props) {
           tabBarActiveTintColor: defaultstyles.colors.yellow,
           tabBarInactiveTintColor: defaultstyles.colors.white,
         }}
-        name="AddContact"
+        name={Constant.ADD_CONTACTS_SCREEN}
         component={AddContactScreen}
       />
       <Tab.Screen
@@ -130,7 +131,7 @@ function IndexNavigator(props) {
           tabBarActiveTintColor: defaultstyles.colors.yellow,
           tabBarInactiveTintColor: defaultstyles.colors.white,
         }}
-        name="Notification"
+        name={Constant.NOTIFICATION_SCREEN}
         component={NotificationScreen}
       />
     </Tab.Navigator>

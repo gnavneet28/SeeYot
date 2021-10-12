@@ -9,6 +9,8 @@ import PlanCard from "../components/PlanCard";
 import Screen from "../components/Screen";
 import VipAdCard from "../components/VipAdCard";
 
+import Constant from "../navigation/NavigationConstants";
+
 import defaultStyles from "../config/styles";
 
 import debounce from "../utilities/debounce";
@@ -27,11 +29,11 @@ function SubscriptionScreen({ navigation, route }) {
   );
 
   const handleManageSubscriptionPress = useCallback(() => {
-    navigation.navigate("Manager");
+    navigation.navigate(Constant.MANAGER_SCREEN);
   }, []);
 
   const handleCollectButtonPress = useCallback(() => {
-    navigation.navigate("PointsScreen");
+    navigation.navigate(Constant.POINTS_SCREEN);
   }, []);
 
   return (
@@ -46,7 +48,7 @@ function SubscriptionScreen({ navigation, route }) {
         onPress={handleManageSubscriptionPress}
         style={styles.manageSubscription}
       >
-        Manage Subscriptions
+        Current Subscriptions
       </AppText>
       <ScrollView>
         <View style={styles.scrollView}>
@@ -65,6 +67,10 @@ function SubscriptionScreen({ navigation, route }) {
           <DescriptionItem
             description="You can see the actual thoughts sent by anyone, without your thoughts being matched."
             name="lock-open"
+          />
+          <DescriptionItem
+            description="You shall be notified when someone add you to his/her Fovorite People list."
+            name="bell-circle"
           />
           <AppText style={styles.selectPlanText}>Select a Plan</AppText>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -86,11 +92,10 @@ function SubscriptionScreen({ navigation, route }) {
             />
             <PlanCard planName="Plan E" planRate={2450} planDuration="1 Year" />
           </ScrollView>
-          <AppText style={styles.selectPlanText}>Or Collect Points</AppText>
           <AppButton
             onPress={handleCollectButtonPress}
             style={styles.collectPoints}
-            title="Collect Points"
+            title="Or Collect Points"
           />
         </View>
       </ScrollView>
@@ -100,19 +105,19 @@ function SubscriptionScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   manageSubscription: {
     alignSelf: "flex-end",
-    borderColor: defaultStyles.colors.lightGrey,
+    backgroundColor: defaultStyles.colors.blue,
     borderRadius: 5,
-    borderWidth: 1,
-    color: defaultStyles.colors.blue,
+    color: defaultStyles.colors.white,
     marginBottom: 10,
     marginRight: 20,
     paddingHorizontal: 20,
   },
   collectPoints: {
-    backgroundColor: defaultStyles.colors.primary,
+    backgroundColor: defaultStyles.colors.secondary,
+    borderRadius: 20,
     height: 35,
     marginVertical: 5,
-    width: "90%",
+    width: "95%",
   },
   scrollView: {
     alignItems: "center",

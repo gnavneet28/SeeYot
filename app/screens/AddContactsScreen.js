@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { StyleSheet, Share, Linking } from "react-native";
 import * as Contacts from "expo-contacts";
-import { useIsFocused } from "@react-navigation/native";
 import * as SMS from "expo-sms";
 
 import AddContactList from "../components/AddContactList";
@@ -10,6 +9,9 @@ import AppActivityIndicator from "../components/ActivityIndicator";
 import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
 import Screen from "../components/Screen";
+
+import Constant from "../navigation/NavigationConstants";
+import DataConstants from "../utilities/DataConstants";
 
 import usersApi from "../api/users";
 
@@ -47,8 +49,6 @@ function AddContactsScreen({ navigation }) {
   });
 
   const [refreshing, setRefreshing] = useState(false);
-
-  const isFocused = useIsFocused();
 
   // ON PAGE FOCUS ACTION
   const requestPermission = async () => {
@@ -105,6 +105,7 @@ function AddContactsScreen({ navigation }) {
 
     const { ok, data, problem } = await usersApi.syncContacts(newListToSync);
     if (ok) {
+      await asyncStorage.store(DataConstants.PHONE_CONTACTS, data);
       return setUsers(data.sort((a, b) => a.isRegistered < b.isRegistered));
     }
 
@@ -122,10 +123,8 @@ function AddContactsScreen({ navigation }) {
   };
 
   useEffect(() => {
-    if (isFocused) {
-      requestPermission();
-    }
-  }, [isFocused]);
+    requestPermission();
+  }, []);
 
   // API ACTIVITY ACTIONS
   const handleApiActivityClose = useCallback(
@@ -151,7 +150,7 @@ function AddContactsScreen({ navigation }) {
   );
 
   const handleRightPress = useCallback(() => {
-    navigation.navigate("Vip");
+    navigation.navigate(Constant.VIP_NAVIGATOR);
   }, []);
 
   // INFO ALERT ACTIONS
@@ -213,7 +212,10 @@ function AddContactsScreen({ navigation }) {
       if (response.ok) {
         modifiedUser.contacts = response.data.contacts;
         setUser(modifiedUser);
-        await asyncStorage.store("userContacts", response.data.contacts);
+        await asyncStorage.store(
+          DataConstants.CONTACTS,
+          response.data.contacts
+        );
       }
 
       return apiActivityStatus(response, setApiActivity);

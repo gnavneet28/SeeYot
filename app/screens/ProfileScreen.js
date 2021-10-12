@@ -21,6 +21,9 @@ import Screen from "../components/Screen";
 import Selection from "../components/Selection";
 import UserDetailsCard from "../components/UserDetailsCard";
 
+import Constant from "../navigation/NavigationConstants";
+import DataConstants from "../utilities/DataConstants";
+
 import useAuth from "../auth/useAuth";
 
 import asyncStorage from "../utilities/cache";
@@ -91,12 +94,14 @@ function ProfileScreen({ navigation }) {
   // SETTING OPTION AND ACTION
   const handleBlockListPress = useCallback(() => {
     setVisible(false);
-    navigation.navigate("Blocked");
+    navigation.navigate(Constant.BLOCKED_SCREEN);
   }, []);
 
   const handleSubscriptionPress = useCallback(() => {
     setVisible(false);
-    navigation.navigate("SubscriptionNavigator", { from: "Profile" });
+    navigation.navigate(Constant.SUBSCRIPTION_NAVIGATOR, {
+      from: Constant.PROFILE_SCREEN,
+    });
   }, []);
 
   const handleReportPress = useCallback(() => {
@@ -164,7 +169,7 @@ function ProfileScreen({ navigation }) {
         modifiedUser.picture = response.data.picture;
         cachedUserDetails.picture = response.data.data;
         setUser(modifiedUser);
-        await asyncStorage.store("userDetails", cachedUserDetails);
+        await asyncStorage.store(DataConstants.DETAILS, cachedUserDetails);
       }
       return apiActivityStatus(response, setApiActivity);
     },
@@ -172,63 +177,77 @@ function ProfileScreen({ navigation }) {
   );
 
   // ECHO CONDITION ACTION
-  const handleMessageSelection = useCallback(async () => {
-    setIsLoading(true);
-    let modifiedUser = { ...user };
+  const handleMessageSelection = useCallback(
+    debounce(
+      async () => {
+        setIsLoading(true);
+        let modifiedUser = { ...user };
 
-    const { data, ok, problem } = await usersApi.updateEchoWhenMessage();
+        const { data, ok, problem } = await usersApi.updateEchoWhenMessage();
 
-    if (ok) {
-      modifiedUser.echoWhen = data;
-      await asyncStorage.store("userEchoWhen", data);
-      setUser(modifiedUser);
-      return setIsLoading(false);
-    }
+        if (ok) {
+          modifiedUser.echoWhen = data;
+          await asyncStorage.store(DataConstants.ECHO_WHEN, data);
+          setUser(modifiedUser);
+          return setIsLoading(false);
+        }
 
-    if (data) {
-      setIsLoading(false);
-      return setInfoAlert({
-        ...infoAlert,
-        infoAlertMessage: data.message,
-        showInfoAlert: true,
-      });
-    }
+        if (data) {
+          setIsLoading(false);
+          return setInfoAlert({
+            ...infoAlert,
+            infoAlertMessage: data.message,
+            showInfoAlert: true,
+          });
+        }
 
-    setIsLoading(false);
-    return setInfoAlert({
-      ...infoAlert,
-      infoAlertMessage: problem,
-      showInfoAlert: true,
-    });
-  }, [user]);
+        setIsLoading(false);
+        return setInfoAlert({
+          ...infoAlert,
+          infoAlertMessage: problem,
+          showInfoAlert: true,
+        });
+      },
+      1000,
+      true
+    ),
+    [user]
+  );
 
-  const handlePhotoTapSelection = useCallback(async () => {
-    setIsLoading(true);
-    let modifiedUser = { ...user };
+  const handlePhotoTapSelection = useCallback(
+    debounce(
+      async () => {
+        setIsLoading(true);
+        let modifiedUser = { ...user };
 
-    const { data, ok, problem } = await usersApi.updateEchoWhenPhotoTap();
+        const { data, ok, problem } = await usersApi.updateEchoWhenPhotoTap();
 
-    if (ok) {
-      modifiedUser.echoWhen = data;
-      await asyncStorage.store("userEchoWhen", data);
-      setUser(modifiedUser);
-      return setIsLoading(false);
-    }
+        if (ok) {
+          modifiedUser.echoWhen = data;
+          await asyncStorage.store(DataConstants.ECHO_WHEN, data);
+          setUser(modifiedUser);
+          return setIsLoading(false);
+        }
 
-    if (data) {
-      setIsLoading(false);
-      return setInfoAlert({
-        infoAlertMessage: data.message,
-        showInfoAlert: true,
-      });
-    }
+        if (data) {
+          setIsLoading(false);
+          return setInfoAlert({
+            infoAlertMessage: data.message,
+            showInfoAlert: true,
+          });
+        }
 
-    setIsLoading(false);
-    return setInfoAlert({
-      infoAlertMessage: problem,
-      showInfoAlert: true,
-    });
-  }, [user]);
+        setIsLoading(false);
+        return setInfoAlert({
+          infoAlertMessage: problem,
+          showInfoAlert: true,
+        });
+      },
+      2000,
+      true
+    ),
+    [user]
+  );
 
   // NAME CHANGE ACTION
   const handleNameChange = useCallback(
@@ -247,7 +266,7 @@ function ProfileScreen({ navigation }) {
       if (response.ok) {
         modifiedUser.name = response.data.name;
         cachedUserDetails.name = response.data.name;
-        await asyncStorage.store("userDetails", cachedUserDetails);
+        await asyncStorage.store(DataConstants.DETAILS, cachedUserDetails);
         setUser(modifiedUser);
       }
       return apiActivityStatus(response, setApiActivity);
@@ -256,25 +275,32 @@ function ProfileScreen({ navigation }) {
   );
 
   // INVITE ACTION
-  const handleInvitePress = useCallback(async () => {
-    try {
-      const result = await Share.share({
-        message:
-          "Join this awesome place and not hold anything back. Just say it",
-      });
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          // shared with activity type of result.activityType
-        } else {
-          // shared
+  const handleInvitePress = useCallback(
+    debounce(
+      async () => {
+        try {
+          const result = await Share.share({
+            message:
+              "Join this awesome place and not hold anything back. Just say it",
+          });
+          if (result.action === Share.sharedAction) {
+            if (result.activityType) {
+              // shared with activity type of result.activityType
+            } else {
+              // shared
+            }
+          } else if (result.action === Share.dismissedAction) {
+            // dismissed
+          }
+        } catch (error) {
+          console.log(error.message);
         }
-      } else if (result.action === Share.dismissedAction) {
-        // dismissed
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
-  }, []);
+      },
+      2000,
+      true
+    ),
+    []
+  );
 
   return (
     <>
@@ -351,9 +377,13 @@ function ProfileScreen({ navigation }) {
                 value="Someone taps on your profile picture."
               />
             </View>
-            <AppText onPress={handleInvitePress} style={styles.inviteText}>
-              Invite friends
-            </AppText>
+            <ProfileOption
+              iconColor={defaultStyles.colors.tomato}
+              onPress={handleInvitePress}
+              title="Invite your friends"
+              icon="people"
+              style={styles.inviteOption}
+            />
           </View>
         </ScrollView>
       </Screen>
@@ -408,9 +438,7 @@ function ProfileScreen({ navigation }) {
         transparent={true}
         visible={openReport}
       >
-        <TouchableHighlight
-          style={{ flex: 1, width: "100%", backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
+        <View style={styles.reportModal}>
           <View style={styles.optionsContainerReport}>
             <AppText
               style={[styles.closeButton, { fontFamily: "Comic-Bold" }]}
@@ -429,14 +457,18 @@ function ProfileScreen({ navigation }) {
             <View style={styles.actionContainer}>
               <AppText>{problemDescription.length}/250</AppText>
               <AppButton
-                disabled={problemDescription ? false : true}
+                disabled={
+                  problemDescription.replace(/\s/g, "").length >= 1
+                    ? false
+                    : true
+                }
                 onPress={handleProblemSubmitPress}
                 style={styles.submitProblemButton}
                 title="Submit"
               />
             </View>
           </View>
-        </TouchableHighlight>
+        </View>
       </Modal>
     </>
   );
@@ -479,20 +511,18 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     fontSize: height * 0.023,
     paddingHorizontal: 10,
+    opacity: 0.8,
   },
   inputProblem: {
     fontSize: 18,
     height: "100%",
     textAlignVertical: "top",
   },
-  inviteText: {
-    backgroundColor: defaultStyles.colors.blue,
-    borderRadius: 5,
-    color: defaultStyles.colors.white,
-    letterSpacing: 1,
-    marginTop: 30,
-    paddingHorizontal: 10,
-    textAlign: "center",
+  inviteOption: {
+    borderColor: defaultStyles.colors.light,
+    borderTopWidth: 1,
+    marginVertical: 15,
+    width: "95%",
   },
   optionsContainerBackground: {
     flex: 1,
@@ -507,11 +537,12 @@ const styles = StyleSheet.create({
     borderRightColor: defaultStyles.colors.light,
     borderRightWidth: 1,
     borderTopColor: defaultStyles.colors.light,
-    borderTopLeftRadius: 5,
-    borderTopRightRadius: 5,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     borderTopWidth: 1,
     bottom: 0,
     height: 300,
+    overflow: "hidden",
     position: "absolute",
     width: "100%",
   },
@@ -523,13 +554,13 @@ const styles = StyleSheet.create({
     borderRightColor: defaultStyles.colors.light,
     borderRightWidth: 1,
     borderTopColor: defaultStyles.colors.light,
-    borderTopLeftRadius: 5,
-    borderTopRightRadius: 5,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     borderTopWidth: 1,
     bottom: 0,
     height: 220,
+    overflow: "hidden",
     paddingHorizontal: 10,
-    position: "absolute",
     width: "100%",
   },
   problemInput: {
@@ -537,6 +568,13 @@ const styles = StyleSheet.create({
     height: 100,
     marginBottom: 10,
     padding: 5,
+  },
+  reportModal: {
+    backgroundColor: "rgba(0,0,0,0.5)",
+    flex: 1,
+    justifyContent: "flex-end",
+    overflow: "hidden",
+    width: "100%",
   },
   submitProblemButton: {
     backgroundColor: defaultStyles.colors.yellow_Variant,

@@ -6,19 +6,29 @@ import AppText from "./AppText";
 
 import defaultStyles from "../config/styles";
 
-function ProfileOption({ icon = "", title = "", onPress, style }) {
+function ProfileOption({
+  icon = "",
+  title = "",
+  onPress,
+  style,
+  iconColor = defaultStyles.colors.yellow_Variant,
+}) {
   return (
     <View style={[styles.container, style]}>
       <MaterialIcons
         style={styles.icon}
-        color={defaultStyles.colors.yellow_Variant}
+        color={iconColor}
         name={icon}
         onPress={onPress}
         size={25}
       />
       <AppText
         onPress={onPress}
-        style={{ flex: 1, marginLeft: 10, fontFamily: "Comic-Bold" }}
+        style={{
+          flex: 1,
+          marginLeft: 10,
+          opacity: 0.8,
+        }}
       >
         {title}
       </AppText>

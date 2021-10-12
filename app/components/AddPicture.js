@@ -33,7 +33,7 @@ function AddPicture({
       height: 300,
       cropping: true,
       mediaType: "photo",
-      compressImageQuality: 0.7,
+      compressImageQuality: 0.9,
     })
       .then((image) => {
         onChangeImage(image.path);

@@ -10,6 +10,9 @@ import SendingThoughtActivity from "../components/SendingThoughtActivity";
 import SendThoughtsInput from "../components/SendThoughtsInput";
 import ThoughtsList from "../components/ThoughtsList";
 
+import Constant from "../navigation/NavigationConstants";
+import DataConstants from "../utilities/DataConstants";
+
 import defaultStyles from "../config/styles";
 
 import useAuth from "../auth/useAuth";
@@ -93,6 +96,11 @@ function SendThoughtsScreen({ navigation, route }) {
     [recipient._id, user, isFocused]
   );
 
+  let inFavorites = useMemo(
+    () => user.favorites.filter((f) => f._id == recipient._id)[0],
+    [recipient._id, user, isFocused]
+  );
+
   let inContacts = useMemo(
     () => user.contacts.filter((c) => c._id == recipient._id)[0],
     [recipient._id, user, isFocused]
@@ -157,12 +165,13 @@ function SendThoughtsScreen({ navigation, route }) {
   // ON FOCUS PAGE ACTION
   const updateSearchHistory = async () => {
     let modifiedUser = { ...user };
-    const { ok, data } = await usersApi.addToSearchHstory(recipient);
+    const { ok, data, problem } = await usersApi.addToSearchHstory(recipient);
     if (ok) {
       modifiedUser.searchHistory = data;
       setUser(modifiedUser);
-      return await asyncStorage.store("userSearchHistory", data);
+      return await asyncStorage.store(DataConstants.SEARCH_HISTORY, data);
     }
+    return;
   };
 
   const updateCurrentContact = useCallback(async () => {
@@ -184,16 +193,16 @@ function SendThoughtsScreen({ navigation, route }) {
 
       if (equalName && equalPicture) return;
 
-      await asyncStorage.store("userContacts", data);
+      await asyncStorage.store(DataConstants.CONTACTS, data);
       return setUser(modifiedUser);
     }
   }, [isFocused]);
 
   useEffect(() => {
     if (isFocused) {
-      if (from == "HomeScreen") {
+      if (from == Constant.HOME_SCREEN) {
         updateCurrentContact();
-      } else if (from == "VipSearchScreen") {
+      } else if (from == Constant.VIP_SEARCH_SCREEN) {
         updateSearchHistory();
       }
     }
@@ -214,7 +223,7 @@ function SendThoughtsScreen({ navigation, route }) {
 
     if (response.ok) {
       modifiedUser.contacts = response.data.contacts;
-      await asyncStorage.store("userContacts", response.data.contacts);
+      await asyncStorage.store(DataConstants.CONTACTS, response.data.contacts);
       setUser(modifiedUser);
     }
 
@@ -235,7 +244,7 @@ function SendThoughtsScreen({ navigation, route }) {
 
     if (response.ok) {
       modifiedUser.blocked = response.data.blocked;
-      await asyncStorage.store("blocked", response.data.blocked);
+      await asyncStorage.store(DataConstants.BLOCKED, response.data.blocked);
       setUser(modifiedUser);
     }
 
@@ -256,7 +265,7 @@ function SendThoughtsScreen({ navigation, route }) {
 
     if (response.ok) {
       modifiedUser.blocked = response.data.blocked;
-      await asyncStorage.store("blocked", response.data.blocked);
+      await asyncStorage.store(DataConstants.BLOCKED, response.data.blocked);
       setUser(modifiedUser);
     }
 
@@ -269,6 +278,47 @@ function SendThoughtsScreen({ navigation, route }) {
     user,
   ]);
 
+  const handleAddFavoritePress = useCallback(async () => {
+    initialApiActivity(setApiActivity, "Adding" + " " + recipient.name + "...");
+
+    let modifiedUser = { ...user };
+
+    const response = await usersApi.addFavorite(recipient._id);
+
+    if (response.ok) {
+      modifiedUser.favorites = response.data.favorites;
+      setUser(modifiedUser);
+      await asyncStorage.store(
+        DataConstants.FAVORITES,
+        response.data.favorites
+      );
+    }
+
+    return apiActivityStatus(response, setApiActivity);
+  }, [user, recipient._id, user.favorites.length]);
+
+  const handleRemoveFavoritePress = useCallback(async () => {
+    initialApiActivity(
+      setApiActivity,
+      "Removing" + " " + recipient.name + "..."
+    );
+
+    let modifiedUser = { ...user };
+
+    const response = await usersApi.removeFavorite(recipient._id);
+
+    if (response.ok) {
+      modifiedUser.favorites = response.data.favorites;
+      setUser(modifiedUser);
+      await asyncStorage.store(
+        DataConstants.FAVORITES,
+        response.data.favorites
+      );
+    }
+
+    return apiActivityStatus(response, setApiActivity);
+  }, [user]);
+
   return (
     <>
       <Screen style={styles.container}>
@@ -277,11 +327,10 @@ function SendThoughtsScreen({ navigation, route }) {
           source={require("../assets/chatWallPaper.png")}
         >
           <AppHeader
-            fwr={true}
             leftIcon="arrow-back"
             onPressLeft={handleBack}
             onPressRight={handleOptionsPress}
-            rightIcon="ellipsis-v"
+            rightIcon="more-vert"
             title={recipient ? recipient.name : ""}
           />
           <SendingThoughtActivity
@@ -329,11 +378,24 @@ function SendThoughtsScreen({ navigation, route }) {
             >
               Close
             </AppText>
+
             {inContacts ? (
               <AppText style={styles.option} onPress={handleUnfriendPress}>
                 Unfriend
               </AppText>
             ) : null}
+
+            <AppText
+              style={styles.option}
+              onPress={
+                !inFavorites
+                  ? handleAddFavoritePress
+                  : handleRemoveFavoritePress
+              }
+            >
+              {inFavorites ? "Remove from Favorites" : "Add to Favorites"}
+            </AppText>
+
             <AppText
               style={styles.option}
               onPress={!isBlocked ? handleBlockPress : handleUnblockPress}

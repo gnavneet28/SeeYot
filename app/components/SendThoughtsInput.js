@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity, TextInput } from "react-native";
 
 import AppTextInput from "./AppTextInput";
 import Icon from "./Icon";
@@ -8,7 +8,13 @@ import defaultStyles from "../config/styles";
 
 const height = defaultStyles.height;
 
-function SendThoughtsInput({ style, submit, onFocus, onBlur }) {
+function SendThoughtsInput({
+  style,
+  submit,
+  onFocus,
+  onBlur,
+  placeholder = "Send your thoughts...",
+}) {
   const [message, setMessage] = useState("");
 
   const handlePress = () => {
@@ -17,13 +23,16 @@ function SendThoughtsInput({ style, submit, onFocus, onBlur }) {
   };
   return (
     <View style={[styles.container, style]}>
-      <AppTextInput
+      <TextInput
         maxLength={250}
         onBlur={onBlur}
         onChangeText={setMessage}
         onFocus={onFocus}
-        placeholder="Send your thoughts..."
-        style={styles.inputBox}
+        placeholder={placeholder}
+        style={[
+          styles.inputBox,
+          { fontFamily: "Comic-Bold", fontWeight: "normal" },
+        ]}
         value={message}
       />
       <TouchableOpacity
@@ -34,7 +43,7 @@ function SendThoughtsInput({ style, submit, onFocus, onBlur }) {
         <Icon
           color={message ? defaultStyles.colors.secondary : "lightgrey"}
           name="send"
-          size={height * 0.04}
+          size={30}
         />
       </TouchableOpacity>
     </View>
@@ -52,8 +61,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     height: defaultStyles.dimensionConstants.height,
     width: "92%",
+    //paddingHorizontal: 10,
+    justifyContent: "space-between",
   },
   inputBox: {
+    fontSize: 19,
+    flex: 1,
     borderRadius: 30,
     height: "100%",
     marginRight: 5,
@@ -65,6 +78,7 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
     width: 40,
+    marginRight: 5,
   },
 });
 

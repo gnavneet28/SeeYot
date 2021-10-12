@@ -1,4 +1,5 @@
 import asyncStorage from "./cache";
+import DataConstants from "./DataConstants";
 
 const storeDetails = async (data) => {
   const userDetails = {
@@ -7,17 +8,19 @@ const storeDetails = async (data) => {
     picture: data.picture,
     phoneNumber: data.phoneNumber,
   };
-  await asyncStorage.store("vip", data.vip);
-  await asyncStorage.store("blocked", data.blocked);
-  await asyncStorage.store("userContacts", data.contacts);
-  await asyncStorage.store("userDetails", userDetails);
-  await asyncStorage.store("userEchoMessage", data.echoMessage);
-  await asyncStorage.store("userEchoWhen", data.echoWhen);
-  await asyncStorage.store("userNotifications", data.notifications);
-  await asyncStorage.store("userThoughts", data.thoughts);
-  await asyncStorage.store("userSearchHistory", data.searchHistory);
-  await asyncStorage.store("userPhoneContacts", data.phoneContacts);
-  await asyncStorage.store("userPoints", data.points);
+  await asyncStorage.store(DataConstants.VIP, data.vip);
+  await asyncStorage.store(DataConstants.BLOCKED, data.blocked);
+  await asyncStorage.store(DataConstants.CONTACTS, data.contacts);
+  await asyncStorage.store(DataConstants.DETAILS, userDetails);
+  await asyncStorage.store(DataConstants.ECHO_MESSAGE, data.echoMessage);
+  await asyncStorage.store(DataConstants.ECHO_WHEN, data.echoWhen);
+  await asyncStorage.store(DataConstants.NOTIFICATIONS, data.notifications);
+  await asyncStorage.store(DataConstants.THOUGHTS, data.thoughts);
+  await asyncStorage.store(DataConstants.SEARCH_HISTORY, data.searchHistory);
+  await asyncStorage.store(DataConstants.PHONE_CONTACTS, data.phoneContacts);
+  await asyncStorage.store(DataConstants.POINTS, data.points);
+  await asyncStorage.store(DataConstants.FAVORITES, data.favorites);
+  await asyncStorage.store(DataConstants.MESSAGES, data.messages);
 };
 
 export default storeDetails;

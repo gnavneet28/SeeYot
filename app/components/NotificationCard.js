@@ -18,6 +18,7 @@ let defaultNotification = {
 
 function NotificationCard({
   onDeleteIconPress,
+  onTapToSeePress,
   notification = defaultNotification,
 }) {
   dayjs.extend(relativeTime);
@@ -28,7 +29,7 @@ function NotificationCard({
   else if (notification.type && notification.type == "Vip")
     customImage = require("../assets/vip.png");
   else if (notification.type && notification.type == "Official")
-    customImage = require("../assets/icon.png");
+    customImage = require("../assets/app-logo.png");
 
   return (
     <View style={styles.container}>
@@ -43,7 +44,15 @@ function NotificationCard({
         customImage={customImage ? customImage : require("../assets/user.png")}
       />
       <View style={styles.notificationInfo}>
-        <Text style={styles.notificationMessage}>{notification.message}</Text>
+        <Text
+          numberOfLines={2}
+          onPress={notification.type == "Vip" ? onTapToSeePress : null}
+          style={styles.notificationMessage}
+        >
+          {notification.type != "Vip"
+            ? notification.message
+            : "Someone is thinking of you! Tap to see the message."}
+        </Text>
         <Text style={styles.date}>
           {dayjs(notification.createdAt).fromNow()}
         </Text>
@@ -63,7 +72,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
-    minHeight: 70,
+    height: 70,
     width: "100%",
   },
   date: {
@@ -80,7 +89,8 @@ const styles = StyleSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderRadius: 20,
     height: 40,
-    marginHorizontal: 10,
+    marginLeft: 15,
+    marginRight: 10,
     width: 40,
   },
   imageSub: {

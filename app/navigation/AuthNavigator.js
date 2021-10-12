@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import RegisterDetailsScreen from "../screens/RegisterDetailsScreen";
 import SendOtpScreen from "../screens/SendOtpScreen";
 import VerifyOtpScreen from "../screens/VerifyOtpScreen";
+import Constant from "./NavigationConstants";
 
 const Tab = createBottomTabNavigator();
 
@@ -12,9 +13,15 @@ function AuthNavigator(props) {
     <Tab.Navigator
       screenOptions={{ headerShown: false, tabBarStyle: { display: "none" } }}
     >
-      <Tab.Screen name="SendOtp" component={SendOtpScreen} />
-      <Tab.Screen name="VerifyOtp" component={VerifyOtpScreen} />
-      <Tab.Screen name="ProfileDetails" component={RegisterDetailsScreen} />
+      <Tab.Screen name={Constant.SEND_OTP_SCREEN} component={SendOtpScreen} />
+      <Tab.Screen
+        name={Constant.VERIFY_OTP_SCREEN}
+        component={VerifyOtpScreen}
+      />
+      <Tab.Screen
+        name={Constant.PROFILE_DETAILS_SCREEN}
+        component={RegisterDetailsScreen}
+      />
     </Tab.Navigator>
   );
 }

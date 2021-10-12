@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import SubscriptionScreen from "../screens/SubscriptionScreen";
 import PointsScreen from "../screens/PointsScreen";
 import ManageSubscriptionScreen from "../screens/ManageSubscriptionScreen";
+import Constant from "./NavigationConstants";
 
 const Tab = createBottomTabNavigator();
 
@@ -12,9 +13,15 @@ function SubscriptionNavigator(props) {
     <Tab.Navigator
       screenOptions={{ headerShown: false, tabBarStyle: { display: "none" } }}
     >
-      <Tab.Screen name="Subscription" component={SubscriptionScreen} />
-      <Tab.Screen name="PointsScreen" component={PointsScreen} />
-      <Tab.Screen name="Manager" component={ManageSubscriptionScreen} />
+      <Tab.Screen
+        name={Constant.SUBSCRIPTION_SCREEN}
+        component={SubscriptionScreen}
+      />
+      <Tab.Screen name={Constant.POINTS_SCREEN} component={PointsScreen} />
+      <Tab.Screen
+        name={Constant.MANAGER_SCREEN}
+        component={ManageSubscriptionScreen}
+      />
     </Tab.Navigator>
   );
 }

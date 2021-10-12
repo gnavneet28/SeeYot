@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
   alertContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 5,
+    borderRadius: 10,
     justifyContent: "space-between",
     padding: 10,
     width: "75%",

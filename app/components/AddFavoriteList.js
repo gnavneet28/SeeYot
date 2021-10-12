@@ -10,7 +10,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import defaultStyles from "../config/styles";
 
 import AppTextInput from "./AppTextInput";
-import AddContactCard from "./AddContactCard";
+import AddFavoriteCard from "./AddFavoriteCard";
 
 const ViewTypes = {
   Full: 0,
@@ -95,20 +95,16 @@ class AddContactList extends React.Component {
     });
   }
 
-  registeredUsersLenght(users) {
-    return users.filter((u) => u.isRegistered === true).length;
-  }
-
   _rowRenderer(type, data) {
     switch (type) {
       case ViewTypes.Full:
         return (
-          <AddContactCard
-            isRegistered={data.isRegistered}
+          <AddFavoriteCard
+            favoriteUser={data}
             name={data.name}
-            onInvitePress={() => this.props.onInvitePress(data)}
-            onPress={() => this.props.onAddPress(data)}
-            phoneNumber={data.phoneNumber}
+            onAddPress={() => this.props.onAddPress(data)}
+            onRemovePress={() => this.props.onRemovePress(data)}
+            onMessagePress={() => this.props.onMessagePress(data)}
           />
         );
       default:
@@ -116,11 +112,7 @@ class AddContactList extends React.Component {
     }
   }
   componentDidUpdate(prevProps) {
-    if (
-      prevProps.users.length != this.props.users.length ||
-      this.registeredUsersLenght(prevProps.users) !=
-        this.registeredUsersLenght(this.props.users)
-    ) {
+    if (prevProps.users != this.props.users) {
       return this.setState({
         ...this.state,
         dataProvider: this.props.users.length
@@ -143,7 +135,7 @@ class AddContactList extends React.Component {
             <AppTextInput
               maxLength={10}
               onChangeText={(text) => this.handleChange(text)}
-              placeholder="Search in your contacts..."
+              placeholder="Search..."
               style={styles.inputBox}
             />
           </View>

@@ -36,7 +36,7 @@ function UserDetailsCard({
     <>
       <View style={[styles.container, style]}>
         <Icon
-          color={defaultStyles.colors.secondary}
+          color={defaultStyles.colors.tomato}
           fw={fw}
           name={iconName}
           size={size}
@@ -46,9 +46,9 @@ function UserDetailsCard({
           <AppText
             numberOfLines={1}
             style={{
-              fontFamily: "Comic-Bold",
               fontSize: height * 0.02,
               paddingBottom: 0,
+              opacity: 0.8,
             }}
           >
             {title}
@@ -83,7 +83,7 @@ function UserDetailsCard({
                 onChangeText={(text) => setName(text)}
                 placeholder={userName}
                 style={styles.inputBox}
-                subStyle={{ opacity: 0.7 }}
+                subStyle={{ opacity: 0.8, paddingHorizontal: 5 }}
                 value={name}
               />
               <AppText style={styles.nameLength}>{name.length}/30</AppText>
@@ -98,11 +98,13 @@ function UserDetailsCard({
                   styles.button,
                   { backgroundColor: defaultStyles.colors.light },
                 ]}
-                subStyle={{ color: defaultStyles.colors.dark, opacity: 0.7 }}
+                subStyle={{ color: defaultStyles.colors.dark, opacity: 0.8 }}
                 title="Cancel"
               />
               <AppButton
-                disabled={name && name.length >= 3 ? false : true}
+                disabled={
+                  name && name.replace(/\s/g, "").length >= 4 ? false : true
+                }
                 onPress={onSave}
                 style={styles.button}
                 title="Save"
@@ -135,15 +137,16 @@ const styles = StyleSheet.create({
     width: "90%",
   },
   data: {
+    color: defaultStyles.colors.dark_Variant,
     fontFamily: "Comic-Bold",
     fontSize: height * 0.02,
     paddingTop: 0,
   },
   editName: {
-    backgroundColor: defaultStyles.colors.primary,
-    color: defaultStyles.colors.white,
-    height: 30,
+    backgroundColor: defaultStyles.colors.light,
+    color: defaultStyles.colors.dark_Variant,
     fontSize: 18,
+    height: 35,
     textAlign: "center",
     textAlignVertical: "center",
   },

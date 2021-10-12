@@ -44,7 +44,7 @@ function ManageSubscriptionScreen({ navigation }) {
     <Screen>
       <AppHeader
         leftIcon="arrow-back"
-        title="Manage Subscription"
+        title="Current Subscription"
         onPressLeft={handleBack}
       />
       <ScrollView contentContainerStyle={styles.container}>

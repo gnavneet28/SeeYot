@@ -16,10 +16,12 @@ import AppTextInput from "../components/AppTextInput";
 import Details from "../components/Details";
 import InfoAlert from "../components/InfoAlert";
 import LoadingIndicator from "../components/LoadingIndicator";
+import Alert from "../components/Alert";
 
 import apiFlow from "../utilities/ApiActivityStatus";
 import asyncStorage from "../utilities/cache";
 import debounce from "../utilities/debounce";
+import DataConstants from "../utilities/DataConstants";
 
 import usersApi from "../api/users";
 
@@ -31,11 +33,13 @@ function PointsScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const { apiActivityStatus, initialApiActivity } = apiFlow;
 
+  // STATES
+  const [showAlert, setShowAlert] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
   });
-  const [pointsToRedeem, setPointsToRedeem] = useState(null);
+  const [pointsToRedeem, setPointsToRedeem] = useState(parseInt(""));
   const [isLoading, setIsLoading] = useState(false);
   const [apiActivity, setApiActivity] = useState({
     message: "",
@@ -44,12 +48,23 @@ function PointsScreen({ navigation }) {
     success: false,
   });
 
+  // ALERT ACTION
+  const handleCloseAlert = useCallback(() => {
+    setShowAlert(false);
+  }, []);
+
+  const handleEarnMorePointsPress = useCallback(() => {
+    setShowAlert(false);
+    handleShowAd();
+  });
+
   // API ACTIVITY ACTIONS
   const handleApiActivityClose = useCallback(
     () => setApiActivity({ ...apiActivity, visible: false }),
     []
   );
 
+  // HEADER ACTION
   const handleBack = useCallback(
     debounce(
       () => {
@@ -61,6 +76,7 @@ function PointsScreen({ navigation }) {
     []
   );
 
+  // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
     () => setInfoAlert({ infoAlertMessage: "", showInfoAlert: false }),
     []
@@ -76,11 +92,8 @@ function PointsScreen({ navigation }) {
     if (ok) {
       modifiedUser.points = data.points;
       setUser(modifiedUser);
-      await asyncStorage.store("userPoints", data.points);
-      return setInfoAlert({
-        infoAlertMessage: "Congrats! You earned two points.",
-        showInfoAlert: true,
-      });
+      await asyncStorage.store(DataConstants.POINTS, data.points);
+      return setShowAlert(true);
     }
 
     if (problem) {
@@ -159,8 +172,8 @@ function PointsScreen({ navigation }) {
       modifiedUser.vip = response.data.vip;
       modifiedUser.points = response.data.points;
       setUser(modifiedUser);
-      await asyncStorage.store("vip", response.data.vip);
-      await asyncStorage.store("userPoints", response.data.points);
+      await asyncStorage.store(DataConstants.VIP, response.data.vip);
+      await asyncStorage.store(DataConstants.POINTS, response.data.points);
     }
     return apiActivityStatus(response, setApiActivity);
   };
@@ -171,6 +184,16 @@ function PointsScreen({ navigation }) {
         leftIcon="arrow-back"
         title="Points"
         onPressLeft={handleBack}
+      />
+      <Alert
+        title="Points"
+        description="Congratulations! You earned 2 points. Want to collect more points?"
+        leftOption="Close"
+        rightOption="Yes"
+        visible={showAlert}
+        onRequestClose={handleCloseAlert}
+        rightPress={handleEarnMorePointsPress}
+        leftPress={handleCloseAlert}
       />
       <InfoAlert
         description={infoAlert.infoAlertMessage}
@@ -200,8 +223,8 @@ function PointsScreen({ navigation }) {
 
         <View style={styles.redeemConatainer}>
           <AppText style={styles.redeemInfo}>
-            For every 20 points you can avail SeeYot Vip Subscription for 24
-            hours.You can collect Points by watching ads.
+            For every 20 points, you can avail SeeYot Vip Subscription for 24
+            hours. You can collect Points by watching ads.
           </AppText>
 
           <View style={styles.actionConatiner}>
@@ -213,6 +236,11 @@ function PointsScreen({ navigation }) {
               placeholder="Enter no. of points to redeem"
             />
             <AppButton
+              disabled={
+                pointsToRedeem.toString().replace(/\s/g, "").length >= 1
+                  ? false
+                  : true
+              }
               onPress={handleRedeemPoints}
               title="Redeem"
               style={styles.redeemButton}
@@ -244,7 +272,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   collectPointsButton: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
+    backgroundColor: defaultStyles.colors.tomato,
     borderRadius: 20,
     height: 40,
     marginBottom: 10,
@@ -252,7 +280,7 @@ const styles = StyleSheet.create({
     width: 120,
   },
   collectPointsButtonSub: {
-    color: defaultStyles.colors.secondary,
+    color: defaultStyles.colors.white,
     fontSize: 17,
   },
   collectPointsInfo: {
@@ -294,18 +322,19 @@ const styles = StyleSheet.create({
     width: "85%",
   },
   redeemInfo: {
-    color: defaultStyles.colors.secondary,
+    color: defaultStyles.colors.dark_Variant,
     fontSize: 15,
     marginBottom: 15,
-    textAlign: "center",
+    textAlign: "left",
+    letterSpacing: 0.3,
   },
   redeemButton: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
+    backgroundColor: defaultStyles.colors.tomato,
     height: 35,
     width: "20%",
   },
   redeemButtonSub: {
-    color: defaultStyles.colors.secondary,
+    color: defaultStyles.colors.white,
     fontSize: 16,
   },
 });

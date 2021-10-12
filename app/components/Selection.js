@@ -20,17 +20,20 @@ function Selection({ style, onPress, opted, value = "" }) {
               borderRadius: opted ? 10 : 12,
             },
           ],
-          {
-            backgroundColor: opted
-              ? defaultStyles.colors.yellow_Variant
-              : defaultStyles.colors.light,
-          },
         ]}
-      />
-      <AppText
-        style={{ fontSize: 18, fontFamily: "Comic-Bold" }}
-        onPress={onPress}
       >
+        <View
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: opted
+              ? defaultStyles.colors.tomato
+              : defaultStyles.colors.light,
+          }}
+        />
+      </View>
+      <AppText style={{ fontSize: 18, opacity: 0.8 }} onPress={onPress}>
         {value}
       </AppText>
     </View>
@@ -46,9 +49,12 @@ const styles = StyleSheet.create({
     width: "95%",
   },
   checkBox: {
-    borderColor: defaultStyles.colors.danger,
+    borderColor: defaultStyles.colors.yellow_Variant,
     borderWidth: 2,
     marginHorizontal: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 5,
   },
   text: {
     fontSize: 18,

@@ -33,9 +33,9 @@ function AppTextInput({
           {
             ...defaultStyles.text,
             fontFamily: "Comic-Bold",
-            fontWeight: "normal",
             fontSize: 19,
             flex: 1,
+            fontWeight: "normal",
           },
           subStyle,
         ]}
@@ -49,11 +49,10 @@ const styles = StyleSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderRadius: 5,
     flexDirection: "row",
-    height: defaultStyles.dimensionConstants.height,
+    minHeight: defaultStyles.dimensionConstants.height,
     width: "100%",
-  },
-  textContent: {
-    ...defaultStyles.text,
+    overflow: "hidden",
+    padding: 5,
   },
 });
 

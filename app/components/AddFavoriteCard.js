@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import LottieView from "lottie-react-native";
+import AntDesign from "react-native-vector-icons/AntDesign";
 
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
@@ -10,27 +11,29 @@ import useAuth from "../auth/useAuth";
 
 import defaultStyles from "../config/styles";
 
-const height = defaultStyles.height;
+const defaulFavoriteUser = {
+  name: "",
+  phoneNumber: parseInt(""),
+  picture: "",
+};
 
 function AddContactCard({
-  isRegistered,
-  imageUrl = "",
-  name = "",
-  onPress = () => null,
-  onInvitePress,
-  phoneNumber = parseInt(""),
+  onAddPress = () => null,
+  onRemovePress = () => null,
+  onMessagePress = () => null,
+  favoriteUser = defaulFavoriteUser,
   style,
 }) {
   const { user } = useAuth();
 
-  const contacts = user.contacts;
+  const favorites = user.favorites;
 
-  const inContacts =
-    contacts &&
-    contacts.length > 0 &&
-    contacts.filter((c) => c.phoneNumber == phoneNumber)[0];
+  const inFavourites =
+    favorites &&
+    favorites.length > 0 &&
+    favorites.filter((f) => f.phoneNumber == favoriteUser.phoneNumber)[0];
 
-  if (!name)
+  if (!favoriteUser.name)
     return (
       <View style={styles.emptyData}>
         <LottieView
@@ -45,43 +48,38 @@ function AddContactCard({
   return (
     <View style={[styles.container, style]}>
       <AppImage
-        imageUrl={imageUrl}
+        imageUrl={favoriteUser.picture}
         style={styles.image}
         subStyle={styles.imageSub}
       />
       <View style={styles.infoContainer}>
         <AppText numberOfLines={1} style={[styles.infoNameText]}>
-          {name}
+          {favoriteUser.name}
         </AppText>
-        <AppText style={styles.infoNumberText}>{phoneNumber}</AppText>
+        <AppText style={styles.infoNumberText}>
+          {favoriteUser.phoneNumber}
+        </AppText>
       </View>
-      {isRegistered ? (
-        <AppButton
-          title={inContacts ? "Added" : "Add"}
-          disabled={inContacts ? true : false}
-          style={[
-            styles.addButton,
-            {
-              backgroundColor: inContacts
-                ? defaultStyles.colors.blue
-                : defaultStyles.colors.secondary,
-            },
-          ]}
-          subStyle={styles.addButtonSub}
-          onPress={onPress}
-        />
-      ) : (
-        <AppButton
-          title="Invite"
-          onPress={onInvitePress}
-          style={[styles.inviteButton]}
-          subStyle={{
-            color: defaultStyles.colors.dark,
-            fontSize: 16,
-            letterSpacing: 1,
-          }}
-        />
-      )}
+      <AppButton
+        title={inFavourites ? "Remove" : "Add"}
+        style={[
+          styles.addButton,
+          {
+            backgroundColor: inFavourites
+              ? defaultStyles.colors.tomato
+              : defaultStyles.colors.blue,
+          },
+        ]}
+        subStyle={styles.addButtonSub}
+        onPress={!inFavourites ? onAddPress : onRemovePress}
+      />
+      <AntDesign
+        style={{ marginHorizontal: 15 }}
+        name="message1"
+        size={25}
+        color={defaultStyles.colors.blue}
+        onPress={onMessagePress}
+      />
     </View>
   );
 }
@@ -94,7 +92,6 @@ const styles = StyleSheet.create({
   },
   addButtonSub: {
     fontSize: 16,
-    letterSpacing: 0.2,
   },
   container: {
     alignItems: "center",
@@ -102,7 +99,6 @@ const styles = StyleSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.light,
     borderRadius: 10,
-    //borderWidth: 1,
     elevation: 1,
     flexDirection: "row",
     height: 60,
@@ -123,7 +119,7 @@ const styles = StyleSheet.create({
   image: {
     borderRadius: 20,
     height: 40,
-    marginHorizontal: 5,
+    marginRight: 5,
     width: 40,
   },
   imageSub: {
@@ -137,7 +133,7 @@ const styles = StyleSheet.create({
   infoNameText: {
     color: defaultStyles.colors.primary,
     fontSize: 18,
-    opacity: 0.8,
+    opacity: 0.9,
     paddingBottom: 0,
   },
   infoNumberText: {
@@ -148,10 +144,10 @@ const styles = StyleSheet.create({
   },
   inviteButton: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 10,
+    borderRadius: 5,
     height: 35,
     marginRight: 5,
-    width: 65,
+    width: 60,
   },
 });
 

@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import AppButton from "./AppButton";
 import AppText from "./AppText";
@@ -10,7 +11,10 @@ const height = defaultStyles.height;
 
 function PlanCard({ planName, planDuration, planRate, onProcess, style }) {
   return (
-    <View style={[styles.container, style]}>
+    <LinearGradient
+      colors={["#FC5C7D", "#6A82FB"]}
+      style={[styles.container, style]}
+    >
       <AppText style={styles.planName}>{planName}</AppText>
       <AppText style={styles.planRate}>
         {"\u20B9"} {planRate}
@@ -22,7 +26,7 @@ function PlanCard({ planName, planDuration, planRate, onProcess, style }) {
         title="Select"
         onPress={onProcess}
       />
-    </View>
+    </LinearGradient>
   );
 }
 const styles = StyleSheet.create({
@@ -34,7 +38,6 @@ const styles = StyleSheet.create({
   },
   container: {
     alignItems: "center",
-    backgroundColor: "tomato",
     borderRadius: 10,
     elevation: 5,
     height: 150,

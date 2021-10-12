@@ -6,6 +6,8 @@ import AppText from "../components/AppText";
 import InfoAlert from "../components/InfoAlert";
 import LoadingIndicator from "../components/LoadingIndicator";
 
+import Constant from "../navigation/NavigationConstants";
+
 import {
   CodeField,
   Cursor,
@@ -81,7 +83,7 @@ export default function VerifyOtpScreen({ navigation, route }) {
 
     if (ok && data.message == "Approved") {
       setIsLoading(false);
-      return navigation.navigate("ProfileDetails", {
+      return navigation.navigate(Constant.PROFILE_DETAILS_SCREEN, {
         number,
         verifiedId,
       });

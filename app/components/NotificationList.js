@@ -8,17 +8,18 @@ import NotificationCard from "./NotificationCard";
 import defaultStyles from "../config/styles";
 
 function NotificationList({
-  onDeleteIconPress,
   notifications = [],
+  onDeleteIconPress,
   onRefresh,
+  onTapToSeePress,
   refreshing = false,
 }) {
   const scrollY = React.useRef(new Animated.Value(0)).current;
 
   const getItemLayout = useCallback(
     (data, index) => ({
-      length: 70,
-      offset: 70 * index,
+      length: 71,
+      offset: 71 * index,
       index,
     }),
     []
@@ -27,7 +28,7 @@ function NotificationList({
   const keyExtracter = useCallback((item) => item._id, []);
 
   const renderItem = ({ item, index }) => {
-    const inputRange = [-1, 0, 70 * index, 70 * (index + 2)];
+    const inputRange = [-1, 0, 71 * index, 71 * (index + 2)];
 
     const scale = scrollY.interpolate({
       inputRange,
@@ -37,6 +38,7 @@ function NotificationList({
     return (
       <Animated.View style={{ transform: [{ scale }] }}>
         <NotificationCard
+          onTapToSeePress={() => onTapToSeePress(item)}
           notification={item}
           onDeleteIconPress={() => onDeleteIconPress(item)}
         />
@@ -56,12 +58,10 @@ function NotificationList({
         getItemLayout={getItemLayout}
         initialNumToRender={13}
         ItemSeparatorComponent={() => (
-          <ItemSeperatorComponent
-            style={{ backgroundColor: defaultStyles.colors.light, height: 1 }}
-          />
+          <ItemSeperatorComponent style={styles.itemSeperatorComponent} />
         )}
         keyExtractor={keyExtracter}
-        maxToRenderPerBatch={10}
+        maxToRenderPerBatch={20}
         onRefresh={onRefresh}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -72,7 +72,7 @@ function NotificationList({
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         updateCellsBatchingPeriod={3000}
-        windowSize={10}
+        windowSize={5}
       />
     </View>
   );
@@ -85,6 +85,10 @@ const styles = StyleSheet.create({
   emptyNotificationInfo: {
     fontSize: 18,
     textAlign: "center",
+  },
+  itemSeperatorComponent: {
+    backgroundColor: defaultStyles.colors.light,
+    height: 1,
   },
 });
 

@@ -8,6 +8,8 @@ import CountryPicker from "../components/CountryPicker";
 import InfoAlert from "../components/InfoAlert";
 import LoadingIndicator from "../components/LoadingIndicator";
 
+import Constant from "../navigation/NavigationConstants";
+
 import defaultStyles from "../config/styles";
 
 import verifyApi from "../api/verify";
@@ -51,7 +53,7 @@ function SendOtpScreen({ navigation }) {
     if (ok) {
       setVerificationId(data.attemptCode);
       setIsLoading(false);
-      return navigation.navigate("VerifyOtp", {
+      return navigation.navigate(Constant.VERIFY_OTP_SCREEN, {
         verificationId: data.attemptCode,
         phoneNumber,
       });

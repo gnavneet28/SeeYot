@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import BlockedUsersScreen from "../screens/BlockedUsersScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import SubscriptionNavigator from "./SubscriptionNavigator";
+import Constant from "./NavigationConstants";
 
 const Tab = createBottomTabNavigator();
 
@@ -12,10 +13,13 @@ function ProfileNavigator(props) {
     <Tab.Navigator
       screenOptions={{ headerShown: false, tabBarStyle: { display: "none" } }}
     >
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Blocked" component={BlockedUsersScreen} />
+      <Tab.Screen name={Constant.PROFILE_SCREEN} component={ProfileScreen} />
       <Tab.Screen
-        name="SubscriptionNavigator"
+        name={Constant.BLOCKED_SCREEN}
+        component={BlockedUsersScreen}
+      />
+      <Tab.Screen
+        name={Constant.SUBSCRIPTION_NAVIGATOR}
         component={SubscriptionNavigator}
       />
     </Tab.Navigator>

@@ -10,7 +10,11 @@ function AppText({ children, style, onPress, ...otherProps }) {
       onPress={onPress}
       style={[
         styles.text,
-        { fontFamily: "Comic-Bold" ? "Comic-Bold" : "Normal" },
+        {
+          fontFamily: "Comic-Bold"
+            ? "Comic-Bold"
+            : defaultStyles.text.fontFamily,
+        },
         style,
       ]}
     >

@@ -29,7 +29,7 @@
     "android": {
       "icon": "./assets/app-logo.png",
       "adaptiveIcon": {
-        "foregroundImage": "./app/assets/user.png",
+        "foregroundImage": "./app/assets/app-logo.png",
         "backgroundColor": "#000000"
       },
       "config": {

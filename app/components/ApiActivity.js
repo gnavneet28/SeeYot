@@ -77,18 +77,17 @@ const styles = StyleSheet.create({
   contentContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderBottomLeftRadius: 25,
-    borderRadius: 5,
-    borderTopRightRadius: 25,
+    borderRadius: 20,
     justifyContent: "center",
+    overflow: "hidden",
     padding: 5,
     width: 200,
   },
   doneButton: {
     backgroundColor: defaultStyles.colors.light,
-    height: 30,
+    height: 35,
     marginBottom: 10,
-    width: "50%",
+    width: 60,
   },
   loaderContainer: {
     alignItems: "center",

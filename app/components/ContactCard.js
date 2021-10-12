@@ -1,5 +1,5 @@
 import React, { useState, useCallback, memo } from "react";
-import { Modal, StyleSheet, TouchableHighlight, View } from "react-native";
+import { Modal, StyleSheet, View } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 import AppButton from "./AppButton";
@@ -29,10 +29,13 @@ function ContactCard({
   });
 
   const handleImagePress = useCallback(async () => {
+    setState({ visible: true, echoMessage: "" });
     const { data, problem, ok } = await echosApi.getEcho(user._id);
     if (ok) {
       return setState({ visible: true, echoMessage: data });
     }
+
+    return;
   }, []);
 
   const handleCloseModal = useCallback(
@@ -46,6 +49,8 @@ function ContactCard({
   );
 
   const onAddEchoButtonPress = useCallback(() => onAddEchoPress(user), [user]);
+
+  if (!user.name) return <View style={styles.emptyContacts} />;
 
   return (
     <>
@@ -68,17 +73,13 @@ function ContactCard({
             title="Add Echo"
           />
         </View>
-        <TouchableHighlight
+        <MaterialCommunityIcons
           onPress={onSendThoughtPress}
+          color={defaultStyles.colors.tomato}
+          name="send-circle-outline"
+          size={35}
           style={styles.sendThoughtIcon}
-          underlayColor={defaultStyles.colors.light}
-        >
-          <MaterialCommunityIcons
-            color={defaultStyles.colors.white}
-            name="thought-bubble-outline"
-            size={30}
-          />
-        </TouchableHighlight>
+        />
       </View>
       <Modal
         onRequestClose={handleCloseModal}
@@ -142,6 +143,10 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
     width: "95%",
   },
+  emptyContacts: {
+    width: "100%",
+    height: 80,
+  },
   image: {
     borderColor: defaultStyles.colors.light,
     borderRadius: 25,
@@ -160,7 +165,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 5,
     marginLeft: 10,
-    opacity: 0.8,
+    opacity: 0.9,
     paddingBottom: 0,
   },
   inlargedImage: {
@@ -176,19 +181,8 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   sendThoughtIcon: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderBottomRightRadius: 22,
-    borderColor: defaultStyles.colors.secondary,
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 15,
-    borderWidth: 1,
-    elevation: 1,
-    height: 45,
-    justifyContent: "center",
-    marginRight: 10,
-    transform: [{ rotate: "45deg" }],
-    width: 45,
+    alignSelf: "center",
+    marginHorizontal: 15,
   },
   subAddEchoButton: {
     color: defaultStyles.colors.secondary,

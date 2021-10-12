@@ -11,6 +11,7 @@ import Screen from "../components/Screen";
 import asyncStorage from "../utilities/cache";
 import apiFlow from "../utilities/ApiActivityStatus";
 import debounce from "../utilities/debounce";
+import DataConstants from "../utilities/DataConstants";
 
 import useAuth from "../auth/useAuth";
 
@@ -55,7 +56,7 @@ function BlockedUsersScreen({ navigation }) {
 
     if (response.ok) {
       modifiedUser.blocked = response.data.blocked;
-      await asyncStorage.store("blocked", response.data.blocked);
+      await asyncStorage.store(DataConstants.BLOCKED, response.data.blocked);
       setUser(modifiedUser);
     }
     return apiActivityStatus(response, setApiActivity);
@@ -81,7 +82,7 @@ function BlockedUsersScreen({ navigation }) {
     const response = await myApi.getBlockList();
     if (response.ok) {
       modifiedUser.blocked = response.data.blocked;
-      await asyncStorage.store("blocked", response.data.blocked);
+      await asyncStorage.store(DataConstants.BLOCKED, response.data.blocked);
       setUser(modifiedUser);
     }
     return apiActivityStatus(response, setApiActivity);

@@ -12,6 +12,9 @@ import EchoMessageList from "../components/EchoMessageList";
 import HelpDialogueBox from "../components/HelpDialogueBox";
 import Screen from "../components/Screen";
 
+import Constant from "../navigation/NavigationConstants";
+import DataConstants from "../utilities/DataConstants";
+
 import InfoAlert from "../components/InfoAlert";
 
 import asyncStorage from "../utilities/cache";
@@ -34,6 +37,7 @@ function AddEchoScreen({ navigation, route }) {
   const isFocused = useIsFocused();
 
   const [isReady, setIsReady] = useState(false);
+  const [initialMessage, setInitialMessage] = useState("");
   const [message, setMessage] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [echoMessageOption, setEchoMessageOption] = useState(null);
@@ -64,12 +68,13 @@ function AddEchoScreen({ navigation, route }) {
   // ON PAGE FOCUS ACTION
   const updateSearchHistory = async () => {
     let modifiedUser = { ...user };
-    const { ok, data } = await usersApi.addToSearchHstory(recipient);
+    const { ok, data, problem } = await usersApi.addToSearchHstory(recipient);
     if (ok) {
       modifiedUser.searchHistory = data;
       setUser(modifiedUser);
-      return await asyncStorage.store("userSearchHistory", data);
+      return await asyncStorage.store(DataConstants.SEARCH_HISTORY, data);
     }
+    if (problem) return;
   };
 
   const updateThisEchoMessage = useCallback(async () => {
@@ -80,8 +85,9 @@ function AddEchoScreen({ navigation, route }) {
       let modifiedUser = { ...user };
       modifiedUser.echoMessage = data;
       setUser(modifiedUser);
-      return await asyncStorage.store("userEchoMessage", data);
+      return await asyncStorage.store(DataConstants.ECHO_MESSAGE, data);
     }
+    if (problem) return;
   }, [user]);
 
   const setEchoMessage = useCallback(() => {
@@ -99,13 +105,14 @@ function AddEchoScreen({ navigation, route }) {
     updateThisEchoMessage();
     const echoMessage = setEchoMessage();
     setMessage(echoMessage ? echoMessage.message : "");
+    setInitialMessage(echoMessage ? echoMessage.message : "");
     setIsReady(true);
   };
 
   useEffect(() => {
     if (isFocused) {
       setUpPage();
-      if (from == "VipSearchScreen") {
+      if (from == Constant.VIP_SEARCH_SCREEN) {
         updateSearchHistory();
       }
     }
@@ -124,13 +131,17 @@ function AddEchoScreen({ navigation, route }) {
 
   // ECHO_MESSAGE SAVE ACTION
   const handleSave = useCallback(async () => {
+    if (message == initialMessage) return;
     initialApiActivity(setApiActivity, "Updating your Echo Message...");
     let modifiedUser = { ...user };
 
     const response = await usersApi.updateEcho(recipient._id, message);
     if (response.ok) {
       modifiedUser.echoMessage = response.data.echoMessage;
-      await asyncStorage.store("userEchoMessage", response.data.echoMessage);
+      await asyncStorage.store(
+        DataConstants.ECHO_MESSAGE,
+        response.data.echoMessage
+      );
       setUser(modifiedUser);
     }
 
@@ -177,7 +188,10 @@ function AddEchoScreen({ navigation, route }) {
 
     if (response.ok) {
       modifiedUser.echoMessage = response.data.echoMessage;
-      await asyncStorage.store("userEchoMessage", response.data.echoMessage);
+      await asyncStorage.store(
+        DataConstants.ECHO_MESSAGE,
+        response.data.echoMessage
+      );
       setUser(modifiedUser);
       setIsVisible(false);
       setEchoMessageOption(null);
@@ -253,8 +267,14 @@ function AddEchoScreen({ navigation, route }) {
                     {message.length}/100
                   </AppText>
                 </View>
+                <AppText style={styles.saveEchoInfo}>
+                  What would you like to say when {recipient.name} taps on your
+                  Display Picture or send you thoughts.
+                </AppText>
                 <AppButton
-                  disabled={message ? false : true}
+                  disabled={
+                    message.replace(/\s/g, "").length >= 1 ? false : true
+                  }
                   onPress={handleSave}
                   style={styles.button}
                   subStyle={{ color: defaultStyles.colors.primary }}
@@ -368,6 +388,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     textAlignVertical: "center",
     width: "100%",
+  },
+  saveEchoInfo: {
+    fontSize: 14,
+    letterSpacing: 0.5,
+    marginBottom: 10,
+    width: "90%",
   },
   textInputSub: {
     textAlignVertical: "top",

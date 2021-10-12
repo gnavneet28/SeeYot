@@ -1,0 +1,15 @@
+export default DataConstants = {
+  VIP: "vip",
+  BLOCKED: "blocked",
+  CONTACTS: "userContacts",
+  DETAILS: "userDetails",
+  ECHO_MESSAGE: "userEchoMessage",
+  ECHO_WHEN: "userEchoWhen",
+  NOTIFICATIONS: "userNotifications",
+  THOUGHTS: "userThoughts",
+  SEARCH_HISTORY: "userSearchHistory",
+  PHONE_CONTACTS: "userPhoneContacts",
+  POINTS: "userPoints",
+  FAVORITES: "userFavorites",
+  MESSAGES: "userMessages",
+};

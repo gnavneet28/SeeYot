@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import IndexNavigator from "./IndexNavigator";
 import ProfileNavigator from "./ProfileNavigator";
 import VipNavigator from "./VipNavigator";
+import Constant from "./NavigationConstants";
 
 import socket from "../api/socketClient";
 
@@ -12,6 +13,7 @@ import navigation from "./rootNavigation";
 
 import SendThoughtsScreen from "../screens/SendThoughtsScreen";
 import AddEchoScreen from "../screens/AddEchoScreen";
+import AddFavoritesScreen from "../screens/AddFavoritesScreen";
 
 import useNotifications from "../hooks/useNotifications";
 
@@ -23,17 +25,29 @@ function AppNavigator(props) {
   const { user, setUser } = useAuth();
 
   useEffect(() => {
-    socket.on(`newNotification${user._id}`, (data) => {
+    const subscription1 = socket.on(`newNotification${user._id}`, (data) => {
       let modifiedUser = { ...user };
       modifiedUser.notifications = data.notifications;
       return setUser(modifiedUser);
     });
 
-    socket.on(`thoughtMatched${user._id}`, (data) => {
+    const subscription2 = socket.on(`thoughtMatched${user._id}`, (data) => {
       let modifiedUser = { ...user };
       modifiedUser.thoughts = data.thoughts;
       return setUser(modifiedUser);
     });
+
+    const subscription3 = socket.on(`newMessage${user._id}`, (data) => {
+      let modifiedUser = { ...user };
+      modifiedUser.messages = data.messages;
+      return setUser(modifiedUser);
+    });
+
+    return () => {
+      subscription1.off();
+      subscription2.off();
+      subscription3.off();
+    };
   }, [user]);
 
   useNotifications(() => navigation.navigate("Notification"));
@@ -45,11 +59,21 @@ function AppNavigator(props) {
         tabBarStyle: { display: "none" },
       }}
     >
-      <Tab.Screen name="Index" component={IndexNavigator} />
-      <Tab.Screen name="Vip" component={VipNavigator} />
-      <Tab.Screen name="ProfileScreen" component={ProfileNavigator} />
-      <Tab.Screen name="SendThought" component={SendThoughtsScreen} />
-      <Tab.Screen name="AddEcho" component={AddEchoScreen} />
+      <Tab.Screen name={Constant.INDEX_NAVIGATOR} component={IndexNavigator} />
+      <Tab.Screen name={Constant.VIP_NAVIGATOR} component={VipNavigator} />
+      <Tab.Screen
+        name={Constant.PROFILE_NAVIGATOR}
+        component={ProfileNavigator}
+      />
+      <Tab.Screen
+        name={Constant.SEND_THOUGHT_SCREEN}
+        component={SendThoughtsScreen}
+      />
+      <Tab.Screen name={Constant.ADD_ECHO_SCREEN} component={AddEchoScreen} />
+      <Tab.Screen
+        name={Constant.ADD_FAVORITES_SCREEN}
+        component={AddFavoritesScreen}
+      />
     </Tab.Navigator>
   );
 }

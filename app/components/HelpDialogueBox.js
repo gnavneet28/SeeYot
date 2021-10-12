@@ -21,7 +21,7 @@ function HelpDialogueBox({ visible, information, onPress, style, iconStyle }) {
             color={defaultStyles.colors.dark}
             name="close"
             onPress={onPress}
-            size={25}
+            size={20}
             style={styles.closeIcon}
           />
           <AppText style={styles.info}>{information}</AppText>
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   closeIcon: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: 5,
-    width: 25,
+    width: 20,
   },
   icon: {
     position: "absolute",
@@ -54,6 +54,9 @@ const styles = StyleSheet.create({
   },
   info: {
     color: defaultStyles.colors.primary,
+    fontSize: 16,
+    letterSpacing: 0.5,
+    opacity: 0.7,
     textAlign: "left",
   },
 });

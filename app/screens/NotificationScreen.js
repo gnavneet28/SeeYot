@@ -9,7 +9,11 @@ import AppText from "../components/AppText";
 import InfoAlert from "../components/InfoAlert";
 import NotificationList from "../components/NotificationList";
 import Screen from "../components/Screen";
+import SeeThought from "../components/SeeThought";
 import VipAdCard from "../components/VipAdCard";
+
+import Constant from "../navigation/NavigationConstants";
+import DataConstants from "../utilities/DataConstants";
 
 import asyncStorage from "../utilities/cache";
 import apiFlow from "../utilities/ApiActivityStatus";
@@ -28,6 +32,8 @@ function NotificationScreen({ navigation }) {
   const { apiActivityStatus, initialApiActivity } = apiFlow;
 
   // STATES
+  const [visible, setVisible] = useState(false);
+  const [thought, setThought] = useState("");
   const [isReady, setIsReady] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
@@ -59,7 +65,7 @@ function NotificationScreen({ navigation }) {
       let modifiedUser = { ...user };
       modifiedUser.notifications = data;
       setUser(modifiedUser);
-      await asyncStorage.store("userNotifications", data);
+      await asyncStorage.store(DataConstants.NOTIFICATIONS, data);
       return setIsReady(true);
     }
     setIsReady(true);
@@ -94,6 +100,10 @@ function NotificationScreen({ navigation }) {
     let modifiedUser = { ...user };
     const response = await myApi.deleteAllNotifications();
     if (response.ok) {
+      await asyncStorage.store(
+        DataConstants.NOTIFICATIONS,
+        response.data.notifications
+      );
       modifiedUser.notifications = response.data.notifications;
       setUser(modifiedUser);
     }
@@ -111,7 +121,7 @@ function NotificationScreen({ navigation }) {
         modifiedUser.notifications = response.data.notifications;
         setUser(modifiedUser);
         await asyncStorage.store(
-          "userNotifications",
+          DataConstants.NOTIFICATIONS,
           response.data.notifications
         );
       }
@@ -120,22 +130,30 @@ function NotificationScreen({ navigation }) {
     [user.notifications, user]
   );
 
+  const handleTapToSeeThought = useCallback((thought) => {
+    setThought(thought.message);
+    setVisible(true);
+  }, []);
+
   const handleRefresh = useCallback(async () => {
     setRefreshing(false);
     let modifiedUser = { ...user };
 
-    const { ok, data } = await myApi.setNotificationSeen();
+    const { ok, data, problem } = await myApi.setNotificationSeen();
     if (ok) {
       if (modifiedUser.notifications.length == data.length) return;
       modifiedUser.notifications = data;
       setUser(modifiedUser);
-      return await asyncStorage.store("userNotifications", data);
+      return await asyncStorage.store(DataConstants.NOTIFICATIONS, data);
     }
+    if (problem) return;
   }, [user]);
 
   // VIP CARD ACTION
   const handleVipCardPress = useCallback(() => {
-    navigation.navigate("SubscriptionNavigator", { from: "Notification" });
+    navigation.navigate(Constant.PROFILE_NAVIGATOR, {
+      screen: Constant.SUBSCRIPTION_NAVIGATOR,
+    });
   }, []);
 
   // NOTIFICATION DATA
@@ -154,6 +172,7 @@ function NotificationScreen({ navigation }) {
         onPressLeft={handleBack}
         title="Notifications"
       />
+      <SeeThought visible={visible} setVisible={setVisible} message={thought} />
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
@@ -179,6 +198,7 @@ function NotificationScreen({ navigation }) {
             </AppText>
           ) : null}
           <NotificationList
+            onTapToSeePress={handleTapToSeeThought}
             onDeleteIconPress={handleDelete}
             notifications={data}
             onRefresh={handleRefresh}

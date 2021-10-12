@@ -9,6 +9,8 @@ import SearchBox from "../components/SearchBox";
 import VipSearchedUserList from "../components/VipSearchedUserList";
 import VipThoughtCardList from "../components/VipThoughtCardList";
 
+import Constant from "../navigation/NavigationConstants";
+
 import defaultStyles from "../config/styles";
 
 import usersApi from "../api/users";
@@ -97,9 +99,9 @@ function VipSearchScreen({ navigation }) {
   // SEARCH RESULT ACTION
   const handleOnSendThoughtButtonPress = useCallback(async (userToAdd) => {
     if (userToAdd) {
-      return navigation.navigate("VipSendThought", {
+      return navigation.navigate(Constant.VIP_SENDTHOUGHT_SCREEN, {
         recipient: userToAdd,
-        from: "VipSearchScreen",
+        from: Constant.VIP_SEARCH_SCREEN,
       });
     }
 
@@ -112,9 +114,9 @@ function VipSearchScreen({ navigation }) {
 
   const handleAddEchoButtonPress = useCallback(async (userToAdd) => {
     if (userToAdd) {
-      return navigation.navigate("VipAddEcho", {
+      return navigation.navigate(Constant.VIP_ADDECHO_SCREEN, {
         recipient: userToAdd,
-        from: "VipSearchScreen",
+        from: Constant.VIP_SEARCH_SCREEN,
       });
     }
     setInfoAlert({
@@ -129,9 +131,9 @@ function VipSearchScreen({ navigation }) {
   const handlePopUpOnSendThoughtButtonPress = useCallback(async () => {
     setIsVisible(false);
     if (interestedUser) {
-      return navigation.navigate("VipSendThought", {
+      return navigation.navigate(Constant.VIP_SENDTHOUGHT_SCREEN, {
         recipient: interestedUser,
-        from: "VipSearchScreen",
+        from: Constant.VIP_SEARCH_SCREEN,
       });
     }
 
@@ -145,9 +147,9 @@ function VipSearchScreen({ navigation }) {
   const handlePopUpAddEchoButtonPress = useCallback(async () => {
     setIsVisible(false);
     if (interestedUser) {
-      return navigation.navigate("VipAddEcho", {
+      return navigation.navigate(Constant.VIP_ADDECHO_SCREEN, {
         recipient: interestedUser,
-        from: "VipSearchScreen",
+        from: Constant.VIP_SEARCH_SCREEN,
       });
     }
     setInfoAlert({

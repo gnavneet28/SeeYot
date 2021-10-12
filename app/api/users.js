@@ -17,6 +17,11 @@ const registerUserWithoutPicture = (phoneNumber, name, verificationId) =>
     verificationId,
   });
 
+const addFavorite = (id) => apiClient.put(endPoint + "/favorite/add/" + id, {});
+
+const removeFavorite = (id) =>
+  apiClient.put(endPoint + "/favorite/remove/" + id, {});
+
 const updatePoints = () => apiClient.put(endPoint + "/me/points/add", {});
 
 const searchUser = (searchQuery) =>
@@ -77,6 +82,7 @@ const redeemPoints = (pointsToRedeem) =>
 
 export default {
   addContact,
+  addFavorite,
   addToSearchHstory,
   blockContact,
   getCurrentUser,
@@ -84,6 +90,7 @@ export default {
   registerUserWithoutPicture,
   registerUserWithPicture,
   removeContact,
+  removeFavorite,
   removeFromSearchHstory,
   searchUser,
   setPrivacyMessage,

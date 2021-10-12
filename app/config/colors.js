@@ -12,4 +12,6 @@ export default {
   white: "#FFFFFF",
   yellow_Variant: "#FFCC00",
   yellow: "#FFF93D",
+  tomato: "#ff6347",
+  dark_Variant: "#6b6863",
 };

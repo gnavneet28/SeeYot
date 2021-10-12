@@ -9,10 +9,10 @@ function DescriptionItem({ name = "", style, description = "" }) {
   return (
     <View style={[styles.container, style]}>
       <MaterialCommunityIcons
-        color={defaultStyles.colors.yellow_Variant}
+        color={defaultStyles.colors.tomato}
         name={name}
         size={20}
-        style={{ marginHorizontal: 5 }}
+        style={{ marginHorizontal: 8 }}
       />
       <AppText style={styles.description}>{description}</AppText>
     </View>
@@ -21,9 +21,9 @@ function DescriptionItem({ name = "", style, description = "" }) {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    borderColor: defaultStyles.colors.light,
-    borderRadius: 5,
-    borderWidth: 1,
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: 10,
+    elevation: 1,
     flexDirection: "row",
     height: 50,
     marginVertical: 5,
@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
   },
   description: {
     flexShrink: 1,
+    letterSpacing: 0.3,
     textAlignVertical: "center",
   },
 });
