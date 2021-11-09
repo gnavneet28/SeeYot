@@ -59,7 +59,7 @@ function ManageSubscriptionScreen({ navigation }) {
               title="Subscription:"
               value={subscription}
             />
-            <Details title="Subscription Type:" value={subscriptionType} />
+            <Details title="Subscription Mode:" value={subscriptionType} />
             <Details
               title="Subscription Start Date:"
               value={subscriptionStartDate}

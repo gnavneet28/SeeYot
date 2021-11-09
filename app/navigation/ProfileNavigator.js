@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import BlockedUsersScreen from "../screens/BlockedUsersScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import SubscriptionNavigator from "./SubscriptionNavigator";
+import HelpScreen from "../screens/HelpScreen";
 import Constant from "./NavigationConstants";
 
 const Tab = createBottomTabNavigator();
@@ -22,6 +23,7 @@ function ProfileNavigator(props) {
         name={Constant.SUBSCRIPTION_NAVIGATOR}
         component={SubscriptionNavigator}
       />
+      <Tab.Screen name={Constant.HELP_SCREEN} component={HelpScreen} />
     </Tab.Navigator>
   );
 }

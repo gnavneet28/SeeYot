@@ -9,6 +9,7 @@ import AppTextInput from "./AppTextInput";
 import defaultStyles from "../config/styles";
 
 function SearchBox({
+  loading = false,
   list = [],
   onChange = () => null,
   placeholder = "Search contacts...",
@@ -29,12 +30,13 @@ function SearchBox({
           size={25}
         />
         <AppTextInput
+          maxLength={50}
           onChangeText={(text) => handleChange(text)}
           placeholder={placeholder}
           style={styles.inputBox}
         />
       </View>
-      {list.length < 1 && searchTerm.length >= 3 ? (
+      {list.length < 1 && searchTerm.length >= 3 && !loading ? (
         <View style={styles.emptyData}>
           <LottieView
             autoPlay
@@ -49,10 +51,12 @@ function SearchBox({
 }
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.lightGrey,
     borderRadius: 25,
     borderWidth: 1,
-    marginVertical: 5,
+    elevation: 2,
+    marginVertical: 8,
     overflow: "hidden",
     width: "95%",
   },
@@ -69,13 +73,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
-    height: 50,
+    height: 42,
     justifyContent: "space-between",
     paddingHorizontal: 10,
     width: "100%",
   },
   inputBox: {
+    borderRadius: 20,
     flexShrink: 1,
+    height: 40,
     marginHorizontal: 5,
     paddingHorizontal: 10,
     width: "100%",

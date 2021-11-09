@@ -1,36 +1,84 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useState, useCallback } from "react";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 import LottieView from "lottie-react-native";
 
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
 import AppText from "./AppText";
+import InfoAlert from "../components/InfoAlert";
+
+import DataConstants from "../utilities/DataConstants";
 
 import useAuth from "../auth/useAuth";
+import usersApi from "../api/users";
+
+import asyncStorage from "../utilities/cache";
+import debounce from "../utilities/debounce";
 
 import defaultStyles from "../config/styles";
 
-const height = defaultStyles.height;
-
-function AddContactCard({
-  isRegistered,
-  imageUrl = "",
-  name = "",
-  onPress = () => null,
-  onInvitePress,
-  phoneNumber = parseInt(""),
-  style,
-}) {
-  const { user } = useAuth();
+function AddContactCard({ contact, onInvitePress, style }) {
+  const { user, setUser } = useAuth();
+  const [processing, setProcessing] = useState(false);
+  const [infoAlert, setInfoAlert] = useState({
+    infoAlertMessage: "",
+    showInfoAlert: false,
+  });
 
   const contacts = user.contacts;
 
   const inContacts =
     contacts &&
     contacts.length > 0 &&
-    contacts.filter((c) => c.phoneNumber == phoneNumber)[0];
+    contacts.filter((c) => c.phoneNumber == contact.phoneNumber)[0];
 
-  if (!name)
+  // INFO ALERT ACTIONS
+  const handleCloseInfoAlert = useCallback(async () => {
+    setInfoAlert({ showInfoAlert: false });
+  }, []);
+
+  // ADD CONTACTS ACTION
+  const handleAddPress = useCallback(
+    debounce(
+      async () => {
+        setProcessing(true);
+
+        let modifiedUser = { ...user };
+
+        const { ok, data, problem } = await usersApi.addContact(
+          contact.phoneNumber,
+          contact.name
+        );
+
+        if (ok) {
+          modifiedUser.contacts = data.contacts;
+          setUser(modifiedUser);
+          await asyncStorage.store(DataConstants.CONTACTS, data.contacts);
+          return setProcessing(false);
+        }
+        setProcessing(false);
+
+        if (problem) {
+          if (data) {
+            return setInfoAlert({
+              infoAlertMessage: data.message,
+              showInfoAlert: true,
+            });
+          }
+
+          setInfoAlert({
+            infoAlertMessage: "Something went wrong! Please try again.",
+            showInfoAlert: true,
+          });
+        }
+      },
+      1000,
+      true
+    ),
+    [user, contact]
+  );
+
+  if (!contact.name)
     return (
       <View style={styles.emptyData}>
         <LottieView
@@ -45,31 +93,38 @@ function AddContactCard({
   return (
     <View style={[styles.container, style]}>
       <AppImage
-        imageUrl={imageUrl}
+        imageUrl={contact.picture}
         style={styles.image}
         subStyle={styles.imageSub}
       />
       <View style={styles.infoContainer}>
         <AppText numberOfLines={1} style={[styles.infoNameText]}>
-          {name}
+          {contact.name}
         </AppText>
-        <AppText style={styles.infoNumberText}>{phoneNumber}</AppText>
+        <AppText style={styles.infoNumberText}>{contact.phoneNumber}</AppText>
       </View>
-      {isRegistered ? (
-        <AppButton
-          title={inContacts ? "Added" : "Add"}
-          disabled={inContacts ? true : false}
-          style={[
-            styles.addButton,
-            {
-              backgroundColor: inContacts
-                ? defaultStyles.colors.blue
-                : defaultStyles.colors.secondary,
-            },
-          ]}
-          subStyle={styles.addButtonSub}
-          onPress={onPress}
-        />
+
+      {contact.isRegistered ? (
+        <View style={styles.buttonContainer}>
+          {!processing ? (
+            <AppButton
+              title={inContacts ? "Added" : "Add"}
+              disabled={inContacts ? true : false}
+              style={[
+                styles.addButton,
+                {
+                  backgroundColor: inContacts
+                    ? defaultStyles.colors.tomato
+                    : defaultStyles.colors.blue,
+                },
+              ]}
+              subStyle={styles.addButtonSub}
+              onPress={handleAddPress}
+            />
+          ) : (
+            <ActivityIndicator size={18} color={defaultStyles.colors.tomato} />
+          )}
+        </View>
       ) : (
         <AppButton
           title="Invite"
@@ -82,14 +137,29 @@ function AddContactCard({
           }}
         />
       )}
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
+      />
     </View>
   );
 }
 const styles = StyleSheet.create({
-  addButton: {
+  buttonContainer: {
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 10,
     height: 35,
     marginRight: 5,
+    width: 65,
+    borderWidth: 1,
+    borderColor: defaultStyles.colors.light,
+    overflow: "hidden",
+  },
+  addButton: {
+    borderRadius: 10,
+    height: 35,
     width: 65,
   },
   addButtonSub: {
@@ -102,11 +172,10 @@ const styles = StyleSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.light,
     borderRadius: 10,
-    //borderWidth: 1,
     elevation: 1,
     flexDirection: "row",
     height: 60,
-    marginVertical: 5,
+    marginVertical: 3,
     padding: 2,
     paddingHorizontal: 5,
     width: "95%",

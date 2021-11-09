@@ -26,7 +26,7 @@ function ThoughtsList({ thoughts = [], recipient }) {
 
   const renderListHeader = useCallback(() => {
     return <ChatListHeader user={recipient} />;
-  }, [recipient]);
+  }, [recipient, user.contacts]);
 
   return (
     <View style={[styles.container]}>

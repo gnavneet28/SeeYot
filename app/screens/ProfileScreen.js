@@ -75,6 +75,7 @@ function ProfileScreen({ navigation }) {
   const handleBack = useCallback(
     debounce(
       () => {
+        setVisible(false);
         navigation.goBack();
       },
       500,
@@ -147,32 +148,37 @@ function ProfileScreen({ navigation }) {
   }, []);
 
   const handleHelpPress = useCallback(() => {
-    console.log("Help");
+    setVisible(false);
+    navigation.navigate(Constant.HELP_SCREEN);
   }, []);
 
   // PICTURE CHANGE ACTION
   const handleImageChange = useCallback(
-    async (image) => {
-      initialApiActivity(setApiActivity, "Updating your picture...");
+    debounce(
+      async (image) => {
+        initialApiActivity(setApiActivity, "Updating your picture...");
 
-      let modifiedUser = { ...user };
-      let cachedUserDetails = {
-        _id: user._id,
-        name: user.name,
-        picture: user.picture,
-        phoneNumber: user.phoneNumber,
-      };
-      let picture = image;
+        let modifiedUser = { ...user };
+        let cachedUserDetails = {
+          _id: user._id,
+          name: user.name,
+          picture: user.picture,
+          phoneNumber: user.phoneNumber,
+        };
+        let picture = image;
 
-      const response = await usersApi.updateCurrentUserPhoto(picture);
-      if (response.ok) {
-        modifiedUser.picture = response.data.picture;
-        cachedUserDetails.picture = response.data.data;
-        setUser(modifiedUser);
-        await asyncStorage.store(DataConstants.DETAILS, cachedUserDetails);
-      }
-      return apiActivityStatus(response, setApiActivity);
-    },
+        const response = await usersApi.updateCurrentUserPhoto(picture);
+        if (response.ok) {
+          modifiedUser.picture = response.data.picture;
+          cachedUserDetails.picture = response.data.data;
+          setUser(modifiedUser);
+          await asyncStorage.store(DataConstants.DETAILS, cachedUserDetails);
+        }
+        return apiActivityStatus(response, setApiActivity);
+      },
+      1000,
+      true
+    ),
     [user]
   );
 
@@ -387,8 +393,9 @@ function ProfileScreen({ navigation }) {
           </View>
         </ScrollView>
       </Screen>
+      {visible || openReport ? <View style={styles.modalFallback} /> : null}
       <Modal
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setVisible(false)}
         transparent={true}
         visible={visible}
@@ -407,7 +414,7 @@ function ProfileScreen({ navigation }) {
               title="Blocklist"
             />
             <ProfileOption
-              icon="subscriptions"
+              icon="library-books"
               onPress={handleSubscriptionPress}
               title="Subscriptions"
             />
@@ -455,7 +462,9 @@ function ProfileScreen({ navigation }) {
               style={styles.problemInput}
             />
             <View style={styles.actionContainer}>
-              <AppText>{problemDescription.length}/250</AppText>
+              <AppText style={styles.problemDescriptionLength}>
+                {problemDescription.length}/250
+              </AppText>
               <AppButton
                 disabled={
                   problemDescription.replace(/\s/g, "").length >= 1
@@ -524,10 +533,17 @@ const styles = StyleSheet.create({
     marginVertical: 15,
     width: "95%",
   },
+  modalFallback: {
+    backgroundColor: "rgba(0,0,0,0.7)",
+    height: "100%",
+    position: "absolute",
+    width: "100%",
+    zIndex: 22,
+  },
   optionsContainerBackground: {
     flex: 1,
     width: "100%",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    //backgroundColor: "rgba(0,0,0,0.5)",
   },
   optionsContainer: {
     alignItems: "center",
@@ -564,13 +580,18 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   problemInput: {
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.white,
+    borderColor: defaultStyles.colors.light,
+    borderRadius: 5,
+    borderWidth: 1,
     height: 100,
     marginBottom: 10,
     padding: 5,
   },
+  problemDescriptionLength: {
+    fontSize: 14,
+  },
   reportModal: {
-    backgroundColor: "rgba(0,0,0,0.5)",
     flex: 1,
     justifyContent: "flex-end",
     overflow: "hidden",

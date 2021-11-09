@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderRadius: 5,
     flexDirection: "row",
-    minHeight: defaultStyles.dimensionConstants.height,
+    height: defaultStyles.dimensionConstants.height,
     width: "100%",
     overflow: "hidden",
     padding: 5,

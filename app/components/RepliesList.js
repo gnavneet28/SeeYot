@@ -9,9 +9,8 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 import defaultStyles from "../config/styles";
 
-import AppText from "./AppText";
 import AppTextInput from "./AppTextInput";
-import AddFavoriteCard from "./AddFavoriteCard";
+import ReplyCard from "./ReplyCard";
 
 const ViewTypes = {
   Full: 0,
@@ -23,7 +22,7 @@ const defaultListItemWhenEmpty = [
   },
 ];
 
-class AddContactList extends React.Component {
+class RepliesList extends React.Component {
   constructor(props) {
     super(props);
 
@@ -41,11 +40,11 @@ class AddContactList extends React.Component {
         switch (type) {
           case ViewTypes.Full:
             dim.width = width;
-            dim.height = 64;
+            dim.height = 160;
             break;
           default:
-            dim.width = 0;
-            dim.height = 0;
+            dim.width = width;
+            dim.height = 160;
         }
       }
     );
@@ -53,10 +52,10 @@ class AddContactList extends React.Component {
     this._rowRenderer = this._rowRenderer.bind(this);
 
     this.state = {
-      defaultUsers: this.props.users,
-      users: this.props.users,
-      dataProvider: this.props.users.length
-        ? dataProvider.cloneWithRows(this.props.users)
+      defaultReplies: this.props.replies,
+      replies: this.props.replies,
+      dataProvider: this.props.replies.length
+        ? dataProvider.cloneWithRows(this.props.replies)
         : dataProvider.cloneWithRows(defaultListItemWhenEmpty),
       searchTerm: "",
     };
@@ -65,8 +64,9 @@ class AddContactList extends React.Component {
   handleChange(text) {
     if (!text.length) {
       let newData = this.state.dataProvider.cloneWithRows(
-        this.state.defaultUsers
+        this.state.defaultReplies
       );
+
       return this.setState({
         ...this.state,
         dataProvider: newData.getSize()
@@ -80,10 +80,11 @@ class AddContactList extends React.Component {
       searchTerm: text,
     });
 
-    const newList = this.state.defaultUsers
+    const newList = this.state.defaultReplies
       .filter(
-        (u) =>
-          u.name.substring(0, text.length).toLowerCase() == text.toLowerCase()
+        (r) =>
+          r.createdFor.name.substring(0, text.length).toLowerCase() ==
+          text.toLowerCase()
       )
       .sort();
 
@@ -100,11 +101,10 @@ class AddContactList extends React.Component {
     switch (type) {
       case ViewTypes.Full:
         return (
-          <AddFavoriteCard
-            favoriteUser={data}
-            name={data.name}
-            onMessagePress={() => this.props.onMessagePress(data)}
-            processing={this.props.processing}
+          <ReplyCard
+            message={data}
+            onDeletePress={() => this.props.onDeletePress(data)}
+            onModalOpenPress={() => this.props.onModalOpenPress(data)}
           />
         );
       default:
@@ -112,12 +112,15 @@ class AddContactList extends React.Component {
     }
   }
   componentDidUpdate(prevProps) {
-    if (prevProps.users != this.props.users) {
+    if (
+      prevProps.replies.length != this.props.replies.length ||
+      prevProps.replies != this.props.replies
+    ) {
       return this.setState({
         ...this.state,
-        defaultUsers: this.props.users,
-        dataProvider: this.props.users.length
-          ? this.state.dataProvider.cloneWithRows(this.props.users)
+        defaultReplies: this.props.replies,
+        dataProvider: this.props.replies.length
+          ? this.state.dataProvider.cloneWithRows(this.props.replies)
           : this.state.dataProvider.cloneWithRows(defaultListItemWhenEmpty),
       });
     }
@@ -136,19 +139,10 @@ class AddContactList extends React.Component {
             <AppTextInput
               maxLength={10}
               onChangeText={(text) => this.handleChange(text)}
-              placeholder="Search..."
+              placeholder="Search people who replied you..."
               style={styles.inputBox}
             />
           </View>
-        </View>
-        <View style={styles.detailsContainer}>
-          <AppText style={styles.favoritePeople}>Favorite People</AppText>
-          <AppText
-            onPress={this.props.onAllRepliesPress}
-            style={styles.allReplies}
-          >
-            All Replies
-          </AppText>
         </View>
         <View style={styles.listView}>
           <RecyclerListView
@@ -171,17 +165,6 @@ class AddContactList extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  allReplies: {
-    alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.light,
-    borderBottomLeftRadius: 20,
-    borderTopLeftRadius: 20,
-    color: defaultStyles.colors.blue,
-    height: 35,
-    marginVertical: 5,
-    paddingHorizontal: 20,
-    textAlignVertical: "center",
-  },
   container: {
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.lightGrey,
@@ -191,18 +174,6 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     overflow: "hidden",
     width: "95%",
-  },
-  detailsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  favoritePeople: {
-    color: defaultStyles.colors.blue,
-    height: 35,
-    marginVertical: 5,
-    paddingHorizontal: 20,
-    textAlignVertical: "center",
   },
   inputBoxContainer: {
     alignItems: "center",
@@ -223,9 +194,8 @@ const styles = StyleSheet.create({
   },
   listView: {
     flex: 1,
-    marginTop: 10,
     width: "100%",
   },
 });
 
-export default AddContactList;
+export default RepliesList;

@@ -10,6 +10,7 @@ import AppText from "../components/AppText";
 import AppTextInput from "../components/AppTextInput";
 import EchoMessageList from "../components/EchoMessageList";
 import HelpDialogueBox from "../components/HelpDialogueBox";
+import Option from "../components/Option";
 import Screen from "../components/Screen";
 
 import Constant from "../navigation/NavigationConstants";
@@ -130,23 +131,30 @@ function AddEchoScreen({ navigation, route }) {
   }, []);
 
   // ECHO_MESSAGE SAVE ACTION
-  const handleSave = useCallback(async () => {
-    if (message == initialMessage) return;
-    initialApiActivity(setApiActivity, "Updating your Echo Message...");
-    let modifiedUser = { ...user };
+  const handleSave = useCallback(
+    debounce(
+      async () => {
+        if (message == initialMessage) return;
+        initialApiActivity(setApiActivity, "Updating your Echo Message...");
+        let modifiedUser = { ...user };
 
-    const response = await usersApi.updateEcho(recipient._id, message);
-    if (response.ok) {
-      modifiedUser.echoMessage = response.data.echoMessage;
-      await asyncStorage.store(
-        DataConstants.ECHO_MESSAGE,
-        response.data.echoMessage
-      );
-      setUser(modifiedUser);
-    }
+        const response = await usersApi.updateEcho(recipient._id, message);
+        if (response.ok) {
+          modifiedUser.echoMessage = response.data.echoMessage;
+          await asyncStorage.store(
+            DataConstants.ECHO_MESSAGE,
+            response.data.echoMessage
+          );
+          setUser(modifiedUser);
+        }
 
-    return apiActivityStatus(response, setApiActivity);
-  }, [message, recipient._id, user]);
+        return apiActivityStatus(response, setApiActivity);
+      },
+      1000,
+      true
+    ),
+    [message, recipient._id, user]
+  );
 
   // HEADER ACTIONS
   const handleBack = useCallback(
@@ -180,25 +188,32 @@ function AddEchoScreen({ navigation, route }) {
     setIsVisible(false);
   }, [message, echoMessageOption]);
 
-  const handleDeleteEchoPress = useCallback(async () => {
-    initialApiActivity(setApiActivity, "Deleting this Echo Message...");
-    let modifiedUser = { ...user };
+  const handleDeleteEchoPress = useCallback(
+    debounce(
+      async () => {
+        initialApiActivity(setApiActivity, "Deleting this Echo Message...");
+        let modifiedUser = { ...user };
 
-    const response = await echosApi.deleteEcho(echoMessageOption._id);
+        const response = await echosApi.deleteEcho(echoMessageOption._id);
 
-    if (response.ok) {
-      modifiedUser.echoMessage = response.data.echoMessage;
-      await asyncStorage.store(
-        DataConstants.ECHO_MESSAGE,
-        response.data.echoMessage
-      );
-      setUser(modifiedUser);
-      setIsVisible(false);
-      setEchoMessageOption(null);
-    }
+        if (response.ok) {
+          modifiedUser.echoMessage = response.data.echoMessage;
+          await asyncStorage.store(
+            DataConstants.ECHO_MESSAGE,
+            response.data.echoMessage
+          );
+          setUser(modifiedUser);
+          setIsVisible(false);
+          setEchoMessageOption(null);
+        }
 
-    return apiActivityStatus(response, setApiActivity);
-  }, [user.echoMessage.length, echoMessageOption, user]);
+        return apiActivityStatus(response, setApiActivity);
+      },
+      1000,
+      true
+    ),
+    [user.echoMessage.length, echoMessageOption, user]
+  );
 
   return (
     <>
@@ -214,7 +229,6 @@ function AddEchoScreen({ navigation, route }) {
           information="Echo messages are flash messages and will only be displayed when a person interacts with you by either tapping on your profile picture or by sending you thoughts. You can set the type of interaction from your profile."
           onPress={handleCloseHelp}
           setVisible={setShowHelp}
-          style={styles.helpDialogue}
           visible={showHelp}
         />
         <InfoAlert
@@ -263,7 +277,7 @@ function AddEchoScreen({ navigation, route }) {
                     subStyle={styles.textInputSub}
                     value={message}
                   />
-                  <AppText style={{ textAlign: "right" }}>
+                  <AppText style={{ textAlign: "right", fontSize: 14 }}>
                     {message.length}/100
                   </AppText>
                 </View>
@@ -277,7 +291,7 @@ function AddEchoScreen({ navigation, route }) {
                   }
                   onPress={handleSave}
                   style={styles.button}
-                  subStyle={{ color: defaultStyles.colors.primary }}
+                  subStyle={{ color: defaultStyles.colors.secondary }}
                   title="Save"
                 />
               </>
@@ -292,16 +306,15 @@ function AddEchoScreen({ navigation, route }) {
       >
         <View style={styles.echoOptionMainContainer}>
           <View style={styles.optionsContainer}>
-            <AppText style={[styles.optionClose]} onPress={handleCloseModal}>
-              Close
-            </AppText>
+            <Option
+              title="Close"
+              titleStyle={styles.optionClose}
+              onPress={handleCloseModal}
+            />
 
-            <AppText style={styles.option} onPress={handleDeleteEchoPress}>
-              Delete
-            </AppText>
-            <AppText style={styles.option} onPress={handleUseThisEchoPress}>
-              Use this ehco
-            </AppText>
+            <Option title="Delete" onPress={handleDeleteEchoPress} />
+
+            <Option title="Use this echo" onPress={handleUseThisEchoPress} />
           </View>
         </View>
       </Modal>
@@ -320,6 +333,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: defaultStyles.dimensionConstants.height,
     width: "90%",
+    borderWidth: 2,
+    borderColor: defaultStyles.colors.yellow,
   },
   container: {
     backgroundColor: defaultStyles.colors.white,
@@ -332,24 +347,17 @@ const styles = StyleSheet.create({
   },
   echoOptionMainContainer: {
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(0,0,0,0.8)",
     flex: 1,
     justifyContent: "center",
     width: "100%",
-  },
-  helpDialogue: {
-    padding: 5,
-    position: "absolute",
-    right: 12,
-    top: 48,
   },
   inputBoxContainer: {
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.lightGrey,
     borderRadius: 10,
     borderWidth: 1,
-    elevation: 1,
-    marginBottom: 10,
+    marginBottom: 5,
     overflow: "hidden",
     padding: 5,
     width: "90%",
@@ -364,35 +372,22 @@ const styles = StyleSheet.create({
   optionsContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 10,
+    borderColor: defaultStyles.colors.dark_Variant,
+    borderRadius: 20,
+    borderWidth: 1,
     overflow: "hidden",
     width: "60%",
   },
-  option: {
-    borderBottomColor: defaultStyles.colors.light,
-    borderBottomWidth: 1,
-    fontSize: 18,
-    height: defaultStyles.dimensionConstants.height,
-    opacity: 0.8,
-    textAlign: "center",
-    textAlignVertical: "center",
-    width: "100%",
-  },
   optionClose: {
-    borderBottomColor: defaultStyles.colors.light,
-    borderBottomWidth: 1,
-    color: defaultStyles.colors.blue,
-    fontSize: 18,
-    height: defaultStyles.dimensionConstants.height,
-    opacity: 0.8,
-    textAlign: "center",
-    textAlignVertical: "center",
-    width: "100%",
+    backgroundColor: defaultStyles.colors.dark_Variant,
+    color: defaultStyles.colors.white,
+    opacity: 1,
   },
   saveEchoInfo: {
+    color: defaultStyles.colors.dark_Variant,
     fontSize: 14,
     letterSpacing: 0.5,
-    marginBottom: 10,
+    marginBottom: 20,
     width: "90%",
   },
   textInputSub: {

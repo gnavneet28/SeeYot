@@ -40,7 +40,7 @@ class AddContactList extends React.Component {
         switch (type) {
           case ViewTypes.Full:
             dim.width = width;
-            dim.height = 70;
+            dim.height = 66;
             break;
           default:
             dim.width = 0;
@@ -104,11 +104,8 @@ class AddContactList extends React.Component {
       case ViewTypes.Full:
         return (
           <AddContactCard
-            isRegistered={data.isRegistered}
-            name={data.name}
+            contact={data}
             onInvitePress={() => this.props.onInvitePress(data)}
-            onPress={() => this.props.onAddPress(data)}
-            phoneNumber={data.phoneNumber}
           />
         );
       default:
@@ -170,10 +167,12 @@ class AddContactList extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.lightGrey,
     borderRadius: 25,
     borderWidth: 1,
-    marginVertical: 5,
+    elevation: 2,
+    marginVertical: 8,
     overflow: "hidden",
     width: "95%",
   },
@@ -181,13 +180,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
-    height: 50,
+    height: 42,
     justifyContent: "space-between",
     paddingHorizontal: 10,
     width: "100%",
   },
   inputBox: {
+    borderRadius: 20,
     flexShrink: 1,
+    height: 40,
     marginHorizontal: 5,
     paddingHorizontal: 10,
     width: "100%",

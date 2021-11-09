@@ -1,26 +1,29 @@
 import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity, TextInput } from "react-native";
 
-import AppTextInput from "./AppTextInput";
 import Icon from "./Icon";
 
 import defaultStyles from "../config/styles";
-
-const height = defaultStyles.height;
+import debounce from "../utilities/debounce";
 
 function SendThoughtsInput({
+  onBlur,
+  onFocus,
+  placeholder = "Send your thoughts...",
   style,
   submit,
-  onFocus,
-  onBlur,
-  placeholder = "Send your thoughts...",
 }) {
   const [message, setMessage] = useState("");
 
-  const handlePress = () => {
-    submit(message);
-    setMessage("");
-  };
+  const handlePress = debounce(
+    () => {
+      submit(message);
+      setMessage("");
+    },
+    1000,
+    true
+  );
+
   return (
     <View style={[styles.container, style]}>
       <TextInput
@@ -36,12 +39,16 @@ function SendThoughtsInput({
         value={message}
       />
       <TouchableOpacity
-        disabled={!message}
+        disabled={message.replace(/\s/g, "").length >= 1 ? false : true}
         onPress={handlePress}
         style={styles.send}
       >
         <Icon
-          color={message ? defaultStyles.colors.secondary : "lightgrey"}
+          color={
+            message.replace(/\s/g, "").length >= 1
+              ? defaultStyles.colors.secondary
+              : defaultStyles.colors.lightGrey
+          }
           name="send"
           size={30}
         />
@@ -60,14 +67,13 @@ const styles = StyleSheet.create({
     elevation: 1,
     flexDirection: "row",
     height: defaultStyles.dimensionConstants.height,
-    width: "92%",
-    //paddingHorizontal: 10,
     justifyContent: "space-between",
+    width: "92%",
   },
   inputBox: {
-    fontSize: 19,
-    flex: 1,
     borderRadius: 30,
+    flex: 1,
+    fontSize: 19,
     height: "100%",
     marginRight: 5,
     paddingHorizontal: 10,
@@ -77,8 +83,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 40,
     justifyContent: "center",
-    width: 40,
     marginRight: 5,
+    width: 40,
   },
 });
 

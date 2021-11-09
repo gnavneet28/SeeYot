@@ -1,8 +1,8 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableHighlight } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
-import FontAwesome from "react-native-vector-icons/FontAwesome5";
+import Materialicons from "react-native-vector-icons/MaterialIcons";
 
 import AppText from "./AppText";
 
@@ -10,30 +10,39 @@ import defaultStyles from "../config/styles";
 
 function AddFavoritesButton({ onPress }) {
   return (
-    <LinearGradient colors={["#4568DC", "#B06AB3"]} style={styles.container}>
-      <FontAwesome
-        onPress={onPress}
-        style={styles.icon}
-        name="grin-stars"
-        size={20}
-        color={defaultStyles.colors.white}
-      />
-      <AppText onPress={onPress} style={styles.add}>
-        Add Favorites
-      </AppText>
-    </LinearGradient>
+    <TouchableHighlight
+      underlayColor={defaultStyles.colors.white}
+      onPress={onPress}
+    >
+      <>
+        <LinearGradient
+          colors={["#4568DC", "#B06AB3"]}
+          style={styles.container}
+        >
+          <Materialicons
+            onPress={onPress}
+            style={styles.icon}
+            name="add-circle-outline"
+            size={20}
+            color={defaultStyles.colors.white}
+          />
+          <AppText onPress={onPress} style={styles.add}>
+            Favorites
+          </AppText>
+        </LinearGradient>
+      </>
+    </TouchableHighlight>
   );
 }
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 32.5,
-    elevation: 5,
-    height: 65,
+    borderRadius: 30,
+    height: 60,
     justifyContent: "center",
     marginHorizontal: 5,
-    width: 65,
+    width: 60,
   },
   add: {
     color: defaultStyles.colors.white,

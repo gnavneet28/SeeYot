@@ -6,11 +6,7 @@ import {
   LayoutProvider,
 } from "recyclerlistview";
 
-import AppButton from "./AppButton";
-import AppText from "./AppText";
-import ContactCard from "./ContactCard";
-
-import defaultStyles from "../config/styles";
+import NotificationCard from "./NotificationCard";
 
 const ViewTypes = {
   Full: 0,
@@ -22,7 +18,7 @@ const defaultListItemWhenEmpty = [
   },
 ];
 
-class ContactList extends React.Component {
+class NotificationListPro extends React.Component {
   constructor(props) {
     super(props);
 
@@ -40,7 +36,7 @@ class ContactList extends React.Component {
         switch (type) {
           case ViewTypes.Full:
             dim.width = width;
-            dim.height = 80;
+            dim.height = 70;
             break;
           default:
             dim.width = 0;
@@ -52,23 +48,22 @@ class ContactList extends React.Component {
     this._rowRenderer = this._rowRenderer.bind(this);
 
     this.state = {
-      users: this.props.users,
-      dataProvider: this.props.users.length
-        ? dataProvider.cloneWithRows(this.props.users)
+      notifications: this.props.notifications,
+      dataProvider: this.props.notifications.length
+        ? dataProvider.cloneWithRows(this.props.notifications)
         : dataProvider.cloneWithRows(defaultListItemWhenEmpty),
     };
   }
 
-  _rowRenderer(type, data, index) {
+  _rowRenderer(type, data) {
     switch (type) {
       case ViewTypes.Full:
         return (
-          <ContactCard
-            index={index}
-            onAddFriendPress={this.props.onAddFriendPress}
-            onAddEchoPress={this.props.onAddEchoPress}
-            onSendThoughtsPress={this.props.onSendThoughtsPress}
-            user={data}
+          <NotificationCard
+            tapToSeeMessage={() => this.props.onTapToSeeMessage(data)}
+            onTapToSeePress={() => this.props.onTapToSeePress(data)}
+            notification={data}
+            onDeleteIconPress={() => this.props.onDeleteIconPress(data)}
           />
         );
       default:
@@ -76,11 +71,11 @@ class ContactList extends React.Component {
     }
   }
   componentDidUpdate(prevProps) {
-    if (prevProps.users != this.props.users) {
+    if (prevProps.notifications != this.props.notifications) {
       return this.setState({
         ...this.state,
-        dataProvider: this.props.users.length
-          ? this.state.dataProvider.cloneWithRows(this.props.users)
+        dataProvider: this.props.notifications.length
+          ? this.state.dataProvider.cloneWithRows(this.props.notifications)
           : this.state.dataProvider.cloneWithRows(defaultListItemWhenEmpty),
       });
     }
@@ -89,20 +84,6 @@ class ContactList extends React.Component {
   render() {
     return (
       <>
-        {!this.props.users.length ? (
-          <View style={styles.addFriendInfoContainer}>
-            <AppText style={styles.emptyContacts}>
-              No friends available. Add friends from your contacts and let them
-              know you are thinking of them!
-            </AppText>
-            <AppButton
-              onPress={this.props.onAddFriendPress}
-              style={styles.addButton}
-              subStyle={styles.addButtonSub}
-              title="Add friends"
-            />
-          </View>
-        ) : null}
         <View style={styles.listView}>
           <RecyclerListView
             refreshControl={
@@ -124,31 +105,11 @@ class ContactList extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  addButton: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 25,
-    height: 50,
-    width: 150,
-  },
-  addButtonSub: {
-    color: defaultStyles.colors.secondary,
-  },
-  addFriendInfoContainer: {
-    alignItems: "center",
-    flex: 1,
-    justifyContent: "center",
-    width: "100%",
-  },
-  emptyContacts: {
-    fontSize: 18,
-    marginBottom: 20,
-    textAlign: "center",
-    width: "80%",
-  },
   listView: {
     flex: 1,
     width: "100%",
+    marginTop: 15,
   },
 });
 
-export default ContactList;
+export default NotificationListPro;

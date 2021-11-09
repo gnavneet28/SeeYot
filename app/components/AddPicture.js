@@ -53,7 +53,7 @@ function AddPicture({
       <View style={[styles.container, style]}>
         <Alert
           onRequestClose={() => setShowAlert(false)}
-          description="Are you sure you want to remove this picture."
+          description="Are you sure you want to remove this picture?"
           leftPress={() => setShowAlert(false)}
           leftOption="Cancel"
           rightOption="Ok"

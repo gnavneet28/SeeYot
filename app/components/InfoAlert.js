@@ -16,7 +16,7 @@ function InfoAlert({ description = "", leftPress, visible = false }) {
             <AppButton
               onPress={leftPress}
               style={styles.okButton}
-              subStyle={{ color: defaultStyles.colors.dark }}
+              subStyle={{ color: defaultStyles.colors.secondary }}
               title="Ok"
             />
           </View>
@@ -29,41 +29,51 @@ const styles = StyleSheet.create({
   alertContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 10,
+    borderColor: defaultStyles.colors.dark_Variant,
+    borderRadius: 20,
+    borderWidth: 2,
     justifyContent: "space-between",
-    padding: 10,
-    width: "75%",
+    overflow: "hidden",
+    width: "65%",
   },
   actionButtonContainer: {
-    alignItems: "center",
+    flexDirection: "row",
     justifyContent: "center",
+    marginBottom: 15,
   },
   container: {
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: "rgba(0,0,0,0.7)",
     flex: 1,
     justifyContent: "center",
     width: "100%",
   },
   description: {
     fontSize: 18,
-    marginBottom: 10,
+    marginBottom: 15,
     marginTop: 2,
     opacity: 0.8,
+    paddingHorizontal: 10,
     textAlign: "center",
     textAlignVertical: "center",
+    width: "95%",
   },
   okButton: {
-    backgroundColor: defaultStyles.colors.light,
-    borderRadius: 5,
-    height: 35,
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: 20,
+    height: 40,
     marginVertical: 5,
-    width: 90,
+    width: 60,
   },
   title: {
-    color: defaultStyles.colors.blue,
-    fontSize: 20,
-    height: 30,
+    backgroundColor: defaultStyles.colors.dark_Variant,
+    color: defaultStyles.colors.white,
+    fontSize: 18,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    textAlign: "center",
+    width: "100%",
   },
 });
 

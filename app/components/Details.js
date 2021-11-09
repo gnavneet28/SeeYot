@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     height: 40,
     justifyContent: "space-between",
-    marginVertical: 10,
+    marginVertical: 5,
     paddingHorizontal: 20,
     width: "85%",
   },

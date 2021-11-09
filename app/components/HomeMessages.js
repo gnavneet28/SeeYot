@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -50,4 +50,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeMessages;
+export default memo(HomeMessages);

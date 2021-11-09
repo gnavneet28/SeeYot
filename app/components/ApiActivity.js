@@ -65,7 +65,7 @@ function ApiActivity({
 }
 const styles = StyleSheet.create({
   buttonSub: {
-    color: defaultStyles.colors.blue,
+    color: defaultStyles.colors.secondary,
   },
   container: {
     alignItems: "center",
@@ -77,14 +77,17 @@ const styles = StyleSheet.create({
   contentContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
+    borderColor: defaultStyles.colors.dark_Variant,
     borderRadius: 20,
+    borderWidth: 2,
     justifyContent: "center",
     overflow: "hidden",
     padding: 5,
-    width: 200,
+    width: "60%",
   },
   doneButton: {
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: 20,
     height: 35,
     marginBottom: 10,
     width: 60,
@@ -98,8 +101,10 @@ const styles = StyleSheet.create({
     width: 80,
   },
   message: {
+    marginBottom: 15,
     marginHorizontal: 5,
-    marginVertical: 5,
+    marginTop: 5,
+    opacity: 0.8,
     opacity: 0.8,
     textAlign: "center",
     width: "95%",

@@ -39,7 +39,7 @@ function PointsScreen({ navigation }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
-  const [pointsToRedeem, setPointsToRedeem] = useState(parseInt(""));
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [apiActivity, setApiActivity] = useState({
     message: "",
@@ -138,21 +138,27 @@ function PointsScreen({ navigation }) {
     return () => removeAllListeners();
   }, []);
 
-  const handleShowAd = async () => {
-    setIsLoading(true);
-    try {
-      await AdMobRewarded.setAdUnitID("ca-app-pub-3940256099942544/5224354917"); // Test admob ID
-      await AdMobRewarded.requestAdAsync();
-      await AdMobRewarded.showAdAsync();
-    } catch (error) {
-      setIsLoading(false);
-      setInfoAlert({
-        infoAlertMessage:
-          "Problem has occured while loading the ad. Please try again.",
-        showInfoAlert: true,
-      });
-    }
-  };
+  const handleShowAd = debounce(
+    async () => {
+      setIsLoading(true);
+      try {
+        await AdMobRewarded.setAdUnitID(
+          "ca-app-pub-3940256099942544/5224354917"
+        ); // Test admob ID
+        await AdMobRewarded.requestAdAsync();
+        await AdMobRewarded.showAdAsync();
+      } catch (error) {
+        setIsLoading(false);
+        setInfoAlert({
+          infoAlertMessage:
+            "Problem has occured while loading the ad. Please try again.",
+          showInfoAlert: true,
+        });
+      }
+    },
+    1000,
+    true
+  );
 
   const calculateTotalRedeemablePoints = (points) => {
     let totalPoints = points;
@@ -161,22 +167,26 @@ function PointsScreen({ navigation }) {
     return totalPoints - totalUnRedeemablePoints;
   };
 
-  const handleRedeemPoints = async () => {
-    initialApiActivity(setApiActivity, "Redeeming Points...");
-    let modifiedUser = { ...user };
+  const handleRedeemPoints = debounce(
+    async () => {
+      initialApiActivity(setApiActivity, "Redeeming Points...");
+      let modifiedUser = { ...user };
 
-    const response = await usersApi.redeemPoints(pointsToRedeem);
+      const response = await usersApi.redeemPoints(pointsToRedeem);
 
-    if (response.ok) {
-      setPointsToRedeem(null);
-      modifiedUser.vip = response.data.vip;
-      modifiedUser.points = response.data.points;
-      setUser(modifiedUser);
-      await asyncStorage.store(DataConstants.VIP, response.data.vip);
-      await asyncStorage.store(DataConstants.POINTS, response.data.points);
-    }
-    return apiActivityStatus(response, setApiActivity);
-  };
+      if (response.ok) {
+        setPointsToRedeem(0);
+        modifiedUser.vip = response.data.vip;
+        modifiedUser.points = response.data.points;
+        setUser(modifiedUser);
+        await asyncStorage.store(DataConstants.VIP, response.data.vip);
+        await asyncStorage.store(DataConstants.POINTS, response.data.points);
+      }
+      return apiActivityStatus(response, setApiActivity);
+    },
+    1000,
+    true
+  );
 
   return (
     <Screen>
@@ -237,7 +247,7 @@ function PointsScreen({ navigation }) {
             />
             <AppButton
               disabled={
-                pointsToRedeem.toString().replace(/\s/g, "").length >= 1
+                pointsToRedeem.toString().replace(/\s/g, "").length >= 2
                   ? false
                   : true
               }

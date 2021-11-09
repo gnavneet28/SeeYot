@@ -5,16 +5,28 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { StyleSheet, Modal, View } from "react-native";
+import {
+  StyleSheet,
+  Modal,
+  View,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import ApiActivity from "../components/ApiActivity";
+import AppImage from "../components/AppImage";
+import AppText from "../components/AppText";
 import ContactList from "../components/ContactList";
 import HomeAppHeader from "../components/HomeAppHeader";
 import HomeMessages from "../components/HomeMessages";
+import Icon from "../components/Icon";
 import InfoAlert from "../components/InfoAlert";
+import ReplyOption from "../components/ReplyOption";
 import Screen from "../components/Screen";
-import AppText from "../components/AppText";
-import AppImage from "../components/AppImage";
+import ToastMessage from "../components/ToastMessage";
 
 import Constant from "../navigation/NavigationConstants";
 
@@ -27,9 +39,7 @@ import defaultStyles from "../config/styles";
 
 import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
-import SendThoughtsInput from "../components/SendThoughtsInput";
 import asyncStorage from "../utilities/cache";
-import ToastMessage from "../components/ToastMessage";
 
 const defaultMessage = {
   _id: "",
@@ -37,9 +47,11 @@ const defaultMessage = {
   createdAt: Date.now(),
   mood: "",
   seen: false,
+  options: [],
 };
 
 function HomeScreen({ navigation }) {
+  dayjs.extend(relativeTime);
   const { user, setUser } = useAuth();
 
   const toast = useRef();
@@ -54,6 +66,7 @@ function HomeScreen({ navigation }) {
     visible: false,
     success: false,
   });
+  const [selectedMessageId, setSelectedMessageId] = useState("");
 
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState(defaultMessage);
@@ -62,6 +75,8 @@ function HomeScreen({ navigation }) {
     picture: "",
   });
   const [messagesList, setMessagesList] = useState([]);
+  const [reply, setReply] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
 
   useEffect(() => {
     let messages = user.messages ? user.messages : [];
@@ -77,22 +92,32 @@ function HomeScreen({ navigation }) {
   // MESSAGES ACTION
 
   const handleAddFavoritesButtonPress = useCallback(
-    () => navigation.navigate(Constant.ADD_FAVORITES_SCREEN),
+    () => navigation.navigate(Constant.FAVORITES_NAVIGATOR),
     []
   );
 
-  const handleMessagePress = async (message) => {
-    setMessage(message);
-    setIsVisible(true);
-    if (message.seen === false) {
-      const { ok, data, problem } = await messagesApi.markRead(message._id);
-      if (ok) {
-        message.seen = true;
-        return await asyncStorage.store(DataConstants.MESSAGES, data.messages);
-      }
-    }
-    return;
-  };
+  const handleMessagePress = useCallback(
+    debounce(
+      async (message) => {
+        setMessage(message);
+        setIsVisible(true);
+        if (message.seen === false) {
+          const { ok, data, problem } = await messagesApi.markRead(message._id);
+          if (ok) {
+            message.seen = true;
+            return await asyncStorage.store(
+              DataConstants.MESSAGES,
+              data.messages
+            );
+          }
+        }
+        return;
+      },
+      1000,
+      true
+    ),
+    [user.messages, message]
+  );
 
   // HEADER ACTIONS
   const handleRightPress = useCallback(() => {
@@ -112,32 +137,39 @@ function HomeScreen({ navigation }) {
   );
 
   // REFRESH ACTION
-  const handleRefresh = useCallback(async () => {
-    setApiActivity({
-      processing: true,
-      message: "Refreshing...",
-      visible: true,
-      success: false,
-    });
+  const handleRefresh = useCallback(
+    debounce(
+      async () => {
+        setApiActivity({
+          processing: true,
+          message: "Refreshing...",
+          visible: true,
+          success: false,
+        });
 
-    const { data, ok } = await usersApi.getCurrentUser();
-    if (ok) {
-      await storeDetails(data);
-      setUser(data);
-      return setApiActivity({
-        processing: true,
-        visible: false,
-        message: "",
-        success: true,
-      });
-    }
-    setApiActivity({
-      message: "Something failed! Please try again.",
-      success: false,
-      processing: false,
-      visible: true,
-    });
-  }, []);
+        const { data, ok } = await usersApi.getCurrentUser();
+        if (ok) {
+          await storeDetails(data);
+          setUser(data);
+          return setApiActivity({
+            processing: true,
+            visible: false,
+            message: "",
+            success: true,
+          });
+        }
+        setApiActivity({
+          message: "Something failed! Please try again.",
+          success: false,
+          processing: false,
+          visible: true,
+        });
+      },
+      5000,
+      true
+    ),
+    []
+  );
 
   // CONTACT CARD OPTIONS
   const handleOnSendThoughtButtonPress = useCallback(
@@ -187,26 +219,58 @@ function HomeScreen({ navigation }) {
   const handleCloseMessage = useCallback(() => {
     setMessageCreator({ name: "**********", picture: "" });
     setMessage(defaultMessage);
+    setSelectedMessageId("");
     setIsVisible(false);
   }, []);
 
   const handleMessageReply = debounce(
-    async (reply) => {
+    async () => {
+      setSendingReply(true);
+      toast.current.show("Sending!", 30000);
+
+      if (selectedMessageId) {
+        const { data, ok, problem } = await messagesApi.reply(
+          message._id,
+          reply,
+          selectedMessageId
+        );
+        if (ok) {
+          setSendingReply(false);
+          setReply("");
+          setMessageCreator({
+            name: data.name,
+            picture: data.picture,
+          });
+          return toast.current.show(data.message, 1000);
+        }
+        setSendingReply(false);
+        if (problem) {
+          if (data) {
+            return toast.current.show(data.message, 3000);
+          }
+
+          return toast.current.show(problem, 3000);
+        }
+      }
+
       const { data, ok, problem } = await messagesApi.reply(message._id, reply);
       if (ok) {
+        setSendingReply(false);
+        setReply("");
         setMessageCreator({
           name: data.name,
           picture: data.picture,
         });
-        return toast.current.show(data.message, 4000);
+        return toast.current.show(data.message, 1000);
       }
+      setSendingReply(false);
 
       if (problem) {
         if (data) {
-          return toast.current.show(data.message, 4000);
+          return toast.current.show(data.message, 3000);
         }
 
-        return toast.current.show(problem, 4000);
+        return toast.current.show(problem, 3000);
       }
     },
     1000,
@@ -248,37 +312,95 @@ function HomeScreen({ navigation }) {
           users={data}
         />
       </Screen>
+      {isVisible ? <View style={styles.modalFallback} /> : null}
       <Modal
         visible={isVisible}
-        onRequestClose={handleCloseMessage}
+        onRequestClose={sendingReply ? null : handleCloseMessage}
         transparent
-        animationType="fade"
+        animationType="slide"
       >
         <View style={styles.messageBackground}>
-          <View style={styles.messageMainContainer}>
-            <AppText onPress={handleCloseMessage} style={styles.closeMessage}>
-              Close
-            </AppText>
-            <View style={styles.messageCreatorDetails}>
-              <AppImage
-                style={styles.image}
-                subStyle={styles.imageSub}
-                imageUrl={messageCreator.picture}
-              />
-              <View style={styles.messageDetailsContainer}>
-                <AppText style={styles.creatorName}>
-                  {messageCreator.name}
-                </AppText>
-                <AppText style={styles.message}>{message.message}</AppText>
-                <AppText style={styles.createdAt}>{message.createdAt}</AppText>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: "flex-end",
+            }}
+          >
+            <View style={styles.messageMainContainer}>
+              <AppText
+                onPress={sendingReply ? null : handleCloseMessage}
+                style={styles.closeMessage}
+              >
+                Close
+              </AppText>
+              <View style={styles.messageCreatorDetails}>
+                <AppImage
+                  style={styles.image}
+                  subStyle={styles.imageSub}
+                  imageUrl={messageCreator.picture}
+                />
+                <View style={styles.messageDetailsContainer}>
+                  <AppText style={styles.creatorName}>
+                    {messageCreator.name}
+                  </AppText>
+                  <AppText style={styles.message}>{message.message}</AppText>
+                  <AppText style={styles.createdAt}>
+                    {dayjs(message.createdAt).fromNow()}
+                  </AppText>
+                </View>
+              </View>
+
+              {message.options.length >= 1 ? (
+                <View style={styles.optionContainerMain}>
+                  <ScrollView>
+                    <AppText style={styles.selectOption}>
+                      Select a Reply
+                    </AppText>
+                    {message.options.map((d, index) => (
+                      <ReplyOption
+                        key={d._id + index.toString()}
+                        selectedMessageId={selectedMessageId}
+                        option={d}
+                        onPress={
+                          sendingReply
+                            ? null
+                            : () => setSelectedMessageId(d._id)
+                        }
+                      />
+                    ))}
+                  </ScrollView>
+                </View>
+              ) : null}
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  maxLength={250}
+                  onChangeText={sendingReply ? null : setReply}
+                  placeholder="Reply to know who sent this message..."
+                  style={[
+                    styles.inputBox,
+                    { fontFamily: "Comic-Bold", fontWeight: "normal" },
+                  ]}
+                  value={reply}
+                />
+                <TouchableOpacity
+                  disabled={reply.replace(/\s/g, "").length >= 1 ? false : true}
+                  onPress={sendingReply ? null : handleMessageReply}
+                  style={styles.send}
+                >
+                  <Icon
+                    color={
+                      reply.replace(/\s/g, "").length >= 1 && !sendingReply
+                        ? defaultStyles.colors.secondary
+                        : defaultStyles.colors.lightGrey
+                    }
+                    name="send"
+                    size={30}
+                  />
+                </TouchableOpacity>
               </View>
             </View>
-            <SendThoughtsInput
-              placeholder="Reply to know who sent you this message..."
-              submit={handleMessageReply}
-              style={{ marginVertical: 10 }}
-            />
-          </View>
+          </ScrollView>
         </View>
         <ToastMessage reference={toast} />
       </Modal>
@@ -299,8 +421,38 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
   },
+  createdAt: {
+    color: defaultStyles.colors.lightGrey,
+    fontSize: 14,
+  },
+  creatorName: {
+    color: defaultStyles.colors.primary,
+    fontSize: 18,
+  },
+  inputContainer: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderColor: defaultStyles.colors.light,
+    borderRadius: 30,
+    borderWidth: 1,
+    elevation: 1,
+    flexDirection: "row",
+    height: defaultStyles.dimensionConstants.height,
+    justifyContent: "space-between",
+    marginVertical: 15,
+    width: "92%",
+  },
+  inputBox: {
+    borderRadius: 30,
+    flex: 1,
+    fontSize: 19,
+    height: "100%",
+    marginRight: 5,
+    paddingHorizontal: 10,
+    width: "86%",
+  },
   messageBackground: {
-    backgroundColor: "rgba(0,0,0,0.7)",
     flex: 1,
     justifyContent: "flex-end",
     width: "100%",
@@ -314,17 +466,26 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   messageCreatorDetails: {
-    minHeight: 70,
-    width: "100%",
-    backgroundColor: defaultStyles.colors.white,
-    marginVertical: 5,
-    flexDirection: "row",
-    paddingHorizontal: 5,
     alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderBottomColor: defaultStyles.colors.light,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    marginVertical: 5,
+    minHeight: 70,
+    paddingHorizontal: 5,
+    width: "95%",
   },
   messageDetailsContainer: {
     flex: 1,
     padding: 5,
+  },
+  modalFallback: {
+    backgroundColor: "rgba(0,0,0,0.7)",
+    height: "100%",
+    position: "absolute",
+    width: "100%",
+    zIndex: 22,
   },
   image: {
     borderColor: defaultStyles.colors.light,
@@ -340,21 +501,35 @@ const styles = StyleSheet.create({
     width: 49,
   },
   message: {
-    textAlign: "left",
-    borderLeftWidth: 2,
     borderColor: defaultStyles.colors.blue,
-    paddingHorizontal: 15,
-    opacity: 0.8,
+    borderLeftWidth: 2,
     color: defaultStyles.colors.secondary,
+    opacity: 0.8,
+    paddingHorizontal: 15,
+    textAlign: "left",
   },
-
-  createdAt: {
+  optionContainerMain: {
+    marginVertical: 5,
+    width: "100%",
+  },
+  selectOption: {
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.light,
+    borderRadius: 20,
     fontSize: 14,
-    color: defaultStyles.colors.lightGrey,
+    height: 35,
+    marginBottom: 10,
+    marginLeft: 10,
+    paddingHorizontal: 20,
+    textAlign: "center",
+    textAlignVertical: "center",
   },
-  creatorName: {
-    fontSize: 18,
-    color: defaultStyles.colors.primary,
+  send: {
+    alignItems: "center",
+    height: 40,
+    justifyContent: "center",
+    marginRight: 5,
+    width: 40,
   },
 });
 

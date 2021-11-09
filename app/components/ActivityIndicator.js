@@ -7,7 +7,7 @@ function AppActivityIndicator(props) {
     <View style={styles.overlay}>
       <ActivityIndicator
         size={30}
-        color={defaultStyles.colors.placeholder}
+        color={defaultStyles.colors.secondary}
         style={{ flex: 1 }}
       />
     </View>

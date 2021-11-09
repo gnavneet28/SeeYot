@@ -14,6 +14,12 @@ function ChatListHeader({ user }) {
         style={styles.image}
         subStyle={styles.subImage}
       />
+      <AppText style={styles.name}>{user.name}</AppText>
+      {user.myNickName ? (
+        <AppText style={styles.myNickName}>
+          {"Calls you by name" + " - " + user.myNickName}
+        </AppText>
+      ) : null}
       <AppText style={styles.infoText}>
         Send your thoughts to {user.name} and within 10 minutes if {user.name}{" "}
         does the same for you, your thoughts will match. You can see all your
@@ -44,9 +50,27 @@ const styles = StyleSheet.create({
   },
   infoText: {
     color: defaultStyles.colors.white,
-    marginVertical: 10,
+    marginVertical: 5,
     textAlign: "center",
     width: "80%",
+    fontSize: 15,
+  },
+  myNickName: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: 20,
+    color: defaultStyles.colors.dark,
+    fontSize: 16,
+    paddingHorizontal: 10,
+    textAlign: "center",
+  },
+  name: {
+    backgroundColor: defaultStyles.colors.blue,
+    borderRadius: 20,
+    color: defaultStyles.colors.white,
+    fontSize: 16,
+    marginVertical: 10,
+    paddingHorizontal: 10,
+    textAlign: "center",
   },
 });
 

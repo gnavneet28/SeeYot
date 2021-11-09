@@ -2,12 +2,13 @@ import React, { useState, useCallback, useMemo } from "react";
 import { View, StyleSheet, Modal } from "react-native";
 
 import AppHeader from "../components/AppHeader";
-import AppText from "../components/AppText";
 import InfoAlert from "../components/InfoAlert";
+import Option from "../components/Option";
 import Screen from "../components/Screen";
 import SearchBox from "../components/SearchBox";
 import VipSearchedUserList from "../components/VipSearchedUserList";
 import VipThoughtCardList from "../components/VipThoughtCardList";
+import HelpDialogueBox from "../components/HelpDialogueBox";
 
 import Constant from "../navigation/NavigationConstants";
 
@@ -34,6 +35,7 @@ function VipSearchScreen({ navigation }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+  const [showHelp, setShowHelp] = useState(false);
 
   // DATA NEEDED
   const searchHistory = useMemo(
@@ -58,6 +60,15 @@ function VipSearchScreen({ navigation }) {
     ),
     []
   );
+
+  const handleHelpPress = useCallback(() => {
+    setShowHelp(true);
+  }, []);
+
+
+  const handleCloseHelp = useCallback(() => {
+    setShowHelp(false);
+  }, []);
 
   // SEARCH HISTORY ACTION
   const handleThougthCardPress = useCallback((user) => {
@@ -195,6 +206,8 @@ function VipSearchScreen({ navigation }) {
           leftIcon="arrow-back"
           onPressLeft={handleLeftPress}
           title="Vip Area"
+          rightIcon="help-outline"
+          onPressRight={handleHelpPress}
         />
         <InfoAlert
           leftPress={handleCloseInfoAlert}
@@ -204,6 +217,7 @@ function VipSearchScreen({ navigation }) {
         <SearchBox
           invite={false}
           list={searchResult}
+          loading={isLoading}
           onChange={handleSearchQuery}
           placeholder="Search people on SeeYot..."
         />
@@ -222,6 +236,12 @@ function VipSearchScreen({ navigation }) {
           users={searchResult}
         />
       </Screen>
+      <HelpDialogueBox
+        information="Only SeeYot Vip members can search people outside their contacts and interact with them."
+        onPress={handleCloseHelp}
+        setVisible={setShowHelp}
+        visible={showHelp}
+      />
       <Modal
         animationType="fade"
         onRequestClose={() => setIsVisible(false)}
@@ -230,30 +250,19 @@ function VipSearchScreen({ navigation }) {
       >
         <View style={styles.searchHistoryMainContainer}>
           <View style={styles.optionsContainer}>
-            <AppText
-              style={[styles.option, { color: defaultStyles.colors.blue }]}
+            <Option
+              title="Close"
+              titleStyle={styles.optionClose}
               onPress={() => setIsVisible(false)}
-            >
-              Close
-            </AppText>
-            <AppText
-              style={styles.option}
-              onPress={hanldeRemoveFromSearchHistory}
-            >
-              Remove
-            </AppText>
-            <AppText
-              style={styles.option}
-              onPress={handlePopUpAddEchoButtonPress}
-            >
-              Add Echo
-            </AppText>
-            <AppText
-              style={styles.option}
+            />
+
+            <Option title="Remove" onPress={hanldeRemoveFromSearchHistory} />
+
+            <Option title="Add Echo" onPress={handlePopUpAddEchoButtonPress} />
+            <Option
+              title="Send Thoughts"
               onPress={handlePopUpOnSendThoughtButtonPress}
-            >
-              Send Thoughts
-            </AppText>
+            />
           </View>
         </View>
       </Modal>
@@ -273,23 +282,20 @@ const styles = StyleSheet.create({
   optionsContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 10,
+    borderColor: defaultStyles.colors.dark_Variant,
+    borderRadius: 20,
+    borderWidth: 1,
     overflow: "hidden",
     width: "60%",
   },
-  option: {
-    borderBottomColor: defaultStyles.colors.light,
-    borderBottomWidth: 1,
-    fontSize: 18,
-    height: defaultStyles.dimensionConstants.height,
-    opacity: 0.8,
-    textAlign: "center",
-    textAlignVertical: "center",
-    width: "100%",
+  optionClose: {
+    backgroundColor: defaultStyles.colors.dark_Variant,
+    color: defaultStyles.colors.white,
+    opacity: 1,
   },
   searchHistoryMainContainer: {
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(0,0,0,0.8)",
     flex: 1,
     justifyContent: "center",
     width: "100%",

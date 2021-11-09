@@ -180,6 +180,7 @@ const styles = StyleSheet.create({
   },
   nameLength: {
     opacity: 0.7,
+    fontSize: 14,
   },
   userDetail: {
     flex: 1,

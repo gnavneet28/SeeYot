@@ -4,11 +4,12 @@ import { useIsFocused } from "@react-navigation/native";
 
 import ApiActivity from "../components/ApiActivity";
 import AppHeader from "../components/AppHeader";
-import AppText from "../components/AppText";
+import Option from "../components/Option";
 import Screen from "../components/Screen";
 import SendingThoughtActivity from "../components/SendingThoughtActivity";
 import SendThoughtsInput from "../components/SendThoughtsInput";
 import ThoughtsList from "../components/ThoughtsList";
+import ThoughtTimer from "../components/ThoughtTimer";
 
 import Constant from "../navigation/NavigationConstants";
 import DataConstants from "../utilities/DataConstants";
@@ -112,53 +113,72 @@ function SendThoughtsScreen({ navigation, route }) {
     [isFocused, user.thoughts.length, recipient._id]
   );
 
+  const latestThought = useMemo(
+    () =>
+      user.thoughts.filter(
+        (t) => t.messageFor == recipient._id && t.matched !== true
+      )[
+        user.thoughts.filter(
+          (t) => t.messageFor == recipient._id && t.matched !== true
+        ).length - 1
+      ],
+    [isFocused, user.thoughts, recipient._id]
+  );
+
   // SENDING THOUGHTS ACTION
   const handleSendThought = useCallback(
-    async (textMessage) => {
-      setMessageActivity({
-        echoMessage: null,
-        message: "Sending your thought...",
-        processing: true,
-        success: false,
-        visible: true,
-      });
-
-      const message = textMessage;
-      const messageFor = recipient._id;
-
-      const { data, problem, ok } = await thoughtsApi.sendThought(
-        message,
-        messageFor
-      );
-      if (ok) {
-        return setMessageActivity({
-          message: data.matched
-            ? "Congrats! Your thoughts matched"
-            : "Thought sent!",
-          processing: false,
-          success: true,
+    debounce(
+      async (textMessage) => {
+        setMessageActivity({
+          echoMessage: null,
+          message: "Sending your thought...",
+          processing: true,
+          success: false,
           visible: true,
-          echoMessage: data.echoMessage ? data.echoMessage : null,
         });
-      }
 
-      if (data) {
+        const message = textMessage;
+        const messageFor = recipient._id;
+
+        const { data, problem, ok } = await thoughtsApi.sendThought(
+          message,
+          messageFor
+        );
+        if (ok) {
+          let modifiedUser = { ...user };
+          modifiedUser.thoughts = data.thoughts;
+          setUser(modifiedUser);
+          return setMessageActivity({
+            message: data.matched
+              ? "Congrats! Your thoughts matched"
+              : "Thought sent!",
+            processing: false,
+            success: true,
+            visible: true,
+            echoMessage: data.echoMessage ? data.echoMessage : null,
+          });
+        }
+
+        if (data) {
+          return setMessageActivity({
+            message: data.message,
+            processing: false,
+            success: false,
+            echoMessage: null,
+            visible: true,
+          });
+        }
         return setMessageActivity({
-          message: data.message,
+          message: problem,
           processing: false,
           success: false,
           echoMessage: null,
           visible: true,
         });
-      }
-      return setMessageActivity({
-        message: problem,
-        processing: false,
-        success: false,
-        echoMessage: null,
-        visible: true,
-      });
-    },
+      },
+      1000,
+      true
+    ),
     [recipient._id]
   );
 
@@ -190,8 +210,10 @@ function SendThoughtsScreen({ navigation, route }) {
 
       let equalName = modifiedContact.name == originalContact.name;
       let equalPicture = modifiedContact.picture == originalContact.picture;
+      let equalNickName =
+        modifiedContact.myNickName == originalContact.myNickName;
 
-      if (equalName && equalPicture) return;
+      if (equalName && equalPicture && equalNickName) return;
 
       await asyncStorage.store(DataConstants.CONTACTS, data);
       return setUser(modifiedUser);
@@ -211,113 +233,142 @@ function SendThoughtsScreen({ navigation, route }) {
   // OPTIONS MODAL ACTIONS
   const handleModalClose = useCallback(() => setIsVisible(false), []);
 
-  const handleUnfriendPress = useCallback(async () => {
-    initialApiActivity(
-      setApiActivity,
-      `Removing ${recipient.name} from your friendlist...`
-    );
+  const handleUnfriendPress = useCallback(
+    debounce(
+      async () => {
+        initialApiActivity(
+          setApiActivity,
+          `Removing ${recipient.name} from your friendlist...`
+        );
 
-    let modifiedUser = { ...user };
+        let modifiedUser = { ...user };
 
-    const response = await usersApi.removeContact(recipient._id);
+        const response = await usersApi.removeContact(recipient._id);
 
-    if (response.ok) {
-      modifiedUser.contacts = response.data.contacts;
-      await asyncStorage.store(DataConstants.CONTACTS, response.data.contacts);
-      setUser(modifiedUser);
-    }
+        if (response.ok) {
+          modifiedUser.contacts = response.data.contacts;
+          await asyncStorage.store(
+            DataConstants.CONTACTS,
+            response.data.contacts
+          );
+          setUser(modifiedUser);
+        }
 
-    return apiActivityStatus(response, setApiActivity);
-  }, [
-    recipient._id,
-    user.contacts.length,
-    user.blocked.length,
-    isFocused,
-    user,
-  ]);
+        return apiActivityStatus(response, setApiActivity);
+      },
+      1000,
+      true
+    ),
+    [recipient._id, user.contacts.length, user.blocked.length, isFocused, user]
+  );
 
-  const handleBlockPress = useCallback(async () => {
-    initialApiActivity(setApiActivity, `Blocking ${recipient.name} ...`);
+  const handleBlockPress = useCallback(
+    debounce(
+      async () => {
+        initialApiActivity(setApiActivity, `Blocking ${recipient.name} ...`);
 
-    let modifiedUser = { ...user };
-    const response = await usersApi.blockContact(recipient._id);
+        let modifiedUser = { ...user };
+        const response = await usersApi.blockContact(recipient._id);
 
-    if (response.ok) {
-      modifiedUser.blocked = response.data.blocked;
-      await asyncStorage.store(DataConstants.BLOCKED, response.data.blocked);
-      setUser(modifiedUser);
-    }
+        if (response.ok) {
+          modifiedUser.blocked = response.data.blocked;
+          await asyncStorage.store(
+            DataConstants.BLOCKED,
+            response.data.blocked
+          );
+          setUser(modifiedUser);
+        }
 
-    return apiActivityStatus(response, setApiActivity);
-  }, [
-    recipient._id,
-    user.blocked.length,
-    user.contacts.length,
-    isFocused,
-    user,
-  ]);
+        return apiActivityStatus(response, setApiActivity);
+      },
+      1000,
+      true
+    ),
+    [recipient._id, user.blocked.length, user.contacts.length, isFocused, user]
+  );
 
-  const handleUnblockPress = useCallback(async () => {
-    initialApiActivity(setApiActivity, `Unblocking ${recipient.name} ...`);
+  const handleUnblockPress = useCallback(
+    debounce(
+      async () => {
+        initialApiActivity(setApiActivity, `Unblocking ${recipient.name} ...`);
 
-    let modifiedUser = { ...user };
-    const response = await usersApi.unBlockContact(recipient._id);
+        let modifiedUser = { ...user };
+        const response = await usersApi.unBlockContact(recipient._id);
 
-    if (response.ok) {
-      modifiedUser.blocked = response.data.blocked;
-      await asyncStorage.store(DataConstants.BLOCKED, response.data.blocked);
-      setUser(modifiedUser);
-    }
+        if (response.ok) {
+          modifiedUser.blocked = response.data.blocked;
+          await asyncStorage.store(
+            DataConstants.BLOCKED,
+            response.data.blocked
+          );
+          setUser(modifiedUser);
+        }
 
-    return apiActivityStatus(response, setApiActivity);
-  }, [
-    recipient._id,
-    user.blocked.length,
-    user.contacts.length,
-    isFocused,
-    user,
-  ]);
+        return apiActivityStatus(response, setApiActivity);
+      },
+      1000,
+      true
+    ),
+    [recipient._id, user.blocked.length, user.contacts.length, isFocused, user]
+  );
 
-  const handleAddFavoritePress = useCallback(async () => {
-    initialApiActivity(setApiActivity, "Adding" + " " + recipient.name + "...");
+  const handleAddFavoritePress = useCallback(
+    debounce(
+      async () => {
+        initialApiActivity(
+          setApiActivity,
+          "Adding" + " " + recipient.name + "..."
+        );
 
-    let modifiedUser = { ...user };
+        let modifiedUser = { ...user };
 
-    const response = await usersApi.addFavorite(recipient._id);
+        const response = await usersApi.addFavorite(recipient._id);
 
-    if (response.ok) {
-      modifiedUser.favorites = response.data.favorites;
-      setUser(modifiedUser);
-      await asyncStorage.store(
-        DataConstants.FAVORITES,
-        response.data.favorites
-      );
-    }
+        if (response.ok) {
+          modifiedUser.favorites = response.data.favorites;
+          setUser(modifiedUser);
+          await asyncStorage.store(
+            DataConstants.FAVORITES,
+            response.data.favorites
+          );
+        }
 
-    return apiActivityStatus(response, setApiActivity);
-  }, [user, recipient._id, user.favorites.length]);
+        return apiActivityStatus(response, setApiActivity);
+      },
+      1000,
+      true
+    ),
+    [user, recipient._id, user.favorites.length]
+  );
 
-  const handleRemoveFavoritePress = useCallback(async () => {
-    initialApiActivity(
-      setApiActivity,
-      "Removing" + " " + recipient.name + "..."
-    );
+  const handleRemoveFavoritePress = useCallback(
+    debounce(
+      async () => {
+        initialApiActivity(
+          setApiActivity,
+          "Removing" + " " + recipient.name + "..."
+        );
 
-    let modifiedUser = { ...user };
+        let modifiedUser = { ...user };
 
-    const response = await usersApi.removeFavorite(recipient._id);
+        const response = await usersApi.removeFavorite(recipient._id);
 
-    if (response.ok) {
-      modifiedUser.favorites = response.data.favorites;
-      setUser(modifiedUser);
-      await asyncStorage.store(
-        DataConstants.FAVORITES,
-        response.data.favorites
-      );
-    }
+        if (response.ok) {
+          modifiedUser.favorites = response.data.favorites;
+          setUser(modifiedUser);
+          await asyncStorage.store(
+            DataConstants.FAVORITES,
+            response.data.favorites
+          );
+        }
 
-    return apiActivityStatus(response, setApiActivity);
-  }, [user]);
+        return apiActivityStatus(response, setApiActivity);
+      },
+      1000,
+      true
+    ),
+    [user]
+  );
 
   return (
     <>
@@ -331,8 +382,9 @@ function SendThoughtsScreen({ navigation, route }) {
             onPressLeft={handleBack}
             onPressRight={handleOptionsPress}
             rightIcon="more-vert"
-            title={recipient ? recipient.name : ""}
+            title="Thoughts"
           />
+          {latestThought ? <ThoughtTimer thought={latestThought} /> : null}
           <SendingThoughtActivity
             echoMessage={messageActivity.echoMessage}
             message={messageActivity.message}
@@ -350,13 +402,6 @@ function SendThoughtsScreen({ navigation, route }) {
             success={apiActivity.success}
             visible={apiActivity.visible}
           />
-          {recipient.myNickName ? (
-            <View style={styles.myNickNameContainer}>
-              <AppText style={styles.myNickName}>
-                {"Calls you by name" + " - " + recipient.myNickName}
-              </AppText>
-            </View>
-          ) : null}
           <ThoughtsList thoughts={thoughts} recipient={recipient} />
           <View style={styles.sendThoughtsInputPlaceholder} />
           <SendThoughtsInput
@@ -372,36 +417,29 @@ function SendThoughtsScreen({ navigation, route }) {
       >
         <View style={styles.contactOptionMainContainer}>
           <View style={styles.optionsContainer}>
-            <AppText
-              style={[styles.option, { color: defaultStyles.colors.blue }]}
+            <Option
+              title="Close"
+              titleStyle={styles.closeOption}
               onPress={handleModalClose}
-            >
-              Close
-            </AppText>
+            />
 
             {inContacts ? (
-              <AppText style={styles.option} onPress={handleUnfriendPress}>
-                Unfriend
-              </AppText>
+              <Option title="Unfriend" onPress={handleUnfriendPress} />
             ) : null}
 
-            <AppText
-              style={styles.option}
+            <Option
+              title={inFavorites ? "Remove from Favorites" : "Add to Favorites"}
               onPress={
                 !inFavorites
                   ? handleAddFavoritePress
                   : handleRemoveFavoritePress
               }
-            >
-              {inFavorites ? "Remove from Favorites" : "Add to Favorites"}
-            </AppText>
+            />
 
-            <AppText
-              style={styles.option}
+            <Option
+              title={isBlocked ? "Unblock" : "Block"}
               onPress={!isBlocked ? handleBlockPress : handleUnblockPress}
-            >
-              {isBlocked ? "Unblock" : "Block"}
-            </AppText>
+            />
           </View>
         </View>
       </Modal>
@@ -414,7 +452,7 @@ const styles = StyleSheet.create({
   },
   contactOptionMainContainer: {
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(0,0,0,0.8)",
     flex: 1,
     justifyContent: "center",
     width: "100%",
@@ -429,35 +467,19 @@ const styles = StyleSheet.create({
     bottom: 10,
     position: "absolute",
   },
-  myNickName: {
-    color: defaultStyles.colors.dark,
-    flex: 1,
-    fontSize: 16,
-    textAlign: "center",
-    textAlignVertical: "center",
-  },
-  myNickNameContainer: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
-    elevation: 1,
-    minHeight: 40,
-    width: "100%",
-  },
   optionsContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 10,
+    borderColor: defaultStyles.colors.dark_Variant,
+    borderRadius: 20,
+    borderWidth: 1,
     overflow: "hidden",
     width: "60%",
   },
-  option: {
-    borderBottomColor: defaultStyles.colors.light,
-    borderBottomWidth: 1,
-    fontSize: 18,
-    height: defaultStyles.dimensionConstants.height,
-    opacity: 0.8,
-    textAlign: "center",
-    textAlignVertical: "center",
-    width: "100%",
+  closeOption: {
+    backgroundColor: defaultStyles.colors.dark_Variant,
+    color: defaultStyles.colors.white,
+    opacity: 1,
   },
   sendThoughtsInputPlaceholder: {
     width: "100%",

@@ -1,37 +1,27 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-} from "react";
-import { StyleSheet, Modal, View, ScrollView } from "react-native";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { StyleSheet, Modal, View, ScrollView, TextInput } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 
-import ApiActivity from "../components/ApiActivity";
-import AppActivityIndicator from "../components/ActivityIndicator";
-import AppHeader from "../components/AppHeader";
-import InfoAlert from "../components/InfoAlert";
-import Screen from "../components/Screen";
 import AddFavoriteList from "../components/AddFavoriteList";
+import AppActivityIndicator from "../components/ActivityIndicator";
+import AppButton from "../components/AppButton";
+import AppHeader from "../components/AppHeader";
+import AppImage from "../components/AppImage";
+import AppText from "../components/AppText";
+import HelpDialogueBox from "../components/HelpDialogueBox";
 import Mood from "../components/Mood";
-
-import DataConstants from "../utilities/DataConstants";
-
-import usersApi from "../api/users";
+import OptionalAnswer from "../components/OptionalAnswer";
+import Screen from "../components/Screen";
+import ToastMessage from "../components/ToastMessage";
 
 import defaultStyles from "../config/styles";
 
 import useAuth from "../auth/useAuth";
 import messagesApi from "../api/messages";
 
-import asyncStorage from "../utilities/cache";
-import apiFlow from "../utilities/ApiActivityStatus";
+import Constants from "../navigation/NavigationConstants";
+
 import debounce from "../utilities/debounce";
-import AppText from "../components/AppText";
-import AppTextInput from "../components/AppTextInput";
-import AppButton from "../components/AppButton";
-import ToastMessage from "../components/ToastMessage";
 
 const defaultRecipient = {
   name: "",
@@ -47,8 +37,7 @@ const moodData = [
 ];
 
 function AddFavoritesScreen({ navigation }) {
-  const { user, setUser } = useAuth();
-  const { apiActivityStatus, initialApiActivity } = apiFlow;
+  const { user } = useAuth();
   const isFocused = useIsFocused();
   const toast = useRef();
 
@@ -61,17 +50,12 @@ function AddFavoritesScreen({ navigation }) {
   const [recipient, setRecipient] = useState(defaultRecipient);
   const [isReady, setIsReady] = useState(false);
   const [users, setUsers] = useState([]);
-  const [infoAlert, setInfoAlert] = useState({
-    infoAlertMessage: "",
-    showInfoAlert: false,
-  });
-  const [apiActivity, setApiActivity] = useState({
-    message: "",
-    processing: true,
-    visible: false,
-    success: false,
-  });
   const [refreshing, setRefreshing] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [optionalAnswer, setOptionalAnswer] = useState([]);
+  const [showAddoption, setShowAddOption] = useState(false);
+  const [optionalMessage, setOptionalMessage] = useState("");
+  const [processing, setProcessing] = useState(false);
 
   // ON PAGE FOCUS ACTION
   const setUsersList = () => {
@@ -94,15 +78,37 @@ function AddFavoritesScreen({ navigation }) {
 
   useEffect(() => {
     if (isFocused) {
+      setIsVisible(false);
       setUsersList();
     }
   }, [isFocused]);
 
-  // API ACTIVITY ACTION
-  const handleApiActivityClose = useCallback(
-    () => setApiActivity({ ...apiActivity, visible: false }),
-    []
-  );
+  // ADD OPTION MODAL ACTION
+
+  const handleCloseAddOption = useCallback(() => {
+    setShowAddOption(false);
+  }, []);
+
+  const handleAddOptionPress = useCallback(() => {
+    setShowAddOption(true);
+  }, []);
+
+  const handleAddOptionalReplyPress = () => {
+    if (optionalAnswer.length < 4) {
+      let newList = [...optionalAnswer];
+      newList.push(optionalMessage);
+      setOptionalAnswer(newList);
+      return setOptionalMessage("");
+    }
+    setOptionalMessage("");
+    setShowAddOption(false);
+  };
+
+  const handleRemoveOptionalAnswer = (answer) => {
+    let currentList = [...optionalAnswer];
+    let newList = currentList.filter((a) => a != answer);
+    setOptionalAnswer(newList);
+  };
 
   //MESSAGE MODAL ACTION
 
@@ -112,34 +118,47 @@ function AddFavoritesScreen({ navigation }) {
     setIsVisible(false);
   }, []);
 
-  const handleSendMessagePress = async () => {
-    let msg = message.textMessage;
-    let mood = message.mood ? message.mood : "Happy";
+  const handleSendMessagePress = useCallback(
+    debounce(
+      async () => {
+        setProcessing(true);
+        toast.current.show("Sending...", 30000);
+        let msg = message.textMessage;
+        let mood = message.mood ? message.mood : "Happy";
+        let optionalReplies = optionalAnswer;
 
-    const { data, ok, problem } = await messagesApi.sendMessage(
-      recipient._id,
-      msg,
-      mood
-    );
+        const { data, ok, problem } = await messagesApi.sendMessage(
+          recipient._id,
+          msg,
+          mood,
+          optionalReplies
+        );
 
-    if (ok) {
-      setMessage({
-        mood: "",
-        textMessage: "",
-      });
-      return toast.current.show(data.message, 4000);
-    }
-
-    if (problem) {
-      if (data) {
-        return toast.current.show(data.message, 4000);
-      }
-      return toast.current.show(
-        "Problem connecting to network. Please try again!",
-        5000
-      );
-    }
-  };
+        if (ok) {
+          setMessage({
+            mood: "",
+            textMessage: "",
+          });
+          setOptionalAnswer([]);
+          setProcessing(false);
+          return toast.current.show(data.message, 1000);
+        }
+        setProcessing(false);
+        if (problem) {
+          if (data) {
+            return toast.current.show(data.message, 3000);
+          }
+          return toast.current.show(
+            "Problem connecting to network. Please try again!",
+            3000
+          );
+        }
+      },
+      1000,
+      true
+    ),
+    [message, recipient._id, user.messages, optionalAnswer]
+  );
 
   const handleSetMood = (mood) => {
     setMessage({
@@ -165,65 +184,48 @@ function AddFavoritesScreen({ navigation }) {
     []
   );
 
-  // INFO ALERT ACTIONS
-  const handleCloseInfoAlert = useCallback(async () => {
-    setInfoAlert({ showInfoAlert: false });
+  const handleHelpPress = useCallback(() => {
+    setShowHelp(true);
   }, []);
 
-  // ADDING , REMOVING AND MESSAGGIN FAVORITES ACTION
-  const handleAddPress = useCallback(
-    async (userToAdd) => {
-      initialApiActivity(
-        setApiActivity,
-        "Adding" + " " + userToAdd.name + "..."
-      );
+  const handleCloseHelp = useCallback(() => {
+    setShowHelp(false);
+  }, []);
 
-      let modifiedUser = { ...user };
-
-      const response = await usersApi.addFavorite(userToAdd._id);
-
-      if (response.ok) {
-        modifiedUser.favorites = response.data.favorites;
-        setUser(modifiedUser);
-        await asyncStorage.store(
-          DataConstants.FAVORITES,
-          response.data.favorites
-        );
-      }
-
-      return apiActivityStatus(response, setApiActivity);
-    },
-    [user]
-  );
-
-  const handleRemovePress = useCallback(
-    async (userToRemove) => {
-      initialApiActivity(
-        setApiActivity,
-        "Removing" + " " + userToRemove.name + "..."
-      );
-
-      let modifiedUser = { ...user };
-
-      const response = await usersApi.removeFavorite(userToRemove._id);
-
-      if (response.ok) {
-        modifiedUser.favorites = response.data.favorites;
-        setUser(modifiedUser);
-        await asyncStorage.store(
-          DataConstants.FAVORITES,
-          response.data.favorites
-        );
-      }
-
-      return apiActivityStatus(response, setApiActivity);
-    },
-    [user]
-  );
+  // MESSAGGIN FAVORITES ACTION
 
   const handleMessagePress = (recipient) => {
     setRecipient(recipient);
     setIsVisible(true);
+  };
+
+  const handleOnAllRepliesPress = useCallback(
+    () =>
+      navigation.navigate(Constants.FAVORITES_NAVIGATOR, {
+        screen: Constants.ALL_REPLIES_SCREEN,
+      }),
+    []
+  );
+
+  const checkSendButtonDisability = () => {
+    if (optionalAnswer.length) {
+      if (
+        message.textMessage.replace(/\s/g, "").length >= 1 &&
+        optionalAnswer.length > 1
+      ) {
+        return false;
+      }
+
+      return true;
+    }
+
+    if (!optionalAnswer.length) {
+      if (message.textMessage.replace(/\s/g, "").length < 1) {
+        return true;
+      }
+
+      return false;
+    }
   };
 
   return (
@@ -233,95 +235,287 @@ function AddFavoritesScreen({ navigation }) {
           leftIcon="arrow-back"
           onPressLeft={handleBack}
           title="Add Favorites"
+          rightIcon="help-outline"
+          onPressRight={handleHelpPress}
         />
-        <ApiActivity
-          message={apiActivity.message}
-          onDoneButtonPress={handleApiActivityClose}
-          onRequestClose={handleApiActivityClose}
-          processing={apiActivity.processing}
-          success={apiActivity.success}
-          visible={apiActivity.visible}
-        />
-        <InfoAlert
-          leftPress={handleCloseInfoAlert}
-          description={infoAlert.infoAlertMessage}
-          visible={infoAlert.showInfoAlert}
+        <HelpDialogueBox
+          information="Add people to your Favorites to receive messages from them. When you send a message to someone who has added you in Favorites, he/she could see the sender's name only when they reply to your messages."
+          onPress={handleCloseHelp}
+          setVisible={setShowHelp}
+          visible={showHelp}
         />
         {!isReady ? (
           <AppActivityIndicator />
         ) : (
           <AddFavoriteList
+            onAllRepliesPress={handleOnAllRepliesPress}
             onRefresh={handleRefresh}
             refreshing={refreshing}
-            onAddPress={handleAddPress}
-            onRemovePress={handleRemovePress}
             onMessagePress={handleMessagePress}
             users={users}
           />
         )}
       </Screen>
+      {isVisible ? <View style={styles.modalFallback} /> : null}
       <Modal
         visible={isVisible}
-        onRequestClose={handleCloseMessage}
+        onRequestClose={processing === true ? () => null : handleCloseMessage}
+        transparent
+        animationType="slide"
+      >
+        <View style={styles.messageBackground}>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: "flex-end",
+            }}
+          >
+            <View style={styles.messageMainContainer}>
+              <AppText
+                onPress={processing === true ? () => null : handleCloseMessage}
+                style={styles.closeMessage}
+              >
+                Close
+              </AppText>
+              <View style={styles.inputBoxContainerMain}>
+                <AppImage
+                  imageUrl={recipient.picture}
+                  style={styles.image}
+                  subStyle={styles.imageSub}
+                />
+                <View style={styles.inputBoxContainer}>
+                  <TextInput
+                    placeholder={
+                      "What would you like to say to" +
+                      " " +
+                      recipient.name +
+                      "..."
+                    }
+                    multiline={true}
+                    value={message.textMessage}
+                    maxLength={250}
+                    onChangeText={
+                      processing === true
+                        ? () => null
+                        : (text) =>
+                            setMessage({ ...message, textMessage: text })
+                    }
+                    style={styles.messageInput}
+                  />
+                  <AppText style={styles.wordCount}>
+                    {message.textMessage.length}/250
+                  </AppText>
+                </View>
+              </View>
+              <View style={styles.moodContainerMain}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.moodContainerSub}
+                >
+                  <AppText style={styles.selectMood}>Select your mood</AppText>
+                  {moodData.map((d, index) => (
+                    <Mood
+                      key={d.mood + index.toString()}
+                      mood={d.mood}
+                      isSelected={message.mood === d.mood ? true : false}
+                      onPress={
+                        processing === true
+                          ? () => null
+                          : () => handleSetMood(d.mood)
+                      }
+                    />
+                  ))}
+                </ScrollView>
+              </View>
+              {optionalAnswer.length >= 1 ? (
+                <View style={styles.optionContainerMain}>
+                  <ScrollView contentContainerStyle={styles.optionContainerSub}>
+                    <AppText style={styles.selectOption}>
+                      Optional Replies
+                    </AppText>
+                    {optionalAnswer.map((d, index) => (
+                      <OptionalAnswer
+                        key={d + index.toString()}
+                        answer={d}
+                        onPress={
+                          processing === true
+                            ? () => null
+                            : () => handleRemoveOptionalAnswer(d)
+                        }
+                      />
+                    ))}
+                  </ScrollView>
+                </View>
+              ) : null}
+              {optionalAnswer.length < 4 ? (
+                <AppButton
+                  onPress={
+                    processing === true ? () => null : handleAddOptionPress
+                  }
+                  title="Add Options"
+                  style={styles.addOptions}
+                  subStyle={styles.addOptionsSub}
+                />
+              ) : null}
+              <AppButton
+                disabled={checkSendButtonDisability() ? true : false}
+                style={[
+                  styles.sendButton,
+                  {
+                    backgroundColor:
+                      checkSendButtonDisability() || processing === true
+                        ? defaultStyles.colors.lightGrey
+                        : defaultStyles.colors.secondary,
+                  },
+                ]}
+                title="Send"
+                onPress={
+                  processing === true ? () => null : handleSendMessagePress
+                }
+              />
+            </View>
+          </ScrollView>
+        </View>
+        <ToastMessage reference={toast} position="center" />
+      </Modal>
+      <Modal
+        visible={showAddoption}
+        onRequestClose={handleCloseAddOption}
         transparent
         animationType="fade"
       >
-        <View style={styles.messageBackground}>
-          <View style={styles.messageMainContainer}>
-            <AppText onPress={handleCloseMessage} style={styles.closeMessage}>
-              Close
+        <View style={styles.addoptionModalFallback}>
+          <View style={styles.addOptionContainer}>
+            <AppText style={styles.addOptionTitle}>Add Option</AppText>
+            <AppText style={styles.addOptionInfo}>
+              Add option you expect {recipient.name} to reply with. You can add
+              a minimum of 2 and a maximum of 4 options. Options help you to get
+              valid replies.
             </AppText>
-            <AppTextInput
-              value={message.textMessage}
-              maxLength={250}
-              onChangeText={(text) =>
-                setMessage({ ...message, textMessage: text })
-              }
+            <TextInput
+              maxLength={100}
               multiline={true}
-              subStyle={styles.messageInputSub}
-              style={styles.messageInput}
-              placeholder={
-                "What would you like to say to" + " " + recipient.name + "..."
-              }
+              onChangeText={setOptionalMessage}
+              placeholder="Add an expected reply..."
+              style={styles.addOptionInput}
+              value={optionalMessage}
             />
-            <AppText style={styles.wordCount}>
-              {message.textMessage.length}/250
+            <AppText style={styles.optionLengthInfo}>
+              Option should be minimum 3 characters long.
             </AppText>
-            <View style={styles.moodContainerMain}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.moodContainerSub}
-              >
-                <AppText style={styles.selectMood}>Select your mood</AppText>
-                {moodData.map((d, index) => (
-                  <Mood
-                    key={d.mood + index.toString()}
-                    mood={d.mood}
-                    isSelected={message.mood === d.mood ? true : false}
-                    onPress={() => handleSetMood(d.mood)}
-                  />
-                ))}
-              </ScrollView>
+            <View style={styles.addOptionActionContainer}>
+              <AppButton
+                onPress={handleCloseAddOption}
+                title="Close"
+                style={styles.closeButton}
+                subStyle={{
+                  fontSize: 15,
+                  color: defaultStyles.colors.secondary,
+                }}
+              />
+              <AppButton
+                disabled={
+                  optionalMessage.replace(/\s/g, "").length >= 3 ? false : true
+                }
+                onPress={handleAddOptionalReplyPress}
+                title="Add"
+                style={[
+                  styles.addButton,
+                  {
+                    backgroundColor:
+                      optionalMessage.replace(/\s/g, "").length >= 3
+                        ? defaultStyles.colors.blue
+                        : defaultStyles.colors.lightGrey,
+                  },
+                ]}
+                subStyle={{ fontSize: 15 }}
+              />
             </View>
-            <AppButton
-              disabled={
-                message.textMessage.replace(/\s/g, "").length >= 1
-                  ? false
-                  : true
-              }
-              style={styles.sendButton}
-              title="Send"
-              onPress={handleSendMessagePress}
-            />
           </View>
         </View>
-        <ToastMessage reference={toast} position="center" />
       </Modal>
     </>
   );
 }
 const styles = StyleSheet.create({
+  addoptionModalFallback: {
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.8)",
+    flex: 1,
+    justifyContent: "center",
+    width: "100%",
+  },
+  addOptions: {
+    backgroundColor: defaultStyles.colors.tomato,
+    borderRadius: 20,
+    elevation: 5,
+    height: 35,
+    marginVertical: 20,
+    width: 100,
+  },
+  addOptionsSub: {
+    fontSize: 16,
+  },
+  addOptionContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: defaultStyles.colors.dark_Variant,
+    elevation: 5,
+    overflow: "hidden",
+    width: "80%",
+  },
+  addOptionTitle: {
+    backgroundColor: defaultStyles.colors.dark_Variant,
+    color: defaultStyles.colors.white,
+    height: 40,
+    textAlign: "center",
+    textAlignVertical: "center",
+    width: "100%",
+  },
+  addOptionInfo: {
+    color: defaultStyles.colors.secondary,
+    fontSize: 14,
+    marginVertical: 5,
+    textAlign: "center",
+    width: "95%",
+  },
+  addOptionInput: {
+    borderColor: defaultStyles.colors.lightGrey,
+    borderRadius: 10,
+    borderWidth: 1,
+    fontFamily: "Comic-Bold",
+    fontSize: 16,
+    fontWeight: "normal",
+    marginTop: 10,
+    padding: 5,
+    paddingHorizontal: 10,
+    width: "95%",
+  },
+  addOptionActionContainer: {
+    alignItems: "center",
+    flexDirection: "row",
+    height: 50,
+    justifyContent: "center",
+    marginVertical: 10,
+    padding: 5,
+    width: "95%",
+  },
+  addButton: {
+    backgroundColor: defaultStyles.colors.blue,
+    borderRadius: 10,
+    height: 35,
+    width: 60,
+  },
+  closeButton: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: 10,
+    height: 35,
+    marginRight: 20,
+    width: 60,
+  },
   closeMessage: {
     color: defaultStyles.colors.danger,
     marginBottom: 15,
@@ -332,8 +526,29 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
   },
+  inputBoxContainerMain: {
+    alignItems: "center",
+    flexDirection: "row",
+    width: "100%",
+  },
+  inputBoxContainer: {
+    alignItems: "center",
+    flexShrink: 1,
+    width: "100%",
+  },
+  image: {
+    alignSelf: "flex-start",
+    borderRadius: 20,
+    height: 40,
+    marginLeft: 15,
+    width: 40,
+  },
+  imageSub: {
+    borderRadius: 20,
+    height: 40,
+    width: 40,
+  },
   messageBackground: {
-    backgroundColor: "rgba(0,0,0,0.7)",
     flex: 1,
     justifyContent: "flex-end",
     width: "100%",
@@ -347,20 +562,26 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   messageInput: {
-    width: "94%",
-    minHeight: 100,
-    alignItems: "flex-start",
-    borderWidth: 2,
-    borderColor: defaultStyles.colors.light,
-    borderRadius: 5,
-  },
-  messageInputSub: {
-    fontSize: 16,
-    minHeight: 90,
+    borderColor: defaultStyles.colors.lightGrey,
+    borderRadius: 10,
+    borderWidth: 1,
+    fontFamily: "Comic-Bold",
+    fontSize: 18,
+    fontWeight: "normal",
+    padding: 5,
+    paddingHorizontal: 10,
     textAlignVertical: "top",
+    width: "94%",
+  },
+  modalFallback: {
+    backgroundColor: "rgba(0,0,0,0.7)",
+    height: "100%",
+    position: "absolute",
+    width: "100%",
+    zIndex: 22,
   },
   moodContainerMain: {
-    height: 80,
+    height: 50,
     width: "100%",
     marginVertical: 5,
   },
@@ -368,13 +589,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 50,
   },
+  optionContainerMain: {
+    marginVertical: 5,
+    width: "100%",
+  },
+  optionLengthInfo: {
+    alignSelf: "flex-start",
+    color: defaultStyles.colors.dark_Variant,
+    fontSize: 12,
+    marginBottom: 10,
+    marginLeft: 10,
+    marginTop: 5,
+    paddingBottom: 0,
+    paddingTop: 0,
+  },
   selectMood: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: 20,
-    height: 35,
-    paddingHorizontal: 10,
-    marginLeft: 10,
+    color: defaultStyles.colors.secondary,
     fontSize: 14,
+    height: 35,
+    marginLeft: 10,
+    paddingHorizontal: 10,
+    textAlign: "center",
+    textAlignVertical: "center",
+  },
+  selectOption: {
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.light,
+    borderRadius: 20,
+    fontSize: 14,
+    height: 35,
+    marginBottom: 10,
+    marginLeft: 10,
+    paddingHorizontal: 20,
     textAlign: "center",
     textAlignVertical: "center",
   },
@@ -383,6 +631,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   wordCount: {
+    fontSize: 14,
     textAlign: "right",
     width: "94%",
   },

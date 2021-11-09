@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { StyleSheet, Share, Linking } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as SMS from "expo-sms";
 
 import AddContactList from "../components/AddContactList";
-import ApiActivity from "../components/ApiActivity";
 import AppActivityIndicator from "../components/ActivityIndicator";
 import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
@@ -14,21 +13,17 @@ import Constant from "../navigation/NavigationConstants";
 import DataConstants from "../utilities/DataConstants";
 
 import usersApi from "../api/users";
+import useAuth from "../auth/useAuth";
 
 import defaultStyles from "../config/styles";
 
-import useAuth from "../auth/useAuth";
-
 import asyncStorage from "../utilities/cache";
-import apiFlow from "../utilities/ApiActivityStatus";
 import debounce from "../utilities/debounce";
 
 const height = defaultStyles.height;
 
 function AddContactsScreen({ navigation }) {
-  const { user, setUser } = useAuth();
-  const { apiActivityStatus, initialApiActivity } = apiFlow;
-
+  const { user } = useAuth();
   const permission = async () => {
     const { granted } = await Contacts.getPermissionsAsync();
     return granted;
@@ -40,12 +35,6 @@ function AddContactsScreen({ navigation }) {
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
-  });
-  const [apiActivity, setApiActivity] = useState({
-    message: "",
-    processing: true,
-    visible: false,
-    success: false,
   });
 
   const [refreshing, setRefreshing] = useState(false);
@@ -109,6 +98,12 @@ function AddContactsScreen({ navigation }) {
       return setUsers(data.sort((a, b) => a.isRegistered < b.isRegistered));
     }
 
+    if (user.phoneContacts) {
+      setUsers(
+        user.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
+      );
+    }
+
     if (data) {
       return setInfoAlert({
         infoAlertMessage: data.message,
@@ -117,7 +112,7 @@ function AddContactsScreen({ navigation }) {
     }
 
     setInfoAlert({
-      infoAlertMessage: problem,
+      infoAlertMessage: "Something went wrong! Please try again.",
       showInfoAlert: true,
     });
   };
@@ -125,12 +120,6 @@ function AddContactsScreen({ navigation }) {
   useEffect(() => {
     requestPermission();
   }, []);
-
-  // API ACTIVITY ACTIONS
-  const handleApiActivityClose = useCallback(
-    () => setApiActivity({ ...apiActivity, visible: false }),
-    []
-  );
 
   // REFRESH ACTION
   const handleRefresh = useCallback(() => {
@@ -170,7 +159,9 @@ function AddContactsScreen({ navigation }) {
     const { result } = await SMS.sendSMSAsync(
       [number],
       "Hi there please join this platform"
-    ).catch((err) => console.log(err));
+    );
+
+    console.log(result);
   }, []);
 
   const handleInvitePress = useCallback(async () => {
@@ -194,35 +185,6 @@ function AddContactsScreen({ navigation }) {
     }
   }, []);
 
-  // ADD CONTACTS ACTION
-  const handleAddPress = useCallback(
-    async (userToAdd) => {
-      initialApiActivity(
-        setApiActivity,
-        "Adding" + " " + userToAdd.name + "..."
-      );
-
-      let modifiedUser = { ...user };
-
-      const response = await usersApi.addContact(
-        userToAdd.phoneNumber,
-        userToAdd.name
-      );
-
-      if (response.ok) {
-        modifiedUser.contacts = response.data.contacts;
-        setUser(modifiedUser);
-        await asyncStorage.store(
-          DataConstants.CONTACTS,
-          response.data.contacts
-        );
-      }
-
-      return apiActivityStatus(response, setApiActivity);
-    },
-    [user]
-  );
-
   return (
     <Screen style={styles.container}>
       <AppHeader
@@ -231,14 +193,6 @@ function AddContactsScreen({ navigation }) {
         onPressRight={handleRightPress}
         rightIcon="person-search"
         title="Add Contacts"
-      />
-      <ApiActivity
-        message={apiActivity.message}
-        onDoneButtonPress={handleApiActivityClose}
-        onRequestClose={handleApiActivityClose}
-        processing={apiActivity.processing}
-        success={apiActivity.success}
-        visible={apiActivity.visible}
       />
       <InfoAlert
         leftPress={handleCloseInfoAlert}
@@ -251,7 +205,6 @@ function AddContactsScreen({ navigation }) {
         <AddContactList
           onRefresh={handleRefresh}
           refreshing={refreshing}
-          onAddPress={handleAddPress}
           onInvitePress={
             SMS.isAvailableAsync() ? handleUserInvite : handleInvitePress
           }

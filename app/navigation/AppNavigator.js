@@ -13,11 +13,11 @@ import navigation from "./rootNavigation";
 
 import SendThoughtsScreen from "../screens/SendThoughtsScreen";
 import AddEchoScreen from "../screens/AddEchoScreen";
-import AddFavoritesScreen from "../screens/AddFavoritesScreen";
 
 import useNotifications from "../hooks/useNotifications";
 
 import useAuth from "../auth/useAuth";
+import FavoritesNavigator from "./FavoritesNavigator";
 
 const Tab = createBottomTabNavigator();
 
@@ -43,14 +43,33 @@ function AppNavigator(props) {
       return setUser(modifiedUser);
     });
 
+    const subscription4 = socket.on(`deletedThought${user._id}`, (data) => {
+      let modifiedUser = { ...user };
+      modifiedUser.thoughts = data.thoughts;
+      return setUser(modifiedUser);
+    });
+
     return () => {
       subscription1.off();
       subscription2.off();
       subscription3.off();
+      subscription4.off();
     };
   }, [user]);
 
-  useNotifications(() => navigation.navigate("Notification"));
+  useNotifications((data) => {
+    console.log(data.notification.request.content.data.message);
+    if (
+      data.notification.request.content.data.message !==
+      "One of your favorites sent you a message!"
+    ) {
+      return navigation.navigate(Constant.NOTIFICATION_NAVIGATOR);
+    }
+
+    navigation.navigate(Constant.INDEX_NAVIGATOR, {
+      screen: Constant.HOME_SCREEN,
+    });
+  });
 
   return (
     <Tab.Navigator
@@ -71,8 +90,8 @@ function AppNavigator(props) {
       />
       <Tab.Screen name={Constant.ADD_ECHO_SCREEN} component={AddEchoScreen} />
       <Tab.Screen
-        name={Constant.ADD_FAVORITES_SCREEN}
-        component={AddFavoritesScreen}
+        name={Constant.FAVORITES_NAVIGATOR}
+        component={FavoritesNavigator}
       />
     </Tab.Navigator>
   );
