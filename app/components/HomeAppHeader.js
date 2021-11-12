@@ -50,8 +50,8 @@ const styles = StyleSheet.create({
   },
   image: {
     borderRadius: 20,
-    borderWidth: 2,
-    borderColor: defaultStyles.colors.yellow_Variant,
+    borderWidth: 1,
+    borderColor: defaultStyles.colors.lightGrey,
     height: 40,
     width: 40,
   },

@@ -61,6 +61,7 @@ function ReplyCard({
     <View style={styles.container}>
       <View style={styles.recipientDetailsContainerMain}>
         <AppImage
+          activeOpacity={1}
           style={styles.image}
           subStyle={styles.imageSub}
           imageUrl={message.createdFor.picture}
@@ -171,6 +172,8 @@ const styles = StyleSheet.create({
     color: defaultStyles.colors.secondary,
     fontSize: 16,
     paddingHorizontal: 10,
+    borderWidth: 2,
+    borderColor: defaultStyles.colors.yellow,
   },
   recipientDetailsContainerMain: {
     alignItems: "center",

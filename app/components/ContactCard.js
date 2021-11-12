@@ -1,6 +1,5 @@
 import React, { useState, useCallback, memo } from "react";
-import { Modal, StyleSheet, View } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { Modal, StyleSheet, View, TouchableOpacity } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
 
 import AppButton from "./AppButton";
@@ -78,7 +77,10 @@ function ContactCard({
             title="Add Echo"
           />
         </View>
-        <View style={styles.sendThoughtIconContainer}>
+        <TouchableOpacity
+          onPress={onSendThoughtPress}
+          style={styles.sendThoughtIconContainer}
+        >
           <Feather
             onPress={onSendThoughtPress}
             color={defaultStyles.colors.primary}
@@ -86,12 +88,13 @@ function ContactCard({
             size={20}
             style={styles.sendThoughtIcon}
           />
-        </View>
+        </TouchableOpacity>
       </View>
       <Modal
         onRequestClose={handleCloseModal}
         transparent={true}
         visible={state.visible}
+        animationType="fade"
       >
         <View style={styles.largeImageModalFallback}>
           <View style={styles.contentContainer}>
@@ -101,6 +104,7 @@ function ContactCard({
               </AppText>
             ) : null}
             <AppImage
+              activeOpacity={1}
               imageUrl={user.picture}
               subStyle={styles.inlargedImage}
               style={styles.inlargedImage}
@@ -135,7 +139,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.yellow_Variant,
+    borderColor: defaultStyles.colors.dark_Variant,
     borderRadius: 25,
     borderWidth: 2,
     elevation: 10,
@@ -155,7 +159,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   image: {
-    borderColor: defaultStyles.colors.light,
+    borderColor: defaultStyles.colors.lightGrey,
     borderRadius: 25,
     borderWidth: 1,
     height: 50,

@@ -4,14 +4,20 @@ import { StyleSheet, Image, TouchableHighlight } from "react-native";
 import defaultStyles from "../config/styles";
 
 function AppImage({
+  activeOpacity = 0.8,
+  customImage,
   imageUrl = "",
+  onPress = () => null,
   style,
   subStyle,
-  onPress = () => null,
-  customImage,
 }) {
   return (
-    <TouchableHighlight onPress={onPress} style={[styles.container, style]}>
+    <TouchableHighlight
+      underlayColor={defaultStyles.colors.white}
+      activeOpacity={activeOpacity}
+      onPress={onPress}
+      style={[styles.container, style]}
+    >
       <Image
         style={[styles.image, subStyle]}
         source={

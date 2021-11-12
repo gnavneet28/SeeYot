@@ -58,6 +58,7 @@ function RepliesScreen({ navigation }) {
   };
 
   const handleDeletePress = async () => {
+    let originalList = [...replies];
     let newListOfMessages = replies.filter((r) => r._id != messageToDelete);
     setReplies(newListOfMessages);
     setShowAlert(false);
@@ -68,6 +69,7 @@ function RepliesScreen({ navigation }) {
     if (ok) {
       return;
     }
+    setReplies(originalList);
     if (problem) {
       if (data) {
         return setInfoAlert({

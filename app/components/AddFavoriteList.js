@@ -173,10 +173,10 @@ class AddContactList extends React.Component {
 const styles = StyleSheet.create({
   allReplies: {
     alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.dark_Variant,
     borderBottomLeftRadius: 20,
     borderTopLeftRadius: 20,
-    color: defaultStyles.colors.blue,
+    color: defaultStyles.colors.yellow_Variant,
     height: 35,
     marginVertical: 5,
     paddingHorizontal: 20,

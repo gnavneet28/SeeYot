@@ -24,4 +24,11 @@ export default {
     mood: "",
     options: [],
   },
+  defaultEchoMessage: {
+    _id: "",
+    messageFor: "",
+    message: "",
+    name: "",
+    picture: "",
+  },
 };

@@ -13,6 +13,7 @@ const ReplyCardSub = ({ message, reply }) => {
   return (
     <View style={styles.replyCard}>
       <AppImage
+        activeOpacity={1}
         style={styles.image}
         subStyle={styles.imageSub}
         imageUrl={message.createdFor.picture}

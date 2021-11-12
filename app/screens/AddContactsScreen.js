@@ -106,7 +106,7 @@ function AddContactsScreen({ navigation }) {
 
     if (data) {
       return setInfoAlert({
-        infoAlertMessage: data.message,
+        infoAlertMessage: "Something went wrong! Please try again.",
         showInfoAlert: true,
       });
     }

@@ -129,6 +129,7 @@ function NotificationCard({
   return (
     <View style={styles.container}>
       <AppImage
+        activeOpacity={1}
         style={styles.image}
         subStyle={styles.imageSub}
         imageUrl={
@@ -219,6 +220,7 @@ const styles = StyleSheet.create({
   image: {
     backgroundColor: defaultStyles.colors.white,
     borderRadius: 20,
+    elevation: 2,
     height: 40,
     marginLeft: 15,
     marginRight: 10,

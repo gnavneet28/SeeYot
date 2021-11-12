@@ -103,6 +103,7 @@ function AddPicture({
           />
           <View>
             <AppImage
+              activeOpacity={1}
               imageUrl={image}
               style={styles.inlargedImage}
               subStyle={styles.inlargedImage}

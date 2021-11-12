@@ -12,9 +12,11 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useIsFocused } from "@react-navigation/native";
 
 import ApiActivity from "../components/ApiActivity";
 import AppImage from "../components/AppImage";
@@ -53,6 +55,7 @@ const defaultMessage = {
 function HomeScreen({ navigation }) {
   dayjs.extend(relativeTime);
   const { user, setUser } = useAuth();
+  const isFocused = useIsFocused();
 
   const toast = useRef();
 
@@ -83,6 +86,12 @@ function HomeScreen({ navigation }) {
     setMessagesList(messages);
   }, [user]);
 
+  useEffect(() => {
+    if (isFocused && isVisible) {
+      setIsVisible(false);
+    }
+  }, [isFocused]);
+
   // APIACTIVITY ACTIONS
   const handleApiActivityClose = useCallback(
     () => setApiActivity({ ...apiActivity, visible: false }),
@@ -90,11 +99,6 @@ function HomeScreen({ navigation }) {
   );
 
   // MESSAGES ACTION
-
-  const handleAddFavoritesButtonPress = useCallback(
-    () => navigation.navigate(Constant.FAVORITES_NAVIGATOR),
-    []
-  );
 
   const handleMessagePress = useCallback(
     debounce(
@@ -105,6 +109,7 @@ function HomeScreen({ navigation }) {
           const { ok, data, problem } = await messagesApi.markRead(message._id);
           if (ok) {
             message.seen = true;
+            setMessagesList(data.messages);
             return await asyncStorage.store(
               DataConstants.MESSAGES,
               data.messages
@@ -113,7 +118,7 @@ function HomeScreen({ navigation }) {
         }
         return;
       },
-      1000,
+      500,
       true
     ),
     [user.messages, message]
@@ -122,6 +127,10 @@ function HomeScreen({ navigation }) {
   // HEADER ACTIONS
   const handleRightPress = useCallback(() => {
     navigation.navigate(Constant.PROFILE_NAVIGATOR);
+  }, []);
+
+  const handleLeftPress = useCallback(() => {
+    Linking.openURL("https://seeyot-frontend.herokuapp.com/how_it_works");
   }, []);
 
   // EMPTY FRIENDLIST
@@ -281,16 +290,20 @@ function HomeScreen({ navigation }) {
     <>
       <Screen style={styles.container}>
         <HomeAppHeader
+          onPressLeft={handleLeftPress}
           onPressRight={handleRightPress}
           rightImageUrl={
             typeof user.picture !== "undefined" ? user.picture : ""
           }
         />
-        <HomeMessages
-          messages={messagesList}
-          onMessagePress={handleMessagePress}
-          onPress={handleAddFavoritesButtonPress}
-        />
+        {messagesList.filter(
+          (m) => dayjs(new Date()).diff(dayjs(m.createdAt), "hours") <= 24
+        ).length > 0 ? (
+          <HomeMessages
+            messages={messagesList}
+            onMessagePress={handleMessagePress}
+          />
+        ) : null}
         <ApiActivity
           message={apiActivity.message}
           onDoneButtonPress={handleApiActivityClose}
@@ -335,6 +348,7 @@ function HomeScreen({ navigation }) {
               </AppText>
               <View style={styles.messageCreatorDetails}>
                 <AppImage
+                  activeOpacity={1}
                   style={styles.image}
                   subStyle={styles.imageSub}
                   imageUrl={messageCreator.picture}

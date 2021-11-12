@@ -22,7 +22,15 @@ function HelpScreen({ navigation }) {
   );
 
   const openPrivacyPage = () => {
-    Linking.openURL("https://www.google.com/");
+    Linking.openURL("https://seeyot-frontend.herokuapp.com/privacy_policy");
+  };
+
+  const openTermsPage = () => {
+    Linking.openURL("https://seeyot-frontend.herokuapp.com/terms_of_service");
+  };
+
+  const openHowItWorksPage = () => {
+    Linking.openURL("https://seeyot-frontend.herokuapp.com/how_it_works");
   };
 
   return (
@@ -53,7 +61,20 @@ function HelpScreen({ navigation }) {
       <Heading
         iconName="article"
         onPress={openPrivacyPage}
-        title="Terms and Privacy Policy"
+        title="Privacy Policy"
+        style={{ marginTop: 10, marginBottom: 0 }}
+      />
+      <Heading
+        iconName="article"
+        onPress={openTermsPage}
+        style={{ marginVertical: 0 }}
+        title="Terms of Service"
+      />
+      <Heading
+        iconName="article"
+        onPress={openHowItWorksPage}
+        style={{ marginTop: 0 }}
+        title="How it Works"
       />
     </Screen>
   );

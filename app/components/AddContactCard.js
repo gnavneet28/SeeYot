@@ -93,6 +93,7 @@ function AddContactCard({ contact, onInvitePress, style }) {
   return (
     <View style={[styles.container, style]}>
       <AppImage
+        activeOpacity={1}
         imageUrl={contact.picture}
         style={styles.image}
         subStyle={styles.imageSub}

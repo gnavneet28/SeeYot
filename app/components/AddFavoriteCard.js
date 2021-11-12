@@ -142,6 +142,7 @@ function AddContactCard({
   return (
     <View style={[styles.container, style]}>
       <AppImage
+        activeOpacity={1}
         imageUrl={favoriteUser.picture}
         style={styles.image}
         subStyle={styles.imageSub}

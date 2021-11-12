@@ -6,9 +6,9 @@ import Icon from "./Icon";
 
 import defaultStyles from "../config/styles";
 
-function Heading({ iconName, title, onPress }) {
+function Heading({ iconName, title, onPress, style }) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       <Icon
         color={defaultStyles.colors.tomato}
         name={iconName}

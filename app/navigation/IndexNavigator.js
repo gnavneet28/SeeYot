@@ -9,8 +9,14 @@ import AddContactScreen from "../screens/AddContactsScreen";
 import HomeScreen from "../screens/HomeScreen";
 import NotificationNavigator from "./NotificationNavigator";
 import Constant from "./NavigationConstants";
+import FavoritesNavigator from "./FavoritesNavigator";
 
 import defaultstyles from "../config/styles";
+
+const home = require("../assets/animations/home.json");
+const addContacts = require("../assets/animations/addContacts.json");
+const notification = require("../assets/animations/notification.json");
+const addFavorite = require("../assets/animations/addFavorite.json");
 
 const Tab = createBottomTabNavigator();
 
@@ -42,7 +48,7 @@ function IndexNavigator(props) {
           tabBarIcon: ({ focused, color, size }) => (
             <>
               <LottieView
-                source={require("../assets/animations/home.json")}
+                source={home}
                 autoPlay={focused}
                 loop={true}
                 style={[styles.lottie, { opacity: focused ? 1 : 0 }]}
@@ -69,7 +75,7 @@ function IndexNavigator(props) {
           tabBarIcon: ({ focused, color, size }) => (
             <>
               <LottieView
-                source={require("../assets/animations/addContacts.json")}
+                source={addContacts}
                 autoPlay={focused}
                 loop={true}
                 style={[
@@ -99,7 +105,37 @@ function IndexNavigator(props) {
           tabBarIcon: ({ focused, color, size }) => (
             <>
               <LottieView
-                source={require("../assets/animations/notification.json")}
+                source={addFavorite}
+                autoPlay={focused}
+                loop={true}
+                style={[
+                  styles.lottie,
+                  { opacity: focused ? 1 : 0, height: 52, width: 52 },
+                ]}
+              />
+
+              {!focused ? (
+                <AntDesign
+                  style={[styles.icon, { opacity: focused ? 0 : 1 }]}
+                  name="staro"
+                  size={size}
+                  color={color}
+                />
+              ) : null}
+            </>
+          ),
+          tabBarActiveTintColor: defaultstyles.colors.yellow,
+          tabBarInactiveTintColor: defaultstyles.colors.white,
+        }}
+        name={Constant.FAVORITES_NAVIGATOR}
+        component={FavoritesNavigator}
+      />
+      <Tab.Screen
+        options={{
+          tabBarIcon: ({ focused, color, size }) => (
+            <>
+              <LottieView
+                source={notification}
                 autoPlay={focused}
                 loop={true}
                 style={[

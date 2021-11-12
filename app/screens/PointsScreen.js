@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
+import { AdMobRewarded } from "expo-ads-admob";
+import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import Screen from "../components/Screen";
 import AppHeader from "../components/AppHeader";
-import { AdMobRewarded } from "expo-ads-admob";
 
 import useAuth from "../auth/useAuth";
 
@@ -197,7 +198,7 @@ function PointsScreen({ navigation }) {
       />
       <Alert
         title="Points"
-        description="Congratulations! You earned 2 points. Want to collect more points?"
+        description="Congratulations! You earned 5 points. Want to collect more points?"
         leftOption="Close"
         rightOption="Yes"
         visible={showAlert}
@@ -265,10 +266,18 @@ function PointsScreen({ navigation }) {
           subStyle={styles.collectPointsButtonSub}
           title="Collect Points"
         />
-        <AppText style={styles.collectPointsInfo}>
-          Clicking on this button will show you an Ad. For each Ad you see, you
-          will be awarded 2 points.
-        </AppText>
+        <View style={styles.collectPointsInfoContainer}>
+          <MaterialCommunityIcon
+            name="google-ads"
+            size={15}
+            color={defaultStyles.colors.yellow_Variant}
+            style={{ alignSelf: "flex-start" }}
+          />
+          <AppText style={styles.collectPointsInfo}>
+            Clicking on this button will show you an Ad. For each Ad you see,
+            you will be awarded 5 points.
+          </AppText>
+        </View>
       </ScrollView>
     </Screen>
   );
@@ -293,10 +302,22 @@ const styles = StyleSheet.create({
     color: defaultStyles.colors.white,
     fontSize: 17,
   },
+  collectPointsInfoContainer: {
+    alignItems: "center",
+    alignSelf: "center",
+    borderTopColor: defaultStyles.colors.light,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingHorizontal: 5,
+    paddingVertical: 5,
+    width: "80%",
+  },
   collectPointsInfo: {
     color: defaultStyles.colors.blue,
     fontSize: 15,
-    textAlign: "center",
+    paddingTop: 0,
+    textAlign: "left",
     width: "70%",
   },
   container: {

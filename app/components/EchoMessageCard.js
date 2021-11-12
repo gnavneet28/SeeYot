@@ -5,23 +5,16 @@ import AppImage from "./AppImage";
 import AppText from "./AppText";
 
 import defaultStyles from "../config/styles";
-
-const defaultEchoMessage = {
-  _id: "",
-  messageFor: "",
-  message: "",
-  name: "",
-  picture: "",
-};
+import defaultProps from "../utilities/defaultProps";
 
 function EchoMessageCard({
-  echoMessage = defaultEchoMessage,
-  style,
+  echoMessage = defaultProps.defaultEchoMessage,
+  cardStyle,
   onEchoMessagePress,
 }) {
   return (
     <>
-      <View style={[styles.container, style]}>
+      <View style={[styles.container, cardStyle]}>
         <AppImage
           imageUrl={echoMessage.picture}
           onPress={onEchoMessagePress}

@@ -10,6 +10,7 @@ function ChatListHeader({ user }) {
   return (
     <View style={styles.container}>
       <AppImage
+        activeOpacity={1}
         imageUrl={user.picture}
         style={styles.image}
         subStyle={styles.subImage}
@@ -37,7 +38,7 @@ const styles = StyleSheet.create({
   },
   image: {
     backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.yellow,
+    borderColor: defaultStyles.colors.light,
     borderRadius: 50,
     borderWidth: 2,
     height: 100,

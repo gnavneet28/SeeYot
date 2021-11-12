@@ -221,10 +221,10 @@ const styles = StyleSheet.create({
   },
   clearAll: {
     alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.dark_Variant,
     borderBottomLeftRadius: 20,
     borderTopLeftRadius: 20,
-    color: defaultStyles.colors.blue,
+    color: defaultStyles.colors.yellow_Variant,
     fontSize: 18,
     paddingHorizontal: 10,
     textAlign: "right",

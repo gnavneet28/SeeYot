@@ -3,12 +3,11 @@ import { View, StyleSheet, ScrollView } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-import AddFavoritesButton from "./AddFavoritesButton";
 import Message from "./Message";
 
 import defaultStyles from "../config/styles";
 
-function HomeMessages({ onPress, messages = [], onMessagePress }) {
+function HomeMessages({ messages = [], onMessagePress }) {
   dayjs.extend(relativeTime);
   return (
     <View style={styles.container}>
@@ -17,7 +16,6 @@ function HomeMessages({ onPress, messages = [], onMessagePress }) {
         horizontal
         showsHorizontalScrollIndicator={false}
       >
-        <AddFavoritesButton onPress={onPress} />
         {messages
           .sort((a, b) => a.createdAt < b.createdAt)
           .filter(
@@ -37,12 +35,11 @@ function HomeMessages({ onPress, messages = [], onMessagePress }) {
 }
 const styles = StyleSheet.create({
   container: {
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     borderColor: defaultStyles.colors.light,
-    borderRadius: 5,
     height: 80,
     marginBottom: 5,
-    paddingLeft: 5,
+    paddingLeft: 10,
     width: "100%",
   },
   contentContainerStyle: {

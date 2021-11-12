@@ -32,6 +32,7 @@ function AddContactCard({
   return (
     <View style={[styles.container, style]}>
       <AppImage
+        activeOpacity={1}
         imageUrl={blockedUser.picture}
         style={styles.image}
         subStyle={styles.imageSub}
@@ -57,7 +58,7 @@ function AddContactCard({
 const styles = StyleSheet.create({
   blockedButton: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 5,
+    borderRadius: 10,
     height: 35,
     marginRight: 5,
     width: 80,
@@ -83,15 +84,18 @@ const styles = StyleSheet.create({
     width: "95%",
   },
   image: {
+    backgroundColor: defaultStyles.colors.white,
     borderRadius: 20,
     height: 40,
     marginRight: 5,
     width: 40,
+    borderWidth: 0,
   },
   imageSub: {
     borderRadius: 20,
     height: 40,
     width: 40,
+    borderWidth: 0,
   },
   infoContainer: {
     flex: 1,
