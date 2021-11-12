@@ -3,6 +3,7 @@ import { StyleSheet, TouchableHighlight } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import LottieView from "lottie-react-native";
 import defaultStyles from "../config/styles";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 const Confused = require("../assets/animations/confused.json");
 const Furious = require("../assets/animations/angry.json");
@@ -38,30 +39,30 @@ function Message({ mood = "Happy", onPress, seen = false }) {
             autoPlay
             loop
             source={emoji}
-            style={{ width: 40, height: 40 }}
+            style={{ width: scale(40), height: scale(40) }}
           />
         </LinearGradient>
       </>
     </TouchableHighlight>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
-    borderRadius: 30,
-    height: 60,
+    borderRadius: "25@s",
+    height: "50@s",
     justifyContent: "center",
-    marginHorizontal: 5,
-    padding: 5,
-    width: 60,
+    marginHorizontal: "5@s",
+    padding: "5@s",
+    width: "50@s",
   },
   gradient: {
     alignItems: "center",
-    borderRadius: 27.5,
-    height: 55,
+    borderRadius: "22.5@s",
+    height: "45@s",
     justifyContent: "center",
-    padding: 2,
-    width: 55,
+    padding: "2@s",
+    width: "45@s",
   },
 });
 

@@ -5,6 +5,7 @@ import {
   DataProvider,
   LayoutProvider,
 } from "recyclerlistview";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppText from "./AppText";
@@ -40,7 +41,7 @@ class ContactList extends React.Component {
         switch (type) {
           case ViewTypes.Full:
             dim.width = width;
-            dim.height = 80;
+            dim.height = scale(75);
             break;
           default:
             dim.width = 0;
@@ -123,12 +124,12 @@ class ContactList extends React.Component {
   }
 }
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   addButton: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 25,
-    height: 50,
-    width: 150,
+    borderRadius: "25@s",
+    height: "40@s",
+    width: "110@s",
   },
   addButtonSub: {
     color: defaultStyles.colors.secondary,
@@ -140,8 +141,8 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   emptyContacts: {
-    fontSize: 18,
-    marginBottom: 20,
+    fontSize: "15@s",
+    marginBottom: "20@s",
     textAlign: "center",
     width: "80%",
   },

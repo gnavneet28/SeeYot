@@ -1,13 +1,12 @@
 import React, { memo } from "react";
-import { View, StyleSheet, TouchableHighlight } from "react-native";
+import { View, TouchableHighlight } from "react-native";
 import LottieView from "lottie-react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
 
 import defaultStyles from "../config/styles";
-
-const height = defaultStyles.height;
 
 function AppHeader({
   customImage,
@@ -38,51 +37,51 @@ function AppHeader({
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.primary,
     flexDirection: "row",
-    height: 55,
+    height: "50@s",
     justifyContent: "center",
-    padding: 2,
+    padding: "2@s",
     width: "100%",
   },
   image: {
-    borderRadius: 20,
+    borderRadius: "20@s",
     borderWidth: 1,
     borderColor: defaultStyles.colors.lightGrey,
-    height: 40,
-    width: 40,
+    height: "38@s",
+    width: "38@s",
   },
   imageSub: {
-    borderRadius: 19,
-    height: 38,
-    width: 38,
+    borderRadius: "19@s",
+    height: "37@s",
+    width: "37@s",
   },
   leftOption: {
     alignItems: "center",
     bottom: 0,
-    borderRadius: 20,
+    borderRadius: "20@s",
     backgroundColor: defaultStyles.colors.primary,
-    height: 55,
+    height: "50@s",
     justifyContent: "center",
-    left: 10,
+    left: "10@s",
     position: "absolute",
-    width: 55,
+    width: "50@s",
   },
   rightOption: {
     alignItems: "center",
     justifyContent: "center",
-    height: 50,
+    height: "50@s",
     position: "absolute",
-    right: 10,
-    width: 50,
+    right: "10@s",
+    width: "50@s",
   },
   title: {
     color: defaultStyles.colors.white,
     fontFamily: "Comic-Bold",
-    fontSize: 22,
+    fontSize: "18@s",
     textAlign: "center",
     width: "60%",
   },

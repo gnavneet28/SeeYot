@@ -1,5 +1,6 @@
 import colors from "./colors";
 import { Platform, Dimensions } from "react-native";
+import { scale } from "react-native-size-matters";
 
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
@@ -16,7 +17,7 @@ export default {
   dimensionConstants,
   text: {
     color: colors.dark,
-    fontSize: height * 0.02,
+    fontSize: scale(15),
     fontFamily: Platform.OS === "android" ? "Roboto" : "Avenir",
   },
 };

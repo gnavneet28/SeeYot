@@ -1,6 +1,7 @@
 import React, { useState, useCallback, memo } from "react";
-import { Modal, StyleSheet, View, TouchableOpacity } from "react-native";
+import { Modal, View, TouchableOpacity } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
@@ -116,14 +117,14 @@ function ContactCard({
     </>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   addEchoButton: {
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 15,
-    borderWidth: 0.5,
-    height: 30,
-    marginLeft: 10,
+    borderRadius: "15@s",
+    borderWidth: "0.5@s",
+    height: "28@s",
+    marginLeft: "5@s",
     width: "45%",
   },
   container: {
@@ -131,9 +132,9 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
-    height: 80,
-    paddingHorizontal: 15,
-    paddingVertical: 2,
+    height: "75@s",
+    paddingHorizontal: "10@s",
+    paddingVertical: "2@s",
     width: "100%",
   },
   contentContainer: {
@@ -149,33 +150,34 @@ const styles = StyleSheet.create({
   echoMessage: {
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
-    marginVertical: 10,
+    marginVertical: "10@s",
     textAlign: "center",
     textAlignVertical: "center",
     width: "95%",
   },
   emptyContacts: {
-    height: 80,
+    height: "80@s",
     width: "100%",
   },
   image: {
     borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: 25,
+    borderRadius: "22.5@s",
     borderWidth: 1,
-    height: 50,
-    marginHorizontal: 8,
-    width: 50,
+    height: "45@s",
+    marginRight: "2@s",
+    marginLeft: "5@s",
+    width: "45@s",
   },
   imageSub: {
-    borderRadius: 24.5,
-    height: 49,
-    width: 49,
+    borderRadius: "22@s",
+    height: "44@s",
+    width: "44@s",
   },
   infoNameText: {
     color: defaultStyles.colors.dark,
-    fontSize: 18,
-    marginBottom: 5,
-    marginLeft: 10,
+    fontSize: "16@s",
+    marginBottom: "5@s",
+    marginLeft: "5@s",
     opacity: 0.9,
     paddingBottom: 0,
   },
@@ -195,24 +197,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderColor: defaultStyles.colors.yellow,
-    borderRadius: 10,
+    borderRadius: "10@s",
     borderWidth: 1,
     elevation: 2,
-    height: 40,
+    height: "35@s",
     justifyContent: "center",
-    marginRight: 10,
-    width: 40,
+    marginRight: "8@s",
+    width: "35@s",
   },
   sendThoughtIcon: {
     opacity: 0.8,
   },
   subAddEchoButton: {
     color: defaultStyles.colors.secondary,
-    fontSize: 17,
+    fontSize: "15@s",
   },
   userDetailsContainer: {
     flex: 1,
-    height: 80,
+    height: "75@s",
     justifyContent: "center",
   },
 });

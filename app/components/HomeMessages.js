@@ -2,6 +2,7 @@ import React, { memo } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import Message from "./Message";
 
@@ -33,13 +34,12 @@ function HomeMessages({ messages = [], onMessagePress }) {
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     borderBottomWidth: 0.5,
     borderColor: defaultStyles.colors.light,
-    height: 80,
-    marginBottom: 5,
-    paddingLeft: 10,
+    height: "65@s",
+    paddingLeft: "10@s",
     width: "100%",
   },
   contentContainerStyle: {

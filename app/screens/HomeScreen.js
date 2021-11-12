@@ -6,7 +6,6 @@ import React, {
   useRef,
 } from "react";
 import {
-  StyleSheet,
   Modal,
   View,
   ScrollView,
@@ -17,6 +16,7 @@ import {
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useIsFocused } from "@react-navigation/native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import ApiActivity from "../components/ApiActivity";
 import AppImage from "../components/AppImage";
@@ -409,7 +409,7 @@ function HomeScreen({ navigation }) {
                         : defaultStyles.colors.lightGrey
                     }
                     name="send"
-                    size={30}
+                    size={scale(28)}
                   />
                 </TouchableOpacity>
               </View>
@@ -421,49 +421,50 @@ function HomeScreen({ navigation }) {
     </>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   closeMessage: {
     color: defaultStyles.colors.danger,
-    marginBottom: 15,
-    marginTop: 5,
+    fontSize: "14@s",
+    marginBottom: "15@s",
+    marginTop: "5@s",
     textAlign: "center",
     width: "100%",
   },
   contactList: {
-    marginTop: 2,
+    marginTop: "2@s",
   },
   container: {
     alignItems: "center",
   },
   createdAt: {
     color: defaultStyles.colors.lightGrey,
-    fontSize: 14,
+    fontSize: "10@s",
   },
   creatorName: {
     color: defaultStyles.colors.primary,
-    fontSize: 18,
+    fontSize: "15@s",
   },
   inputContainer: {
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.light,
-    borderRadius: 30,
+    borderRadius: "30@s",
     borderWidth: 1,
     elevation: 1,
     flexDirection: "row",
     height: defaultStyles.dimensionConstants.height,
     justifyContent: "space-between",
-    marginVertical: 15,
+    marginVertical: "15@s",
     width: "92%",
   },
   inputBox: {
-    borderRadius: 30,
+    borderRadius: "30@s",
     flex: 1,
-    fontSize: 19,
+    fontSize: "15@s",
     height: "100%",
-    marginRight: 5,
-    paddingHorizontal: 10,
+    marginRight: "5@s",
+    paddingHorizontal: "10@s",
     width: "86%",
   },
   messageBackground: {
@@ -474,8 +475,8 @@ const styles = StyleSheet.create({
   messageMainContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: "20@s",
+    borderTopRightRadius: "20@s",
     overflow: "hidden",
     width: "100%",
   },
@@ -485,14 +486,14 @@ const styles = StyleSheet.create({
     borderBottomColor: defaultStyles.colors.light,
     borderBottomWidth: 1,
     flexDirection: "row",
-    marginVertical: 5,
-    minHeight: 70,
-    paddingHorizontal: 5,
+    marginVertical: "5@s",
+    minHeight: "70@s",
+    paddingHorizontal: "5@s",
     width: "95%",
   },
   messageDetailsContainer: {
     flex: 1,
-    padding: 5,
+    padding: "5@s",
   },
   modalFallback: {
     backgroundColor: "rgba(0,0,0,0.7)",
@@ -503,47 +504,47 @@ const styles = StyleSheet.create({
   },
   image: {
     borderColor: defaultStyles.colors.light,
-    borderRadius: 25,
+    borderRadius: "22.5@s",
     borderWidth: 1,
-    height: 50,
-    marginHorizontal: 8,
-    width: 50,
+    height: "45@s",
+    marginRight: "8@s",
+    width: "45@s",
   },
   imageSub: {
-    borderRadius: 24.5,
-    height: 49,
-    width: 49,
+    borderRadius: "22@s",
+    height: "44@s",
+    width: "44@s",
   },
   message: {
     borderColor: defaultStyles.colors.blue,
     borderLeftWidth: 2,
     color: defaultStyles.colors.secondary,
     opacity: 0.8,
-    paddingHorizontal: 15,
+    paddingHorizontal: "10@s",
     textAlign: "left",
   },
   optionContainerMain: {
-    marginVertical: 5,
+    marginVertical: "5@s",
     width: "100%",
   },
   selectOption: {
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: 20,
-    fontSize: 14,
-    height: 35,
-    marginBottom: 10,
-    marginLeft: 10,
-    paddingHorizontal: 20,
+    borderRadius: "20@s",
+    fontSize: "13@s",
+    height: "35@s",
+    marginBottom: "10@s",
+    marginLeft: "10@s",
+    paddingHorizontal: "20@s",
     textAlign: "center",
     textAlignVertical: "center",
   },
   send: {
     alignItems: "center",
-    height: 40,
+    height: "40@s",
     justifyContent: "center",
-    marginRight: 5,
-    width: 40,
+    marginRight: "5@s",
+    width: "40@s",
   },
 });
 

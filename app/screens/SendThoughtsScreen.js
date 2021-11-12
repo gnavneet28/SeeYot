@@ -110,7 +110,7 @@ function SendThoughtsScreen({ navigation, route }) {
   // THOUGHTS LIST ACTION
   const thoughts = useMemo(
     () => filterThoughts(user.thoughts, recipient, user),
-    [isFocused, user.thoughts.length, recipient._id]
+    [isFocused, user.thoughts.length, recipient._id, user.thoughts]
   );
 
   const latestThought = useMemo(
