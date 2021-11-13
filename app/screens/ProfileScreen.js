@@ -7,6 +7,7 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AddPicture from "../components/AddPicture";
 import ApiActivity from "../components/ApiActivity";
@@ -473,6 +474,7 @@ function ProfileScreen({ navigation }) {
                 }
                 onPress={handleProblemSubmitPress}
                 style={styles.submitProblemButton}
+                subStyle={styles.submitProblemButtonSub}
                 title="Submit"
               />
             </View>
@@ -482,28 +484,28 @@ function ProfileScreen({ navigation }) {
     </>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   actionContainer: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 5,
+    paddingHorizontal: "5@s",
     width: "100%",
   },
   addPicture: {
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: "10@s",
+    marginBottom: "20@s",
   },
   container: {
     alignItems: "center",
     width: "100%",
   },
   closeButton: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: "20@s",
+    borderTopRightRadius: "20@s",
     color: defaultStyles.colors.danger,
-    fontSize: 18,
-    height: 40,
+    fontSize: "14@s",
+    height: "40@s",
     textAlign: "center",
     textAlignVertical: "center",
     width: "100%",
@@ -512,25 +514,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: defaultStyles.colors.light,
     borderTopWidth: 1,
-    marginTop: 5,
-    paddingTop: 10,
+    marginTop: "5@s",
+    paddingTop: "10@s",
     width: "95%",
   },
   echoWhen: {
     alignSelf: "flex-start",
-    fontSize: height * 0.023,
+    fontSize: "15@s",
     paddingHorizontal: 10,
     opacity: 0.8,
   },
   inputProblem: {
-    fontSize: 18,
+    fontSize: "18@s",
     height: "100%",
     textAlignVertical: "top",
   },
   inviteOption: {
     borderColor: defaultStyles.colors.light,
     borderTopWidth: 1,
-    marginVertical: 15,
+    marginVertical: "15@s",
     width: "95%",
   },
   modalFallback: {
@@ -543,7 +545,6 @@ const styles = StyleSheet.create({
   optionsContainerBackground: {
     flex: 1,
     width: "100%",
-    //backgroundColor: "rgba(0,0,0,0.5)",
   },
   optionsContainer: {
     alignItems: "center",
@@ -553,11 +554,11 @@ const styles = StyleSheet.create({
     borderRightColor: defaultStyles.colors.light,
     borderRightWidth: 1,
     borderTopColor: defaultStyles.colors.light,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: "20@s",
+    borderTopRightRadius: "20@s",
     borderTopWidth: 1,
     bottom: 0,
-    height: 300,
+    height: "240@s",
     overflow: "hidden",
     position: "absolute",
     width: "100%",
@@ -570,26 +571,26 @@ const styles = StyleSheet.create({
     borderRightColor: defaultStyles.colors.light,
     borderRightWidth: 1,
     borderTopColor: defaultStyles.colors.light,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: "20@s",
+    borderTopRightRadius: "20@s",
     borderTopWidth: 1,
     bottom: 0,
-    height: 220,
+    height: "200@s",
     overflow: "hidden",
-    paddingHorizontal: 10,
+    paddingHorizontal: "10@s",
     width: "100%",
   },
   problemInput: {
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.light,
-    borderRadius: 5,
+    borderRadius: "5@s",
     borderWidth: 1,
-    height: 100,
-    marginBottom: 10,
-    padding: 5,
+    height: "100@s",
+    marginBottom: "10@s",
+    padding: "5@s",
   },
   problemDescriptionLength: {
-    fontSize: 14,
+    fontSize: "12@s",
   },
   reportModal: {
     flex: 1,
@@ -599,8 +600,11 @@ const styles = StyleSheet.create({
   },
   submitProblemButton: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    height: 35,
-    width: 80,
+    height: "30@s",
+    width: "60@s",
+  },
+  submitProblemButtonSub: {
+    color: defaultStyles.colors.secondary,
   },
   userDetailsName: {
     borderBottomWidth: 1,

@@ -1,6 +1,7 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";
 
@@ -8,48 +9,42 @@ import defaultStyles from "../config/styles";
 
 function ProfileOption({
   icon = "",
-  title = "",
+  iconColor = defaultStyles.colors.yellow_Variant,
   onPress,
   style,
-  iconColor = defaultStyles.colors.yellow_Variant,
+  title = "",
 }) {
   return (
     <View style={[styles.container, style]}>
       <MaterialIcons
-        style={styles.icon}
         color={iconColor}
         name={icon}
         onPress={onPress}
-        size={25}
+        size={scale(20)}
+        style={styles.icon}
       />
-      <AppText
-        onPress={onPress}
-        style={{
-          flex: 1,
-          marginLeft: 10,
-          opacity: 0.8,
-        }}
-      >
+      <AppText onPress={onPress} style={styles.title}>
         {title}
       </AppText>
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     flexDirection: "row",
-    height: 40,
-    marginVertical: 2,
-    paddingHorizontal: 10,
+    height: "32@s",
+    marginVertical: "2@s",
+    paddingHorizontal: "10@s",
     width: "100%",
   },
   icon: {
-    marginLeft: 5,
+    marginLeft: "5@s",
   },
   title: {
     flex: 1,
-    marginLeft: 10,
+    marginLeft: "8@s",
+    opacity: 0.8,
   },
 });
 

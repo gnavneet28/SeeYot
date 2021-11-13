@@ -1,20 +1,14 @@
 import React, { useState, memo } from "react";
-import {
-  Image,
-  Modal,
-  StyleSheet,
-  TouchableHighlight,
-  View,
-} from "react-native";
+import { Image, Modal, TouchableHighlight, View } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import ImagePicker from "react-native-image-crop-picker";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
 import Alert from "./Alert";
 import AppImage from "./AppImage";
 
-const height = defaultStyles.height;
 const width = defaultStyles.width;
 
 function AddPicture({
@@ -33,7 +27,7 @@ function AddPicture({
       height: 300,
       cropping: true,
       mediaType: "photo",
-      compressImageQuality: 0.9,
+      compressImageQuality: 1,
     })
       .then((image) => {
         onChangeImage(image.path);
@@ -83,7 +77,7 @@ function AddPicture({
           <MaterialIcons
             color={defaultStyles.colors.secondary}
             name={icon}
-            size={height * 0.022}
+            size={scale(14)}
           />
         </TouchableHighlight>
       </View>
@@ -97,7 +91,7 @@ function AddPicture({
           <MaterialIcons
             onPress={() => setVisible(false)}
             name="arrow-back"
-            size={26}
+            size={scale(23)}
             color={defaultStyles.colors.white}
             style={styles.closeIcon}
           />
@@ -114,11 +108,11 @@ function AddPicture({
     </>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   closeIcon: {
     position: "absolute",
-    top: 15,
-    left: 22,
+    top: "13@s",
+    left: "19@s",
   },
   contentContainer: {
     backgroundColor: "rgba(0,0,0,1)",
@@ -128,34 +122,38 @@ const styles = StyleSheet.create({
   },
   container: {
     alignItems: "center",
-    height: height > 640 ? height * 0.173 : height * 0.19,
+    height: "120@s",
     justifyContent: "center",
-    width: height > 640 ? height * 0.173 : height * 0.19,
+    width: "120@s",
   },
   icon: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 20,
-    bottom: height * 0.01,
-    height: height * 0.04,
+    borderWidth: 2,
+    borderColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "20@s",
+    bottom: "8@s",
+    height: "25@s",
     justifyContent: "center",
     position: "absolute",
-    right: height * 0.01,
-    width: height * 0.04,
+    right: "8@s",
+    width: "25@s",
   },
   imageContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 65,
-    height: height > 640 ? height * 0.15 : height * 0.18,
+    borderColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "65@s",
+    borderWidth: 2,
+    height: "115@s",
     justifyContent: "center",
-    width: height > 640 ? height * 0.15 : height * 0.18,
+    width: "115@s",
   },
   image: {
-    borderRadius: 60,
-    height: height > 640 ? height * 0.138 : height * 0.17,
+    borderRadius: "60@s",
+    height: "108@s",
     resizeMode: "cover",
-    width: height > 640 ? height * 0.138 : height * 0.17,
+    width: "108@s",
   },
   inlargedImage: {
     borderRadius: 0,

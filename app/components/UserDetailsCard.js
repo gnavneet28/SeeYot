@@ -1,5 +1,6 @@
 import React, { useState, memo } from "react";
-import { View, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import { View, TouchableOpacity, Modal } from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppText from "./AppText";
@@ -7,8 +8,6 @@ import AppTextInput from "./AppTextInput";
 import Icon from "./Icon";
 
 import defaultStyles from "../config/styles";
-
-const height = defaultStyles.height;
 
 function UserDetailsCard({
   data,
@@ -46,9 +45,9 @@ function UserDetailsCard({
           <AppText
             numberOfLines={1}
             style={{
-              fontSize: height * 0.02,
+              fontSize: scale(15),
               paddingBottom: 0,
-              opacity: 0.8,
+              opacity: 0.9,
             }}
           >
             {title}
@@ -62,7 +61,7 @@ function UserDetailsCard({
             <Icon
               color={defaultStyles.colors.secondary}
               name="mode-edit"
-              size={height * 0.019}
+              size={scale(14)}
             />
           </TouchableOpacity>
         ) : null}
@@ -83,7 +82,7 @@ function UserDetailsCard({
                 onChangeText={(text) => setName(text)}
                 placeholder={userName}
                 style={styles.inputBox}
-                subStyle={{ opacity: 0.8, paddingHorizontal: 5 }}
+                subStyle={{ opacity: 0.8, paddingHorizontal: scale(5) }}
                 value={name}
               />
               <AppText style={styles.nameLength}>{name.length}/30</AppText>
@@ -107,6 +106,7 @@ function UserDetailsCard({
                 }
                 onPress={onSave}
                 style={styles.button}
+                subStyle={styles.saveButtonSub}
                 title="Save"
               />
             </View>
@@ -116,45 +116,45 @@ function UserDetailsCard({
     </>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   actionButtonContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
   },
   button: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    height: 35,
-    marginHorizontal: 10,
-    width: 80,
+    height: "30@s",
+    marginHorizontal: "10@s",
+    width: "60@s",
   },
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.light,
     flexDirection: "row",
-    height: defaultStyles.dimensionConstants.height + 5,
+    height: "50@s",
     justifyContent: "space-between",
     width: "90%",
   },
   data: {
     color: defaultStyles.colors.dark_Variant,
     fontFamily: "Comic-Bold",
-    fontSize: height * 0.02,
+    fontSize: "14@s",
     paddingTop: 0,
   },
   editName: {
     backgroundColor: defaultStyles.colors.light,
     color: defaultStyles.colors.dark_Variant,
-    fontSize: 18,
-    height: 35,
+    fontSize: "14@s",
+    height: "35@s",
     textAlign: "center",
     textAlignVertical: "center",
   },
   editContainer: {
     backgroundColor: defaultStyles.colors.white,
-    borderTopRightRadius: 20,
-    borderTopStartRadius: 20,
-    height: 150,
+    borderTopRightRadius: "20@s",
+    borderTopStartRadius: "20@s",
+    height: "150@s",
     overflow: "hidden",
     width: "100%",
   },
@@ -166,21 +166,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     height: defaultStyles.dimensionConstants.height,
     justifyContent: "space-between",
-    marginBottom: 10,
-    paddingHorizontal: 5,
+    marginBottom: "10@s",
+    paddingHorizontal: "5@s",
   },
   inputBox: {
-    paddingHorizontal: 5,
+    paddingHorizontal: "5@s",
     width: "85%",
   },
   modal: {
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: "rgba(0,0,0,0.7)",
     flex: 1,
     justifyContent: "flex-end",
   },
   nameLength: {
     opacity: 0.7,
-    fontSize: 14,
+    fontSize: "12@s",
+  },
+  saveButtonSub: {
+    color: defaultStyles.colors.secondary,
   },
   userDetail: {
     flex: 1,
