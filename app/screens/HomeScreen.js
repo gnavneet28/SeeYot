@@ -425,7 +425,7 @@ const styles = ScaledSheet.create({
   closeMessage: {
     color: defaultStyles.colors.danger,
     fontSize: "14@s",
-    marginBottom: "15@s",
+    marginBottom: "5@s",
     marginTop: "5@s",
     textAlign: "center",
     width: "100%",

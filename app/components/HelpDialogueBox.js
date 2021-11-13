@@ -1,6 +1,7 @@
 import React from "react";
-import { View, StyleSheet, Modal } from "react-native";
+import { View, Modal } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";
 
@@ -14,14 +15,14 @@ function HelpDialogueBox({ visible, information, onPress, style, iconStyle }) {
           <MaterialIcons
             color={defaultStyles.colors.light}
             name="play-arrow"
-            size={25}
+            size={scale(25)}
             style={[styles.icon, iconStyle]}
           />
           <MaterialIcons
             color={defaultStyles.colors.dark}
             name="close"
             onPress={onPress}
-            size={25}
+            size={scale(20)}
             style={styles.closeIcon}
           />
           <AppText style={styles.info}>{information}</AppText>
@@ -30,7 +31,7 @@ function HelpDialogueBox({ visible, information, onPress, style, iconStyle }) {
     </Modal>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   mainContainer: {
     backgroundColor: "rgba(0,0,0,0.7)",
     flex: 1,
@@ -38,28 +39,28 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 5,
-    padding: 5,
+    borderRadius: "5@s",
+    padding: "5@s",
     position: "absolute",
-    right: 12,
-    top: 48,
-    width: 300,
+    right: "12@s",
+    top: "48@s",
+    width: "300@s",
   },
   closeIcon: {
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: 5,
-    width: 25,
+    borderRadius: "5@s",
+    width: "20@s",
   },
   icon: {
     position: "absolute",
-    right: 10,
-    top: -15,
+    right: "10@s",
+    top: "-15@s",
     transform: [{ rotate: "34deg" }],
   },
   info: {
     color: defaultStyles.colors.dark_Variant,
-    fontSize: 14,
-    letterSpacing: 0.2,
+    fontSize: "12@s",
+    letterSpacing: "0.2@s",
     textAlign: "left",
   },
 });

@@ -1,6 +1,7 @@
 import React from "react";
-import { StyleSheet, TouchableHighlight } from "react-native";
+import { TouchableHighlight } from "react-native";
 import LottieView from "lottie-react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";
 
@@ -40,7 +41,7 @@ function Mood({ mood, onPress, isSelected = false }) {
           autoPlay
           loop
           source={emoji}
-          style={{ width: 30, height: 30, marginRight: 2 }}
+          style={{ width: scale(25), height: scale(25), marginRight: scale(2) }}
         />
         <AppText
           style={[
@@ -58,21 +59,21 @@ function Mood({ mood, onPress, isSelected = false }) {
     </TouchableHighlight>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: 20,
+    borderRadius: "20@s",
     flex: 1,
     flexDirection: "row",
-    height: 40,
-    marginHorizontal: 5,
-    minWidth: 80,
-    padding: 5,
+    height: "32@s",
+    marginHorizontal: "5@s",
+    minWidth: "80@s",
+    padding: "5@s",
   },
   moodLabel: {
-    fontSize: 12,
-    marginRight: 10,
+    fontSize: "12@s",
+    marginRight: "10@s",
   },
 });
 

@@ -1,11 +1,12 @@
 import React from "react";
-import { StyleSheet, Dimensions, View, RefreshControl } from "react-native";
+import { Dimensions, View, RefreshControl } from "react-native";
 import {
   RecyclerListView,
   DataProvider,
   LayoutProvider,
 } from "recyclerlistview";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
@@ -41,7 +42,7 @@ class AddContactList extends React.Component {
         switch (type) {
           case ViewTypes.Full:
             dim.width = width;
-            dim.height = 64;
+            dim.height = scale(56);
             break;
           default:
             dim.width = 0;
@@ -131,7 +132,7 @@ class AddContactList extends React.Component {
             <Ionicons
               color={defaultStyles.colors.yellow_Variant}
               name="search-sharp"
-              size={25}
+              size={scale(22)}
             />
             <AppTextInput
               maxLength={10}
@@ -170,25 +171,26 @@ class AddContactList extends React.Component {
   }
 }
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   allReplies: {
     alignSelf: "flex-end",
     backgroundColor: defaultStyles.colors.dark_Variant,
-    borderBottomLeftRadius: 20,
-    borderTopLeftRadius: 20,
-    color: defaultStyles.colors.yellow_Variant,
-    height: 35,
-    marginVertical: 5,
-    paddingHorizontal: 20,
+    borderBottomLeftRadius: "20@s",
+    borderTopLeftRadius: "20@s",
+    color: defaultStyles.colors.white,
+    fontSize: "14@s",
+    height: "30@s",
+    marginVertical: "5@s",
+    paddingHorizontal: "20@s",
     textAlignVertical: "center",
   },
   container: {
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: 25,
+    borderRadius: "25@s",
     borderWidth: 1,
     elevation: 2,
-    marginVertical: 8,
+    marginVertical: "8@s",
     overflow: "hidden",
     width: "95%",
   },
@@ -199,31 +201,32 @@ const styles = StyleSheet.create({
   },
   favoritePeople: {
     color: defaultStyles.colors.blue,
-    height: 35,
-    marginVertical: 5,
-    paddingHorizontal: 20,
+    fontSize: "14@s",
+    height: "30@s",
+    marginVertical: "5@s",
+    paddingHorizontal: "20@s",
     textAlignVertical: "center",
   },
   inputBoxContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
-    height: 42,
+    height: "38@s",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
+    paddingHorizontal: "10@s",
     width: "100%",
   },
   inputBox: {
-    borderRadius: 20,
+    borderRadius: "20@s",
     flexShrink: 1,
-    height: 40,
-    marginHorizontal: 5,
-    paddingHorizontal: 10,
+    height: "36@s",
+    marginHorizontal: "5@s",
+    paddingHorizontal: "10@s",
     width: "100%",
   },
   listView: {
     flex: 1,
-    marginTop: 10,
+    marginTop: "10@s",
     width: "100%",
   },
 });

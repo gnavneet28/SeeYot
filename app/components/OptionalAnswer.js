@@ -1,6 +1,7 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";
 
@@ -11,29 +12,29 @@ function OptionalAnswer({ answer, onPress }) {
     <View style={styles.container}>
       <AppText style={styles.answer}>{answer}</AppText>
       <Ionicons
-        onPress={onPress}
-        name="close"
-        size={25}
         color={defaultStyles.colors.lightGrey}
+        name="close"
+        onPress={onPress}
+        size={scale(22)}
       />
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   answer: {
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: 10,
+    borderRadius: "10@s",
     color: defaultStyles.colors.blue,
-    marginLeft: 10,
+    marginLeft: "10@s",
     maxWidth: "85%",
-    paddingHorizontal: 10,
+    paddingHorizontal: "10@s",
   },
   container: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    marginVertical: 5,
-    padding: 5,
+    marginVertical: "5@s",
+    padding: "5@s",
     width: "95%",
   },
 });

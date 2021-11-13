@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import LottieView from "lottie-react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
@@ -155,7 +156,7 @@ function AddContactCard({
       <View style={styles.buttonContainer}>
         {processing ? (
           <ActivityIndicator
-            size={18}
+            size={scale(16)}
             color={
               inFavourites
                 ? defaultStyles.colors.tomato
@@ -179,89 +180,83 @@ function AddContactCard({
         )}
       </View>
       <AntDesign
-        style={{ marginHorizontal: 15 }}
-        name="message1"
-        size={25}
         color={defaultStyles.colors.dark_Variant}
+        name="message1"
         onPress={onMessagePress}
+        size={scale(22)}
+        style={{ marginHorizontal: scale(10) }}
       />
       <InfoAlert
-        leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
+        leftPress={handleCloseInfoAlert}
         visible={infoAlert.showInfoAlert}
       />
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   buttonContainer: {
     alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 10,
-    height: 35,
-    marginRight: 5,
-    width: 65,
-    borderWidth: 1,
     borderColor: defaultStyles.colors.light,
+    borderRadius: "10@s",
+    borderWidth: 1,
+    height: "32@s",
+    justifyContent: "center",
+    marginRight: "4@s",
     overflow: "hidden",
+    width: "60@s",
   },
   addButton: {
-    borderRadius: 10,
-    height: 35,
-    width: 65,
+    borderRadius: "10@s",
+    height: "32@s",
+    width: "60@s",
   },
   addButtonSub: {
-    fontSize: 16,
+    fontSize: "14@s",
+    letterSpacing: "0.2@s",
   },
   container: {
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 10,
+    borderColor: defaultStyles.colors.light,
+    borderRadius: "10@s",
     elevation: 1,
     flexDirection: "row",
-    height: 60,
-    marginVertical: 2,
-    padding: 2,
-    paddingHorizontal: 5,
+    height: "50@s",
+    marginVertical: "3@s",
+    padding: "2@s",
+    paddingHorizontal: "5@s",
     width: "95%",
   },
   emptyData: {
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 5,
-    height: 70,
+    borderRadius: "5@s",
+    height: "50@s",
     justifyContent: "center",
     width: "95%",
   },
   image: {
-    borderRadius: 20,
-    height: 40,
-    marginRight: 5,
-    marginLeft: 10,
-    width: 40,
+    borderRadius: "19@s",
+    height: "38@s",
+    marginHorizontal: "5@s",
+    width: "38@s",
   },
   imageSub: {
-    borderRadius: 20,
-    height: 40,
-    width: 40,
+    borderRadius: "19@s",
+    height: "38@s",
+    width: "38@s",
   },
   infoContainer: {
     flex: 1,
   },
   infoNameText: {
     color: defaultStyles.colors.primary,
-    fontSize: 18,
-    opacity: 0.9,
+    fontSize: "15@s",
+    opacity: 0.8,
     paddingBottom: 0,
-  },
-  inviteButton: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 5,
-    height: 35,
-    marginRight: 5,
-    width: 60,
   },
 });
 

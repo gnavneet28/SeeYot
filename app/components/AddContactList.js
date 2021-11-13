@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Dimensions, View, RefreshControl } from "react-native";
+import { Dimensions, View, RefreshControl } from "react-native";
 import {
   RecyclerListView,
   DataProvider,

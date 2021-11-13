@@ -1,13 +1,14 @@
 import React from "react";
-import { View, StyleSheet, TextInput } from "react-native";
+import { View, TextInput } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
 function AppTextInput({
   iconColor = defaultStyles.colors.dark,
   iconName = "",
-  iconSize = 30,
+  iconSize = scale(30),
   multiline = false,
   numberOfLines = 1,
   style,
@@ -21,7 +22,7 @@ function AppTextInput({
           color={iconColor}
           name={iconName}
           size={iconSize}
-          style={{ marginHorizontal: 5 }}
+          style={{ marginHorizontal: scale(5) }}
         />
       ) : null}
       <TextInput
@@ -33,7 +34,7 @@ function AppTextInput({
           {
             ...defaultStyles.text,
             fontFamily: "Comic-Bold",
-            fontSize: 19,
+            fontSize: scale(15),
             flex: 1,
             fontWeight: "normal",
           },
@@ -43,16 +44,16 @@ function AppTextInput({
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 5,
+    borderRadius: "5@s",
     flexDirection: "row",
     height: defaultStyles.dimensionConstants.height,
     width: "100%",
     overflow: "hidden",
-    padding: 5,
+    padding: "5@s",
   },
 });
 
