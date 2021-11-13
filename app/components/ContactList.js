@@ -41,7 +41,7 @@ class ContactList extends React.Component {
         switch (type) {
           case ViewTypes.Full:
             dim.width = width;
-            dim.height = scale(75);
+            dim.height = scale(70);
             break;
           default:
             dim.width = 0;

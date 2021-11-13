@@ -132,7 +132,7 @@ const styles = ScaledSheet.create({
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
-    height: "75@s",
+    height: "70@s",
     paddingHorizontal: "10@s",
     paddingVertical: "2@s",
     width: "100%",
@@ -214,7 +214,7 @@ const styles = ScaledSheet.create({
   },
   userDetailsContainer: {
     flex: 1,
-    height: "75@s",
+    height: "70@s",
     justifyContent: "center",
   },
 });

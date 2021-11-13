@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import LottieView from "lottie-react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
@@ -133,7 +134,7 @@ function AddContactCard({ contact, onInvitePress, style }) {
           style={[styles.inviteButton]}
           subStyle={{
             color: defaultStyles.colors.dark,
-            fontSize: 16,
+            fontSize: scale(14),
             letterSpacing: 1,
           }}
         />
@@ -146,25 +147,25 @@ function AddContactCard({ contact, onInvitePress, style }) {
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   buttonContainer: {
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 10,
-    height: 35,
-    marginRight: 5,
-    width: 65,
+    borderRadius: "10@s",
+    height: "32@s",
+    marginRight: "4@s",
+    width: "60@s",
     borderWidth: 1,
     borderColor: defaultStyles.colors.light,
     overflow: "hidden",
   },
   addButton: {
-    borderRadius: 10,
-    height: 35,
-    width: 65,
+    borderRadius: "10@s",
+    height: "32@s",
+    width: "60@s",
   },
   addButtonSub: {
-    fontSize: 16,
+    fontSize: "14@s",
     letterSpacing: 0.2,
   },
   container: {
@@ -172,56 +173,56 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.light,
-    borderRadius: 10,
+    borderRadius: "10@s",
     elevation: 1,
     flexDirection: "row",
-    height: 60,
-    marginVertical: 3,
-    padding: 2,
-    paddingHorizontal: 5,
+    height: "50@s",
+    marginVertical: "3@s",
+    padding: "2@s",
+    paddingHorizontal: "5@s",
     width: "95%",
   },
   emptyData: {
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 5,
-    height: 70,
+    borderRadius: "5@s",
+    height: "50@s",
     justifyContent: "center",
     width: "95%",
   },
   image: {
-    borderRadius: 20,
-    height: 40,
-    marginHorizontal: 5,
-    width: 40,
+    borderRadius: "19@s",
+    height: "38@s",
+    marginHorizontal: "5@s",
+    width: "38@s",
   },
   imageSub: {
-    borderRadius: 20,
-    height: 40,
-    width: 40,
+    borderRadius: "19@s",
+    height: "38@s",
+    width: "38@s",
   },
   infoContainer: {
     flex: 1,
   },
   infoNameText: {
     color: defaultStyles.colors.primary,
-    fontSize: 18,
+    fontSize: "15@s",
     opacity: 0.8,
     paddingBottom: 0,
   },
   infoNumberText: {
     color: defaultStyles.colors.secondary,
-    fontSize: 14,
+    fontSize: "10@s",
     opacity: 0.7,
     paddingTop: 0,
   },
   inviteButton: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 10,
-    height: 35,
-    marginRight: 5,
-    width: 65,
+    borderRadius: "10@s",
+    height: "32@s",
+    marginRight: "5@s",
+    width: "60@s",
   },
 });
 

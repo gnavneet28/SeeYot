@@ -1,15 +1,12 @@
 import React, { memo } from "react";
-import { View, StyleSheet, TouchableHighlight } from "react-native";
+import { View, TouchableHighlight } from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
 import Icon from "./Icon";
 
 import defaultStyles from "../config/styles";
-
-const height = defaultStyles.height;
-
-import debounce from "../utilities/debounce";
 
 function AppHeader({
   fwl,
@@ -37,7 +34,7 @@ function AppHeader({
               color={defaultStyles.colors.white}
               fw={fwl}
               name={leftIcon}
-              size={height * 0.03}
+              size={scale(23)}
             />
           ) : null}
 
@@ -66,7 +63,7 @@ function AppHeader({
               color={defaultStyles.colors.white}
               fw={fwr}
               name={rightIcon}
-              size={height * 0.03}
+              size={scale(23)}
             />
           ) : null}
 
@@ -83,50 +80,50 @@ function AppHeader({
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.primary,
     flexDirection: "row",
-    height: 55,
+    height: "50@s",
     justifyContent: "center",
-    padding: 2,
+    padding: "2@s",
     width: "100%",
   },
   headerText: {
     color: defaultStyles.colors.white,
     fontFamily: "Comic-Bold",
-    fontSize: 20,
+    fontSize: "18@s",
     textAlign: "center",
     width: "60%",
   },
   image: {
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: defaultStyles.colors.yellow_Variant,
-    height: 40,
-    width: 40,
+    borderRadius: "20@s",
+    borderWidth: 1,
+    borderColor: defaultStyles.colors.lightGrey,
+    height: "38@s",
+    width: "38@s",
   },
   imageSub: {
-    borderRadius: 19,
-    height: 38,
-    width: 38,
+    borderRadius: "19@s",
+    height: "37@s",
+    width: "37@s",
   },
   leftOption: {
     alignItems: "center",
-    height: 50,
+    height: "50@s",
     justifyContent: "center",
-    left: 10,
+    left: "5@s",
     position: "absolute",
-    width: 50,
+    width: "50@s",
   },
   rightOption: {
     alignItems: "center",
-    height: 50,
+    height: "50@s",
     justifyContent: "center",
     position: "absolute",
-    right: 10,
-    width: 50,
+    right: "5@s",
+    width: "50@s",
   },
 });
 

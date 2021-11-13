@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { StyleSheet, Share, Linking } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as SMS from "expo-sms";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AddContactList from "../components/AddContactList";
 import AppActivityIndicator from "../components/ActivityIndicator";
