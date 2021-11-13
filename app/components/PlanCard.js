@@ -1,13 +1,11 @@
 import React from "react";
-import { StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppText from "./AppText";
 
 import defaultStyles from "../config/styles";
-
-const height = defaultStyles.height;
 
 function PlanCard({ planName, planDuration, planRate, onProcess, style }) {
   return (
@@ -29,35 +27,35 @@ function PlanCard({ planName, planDuration, planRate, onProcess, style }) {
     </LinearGradient>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   button: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 20,
-    height: 30,
+    borderRadius: "20@s",
+    height: "30@s",
+    marginBottom: "5@s",
     width: "70%",
   },
   container: {
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: "10@s",
     elevation: 5,
-    height: 150,
-    marginHorizontal: 5,
-    marginVertical: 10,
-    padding: 5,
-    width: 150,
+    marginHorizontal: "5@s",
+    marginVertical: "10@s",
+    padding: "5@s",
+    width: "140@s",
   },
   planDuration: {
     color: defaultStyles.colors.yellow,
-    marginBottom: 5,
+    marginBottom: "5@s",
   },
   planName: {
-    fontSize: 20,
-    marginBottom: 2,
+    fontSize: "16@s",
+    marginBottom: "2@s",
   },
   planRate: {
     color: defaultStyles.colors.white,
-    fontSize: 22,
-    marginBottom: 5,
+    fontSize: "18@s",
+    marginBottom: "5@s",
   },
 });
 

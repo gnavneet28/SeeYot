@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
-import { StyleSheet, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppButton from "../components/AppButton";
 import AppHeader from "../components/AppHeader";
@@ -102,36 +103,39 @@ function SubscriptionScreen({ navigation, route }) {
     </Screen>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   manageSubscription: {
     alignSelf: "flex-end",
     backgroundColor: defaultStyles.colors.blue,
-    borderRadius: 5,
+    borderRadius: "5@s",
     color: defaultStyles.colors.white,
-    marginBottom: 10,
-    marginRight: 20,
-    paddingHorizontal: 20,
+    fontSize: "14@s",
+    marginBottom: "10@s",
+    marginRight: "20@s",
+    paddingHorizontal: "15@s",
   },
   collectPoints: {
     backgroundColor: defaultStyles.colors.secondary,
-    borderRadius: 20,
-    height: 35,
-    marginVertical: 5,
+    borderRadius: "20@s",
+    height: "35@s",
+    marginVertical: "5@s",
     width: "95%",
   },
   scrollView: {
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: "15@s",
     width: "100%",
   },
   selectPlanText: {
     alignSelf: "flex-start",
+    borderBottomColor: defaultStyles.colors.lightGrey,
+    borderBottomWidth: 1,
     color: defaultStyles.colors.secondary,
-    fontSize: 20,
-    marginVertical: 10,
+    fontSize: "16@s",
+    marginTop: "15@s",
   },
   vipAdCard: {
-    marginVertical: 5,
+    marginVertical: "5@s",
   },
 });
 

@@ -1,5 +1,6 @@
 import React from "react";
 import { TouchableOpacity, StyleSheet, Text } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
@@ -25,19 +26,19 @@ function AppButton({
     </TouchableOpacity>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.secondary,
-    borderRadius: 5,
-    height: height > 640 ? height * 0.058 : height * 0.07,
+    borderRadius: "5@s",
+    height: "50@s",
     justifyContent: "center",
     width: "100%",
   },
   text: {
     ...defaultStyles.text,
     color: defaultStyles.colors.white,
-    fontSize: height * 0.022,
+    fontSize: "14@s",
   },
 });
 
