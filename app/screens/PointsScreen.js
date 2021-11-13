@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
 import { AdMobRewarded } from "expo-ads-admob";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import Screen from "../components/Screen";
 import AppHeader from "../components/AppHeader";
@@ -269,7 +270,7 @@ function PointsScreen({ navigation }) {
         <View style={styles.collectPointsInfoContainer}>
           <MaterialCommunityIcon
             name="google-ads"
-            size={15}
+            size={scale(14)}
             color={defaultStyles.colors.yellow_Variant}
             style={{ alignSelf: "flex-start" }}
           />
@@ -282,25 +283,25 @@ function PointsScreen({ navigation }) {
     </Screen>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   actionConatiner: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 5,
+    paddingHorizontal: "5@s",
     width: "100%",
   },
   collectPointsButton: {
     backgroundColor: defaultStyles.colors.tomato,
-    borderRadius: 20,
-    height: 40,
-    marginBottom: 10,
-    marginTop: 100,
-    width: 120,
+    borderRadius: "20@s",
+    height: "35@s",
+    marginBottom: "10@s",
+    marginTop: "100@s",
+    width: "110@s",
   },
   collectPointsButtonSub: {
     color: defaultStyles.colors.white,
-    fontSize: 17,
+    fontSize: "15@s",
   },
   collectPointsInfoContainer: {
     alignItems: "center",
@@ -309,13 +310,13 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     flexDirection: "row",
     justifyContent: "center",
-    paddingHorizontal: 5,
-    paddingVertical: 5,
+    paddingHorizontal: "5@s",
+    paddingVertical: "5@s",
     width: "80%",
   },
   collectPointsInfo: {
     color: defaultStyles.colors.blue,
-    fontSize: 15,
+    fontSize: "12@s",
     paddingTop: 0,
     textAlign: "left",
     width: "70%",
@@ -328,45 +329,46 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: defaultStyles.colors.yellow_Variant,
     color: defaultStyles.colors.blue,
-    fontSize: 18,
-    marginVertical: 10,
-    paddingHorizontal: 10,
+    fontSize: "15@s",
+    marginVertical: "10@s",
+    paddingHorizontal: "10@s",
     textAlign: "center",
     textAlignVertical: "center",
     width: "95%",
   },
   input: {
-    paddingHorizontal: 5,
-    width: "75%",
+    paddingHorizontal: "5@s",
+    width: "74%",
   },
   inputSub: {
-    fontSize: 18,
+    fontSize: "14@s",
     textAlign: "center",
   },
   redeemConatainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
     borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: 5,
+    borderRadius: "5@s",
     borderWidth: 1,
-    padding: 10,
-    width: "85%",
+    elevation: 2,
+    padding: "10@s",
+    width: "90%",
   },
   redeemInfo: {
     color: defaultStyles.colors.dark_Variant,
-    fontSize: 15,
-    marginBottom: 15,
+    fontSize: "12@s",
+    letterSpacing: "0.3@s",
+    marginBottom: "10@s",
     textAlign: "left",
-    letterSpacing: 0.3,
   },
   redeemButton: {
     backgroundColor: defaultStyles.colors.tomato,
-    height: 35,
-    width: "20%",
+    height: "35@s",
+    width: "24%",
   },
   redeemButtonSub: {
     color: defaultStyles.colors.white,
-    fontSize: 16,
+    fontSize: "14@s",
   },
 });
 
