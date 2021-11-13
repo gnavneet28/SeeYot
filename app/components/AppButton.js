@@ -36,7 +36,7 @@ const styles = ScaledSheet.create({
   text: {
     ...defaultStyles.text,
     color: defaultStyles.colors.white,
-    fontSize: "14@s",
+    fontSize: "14.5@s",
   },
 });
 

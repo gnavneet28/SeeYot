@@ -1,7 +1,6 @@
 import React, { memo, useCallback, useState, useEffect } from "react";
 import {
   View,
-  StyleSheet,
   Text,
   ActivityIndicator,
   TouchableHighlight,
@@ -9,6 +8,7 @@ import {
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
@@ -23,8 +23,6 @@ import DataConstants from "../utilities/DataConstants";
 import debounce from "../utilities/debounce";
 
 import defaultStyles from "../config/styles";
-
-const height = defaultStyles.height;
 
 let defaultNotification = {
   type: "",
@@ -164,12 +162,15 @@ function NotificationCard({
         {!processing ? (
           <MaterialCommunityIcons
             name="delete-circle-outline"
-            size={20}
+            size={scale(17)}
             onPress={handleDeletePress}
             color={defaultStyles.colors.danger}
           />
         ) : (
-          <ActivityIndicator size={18} color={defaultStyles.colors.tomato} />
+          <ActivityIndicator
+            size={scale(16)}
+            color={defaultStyles.colors.tomato}
+          />
         )}
       </View>
       <InfoAlert
@@ -180,68 +181,68 @@ function NotificationCard({
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
-    height: 70,
+    height: "60@s",
     width: "100%",
   },
   date: {
     ...defaultStyles.text,
     color: defaultStyles.colors.placeholder,
     fontFamily: "Comic-Bold",
-    fontSize: height * 0.014,
+    fontSize: "10@s",
     opacity: 0.8,
   },
   deleteContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
     borderColor: defaultStyles.colors.light,
-    borderRadius: 10,
+    borderRadius: "10@s",
     borderWidth: 1,
-    height: 30,
+    height: "30@s",
     justifyContent: "center",
-    marginHorizontal: 15,
-    width: 30,
+    marginHorizontal: "15@s",
+    width: "30@s",
   },
   emptyNotificationInfo: {
-    fontSize: 18,
+    fontSize: "18@s",
     textAlign: "center",
   },
   emptyNotificationContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    height: 70,
+    height: "60@s",
     justifyContent: "center",
     width: "100%",
   },
   image: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 20,
+    borderRadius: "18@s",
     elevation: 2,
-    height: 40,
-    marginLeft: 15,
-    marginRight: 10,
-    width: 40,
+    height: "36@s",
+    marginLeft: "10@s",
+    marginRight: "2@s",
+    width: "36@s",
   },
   imageSub: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    borderRadius: "18@s",
+    height: "36@s",
+    width: "36@s",
   },
   notificationInfo: {
-    borderRadius: 10,
+    borderRadius: "10@s",
     flexShrink: 1,
     justifyContent: "center",
-    padding: 5,
+    padding: "5@s",
     width: "80%",
   },
   notificationMessage: {
     ...defaultStyles.text,
     fontFamily: "Comic-Bold",
-    fontSize: 16,
+    fontSize: "14@s",
     opacity: 0.8,
   },
   text: {

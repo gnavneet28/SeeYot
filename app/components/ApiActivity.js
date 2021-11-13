@@ -1,6 +1,7 @@
 import React from "react";
-import { View, StyleSheet, Modal } from "react-native";
+import { View, Modal } from "react-native";
 import LottieView from "lottie-react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppText from "./AppText";
@@ -63,7 +64,7 @@ function ApiActivity({
     </Modal>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   buttonSub: {
     color: defaultStyles.colors.secondary,
   },
@@ -78,33 +79,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: 20,
-    borderWidth: 2,
+    borderRadius: "20@s",
+    borderWidth: "2@s",
     justifyContent: "center",
     overflow: "hidden",
-    padding: 5,
+    padding: "5@s",
     width: "60%",
   },
   doneButton: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 20,
-    height: 35,
-    marginBottom: 10,
-    width: 60,
+    borderRadius: "20@s",
+    height: "35@s",
+    marginVertical: "5@s",
+    width: "50@s",
   },
   loaderContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 10,
-    height: 50,
+    borderRadius: "10@s",
+    height: "50@s",
     justifyContent: "space-between",
-    width: 80,
+    width: "80@s",
   },
   message: {
-    marginBottom: 15,
-    marginHorizontal: 5,
-    marginTop: 5,
-    opacity: 0.8,
+    marginBottom: "15@s",
+    marginHorizontal: "5@s",
+    marginTop: "5@s",
     opacity: 0.8,
     textAlign: "center",
     width: "95%",

@@ -1,14 +1,11 @@
 import React from "react";
-import { View, StyleSheet, Modal } from "react-native";
+import { View, Modal } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 import AppText from "./AppText";
 
-function SeeThought({
-  visible = false,
-  setVisible,
-  message = "Hi man how are you! Its nice to meet you.",
-}) {
+function SeeThought({ visible = false, setVisible, message = "" }) {
   return (
     <Modal
       animationType="none"
@@ -28,12 +25,13 @@ function SeeThought({
     </Modal>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   close: {
     backgroundColor: defaultStyles.colors.white,
-    color: defaultStyles.colors.tomato,
-    height: 30,
-    marginBottom: 5,
+    color: defaultStyles.colors.danger,
+    fontSize: "14@s",
+    height: "30@s",
+    marginBottom: "5@s",
     textAlign: "center",
     width: "100%",
   },
@@ -47,16 +45,16 @@ const styles = StyleSheet.create({
   mainContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 5,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: "5@s",
+    borderTopLeftRadius: "20@s",
+    borderTopRightRadius: "20@s",
     justifyContent: "center",
     overflow: "hidden",
     width: "100%",
   },
   message: {
     color: defaultStyles.colors.dark_Variant,
-    marginBottom: 15,
+    marginBottom: "15@s",
     textAlign: "center",
     width: "80%",
   },
@@ -64,8 +62,8 @@ const styles = StyleSheet.create({
     borderBottomColor: defaultStyles.colors.light,
     borderBottomWidth: 1,
     color: defaultStyles.colors.blue,
-    fontSize: 20,
-    marginBottom: 10,
+    fontSize: "16@s",
+    marginBottom: "10@s",
     textAlign: "center",
     width: "50%",
   },

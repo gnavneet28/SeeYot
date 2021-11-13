@@ -1,7 +1,8 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
@@ -30,45 +31,45 @@ const ReplyCardSub = ({ message, reply }) => {
     </View>
   );
 };
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   image: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 20,
-    height: 40,
-    marginLeft: 15,
-    marginRight: 10,
-    width: 40,
+    borderRadius: "18@s",
+    height: "36@s",
+    marginLeft: "5@s",
+    marginRight: "2@s",
+    width: "36@s",
   },
   imageSub: {
-    borderRadius: 20,
-    height: 40,
-    width: 40,
+    borderRadius: "18@s",
+    height: "36@s",
+    width: "36@s",
   },
   recipientName: {
     color: defaultStyles.colors.secondary,
-    paddingBottom: 5,
+    paddingBottom: "5@s",
   },
   replyCard: {
     flexDirection: "row",
-    padding: 10,
+    padding: "10@s",
     width: "100%",
   },
   replyDetails: {
     alignItems: "flex-start",
     flex: 1,
-    paddingHorizontal: 5,
+    paddingHorizontal: "5@s",
   },
   repliedMessage: {
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: 10,
-    fontSize: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    borderRadius: "10@s",
+    fontSize: "14@s",
+    paddingHorizontal: "10@s",
+    paddingVertical: "5@s",
     textAlignVertical: "center",
   },
   replyCreatedAt: {
     color: defaultStyles.colors.lightGrey,
-    fontSize: 14,
+    fontSize: "10@s",
   },
 });
 

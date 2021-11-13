@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { StyleSheet, Modal, ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import ApiActivity from "../components/ApiActivity";
 import AppActivityIndicator from "../components/ActivityIndicator";
@@ -212,9 +213,9 @@ function NotificationScreen({ navigation }) {
     </>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   adCard: {
-    marginVertical: 5,
+    marginVertical: "5@s",
   },
   container: {
     alignItems: "center",
@@ -222,11 +223,11 @@ const styles = StyleSheet.create({
   clearAll: {
     alignSelf: "flex-end",
     backgroundColor: defaultStyles.colors.dark_Variant,
-    borderBottomLeftRadius: 20,
-    borderTopLeftRadius: 20,
-    color: defaultStyles.colors.yellow_Variant,
-    fontSize: 18,
-    paddingHorizontal: 10,
+    borderBottomLeftRadius: "20@s",
+    borderTopLeftRadius: "20@s",
+    color: defaultStyles.colors.white,
+    fontSize: "14@s",
+    paddingHorizontal: "10@s",
     textAlign: "right",
   },
   modalFallback: {

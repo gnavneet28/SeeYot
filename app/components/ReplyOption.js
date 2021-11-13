@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppText from "./AppText";
 
@@ -36,20 +37,20 @@ function ReplyOption({ option = defaultOption, onPress, selectedMessageId }) {
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   answer: {
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    borderRadius: "10@s",
+    paddingHorizontal: "10@s",
+    paddingVertical: "5@s",
     textAlign: "center",
     textAlignVertical: "center",
   },
   container: {
     alignItems: "flex-start",
-    borderRadius: 10,
+    borderRadius: "10@s",
     justifyContent: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 5,
+    paddingHorizontal: "20@s",
+    paddingVertical: "5@s",
     width: "100%",
   },
 });

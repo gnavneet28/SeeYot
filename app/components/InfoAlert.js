@@ -1,5 +1,6 @@
 import React, { memo } from "react";
-import { View, StyleSheet, Modal } from "react-native";
+import { View, Modal } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 import AppText from "./AppText";
@@ -25,13 +26,13 @@ function InfoAlert({ description = "", leftPress, visible = false }) {
     </Modal>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   alertContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: 20,
-    borderWidth: 2,
+    borderRadius: "20@s",
+    borderWidth: "2@s",
     justifyContent: "space-between",
     overflow: "hidden",
     width: "65%",
@@ -39,7 +40,7 @@ const styles = StyleSheet.create({
   actionButtonContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 15,
+    marginBottom: "5@s",
   },
   container: {
     alignItems: "center",
@@ -49,29 +50,29 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   description: {
-    fontSize: 18,
-    marginBottom: 15,
-    marginTop: 2,
+    fontSize: "15@s",
+    marginBottom: "15@s",
+    marginTop: "2@s",
     opacity: 0.8,
-    paddingHorizontal: 10,
+    paddingHorizontal: "10@s",
     textAlign: "center",
     textAlignVertical: "center",
     width: "95%",
   },
   okButton: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 20,
-    height: 40,
-    marginVertical: 5,
-    width: 60,
+    borderRadius: "20@s",
+    height: "35@s",
+    marginVertical: "5@s",
+    width: "50@s",
   },
   title: {
     backgroundColor: defaultStyles.colors.dark_Variant,
     color: defaultStyles.colors.white,
-    fontSize: 18,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    fontSize: "16@s",
+    marginBottom: "10@s",
+    paddingHorizontal: "10@s",
+    paddingVertical: "10@s",
     textAlign: "center",
     width: "100%",
   },

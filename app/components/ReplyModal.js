@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet, Modal, ScrollView } from "react-native";
+import { View, Modal, ScrollView } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import ReplyCardSub from "../components/ReplyCardSub";
 import ReplyOption from "../components/ReplyOption";
@@ -17,10 +18,10 @@ const defaultMessage = {
 function ReplyModal({ message = defaultMessage, handleCloseModal }) {
   return (
     <Modal
-      transparent
       animationType="slide"
-      visible={message.isVisible}
       onRequestClose={handleCloseModal}
+      transparent
+      visible={message.isVisible}
     >
       <View style={styles.messageBackground}>
         <ScrollView
@@ -64,11 +65,11 @@ function ReplyModal({ message = defaultMessage, handleCloseModal }) {
     </Modal>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   closeMessage: {
     color: defaultStyles.colors.danger,
-    marginBottom: 15,
-    marginTop: 5,
+    marginBottom: "5@s",
+    marginTop: "5@s",
     textAlign: "center",
     width: "100%",
   },
@@ -80,8 +81,8 @@ const styles = StyleSheet.create({
   messageMainContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: "20@s",
+    borderTopRightRadius: "20@s",
     overflow: "hidden",
     width: "100%",
   },
@@ -89,13 +90,13 @@ const styles = StyleSheet.create({
     borderLeftColor: defaultStyles.colors.yellow_Variant,
     borderLeftWidth: 2,
     color: defaultStyles.colors.blue,
-    marginBottom: 10,
+    marginBottom: "10@s",
     maxWidth: "80%",
-    paddingHorizontal: 10,
+    paddingHorizontal: "10@s",
     textAlign: "left",
   },
   optionContainerMain: {
-    marginVertical: 5,
+    marginVertical: "5@s",
     width: "100%",
   },
   repliesHeading: {
@@ -103,11 +104,11 @@ const styles = StyleSheet.create({
     borderBottomColor: defaultStyles.colors.light,
     borderBottomWidth: 1,
     color: defaultStyles.colors.dark_Variant,
-    fontSize: 14,
-    height: 35,
-    marginBottom: 10,
-    marginLeft: 10,
-    paddingHorizontal: 20,
+    fontSize: "14@s",
+    height: "35@s",
+    marginBottom: "10@s",
+    marginLeft: "10@s",
+    paddingHorizontal: "20@s",
     textAlign: "center",
     textAlignVertical: "center",
     width: "70%",

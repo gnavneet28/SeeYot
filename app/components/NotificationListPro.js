@@ -5,6 +5,7 @@ import {
   DataProvider,
   LayoutProvider,
 } from "recyclerlistview";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import NotificationCard from "./NotificationCard";
 
@@ -36,7 +37,7 @@ class NotificationListPro extends React.Component {
         switch (type) {
           case ViewTypes.Full:
             dim.width = width;
-            dim.height = 70;
+            dim.height = scale(60);
             break;
           default:
             dim.width = 0;
@@ -104,11 +105,11 @@ class NotificationListPro extends React.Component {
   }
 }
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   listView: {
     flex: 1,
     width: "100%",
-    marginTop: 15,
+    marginTop: "15@s",
   },
 });
 

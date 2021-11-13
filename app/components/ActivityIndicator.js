@@ -1,12 +1,13 @@
 import React from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { scale } from "react-native-size-matters";
 import defaultStyles from "../config/styles";
 
 function AppActivityIndicator(props) {
   return (
     <View style={styles.overlay}>
       <ActivityIndicator
-        size={30}
+        size={scale(25)}
         color={defaultStyles.colors.secondary}
         style={{ flex: 1 }}
       />
