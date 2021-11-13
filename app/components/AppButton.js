@@ -1,10 +1,8 @@
 import React from "react";
-import { TouchableOpacity, StyleSheet, Text } from "react-native";
+import { TouchableOpacity, Text } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
-
-const height = defaultStyles.height;
 
 function AppButton({
   onPress = () => null,

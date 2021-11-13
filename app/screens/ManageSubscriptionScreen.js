@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
@@ -55,7 +56,7 @@ function ManageSubscriptionScreen({ navigation }) {
         ) : (
           <>
             <Details
-              style={{ marginTop: 20 }}
+              style={{ marginTop: scale(20) }}
               title="Subscription:"
               value={subscription}
             />
@@ -74,17 +75,17 @@ function ManageSubscriptionScreen({ navigation }) {
     </Screen>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     flexGrow: 1,
   },
   noActiveSubsInfo: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 5,
+    borderRadius: "5@s",
     elevation: 2,
-    height: 40,
-    marginVertical: 10,
+    height: "35@s",
+    marginVertical: "10@s",
     textAlign: "center",
     textAlignVertical: "center",
     width: "90%",

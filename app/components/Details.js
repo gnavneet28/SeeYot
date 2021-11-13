@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppText from "./AppText";
 
@@ -13,18 +14,18 @@ function Details({ title, value, style }) {
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   descriptionContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
     borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: 5,
+    borderRadius: "5@s",
     borderWidth: 1,
     flexDirection: "row",
-    height: 40,
+    height: "35@s",
     justifyContent: "space-between",
-    marginVertical: 5,
-    paddingHorizontal: 20,
+    marginVertical: "5@s",
+    paddingHorizontal: "10@s",
     width: "85%",
   },
   descriptionTitle: {
