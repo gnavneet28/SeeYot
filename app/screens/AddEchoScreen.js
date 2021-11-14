@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { StyleSheet, View, Modal, ScrollView } from "react-native";
+import { View, Modal, ScrollView } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import ApiActivity from "../components/ApiActivity";
 import AppActivityIndicator from "../components/ActivityIndicator";
@@ -277,7 +278,7 @@ function AddEchoScreen({ navigation, route }) {
                     subStyle={styles.textInputSub}
                     value={message}
                   />
-                  <AppText style={{ textAlign: "right", fontSize: 14 }}>
+                  <AppText style={{ textAlign: "right", fontSize: scale(10) }}>
                     {message.length}/100
                   </AppText>
                 </View>
@@ -321,28 +322,29 @@ function AddEchoScreen({ navigation, route }) {
     </>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   allEchoMessagesText: {
     color: defaultStyles.colors.dark,
+    fontSize: "14@s",
     textAlign: "left",
     width: "100%",
   },
   button: {
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 10,
+    borderColor: defaultStyles.colors.yellow,
+    borderRadius: "10@s",
+    borderWidth: 2,
     height: defaultStyles.dimensionConstants.height,
     width: "90%",
-    borderWidth: 2,
-    borderColor: defaultStyles.colors.yellow,
   },
   container: {
     backgroundColor: defaultStyles.colors.white,
   },
   echoMessageListContainer: {
-    marginTop: 5,
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    marginTop: "2@s",
+    marginBottom: "5@s",
+    paddingHorizontal: "10@s",
     width: "100%",
   },
   echoOptionMainContainer: {
@@ -355,25 +357,25 @@ const styles = StyleSheet.create({
   inputBoxContainer: {
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: 10,
+    borderRadius: "10@s",
     borderWidth: 1,
-    marginBottom: 5,
+    marginBottom: "5@s",
     overflow: "hidden",
-    padding: 5,
+    padding: "5@s",
     width: "90%",
   },
   inputBox: {
-    borderRadius: 5,
-    height: 70,
-    marginBottom: 5,
-    paddingHorizontal: 15,
+    borderRadius: "5@s",
+    height: "70@s",
+    marginBottom: "5@s",
+    paddingHorizontal: "5@s",
     width: "100%",
   },
   optionsContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: 20,
+    borderRadius: "20@s",
     borderWidth: 1,
     overflow: "hidden",
     width: "60%",
@@ -385,14 +387,14 @@ const styles = StyleSheet.create({
   },
   saveEchoInfo: {
     color: defaultStyles.colors.dark_Variant,
-    fontSize: 14,
-    letterSpacing: 0.5,
-    marginBottom: 20,
+    fontSize: "12@s",
+    letterSpacing: "0.5@s",
+    marginBottom: "20@s",
     width: "90%",
   },
   textInputSub: {
+    fontSize: "14.5@s",
     textAlignVertical: "top",
-    fontSize: 18,
   },
 });
 

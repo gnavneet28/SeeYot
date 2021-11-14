@@ -1,6 +1,7 @@
 import React from "react";
-import { View, StyleSheet, Modal } from "react-native";
+import { View, Modal } from "react-native";
 import LottieView from "lottie-react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
@@ -20,21 +21,22 @@ function LoadingIndicator({ visible = false, cancelable = false }) {
     </Modal>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.6)",
     flex: 1,
     justifyContent: "center",
+    overflow: "hidden",
     width: "100%",
   },
   loaderContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 10,
-    height: 50,
+    borderRadius: "10@s",
+    height: "40@s",
     justifyContent: "space-between",
-    width: 80,
+    width: "60@s",
   },
 });
 

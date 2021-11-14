@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import { View, StyleSheet } from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
@@ -28,30 +29,30 @@ function EchoMessageCard({
     </>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
-    height: 100,
+    height: "75@s",
     justifyContent: "center",
-    width: 80,
+    width: "70@s",
   },
   image: {
     alignItems: "center",
     borderColor: defaultStyles.colors.light,
-    borderRadius: 25,
+    borderRadius: "20@s",
     borderWidth: 2,
-    height: 50,
+    height: "40@s",
     justifyContent: "center",
-    width: 50,
+    width: "40@s",
   },
   name: {
     color: defaultStyles.colors.secondary,
-    fontSize: 15,
+    fontSize: "12@s",
   },
   subImage: {
-    borderRadius: 24,
-    height: 48,
-    width: 48,
+    borderRadius: "19@s",
+    height: "38@s",
+    width: "38@s",
   },
 });
 

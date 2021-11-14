@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, TouchableHighlight } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
@@ -16,16 +17,16 @@ function Option({ onPress, title, titleStyle, containerStyle }) {
     </TouchableHighlight>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     borderBottomColor: defaultStyles.colors.light,
     borderBottomWidth: 1,
-    height: defaultStyles.dimensionConstants.height,
+    height: "40@s",
     width: "100%",
   },
   option: {
-    fontSize: 18,
-    height: defaultStyles.dimensionConstants.height,
+    fontSize: "14.5@s",
+    height: "40@s",
     opacity: 0.9,
     textAlign: "center",
     textAlignVertical: "center",

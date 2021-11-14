@@ -7,7 +7,7 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AddPicture from "../components/AddPicture";
 import ApiActivity from "../components/ApiActivity";
@@ -525,7 +525,7 @@ const styles = ScaledSheet.create({
     opacity: 0.8,
   },
   inputProblem: {
-    fontSize: "18@s",
+    fontSize: "15@s",
     height: "100%",
     textAlignVertical: "top",
   },

@@ -1,5 +1,6 @@
 import React, { useCallback, memo } from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import { View, FlatList } from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import EchoMessageCard from "./EchoMessageCard";
 
@@ -17,8 +18,8 @@ function EchoMessageList({ echoMessages = [], onEchoMessagePress, style }) {
 
   const getItemLayout = useCallback(
     (data, index) => ({
-      length: 80,
-      offset: 80 * index,
+      length: scale(70),
+      offset: scale(70) * index,
       index,
     }),
     []
@@ -42,9 +43,9 @@ function EchoMessageList({ echoMessages = [], onEchoMessagePress, style }) {
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
-    height: 100,
+    height: "75@s",
     justifyContent: "center",
   },
 });

@@ -145,9 +145,11 @@ function SendThoughtsScreen({ navigation, route }) {
           messageFor
         );
         if (ok) {
-          let modifiedUser = { ...user };
-          modifiedUser.thoughts = data.thoughts;
-          setUser(modifiedUser);
+          if (!data.matched) {
+            let modifiedUser = { ...user };
+            modifiedUser.thoughts = data.thoughts;
+            setUser(modifiedUser);
+          }
           return setMessageActivity({
             message: data.matched
               ? "Congrats! Your thoughts matched"
@@ -179,7 +181,7 @@ function SendThoughtsScreen({ navigation, route }) {
       1000,
       true
     ),
-    [recipient._id]
+    [recipient._id, user.thoughts]
   );
 
   // ON FOCUS PAGE ACTION

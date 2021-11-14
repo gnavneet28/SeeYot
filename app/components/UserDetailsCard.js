@@ -76,7 +76,6 @@ function UserDetailsCard({
             <AppText style={styles.editName}>Edit your name</AppText>
             <View style={styles.inputBoxContainer}>
               <AppTextInput
-                autoFocus={true}
                 maxLength={30}
                 minLength={3}
                 onChangeText={(text) => setName(text)}
