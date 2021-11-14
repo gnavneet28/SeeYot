@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
-import { View, StyleSheet, Linking } from "react-native";
+import { View, Linking } from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppHeader from "../components/AppHeader";
 import Heading from "../components/Heading";
@@ -36,33 +37,36 @@ function HelpScreen({ navigation }) {
   return (
     <Screen style={styles.container}>
       <AppHeader
-        title="Help"
         leftIcon="arrow-back"
         onPressLeft={handleBackPress}
+        title="Help"
       />
       <View style={styles.contactUs}>
-        <Heading iconName="contact-mail" title="Contact Us" />
+        <Heading
+          iconName="contact-mail"
+          title="Contact Us"
+          style={{ marginTop: scale(5), marginBottom: 0 }}
+        />
         <UserDetailsCard
           data="SeeYot@gmail.com"
           editable={false}
           iconName="email"
-          size={20}
-          style={{ marginBottom: 10 }}
+          size={scale(20)}
           title="Email"
         />
         <UserDetailsCard
           data="+91 9944603844"
           editable={false}
           iconName="phone"
-          size={20}
+          size={scale(20)}
           title="Contact Number"
         />
       </View>
       <Heading
         iconName="article"
         onPress={openPrivacyPage}
+        style={{ marginTop: scale(5), marginBottom: 0 }}
         title="Privacy Policy"
-        style={{ marginTop: 10, marginBottom: 0 }}
       />
       <Heading
         iconName="article"
@@ -79,14 +83,14 @@ function HelpScreen({ navigation }) {
     </Screen>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
   },
   contactUs: {
     justifyContent: "center",
+    marginBottom: "15@s",
     width: "100%",
-    marginBottom: 20,
   },
 });
 

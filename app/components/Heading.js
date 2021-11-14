@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";
 import Icon from "./Icon";
@@ -13,7 +14,7 @@ function Heading({ iconName, title, onPress, style }) {
         color={defaultStyles.colors.tomato}
         name={iconName}
         onPress={onPress}
-        size={25}
+        size={scale(22)}
       />
       <AppText onPress={onPress} style={styles.title}>
         {title}
@@ -21,19 +22,19 @@ function Heading({ iconName, title, onPress, style }) {
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
-    marginVertical: 10,
-    paddingHorizontal: 5,
+    marginVertical: "10@s",
+    paddingHorizontal: "5@s",
     width: "100%",
   },
   title: {
     borderBottomColor: defaultStyles.colors.light,
     borderBottomWidth: 1,
-    fontSize: 17,
+    fontSize: "16@s",
     textAlign: "left",
   },
 });
