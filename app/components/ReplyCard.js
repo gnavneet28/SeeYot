@@ -1,9 +1,10 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import LottieView from "lottie-react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
@@ -77,7 +78,7 @@ function ReplyCard({
         <View style={styles.deleteIconContainer}>
           <MaterialCommunityIcons
             name="delete-circle-outline"
-            size={20}
+            size={scale(18)}
             onPress={onDeletePress}
             color={defaultStyles.colors.danger}
           />
@@ -96,69 +97,69 @@ function ReplyCard({
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderRadius: 10,
-    elevation: 2,
-    marginVertical: 5,
-    padding: 5,
-    width: "95%",
-    height: 150,
     alignSelf: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: "10@s",
+    elevation: 2,
+    height: "145@s",
+    marginBottom: "5@s",
+    padding: "5@s",
+    width: "95%",
   },
   deleteIconContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
     borderColor: defaultStyles.colors.light,
-    borderRadius: 10,
+    borderRadius: "10@s",
     borderWidth: 1,
-    height: 35,
+    height: "30@s",
     justifyContent: "center",
-    marginHorizontal: 15,
-    width: 35,
+    marginHorizontal: "15@s",
+    width: "30@s",
   },
   emptyDataContainer: {
     alignItems: "center",
     alignSelf: "center",
     borderRadius: 5,
-    height: 160,
+    height: "145@s",
     justifyContent: "center",
     width: "95%",
   },
   emptyData: {
     alignItems: "center",
     alignSelf: "center",
-    borderRadius: 5,
-    height: 60,
+    borderRadius: "5@s",
+    height: "60@s",
     justifyContent: "center",
     width: "95%",
   },
   message: {
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: 10,
+    borderRadius: "10@s",
     color: defaultStyles.colors.dark_Variant,
-    marginVertical: 10,
+    marginVertical: "10@s",
     maxWidth: "80%",
-    paddingHorizontal: 10,
+    paddingHorizontal: "10@s",
   },
   image: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 20,
-    height: 40,
-    marginLeft: 15,
-    marginRight: 10,
-    width: 40,
+    borderRadius: "18@s",
+    height: "36@s",
+    marginLeft: "15@s",
+    marginRight: "2@s",
+    width: "36@s",
   },
   imageSub: {
-    borderRadius: 20,
-    height: 40,
-    width: 40,
+    borderRadius: "18@s",
+    height: "36@s",
+    width: "36@s",
   },
   messageCreatedAt: {
     color: defaultStyles.colors.lightGrey,
-    fontSize: 14,
+    fontSize: "10@s",
     paddingTop: 0,
   },
   recipientName: {
@@ -168,25 +169,31 @@ const styles = StyleSheet.create({
   repliesCount: {
     alignSelf: "flex-end",
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 20,
-    color: defaultStyles.colors.secondary,
-    fontSize: 16,
-    paddingHorizontal: 10,
-    borderWidth: 2,
     borderColor: defaultStyles.colors.yellow,
+    borderRadius: "20@s",
+    borderWidth: 2,
+    bottom: "5@s",
+    color: defaultStyles.colors.secondary,
+    fontSize: "12@s",
+    marginRight: "5@s",
+    paddingHorizontal: "10@s",
+    position: "absolute",
+    right: "5@s",
+    textAlign: "center",
+    textAlignVertical: "center",
   },
   recipientDetailsContainerMain: {
     alignItems: "center",
     borderBottomColor: defaultStyles.colors.light,
     borderBottomWidth: 1,
     flexDirection: "row",
-    padding: 5,
+    padding: "5@s",
     width: "95%",
   },
   recipientDetailsContainerSub: {
     flex: 1,
-    marginHorizontal: 5,
-    padding: 5,
+    marginRight: "5@s",
+    padding: "5@s",
   },
 });
 

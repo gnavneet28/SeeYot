@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet, Modal } from "react-native";
+import { View, Modal } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 import AppText from "./AppText";
@@ -25,13 +26,13 @@ function Alert({
             <AppButton
               onPress={leftPress}
               style={styles.leftButton}
-              subStyle={{ color: defaultStyles.colors.dark, fontSize: 17 }}
+              subStyle={{ color: defaultStyles.colors.dark }}
               title={leftOption}
             />
             <AppButton
               onPress={rightPress}
               style={styles.rightButton}
-              subStyle={{ fontSize: 17, color: defaultStyles.colors.secondary }}
+              subStyle={{ color: defaultStyles.colors.secondary }}
               title={rightOption}
             />
           </View>
@@ -40,18 +41,18 @@ function Alert({
     </Modal>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   actionButtonContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 20,
+    marginBottom: "10@s",
   },
   alertContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: 20,
-    borderWidth: 2,
+    borderRadius: "20@s",
+    borderWidth: "2@s",
     justifyContent: "space-between",
     overflow: "hidden",
     width: "65%",
@@ -64,35 +65,35 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   description: {
-    fontSize: 18,
-    marginBottom: 15,
-    marginTop: 2,
+    fontSize: "15@s",
+    marginBottom: "15@s",
+    marginTop: "2@s",
     opacity: 0.8,
-    paddingHorizontal: 10,
+    paddingHorizontal: "10@s",
     textAlign: "center",
     textAlignVertical: "center",
     width: "95%",
   },
   leftButton: {
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: 20,
-    height: 35,
-    marginRight: 30,
-    width: 70,
+    borderRadius: "20@s",
+    height: "35@s",
+    marginRight: "20@s",
+    width: "70@s",
   },
   rightButton: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 20,
-    height: 35,
-    width: 70,
+    borderRadius: "20@s",
+    height: "35@s",
+    width: "70@s",
   },
   title: {
     backgroundColor: defaultStyles.colors.dark_Variant,
     color: defaultStyles.colors.white,
-    fontSize: 18,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    fontSize: "16@s",
+    marginBottom: "10@s",
+    paddingHorizontal: "10@s",
+    paddingVertical: "10@s",
     textAlign: "center",
     width: "100%",
   },

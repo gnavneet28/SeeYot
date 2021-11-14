@@ -6,6 +6,7 @@ import {
   LayoutProvider,
 } from "recyclerlistview";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
@@ -40,11 +41,11 @@ class RepliesList extends React.Component {
         switch (type) {
           case ViewTypes.Full:
             dim.width = width;
-            dim.height = 160;
+            dim.height = scale(150);
             break;
           default:
             dim.width = width;
-            dim.height = 160;
+            dim.height = scale(150);
         }
       }
     );
@@ -164,14 +165,14 @@ class RepliesList extends React.Component {
   }
 }
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: 25,
+    borderRadius: "25@s",
     borderWidth: 1,
     elevation: 2,
-    marginVertical: 8,
+    marginVertical: "8@s",
     overflow: "hidden",
     width: "95%",
   },
@@ -179,17 +180,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
-    height: 42,
+    height: "38@s",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
+    paddingHorizontal: "10@s",
     width: "100%",
   },
   inputBox: {
-    borderRadius: 20,
+    borderRadius: "20@s",
     flexShrink: 1,
-    height: 40,
-    marginHorizontal: 5,
-    paddingHorizontal: 10,
+    height: "36@s",
+    marginHorizontal: "5@s",
+    paddingHorizontal: "10@s",
     width: "100%",
   },
   listView: {
