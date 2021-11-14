@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { StyleSheet, FlatList } from "react-native";
+import { FlatList } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppHeader from "../components/AppHeader";
 import ApiActivity from "../components/ApiActivity";
@@ -130,15 +131,15 @@ function BlockedUsersScreen({ navigation }) {
     </Screen>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   blockList: {
-    marginTop: 5,
+    marginTop: "5@s",
   },
   emptyBlocklistInfo: {
     alignSelf: "center",
-    fontSize: 18,
+    fontSize: "15@s",
     textAlign: "center",
-    top: 50,
+    top: "50@s",
   },
 });
 

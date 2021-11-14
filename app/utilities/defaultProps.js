@@ -31,4 +31,10 @@ export default {
     name: "",
     picture: "",
   },
+  defaultBlockedUser: {
+    _id: "",
+    picture: "",
+    name: "",
+    phoneNumber: parseInt(""),
+  },
 };

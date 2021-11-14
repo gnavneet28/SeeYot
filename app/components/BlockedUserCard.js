@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
@@ -8,20 +9,12 @@ import AppText from "./AppText";
 import useAuth from "../auth/useAuth";
 
 import defaultStyles from "../config/styles";
-
-const height = defaultStyles.height;
-
-let defaultBlockedUser = {
-  _id: "",
-  picture: "",
-  name: "",
-  phoneNumber: parseInt(""),
-};
+import defaultProps from "../utilities/defaultProps";
 
 function AddContactCard({
   style,
   onUnBlockPress = () => null,
-  blockedUser = defaultBlockedUser,
+  blockedUser = defaultProps.defaultBlockedUser,
 }) {
   const { user } = useAuth();
 
@@ -55,59 +48,57 @@ function AddContactCard({
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   blockedButton: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 10,
-    height: 35,
-    marginRight: 5,
-    width: 80,
+    borderRadius: "10@s",
+    height: "30@s",
+    marginRight: "5@s",
+    width: "70@s",
   },
   blockButtonSub: {
     color: defaultStyles.colors.primary,
-    fontSize: 16,
-    letterSpacing: 1,
+    fontSize: "14.5@s",
+    letterSpacing: "0.5@s",
   },
   container: {
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.light,
-    borderRadius: 10,
+    borderRadius: "10@s",
     borderWidth: 1,
     elevation: 1,
     flexDirection: "row",
-    height: 60,
-    marginVertical: 5,
-    padding: 2,
-    paddingHorizontal: 5,
+    height: "50@s",
+    marginVertical: "5@s",
+    padding: "2@s",
+    paddingHorizontal: "5@s",
     width: "95%",
   },
   image: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 20,
-    height: 40,
-    marginRight: 5,
-    width: 40,
-    borderWidth: 0,
+    borderRadius: "19@s",
+    height: "38@s",
+    marginRight: "5@s",
+    width: "38@s",
   },
   imageSub: {
-    borderRadius: 20,
-    height: 40,
-    width: 40,
     borderWidth: 0,
+    height: "38@s",
+    width: "38@s",
   },
   infoContainer: {
     flex: 1,
   },
   infoNameText: {
     color: defaultStyles.colors.primary,
-    fontSize: 18,
+    fontSize: "15@s",
     paddingBottom: 0,
   },
   infoNumberText: {
     color: defaultStyles.colors.secondary,
-    fontSize: 14,
+    fontSize: "10@s",
     paddingTop: 0,
   },
 });
