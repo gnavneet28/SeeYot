@@ -8,6 +8,10 @@ import AppText from "./AppText";
 
 import defaultStyles from "../config/styles";
 
+const load = require("../assets/animations/load.json");
+const done = require("../assets/animations/done.json");
+const failed = require("../assets/animations/failed.json");
+
 function ApiActivity({
   message,
   onDoneButtonPress,
@@ -27,24 +31,19 @@ function ApiActivity({
         <View style={styles.contentContainer}>
           <View style={styles.loaderContainer}>
             {processing ? (
-              <LottieView
-                autoPlay
-                loop
-                source={require("../assets/animations/load.json")}
-                style={{ flex: 1 }}
-              />
+              <LottieView autoPlay loop source={load} style={{ flex: 1 }} />
             ) : (
               <>
                 <LottieView
                   autoPlay
                   loop
-                  source={require("../assets/animations/done.json")}
+                  source={done}
                   style={{ flex: 1, opacity: success ? 1 : 0 }}
                 />
                 <LottieView
                   autoPlay
                   loop
-                  source={require("../assets/animations/failed.json")}
+                  source={failed}
                   style={{ flex: 1, opacity: success ? 0 : 1 }}
                 />
               </>

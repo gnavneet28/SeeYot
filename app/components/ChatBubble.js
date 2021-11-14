@@ -2,11 +2,9 @@ import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 
 import Svg, { Path } from "react-native-svg";
-import { moderateScale } from "react-native-size-matters";
+import { moderateScale, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
-
-const heigth = defaultStyles.height;
 
 function ChatBubble({ text = "", mine }) {
   return (
@@ -65,21 +63,21 @@ function ChatBubble({ text = "", mine }) {
 
 const styles = StyleSheet.create({
   arrow_container: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
     bottom: 0,
-    zIndex: -1,
     flex: 1,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0,
+    zIndex: -1,
   },
   arrow_left_container: {
-    justifyContent: "flex-end",
     alignItems: "flex-start",
+    justifyContent: "flex-end",
   },
   arrow_right_container: {
-    justifyContent: "flex-end",
     alignItems: "flex-end",
+    justifyContent: "flex-end",
   },
   arrow_left: {
     left: moderateScale(-6, 0.5),
@@ -88,11 +86,11 @@ const styles = StyleSheet.create({
     right: moderateScale(-6, 0.5),
   },
   cloud: {
+    borderRadius: 20,
     maxWidth: moderateScale(250, 2),
+    paddingBottom: moderateScale(7, 2),
     paddingHorizontal: moderateScale(10, 2),
     paddingTop: moderateScale(5, 2),
-    paddingBottom: moderateScale(7, 2),
-    borderRadius: 20,
   },
   message: {
     flexDirection: "row",
@@ -108,9 +106,9 @@ const styles = StyleSheet.create({
 
   text: {
     ...defaultStyles.text,
+    fontSize: scale(14),
+    lineHeight: scale(16),
     paddingTop: 3,
-    fontSize: heigth * 0.02,
-    lineHeight: 22,
   },
 });
 

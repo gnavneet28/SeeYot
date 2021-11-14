@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity, TextInput } from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import Icon from "./Icon";
 
@@ -50,41 +51,41 @@ function SendThoughtsInput({
               : defaultStyles.colors.lightGrey
           }
           name="send"
-          size={30}
+          size={scale(28)}
         />
       </TouchableOpacity>
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.light,
-    borderRadius: 30,
+    borderRadius: "30@s",
     borderWidth: 1,
     elevation: 1,
     flexDirection: "row",
-    height: defaultStyles.dimensionConstants.height,
+    height: "38@s",
     justifyContent: "space-between",
     width: "92%",
   },
   inputBox: {
-    borderRadius: 30,
+    borderRadius: "30@s",
     flex: 1,
-    fontSize: 19,
+    fontSize: "15@s",
     height: "100%",
-    marginRight: 5,
-    paddingHorizontal: 10,
+    marginRight: "5@s",
+    paddingHorizontal: "10@s",
     width: "86%",
   },
   send: {
     alignItems: "center",
-    height: 40,
+    height: "40@s",
     justifyContent: "center",
-    marginRight: 5,
-    width: 40,
+    marginRight: "5@s",
+    width: "40@s",
   },
 });
 

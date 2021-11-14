@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";
 import InfoAlert from "./InfoAlert";
@@ -80,10 +81,10 @@ function ThoughtTimer({ thought }) {
   return (
     <View style={styles.container}>
       <MaterialCommunityIcons
-        style={styles.timerIcon}
-        name="timer-outline"
-        size={25}
         color={defaultStyles.colors.dark_Variant}
+        name="timer-outline"
+        size={scale(25)}
+        style={styles.timerIcon}
       />
       <View style={styles.thoughtDetailsContainer}>
         <AppText style={styles.message}>{thought.message}</AppText>
@@ -94,59 +95,62 @@ function ThoughtTimer({ thought }) {
       <View style={styles.deleteContainer}>
         {!processing ? (
           <MaterialCommunityIcons
-            name="delete-circle-outline"
-            size={20}
-            onPress={handleDeletePress}
             color={defaultStyles.colors.danger}
+            name="delete-circle-outline"
+            onPress={handleDeletePress}
+            size={scale(20)}
           />
         ) : (
-          <ActivityIndicator size={18} color={defaultStyles.colors.tomato} />
+          <ActivityIndicator
+            size={scale(16)}
+            color={defaultStyles.colors.tomato}
+          />
         )}
       </View>
       <InfoAlert
-        leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
+        leftPress={handleCloseInfoAlert}
         visible={infoAlert.showInfoAlert}
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   createdAt: {
     color: defaultStyles.colors.lightGrey,
-    fontSize: 12,
+    fontSize: "10@s",
     paddingTop: 0,
   },
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 5,
+    borderRadius: "5@s",
     flexDirection: "row",
-    marginVertical: 10,
-    padding: 8,
+    marginVertical: "5@s",
+    padding: "8@s",
     width: "96%",
   },
   deleteContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
     borderColor: defaultStyles.colors.light,
-    borderRadius: 10,
+    borderRadius: "10@s",
     borderWidth: 1,
-    height: 35,
+    height: "30@s",
     justifyContent: "center",
-    marginHorizontal: 15,
-    width: 35,
+    marginHorizontal: "15@s",
+    width: "30@s",
   },
   thoughtDetailsContainer: {
     width: "70%",
   },
   message: {
-    fontSize: 15,
+    fontSize: "13@s",
     paddingBottom: 0,
   },
   timerIcon: {
-    marginHorizontal: 10,
+    marginHorizontal: "5@s",
   },
 });
 

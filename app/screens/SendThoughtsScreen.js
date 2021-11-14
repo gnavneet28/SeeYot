@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, StyleSheet, Modal, ImageBackground } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import ApiActivity from "../components/ApiActivity";
 import AppHeader from "../components/AppHeader";
@@ -448,7 +449,7 @@ function SendThoughtsScreen({ navigation, route }) {
     </>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
   },
@@ -466,14 +467,14 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   inputBox: {
-    bottom: 10,
+    bottom: "8@s",
     position: "absolute",
   },
   optionsContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: 20,
+    borderRadius: "20@s",
     borderWidth: 1,
     overflow: "hidden",
     width: "60%",
@@ -484,8 +485,8 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
   sendThoughtsInputPlaceholder: {
+    height: "54@s",
     width: "100%",
-    height: 60,
   },
 });
 

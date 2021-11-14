@@ -1,13 +1,11 @@
 import React, { useCallback, memo } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 
+import ChatListHeader from "./ChatListHeader";
 import ItemSeperatorComponent from "./ItemSeperatorComponent";
 import ThoughtCard from "./ThoughtCard";
-import ChatListHeader from "./ChatListHeader";
 
 import useAuth from "../auth/useAuth";
-
-import defaultStyles from "../config/styles";
 
 function ThoughtsList({ thoughts = [], recipient }) {
   const { user } = useAuth();
@@ -45,13 +43,6 @@ const styles = StyleSheet.create({
   container: {
     flexShrink: 1,
     width: "100%",
-  },
-  emptyThoughtsInfo: {
-    alignSelf: "center",
-    color: defaultStyles.colors.white,
-    fontSize: 18,
-    marginTop: 50,
-    textAlign: "center",
   },
 });
 

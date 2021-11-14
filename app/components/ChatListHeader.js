@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import { View, StyleSheet } from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
@@ -29,48 +30,49 @@ function ChatListHeader({ user }) {
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.2)",
-    paddingVertical: 10,
+    paddingVertical: "10@s",
     width: "100%",
   },
   image: {
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.light,
-    borderRadius: 50,
+    borderRadius: "40@s",
     borderWidth: 2,
-    height: 100,
-    width: 100,
+    height: "80@s",
+    width: "80@s",
   },
   subImage: {
-    borderRadius: 49,
-    height: 98,
-    width: 98,
+    borderRadius: "39@s",
+    height: "78@s",
+    width: "78@s",
   },
   infoText: {
     color: defaultStyles.colors.white,
-    marginVertical: 5,
+    fontSize: "13@s",
+    marginVertical: "5@s",
     textAlign: "center",
     width: "80%",
-    fontSize: 15,
   },
   myNickName: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 20,
+    borderRadius: "20@s",
     color: defaultStyles.colors.dark,
-    fontSize: 16,
-    paddingHorizontal: 10,
+    fontSize: "14@s",
+    paddingHorizontal: "10@s",
     textAlign: "center",
   },
   name: {
     backgroundColor: defaultStyles.colors.blue,
-    borderRadius: 20,
+    borderRadius: "20@s",
     color: defaultStyles.colors.white,
-    fontSize: 16,
-    marginVertical: 10,
-    paddingHorizontal: 10,
+    fontSize: "14@s",
+    marginTop: "10@s",
+    marginBottom: "5@s",
+    paddingHorizontal: "10@s",
     textAlign: "center",
   },
 });

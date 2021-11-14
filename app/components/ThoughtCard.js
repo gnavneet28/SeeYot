@@ -1,14 +1,13 @@
 import React, { memo } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";
 import ChatBubble from "./ChatBubble";
 
 import defaultStyles from "../config/styles";
-
-const height = defaultStyles.height;
 
 let defaultThought = {
   message: "",
@@ -25,7 +24,7 @@ function ThoughtCard({ thought = defaultThought, mine }) {
           styles.date,
           {
             fontFamily: "Comic-LightItalic",
-            marginHorizontal: 20,
+            marginHorizontal: scale(16),
             textAlign: mine ? "right" : "left",
           },
         ]}
@@ -35,14 +34,14 @@ function ThoughtCard({ thought = defaultThought, mine }) {
     </TouchableOpacity>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     justifyContent: "center",
     width: "100%",
   },
   date: {
     color: defaultStyles.colors.light,
-    fontSize: height * 0.015,
+    fontSize: "9.5@s",
     paddingTop: 0,
   },
 });
