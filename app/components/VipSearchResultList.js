@@ -1,5 +1,10 @@
 import React from "react";
-import { Dimensions, View, RefreshControl } from "react-native";
+import {
+  Dimensions,
+  View,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
 import {
   RecyclerListView,
   DataProvider,
@@ -7,8 +12,6 @@ import {
 } from "recyclerlistview";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
-import AppButton from "./AppButton";
-import AppText from "./AppText";
 import ContactCard from "./ContactCard";
 
 import defaultStyles from "../config/styles";
@@ -23,7 +26,7 @@ const defaultListItemWhenEmpty = [
   },
 ];
 
-class ContactList extends React.Component {
+class VipSearchResultList extends React.Component {
   constructor(props) {
     super(props);
 
@@ -66,7 +69,6 @@ class ContactList extends React.Component {
         return (
           <ContactCard
             index={index}
-            onAddFriendPress={this.props.onAddFriendPress}
             onAddEchoPress={this.props.onAddEchoPress}
             onSendThoughtsPress={this.props.onSendThoughtsPress}
             user={data}
@@ -90,21 +92,14 @@ class ContactList extends React.Component {
   render() {
     return (
       <>
-        {!this.props.users.length ? (
-          <View style={styles.addFriendInfoContainer}>
-            <AppText style={styles.emptyContacts}>
-              No friends available. Add friends from your contacts and let them
-              know you are thinking of them!
-            </AppText>
-            <AppButton
-              onPress={this.props.onAddFriendPress}
-              style={styles.addButton}
-              subStyle={styles.addButtonSub}
-              title="Add friends"
-            />
-          </View>
-        ) : null}
         <View style={styles.listView}>
+          {this.props.isLoading ? (
+            <ActivityIndicator
+              animating={this.props.isLoading}
+              color={defaultStyles.colors.secondary}
+              size={scale(28)}
+            />
+          ) : null}
           <RecyclerListView
             refreshControl={
               <RefreshControl
@@ -125,31 +120,10 @@ class ContactList extends React.Component {
 }
 
 const styles = ScaledSheet.create({
-  addButton: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: "25@s",
-    height: "40@s",
-    width: "110@s",
-  },
-  addButtonSub: {
-    color: defaultStyles.colors.secondary,
-  },
-  addFriendInfoContainer: {
-    alignItems: "center",
-    flex: 1,
-    justifyContent: "center",
-    width: "100%",
-  },
-  emptyContacts: {
-    fontSize: "15@s",
-    marginBottom: "20@s",
-    textAlign: "center",
-    width: "80%",
-  },
   listView: {
     flex: 1,
     width: "100%",
   },
 });
 
-export default ContactList;
+export default VipSearchResultList;

@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { View, StyleSheet, Modal } from "react-native";
+import { View, Modal } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
 import Option from "../components/Option";
 import Screen from "../components/Screen";
 import SearchBox from "../components/SearchBox";
-import VipSearchedUserList from "../components/VipSearchedUserList";
+import VipSearchResultList from "../components/VipSearchResultList";
 import VipThoughtCardList from "../components/VipThoughtCardList";
 import HelpDialogueBox from "../components/HelpDialogueBox";
 
@@ -64,7 +65,6 @@ function VipSearchScreen({ navigation }) {
   const handleHelpPress = useCallback(() => {
     setShowHelp(true);
   }, []);
-
 
   const handleCloseHelp = useCallback(() => {
     setShowHelp(false);
@@ -205,13 +205,13 @@ function VipSearchScreen({ navigation }) {
         <AppHeader
           leftIcon="arrow-back"
           onPressLeft={handleLeftPress}
-          title="Vip Area"
-          rightIcon="help-outline"
           onPressRight={handleHelpPress}
+          rightIcon="help-outline"
+          title="Vip Area"
         />
         <InfoAlert
-          leftPress={handleCloseInfoAlert}
           description={infoAlert.infoAlertMessage}
+          leftPress={handleCloseInfoAlert}
           visible={infoAlert.showInfoAlert}
         />
         <SearchBox
@@ -224,12 +224,12 @@ function VipSearchScreen({ navigation }) {
         {user.searchHistory.length > 0 ? (
           <View style={styles.matchedThoughtsContainer}>
             <VipThoughtCardList
-              users={searchHistory}
               onThoughtCardPress={handleThougthCardPress}
+              users={searchHistory}
             />
           </View>
         ) : null}
-        <VipSearchedUserList
+        <VipSearchResultList
           isLoading={isLoading}
           onAddEchoPress={handleAddEchoButtonPress}
           onSendThoughtsPress={handleOnSendThoughtButtonPress}
@@ -251,9 +251,9 @@ function VipSearchScreen({ navigation }) {
         <View style={styles.searchHistoryMainContainer}>
           <View style={styles.optionsContainer}>
             <Option
+              onPress={() => setIsVisible(false)}
               title="Close"
               titleStyle={styles.optionClose}
-              onPress={() => setIsVisible(false)}
             />
 
             <Option title="Remove" onPress={hanldeRemoveFromSearchHistory} />
@@ -269,21 +269,21 @@ function VipSearchScreen({ navigation }) {
     </>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
   },
   matchedThoughtsContainer: {
-    borderRadius: 5,
-    height: 100,
-    paddingHorizontal: 10,
+    borderRadius: "5@s",
+    height: "75@s",
+    paddingHorizontal: "10@s",
     width: "100%",
   },
   optionsContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: 20,
+    borderRadius: "20@s",
     borderWidth: 1,
     overflow: "hidden",
     width: "60%",

@@ -1,5 +1,6 @@
 import React, { memo } from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
@@ -17,34 +18,40 @@ function VipThoughtCard({ user = defaultUser, style, onPress }) {
     <View style={[styles.container, style]}>
       <AppImage
         style={styles.image}
-        subStyle={styles.image}
+        subStyle={styles.subImage}
         imageUrl={user.picture}
         onPress={() => onPress(user)}
       />
-      <AppText style={{ fontSize: 16 }} numberOfLines={1}>
+      <AppText style={styles.name} numberOfLines={1}>
         {user.name}
       </AppText>
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
-    height: 100,
+    height: "75@s",
     justifyContent: "center",
-    width: 80,
+    width: "70@s",
   },
   image: {
+    alignItems: "center",
     borderColor: defaultStyles.colors.light,
-    borderRadius: 25,
-    borderWidth: 1,
-    height: 50,
-    width: 50,
+    borderRadius: "22@s",
+    borderWidth: 2,
+    height: "44@s",
+    justifyContent: "center",
+    width: "44@s",
   },
-  imageSub: {
-    borderRadius: 24.5,
-    height: 49,
-    width: 49,
+  name: {
+    color: defaultStyles.colors.secondary,
+    fontSize: "12@s",
+  },
+  subImage: {
+    borderRadius: "22@s",
+    height: "44@s",
+    width: "44@s",
   },
 });
 

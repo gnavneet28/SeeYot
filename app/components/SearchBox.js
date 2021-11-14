@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LottieView from "lottie-react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
-import AppText from "./AppText";
 import AppTextInput from "./AppTextInput";
 
 import defaultStyles from "../config/styles";
@@ -27,7 +27,7 @@ function SearchBox({
         <Ionicons
           color={defaultStyles.colors.yellow_Variant}
           name="search-sharp"
-          size={25}
+          size={scale(22)}
         />
         <AppTextInput
           maxLength={50}
@@ -49,14 +49,14 @@ function SearchBox({
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: 25,
+    borderRadius: "25@s",
     borderWidth: 1,
     elevation: 2,
-    marginVertical: 8,
+    marginVertical: "8@s",
     overflow: "hidden",
     width: "95%",
   },
@@ -64,8 +64,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 5,
-    height: 70,
+    borderRadius: "5@s",
+    height: "70@s",
     justifyContent: "center",
     width: "95%",
   },
@@ -73,17 +73,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
-    height: 42,
+    height: "38@s",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
+    paddingHorizontal: "10@s",
     width: "100%",
   },
   inputBox: {
-    borderRadius: 20,
+    borderRadius: "20@s",
     flexShrink: 1,
-    height: 40,
-    marginHorizontal: 5,
-    paddingHorizontal: 10,
+    height: "36@s",
+    marginHorizontal: "5@s",
+    paddingHorizontal: "10@s",
     width: "100%",
   },
 });

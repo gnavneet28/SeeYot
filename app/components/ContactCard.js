@@ -1,7 +1,7 @@
 import React, { useState, useCallback, memo } from "react";
 import { Modal, View, TouchableOpacity } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
-import { ScaledSheet } from "react-native-size-matters";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
@@ -40,8 +40,8 @@ function ContactCard({
       return setState({ visible: true, echoMessage: data });
     }
 
-    return;
-  }, []);
+    if (problem) return;
+  }, [user, index]);
 
   const handleCloseModal = useCallback(
     () => setState({ ...state, visible: false }),
@@ -86,7 +86,7 @@ function ContactCard({
             onPress={onSendThoughtPress}
             color={defaultStyles.colors.primary}
             name="send"
-            size={20}
+            size={scale(18)}
             style={styles.sendThoughtIcon}
           />
         </TouchableOpacity>
@@ -141,7 +141,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: 25,
+    borderRadius: "25@s",
     borderWidth: 2,
     elevation: 10,
     overflow: "hidden",

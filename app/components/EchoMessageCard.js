@@ -1,6 +1,6 @@
 import React, { memo } from "react";
-import { View, StyleSheet } from "react-native";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import { View } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
