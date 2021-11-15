@@ -1,6 +1,7 @@
-import React, { useCallback } from "react";
-import { View, StyleSheet, Modal, FlatList } from "react-native";
+import React from "react";
+import { View, Modal, FlatList } from "react-native";
 import countryCodes from "../assets/countryCodes";
+import { ScaledSheet } from "react-native-size-matters";
 
 import CountrySelectionCard from "./CountrySelectionCard";
 
@@ -14,10 +15,10 @@ function CountryPicker({ visible, setVisible, onPress }) {
   );
   return (
     <Modal
-      visible={visible}
-      transparent
       animationType="slide"
       onRequestClose={() => setVisible(false)}
+      transparent
+      visible={visible}
     >
       <View style={styles.mainContainer}>
         <View style={styles.container}>
@@ -32,10 +33,10 @@ function CountryPicker({ visible, setVisible, onPress }) {
     </Modal>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   mainContainer: {
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0)",
     flex: 1,
     justifyContent: "center",
     width: "100%",
@@ -43,11 +44,11 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    justifyContent: "center",
-    width: "80%",
-    overflow: "hidden",
+    borderRadius: "10@s",
     height: "70%",
-    borderRadius: 10,
+    justifyContent: "center",
+    overflow: "hidden",
+    width: "80%",
   },
 });
 

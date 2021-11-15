@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
-import { View, StyleSheet, ImageBackground } from "react-native";
+import { View, ImageBackground } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
@@ -13,8 +14,6 @@ import Constant from "../navigation/NavigationConstants";
 import defaultStyles from "../config/styles";
 
 import verifyApi from "../api/verify";
-
-const height = defaultStyles.height;
 
 function SendOtpScreen({ navigation }) {
   //STATES
@@ -84,15 +83,16 @@ function SendOtpScreen({ navigation }) {
       </View>
       <LoadingIndicator visible={isLoading} />
       <InfoAlert
-        leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
+        leftPress={handleCloseInfoAlert}
         visible={infoAlert.showInfoAlert}
       />
       <CountryPicker
-        visible={visible}
-        setVisible={setVisible}
         onPress={handleSetCode}
+        setVisible={setVisible}
+        visible={visible}
       />
+      {visible ? <View style={styles.modalFallback} /> : null}
       <View style={styles.inputContainer}>
         <View style={styles.phoneInputContainer}>
           <AppText onPress={handleOpenCodePress} style={styles.code}>
@@ -101,13 +101,13 @@ function SendOtpScreen({ navigation }) {
           <AppTextInput
             autoCorrect={false}
             keyboardType="phone-pad"
-            textContentType="telephoneNumber"
             maxLength={10}
             onChangeText={(number) => setNumber(number)}
-            value={number}
             placeholder="Enter phone number"
             style={styles.number}
             subStyle={styles.numberSub}
+            textContentType="telephoneNumber"
+            value={number}
           />
         </View>
         <AppButton
@@ -128,11 +128,11 @@ function SendOtpScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   button: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 5,
-    height: defaultStyles.dimensionConstants.height,
+    borderRadius: "5@s",
+    height: "40@s",
     width: "80%",
   },
   code: {
@@ -141,10 +141,10 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    backgroundColor: "rgba(255, 80, 80, 0.8)",
-    borderBottomLeftRadius: 80,
-    borderBottomRightRadius: 80,
-    height: 100,
+    backgroundColor: "rgba(255, 80, 80, 0.7)",
+    borderBottomLeftRadius: "80@s",
+    borderBottomRightRadius: "80@s",
+    height: "75@s",
     justifyContent: "center",
     position: "absolute",
     top: 0,
@@ -159,32 +159,41 @@ const styles = StyleSheet.create({
   inputContainer: {
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 20,
+    marginBottom: "20@s",
     width: "100%",
   },
   inputBox: {
     backgroundColor: "tomato",
-    borderRadius: 5,
-    marginBottom: 20,
+    borderRadius: "5@s",
+    marginBottom: "20@s",
     width: "95%",
   },
   infoText: {
     color: defaultStyles.colors.white,
-    height: 100,
-    lineHeight: height > 640 ? height * 0.028 : height * 0.03,
+    fontSize: "13.5@s",
+    lineHeight: "15@s",
+    paddingHorizontal: "10@s",
+    paddingVertical: "5@s",
     textAlign: "center",
     width: "80%",
+  },
+  modalFallback: {
+    backgroundColor: "rgba(0,0,0,0.7)",
+    height: "100%",
+    position: "absolute",
+    width: "100%",
+    zIndex: 22,
   },
   number: {
     width: "75%",
   },
   numberSub: {
-    letterSpacing: 1,
+    letterSpacing: "1@s",
   },
   otpSentInfo: {
     color: defaultStyles.colors.white,
-    fontSize: 18,
-    marginTop: 10,
+    fontSize: "18@s",
+    marginTop: "10@s",
     textAlign: "center",
   },
   phoneInputContainer: {
@@ -192,20 +201,20 @@ const styles = StyleSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderRadius: 5,
     flexDirection: "row",
-    height: 45,
+    height: "40@s",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: "10@s",
     overflow: "hidden",
     width: "80%",
   },
   submitButtonSub: {
     color: defaultStyles.colors.primary,
-    letterSpacing: 1,
+    letterSpacing: "1@s",
   },
   verifyInfo: {
     color: defaultStyles.colors.white,
-    fontSize: 22,
-    top: 10,
+    fontSize: "17@s",
+    top: "10@s",
   },
 });
 

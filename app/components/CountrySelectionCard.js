@@ -1,5 +1,7 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
+
 import AppText from "./AppText";
 import defaultStyles from "../config/styles";
 
@@ -15,25 +17,26 @@ function CountrySelectionCard({ country, onPress }) {
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     flexDirection: "row",
-    height: 45,
+    height: "40@s",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: "10@s",
+    paddingVertical: "4@s",
     width: "100%",
   },
   name: {
-    width: "70%",
     flexShrink: 1,
+    fontSize: "14@s",
+    width: "70%",
   },
   code: {
-    width: 60,
-    marginHorizontal: 10,
     color: defaultStyles.colors.blue,
+    marginHorizontal: "10@s",
     textAlign: "center",
+    width: "60@s",
   },
 });
 
