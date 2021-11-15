@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ImageBackground } from "react-native";
+import { View, ImageBackground } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AddPicture from "../components/AddPicture";
 import AppButton from "../components/AppButton";
@@ -17,8 +18,6 @@ import storeDetails from "../utilities/storeDetails";
 
 import defaultStyles from "../config/styles";
 import { useKeyboard } from "@react-native-community/hooks";
-
-const height = defaultStyles.height;
 
 function RegisterDetailsScreen({ route }) {
   const { logIn } = useAuth();
@@ -135,7 +134,7 @@ function RegisterDetailsScreen({ route }) {
           subStyle={styles.enterNameSub}
         />
         <AppText style={styles.info}>
-          Name you enter here will be visible to your friends.
+          Name you enter here, will be visible to your friends.
         </AppText>
       </View>
       <AppButton
@@ -143,55 +142,56 @@ function RegisterDetailsScreen({ route }) {
         onPress={handleSubmit}
         style={[styles.button, { display: keyboardShown ? "none" : "flex" }]}
         subStyle={styles.submitButtonSub}
-        title="Next"
+        title="Register"
       />
     </ImageBackground>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   addPhoto: {
-    marginBottom: 30,
-    marginTop: 50,
+    marginBottom: "20@s",
+    marginTop: "30@s",
   },
   button: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 5,
-    height: defaultStyles.dimensionConstants.height,
+    borderRadius: "5@s",
+    height: "40@s",
     width: "90%",
   },
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.primary,
-    padding: 20,
+    padding: "20@s",
   },
   enterDetailsContainer: {
-    width: "90%",
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
+    width: "90%",
   },
   enterName: {
-    marginBottom: 10,
-    borderRadius: 5,
-    height: defaultStyles.dimensionConstants.height,
+    borderRadius: "5@s",
+    height: "40@s",
+    marginBottom: "5@s",
   },
   imageBackground: {
-    backgroundColor: defaultStyles.colors.primary,
     alignItems: "center",
+    backgroundColor: defaultStyles.colors.primary,
     flex: 1,
-    paddingVertical: 20,
     justifyContent: "space-between",
+    paddingVertical: "20@s",
   },
   info: {
     color: defaultStyles.colors.white,
-    fontSize: height * 0.02,
-    textAlign: "center",
+    fontSize: "12@s",
+    textAlign: "left",
+    width: "100%",
   },
   enterNameSub: {
-    marginHorizontal: 10,
+    marginHorizontal: "10@s",
   },
   submitButtonSub: {
     color: defaultStyles.colors.primary,
-    letterSpacing: 2,
+    letterSpacing: "1@s",
   },
 });
 
