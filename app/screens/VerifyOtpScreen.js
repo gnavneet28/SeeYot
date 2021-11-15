@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ImageBackground, Text } from "react-native";
+import { View, ImageBackground, Text, Linking } from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
@@ -18,8 +19,6 @@ import {
 import defaultStyles from "../config/styles";
 
 import verifyApi from "../api/verify";
-
-const height = defaultStyles.height;
 
 export default function VerifyOtpScreen({ navigation, route }) {
   const { phoneNumber, verificationId } = route.params;
@@ -40,6 +39,9 @@ export default function VerifyOtpScreen({ navigation, route }) {
     setValue,
   });
 
+  const openPrivacyPage = () => {
+    Linking.openURL("https://seeyot-frontend.herokuapp.com/privacy_policy");
+  };
   // INFO ALERT ACTION
   const handleCloseInfoAlert = () =>
     setInfoAlert({ ...infoAlert, showInfoAlert: false });
@@ -119,7 +121,6 @@ export default function VerifyOtpScreen({ navigation, route }) {
         <AppText style={styles.verifyInfo}>Verify OTP.</AppText>
       </View>
       <View style={styles.inputContainer}>
-        <AppText style={styles.enterOtpText}>Enter the otp.</AppText>
         <View style={styles.otpInputContainer}>
           <CodeField
             ref={ref}
@@ -149,49 +150,46 @@ export default function VerifyOtpScreen({ navigation, route }) {
           disabled={!value || value.length < 6 ? true : false}
           onPress={handleSubmit}
           style={styles.button}
-          subStyle={{ color: defaultStyles.colors.primary, letterSpacing: 2 }}
+          subStyle={{
+            color: defaultStyles.colors.primary,
+            letterSpacing: scale(2),
+          }}
           title="Next"
         />
         <AppButton
           disabled={disabled}
           title="Send Otp again"
           style={styles.sendOtpAgain}
-          subStyle={{ fontSize: 16 }}
+          subStyle={{ fontSize: scale(10) }}
           onPress={handleSendOtpAgainPress}
         />
       </View>
-      <AppText style={styles.infoText}>
+      <AppText onPress={openPrivacyPage} style={styles.infoText}>
         By continuing you agree to the Terms and Privacy policy.
       </AppText>
     </ImageBackground>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   button: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: 5,
-    height: defaultStyles.dimensionConstants.height,
+    borderRadius: "5@s",
+    height: "35@s",
+    marginVertical: "10@s",
     width: "80%",
   },
-  codeFieldRoot: { marginTop: 20 },
+  codeFieldRoot: {},
   cell: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: 5,
-    fontSize: 20,
-    height: 45,
-    lineHeight: 38,
-    marginHorizontal: 5,
+    borderRadius: "5@s",
+    fontSize: "15@s",
+    height: "35@s",
+    lineHeight: "38@s",
+    marginHorizontal: "5.5@s",
     textAlign: "center",
     textAlignVertical: "center",
-    width: 45,
-  },
-  enterOtpText: {
-    color: defaultStyles.colors.white,
-    fontSize: 22,
-    marginBottom: 15,
-    textAlign: "center",
-    width: "100%",
+    width: "35@s",
   },
   focusCell: {
     borderColor: "#000",
@@ -199,9 +197,9 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     backgroundColor: "rgba(255, 80, 80, 0.8)",
-    borderBottomLeftRadius: 80,
-    borderBottomRightRadius: 80,
-    height: 100,
+    borderBottomLeftRadius: "80@s",
+    borderBottomRightRadius: "80@s",
+    height: "75@s",
     justifyContent: "center",
     position: "absolute",
     top: 0,
@@ -211,43 +209,44 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.primary,
     flex: 1,
-    justifyContent: "center",
+    paddingTop: "230@s",
   },
   inputContainer: {
     alignItems: "center",
-    bottom: 20,
+    bottom: "20@s",
     justifyContent: "center",
     width: "100%",
   },
   infoText: {
     color: defaultStyles.colors.white,
-    lineHeight: height > 640 ? height * 0.028 : height * 0.03,
+    fontSize: "13.5@s",
+    lineHeight: "15@s",
     textAlign: "center",
     width: "70%",
   },
   otpInputContainer: {
     alignItems: "center",
+    alignSelf: "center",
     flexDirection: "row",
-    height: defaultStyles.dimensionConstants.height,
+    height: "40@s",
     justifyContent: "space-between",
-    marginBottom: 20,
     width: "80%",
   },
   sendOtpAgain: {
     backgroundColor: defaultStyles.colors.blue,
-    height: 35,
-    marginVertical: 30,
-    width: 110,
+    height: "25@s",
+    marginTop: "5@s",
+    width: "80@s",
   },
   screen: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.primary,
     justifyContent: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: "20@s",
   },
   verifyInfo: {
     color: defaultStyles.colors.white,
-    fontSize: 22,
-    top: 10,
+    fontSize: "17@s",
+    top: "10@s",
   },
 });

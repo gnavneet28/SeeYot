@@ -154,7 +154,8 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.primary,
     flex: 1,
-    justifyContent: "center",
+    paddingTop: "230@s",
+    //justifyContent: "center",
   },
   inputContainer: {
     alignItems: "center",
