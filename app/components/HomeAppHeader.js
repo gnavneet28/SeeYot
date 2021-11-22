@@ -81,7 +81,8 @@ const styles = ScaledSheet.create({
   title: {
     color: defaultStyles.colors.white,
     fontFamily: "Comic-Bold",
-    fontSize: "18@s",
+    fontSize: "20@s",
+    letterSpacing: "0.3@s",
     textAlign: "center",
     width: "60%",
   },

@@ -19,6 +19,7 @@ import DataConstants from "../utilities/DataConstants";
 import debounce from "../utilities/debounce";
 
 function ThoughtTimer({ thought }) {
+  let currentDate = Date.now();
   dayjs.extend(relativeTime);
 
   const { user, setUser } = useAuth();
@@ -89,7 +90,11 @@ function ThoughtTimer({ thought }) {
       <View style={styles.thoughtDetailsContainer}>
         <AppText style={styles.message}>{thought.message}</AppText>
         <AppText style={styles.createdAt}>
-          Sent {dayjs(thought.createdAt).fromNow()}
+          {Math.ceil(
+            10 -
+              dayjs(currentDate).diff(dayjs(thought.createdAt), "seconds") / 60
+          )}{" "}
+          minutes left.
         </AppText>
       </View>
       <View style={styles.deleteContainer}>

@@ -19,6 +19,8 @@ import AuthContext from "./app/auth/context";
 import authStorage from "./app/auth/storage";
 
 import usersApi from "./app/api/users";
+import Screen from "./app/components/Screen";
+import Onboarding from "./app/components/Onboarding";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -79,6 +81,9 @@ export default function App() {
     );
 
   return (
+    // <Screen>
+    //   <Onboarding />
+    // </Screen>
     <SafeAreaProvider>
       <AuthContext.Provider value={{ user, setUser }}>
         <Image

@@ -70,7 +70,7 @@ function SubscriptionScreen({ navigation, route }) {
             name="lock-open"
           />
           <DescriptionItem
-            description="You shall be notified when someone add you to his/her Fovorite People list."
+            description="You will be notified when someone add you to his/her Fovorite People list."
             name="bell-circle"
           />
           <AppText style={styles.selectPlanText}>Select a Plan</AppText>
@@ -106,13 +106,14 @@ function SubscriptionScreen({ navigation, route }) {
 const styles = ScaledSheet.create({
   manageSubscription: {
     alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.blue,
-    borderRadius: "5@s",
+    backgroundColor: defaultStyles.colors.dark_Variant,
+    borderBottomLeftRadius: "20@s",
+    borderTopLeftRadius: "20@s",
     color: defaultStyles.colors.white,
     fontSize: "14@s",
     marginBottom: "10@s",
-    marginRight: "20@s",
-    paddingHorizontal: "15@s",
+    paddingHorizontal: "10@s",
+    textAlign: "right",
   },
   collectPoints: {
     backgroundColor: defaultStyles.colors.secondary,
