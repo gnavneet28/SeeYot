@@ -1,6 +1,7 @@
 import React from "react";
-import { View, StyleSheet, Platform } from "react-native";
+import { View, Platform } from "react-native";
 import Constants from "expo-constants";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppText from "./AppText";
 import useConnection from "../hooks/useConnection";
@@ -19,13 +20,15 @@ function OfflineNotice(props) {
 
   return null;
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: colors.yellow,
+    borderBottomRightRadius: "5@s",
+    borderBottomLeftRadius: "5@s",
     elevation: Platform.OS === "android" ? 1 : 0,
-    height: 60,
+    height: "25@s",
     justifyContent: "center",
     position: "absolute",
     top: Constants.statusBarHeight,
@@ -33,7 +36,8 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   text: {
-    color: colors.primary,
+    color: colors.danger,
+    fontSize: "13@s",
   },
 });
 

@@ -3,11 +3,11 @@ import {
   Modal,
   ScrollView,
   Share,
-  StyleSheet,
   TouchableHighlight,
   View,
 } from "react-native";
-import { ScaledSheet } from "react-native-size-matters";
+import { ScaledSheet, scale } from "react-native-size-matters";
+import AntDesign from "react-native-vector-icons/AntDesign";
 
 import AddPicture from "../components/AddPicture";
 import ApiActivity from "../components/ApiActivity";
@@ -401,14 +401,16 @@ function ProfileScreen({ navigation }) {
         transparent={true}
         visible={visible}
       >
-        <TouchableHighlight style={styles.optionsContainerBackground}>
-          <View style={styles.optionsContainer}>
-            <AppText
-              style={[styles.closeButton, { fontFamily: "Comic-Bold" }]}
+        <View style={styles.optionsContainerBackground}>
+          <View style={styles.closeMessageIconContainer}>
+            <AntDesign
               onPress={() => setVisible(false)}
-            >
-              Close
-            </AppText>
+              name="downcircle"
+              color={defaultStyles.colors.tomato}
+              size={scale(28)}
+            />
+          </View>
+          <View style={styles.optionsContainer}>
             <ProfileOption
               icon="block"
               onPress={handleBlockListPress}
@@ -438,22 +440,24 @@ function ProfileScreen({ navigation }) {
               title="Log Out"
             />
           </View>
-        </TouchableHighlight>
+        </View>
       </Modal>
       <Modal
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setOpenReport(false)}
         transparent={true}
         visible={openReport}
       >
         <View style={styles.reportModal}>
-          <View style={styles.optionsContainerReport}>
-            <AppText
-              style={[styles.closeButton, { fontFamily: "Comic-Bold" }]}
+          <View style={styles.closeMessageIconContainer}>
+            <AntDesign
               onPress={() => setOpenReport(false)}
-            >
-              Close
-            </AppText>
+              name="downcircle"
+              color={defaultStyles.colors.tomato}
+              size={scale(28)}
+            />
+          </View>
+          <View style={styles.optionsContainerReport}>
             <AppTextInput
               maxLength={250}
               multiline={true}
@@ -500,15 +504,17 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     width: "100%",
   },
-  closeButton: {
-    borderTopLeftRadius: "20@s",
-    borderTopRightRadius: "20@s",
-    color: defaultStyles.colors.danger,
-    fontSize: "14@s",
+  closeMessageIconContainer: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: "25@s",
+    bottom: "-25@s",
     height: "40@s",
-    textAlign: "center",
-    textAlignVertical: "center",
-    width: "100%",
+    justifyContent: "center",
+    padding: "5@s",
+    width: "40@s",
+    zIndex: 222,
   },
   echoBox: {
     alignItems: "center",
@@ -544,6 +550,8 @@ const styles = ScaledSheet.create({
   },
   optionsContainerBackground: {
     flex: 1,
+    justifyContent: "flex-end",
+    overflow: "hidden",
     width: "100%",
   },
   optionsContainer: {
@@ -554,13 +562,13 @@ const styles = ScaledSheet.create({
     borderRightColor: defaultStyles.colors.light,
     borderRightWidth: 1,
     borderTopColor: defaultStyles.colors.light,
-    borderTopLeftRadius: "20@s",
-    borderTopRightRadius: "20@s",
+    borderTopLeftRadius: "10@s",
+    borderTopRightRadius: "10@s",
     borderTopWidth: 1,
     bottom: 0,
     height: "240@s",
     overflow: "hidden",
-    position: "absolute",
+    paddingTop: "20@s",
     width: "100%",
   },
   optionsContainerReport: {
@@ -571,13 +579,14 @@ const styles = ScaledSheet.create({
     borderRightColor: defaultStyles.colors.light,
     borderRightWidth: 1,
     borderTopColor: defaultStyles.colors.light,
-    borderTopLeftRadius: "20@s",
-    borderTopRightRadius: "20@s",
+    borderTopLeftRadius: "10@s",
+    borderTopRightRadius: "10@s",
     borderTopWidth: 1,
     bottom: 0,
     height: "200@s",
     overflow: "hidden",
     paddingHorizontal: "10@s",
+    paddingTop: "25@s",
     width: "100%",
   },
   problemInput: {

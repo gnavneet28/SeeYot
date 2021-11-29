@@ -284,7 +284,7 @@ function AddEchoScreen({ navigation, route }) {
                 </View>
                 <AppText style={styles.saveEchoInfo}>
                   What would you like to say when {recipient.name} taps on your
-                  Display Picture or send you thoughts.
+                  Display Picture or sends you thoughts.
                 </AppText>
                 <AppButton
                   disabled={
@@ -332,10 +332,10 @@ const styles = ScaledSheet.create({
   button: {
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderColor: defaultStyles.colors.yellow,
-    borderRadius: "10@s",
+    borderColor: defaultStyles.colors.light,
+    borderRadius: "5@s",
     borderWidth: 2,
-    height: defaultStyles.dimensionConstants.height,
+    height: "38@s",
     width: "90%",
   },
   container: {
@@ -357,7 +357,7 @@ const styles = ScaledSheet.create({
   inputBoxContainer: {
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: "10@s",
+    borderRadius: "5@s",
     borderWidth: 1,
     marginBottom: "5@s",
     overflow: "hidden",

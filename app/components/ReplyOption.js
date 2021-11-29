@@ -40,6 +40,7 @@ function ReplyOption({ option = defaultOption, onPress, selectedMessageId }) {
 const styles = ScaledSheet.create({
   answer: {
     borderRadius: "10@s",
+    fontSize: "14@s",
     paddingHorizontal: "10@s",
     paddingVertical: "5@s",
     textAlign: "center",

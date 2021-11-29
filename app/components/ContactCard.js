@@ -1,7 +1,18 @@
 import React, { useState, useCallback, memo } from "react";
-import { Modal, View, TouchableOpacity } from "react-native";
+import { Modal, View, TouchableOpacity, Image } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
+import {
+  PinchGestureHandler,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
+import Animated, {
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
@@ -55,6 +66,41 @@ function ContactCard({
 
   const onAddEchoButtonPress = useCallback(() => onAddEchoPress(user), [user]);
 
+  // PinchGesture Image Zoom
+
+  const AnimatedImage = Animated.createAnimatedComponent(Image);
+
+  const scaleImage = useSharedValue(1);
+  const focalX = useSharedValue(0);
+  const focalY = useSharedValue(0);
+
+  const pinchHandler = useAnimatedGestureHandler({
+    onActive: (event) => {
+      scaleImage.value = event.scale;
+      focalX.value = event.focalX;
+      focalY.value = event.focalY;
+    },
+    onEnd: () => {
+      scaleImage.value = withTiming(1);
+    },
+  });
+
+  const rStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateX: focalX.value },
+        { translateY: focalY.value },
+        { translateX: width < height ? -width / 2 : -height / 2 },
+        { translateY: width < height ? -width / 2 : -height / 2 },
+        { scale: scaleImage.value },
+        { translateX: -focalX.value },
+        { translateY: -focalY.value },
+        { translateX: width < height ? width / 2 : height / 2 },
+        { translateY: width < height ? width / 2 : height / 2 },
+      ],
+    };
+  });
+
   if (!user.name) return <View style={styles.emptyContacts} />;
 
   return (
@@ -99,18 +145,35 @@ function ContactCard({
       >
         <View style={styles.largeImageModalFallback}>
           <View style={styles.contentContainer}>
+            <View style={styles.inlargedHeader}>
+              <MaterialIcons
+                onPress={handleCloseModal}
+                name="arrow-back"
+                size={scale(23)}
+                color={defaultStyles.colors.secondary}
+                style={styles.closeIcon}
+              />
+
+              <AppText style={{ zIndex: 222 }}>{user.name}</AppText>
+            </View>
+            <GestureHandlerRootView>
+              <PinchGestureHandler onGestureEvent={pinchHandler}>
+                <AnimatedImage
+                  activeOpacity={1}
+                  source={
+                    user.picture
+                      ? { uri: user.picture }
+                      : require("../assets/user.png")
+                  }
+                  style={[styles.inlargedImage, rStyle]}
+                />
+              </PinchGestureHandler>
+            </GestureHandlerRootView>
             {state.echoMessage ? (
               <AppText style={styles.echoMessage}>
                 {state.echoMessage.message}
               </AppText>
             ) : null}
-            <AppImage
-              activeOpacity={1}
-              imageUrl={user.picture}
-              subStyle={styles.inlargedImage}
-              style={styles.inlargedImage}
-              onPress={handleCloseModal}
-            />
           </View>
         </View>
       </Modal>
@@ -123,9 +186,14 @@ const styles = ScaledSheet.create({
     borderColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "15@s",
     borderWidth: "0.5@s",
-    height: "28@s",
+    height: "26@s",
     marginLeft: "5@s",
-    width: "45%",
+    width: "40%",
+  },
+  closeIcon: {
+    left: "15@s",
+    position: "absolute",
+    zIndex: 222,
   },
   container: {
     alignItems: "center",
@@ -141,15 +209,14 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: "25@s",
-    borderWidth: 2,
+    borderRadius: "15@s",
+    borderWidth: 1,
     elevation: 10,
     overflow: "hidden",
-    width: width < height ? width - 40 : height - 40,
+    width: "100%",
   },
   echoMessage: {
     alignSelf: "center",
-    backgroundColor: defaultStyles.colors.white,
     marginVertical: "10@s",
     textAlign: "center",
     textAlignVertical: "center",
@@ -175,7 +242,7 @@ const styles = ScaledSheet.create({
   },
   infoNameText: {
     color: defaultStyles.colors.dark,
-    fontSize: "16@s",
+    fontSize: "15@s",
     marginBottom: "5@s",
     marginLeft: "5@s",
     opacity: 0.9,
@@ -183,8 +250,15 @@ const styles = ScaledSheet.create({
   },
   inlargedImage: {
     borderRadius: 0,
-    height: width < height ? width - 40 : height - 40,
-    width: width < height ? width - 40 : height - 40,
+    height: width < height ? width : height,
+    width: width < height ? width : height,
+  },
+  inlargedHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    padding: "10@s",
+    width: "100%",
   },
   largeImageModalFallback: {
     alignItems: "center",
@@ -210,7 +284,7 @@ const styles = ScaledSheet.create({
   },
   subAddEchoButton: {
     color: defaultStyles.colors.secondary,
-    fontSize: "15@s",
+    fontSize: "14@s",
   },
   userDetailsContainer: {
     flex: 1,

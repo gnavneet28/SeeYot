@@ -58,7 +58,7 @@ function AppNavigator(props) {
   }, [user]);
 
   useNotifications((data) => {
-    console.log(data.notification.request.content.data.message);
+    //console.log(data.notification.request.content.data.message);
     if (
       data.notification.request.content.data.message !==
       "One of your favorites sent you a message!"

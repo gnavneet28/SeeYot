@@ -105,6 +105,7 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.dark_Variant,
     borderRadius: "10@s",
     color: defaultStyles.colors.white,
+    fontSize: "13@s",
     marginBottom: "5@s",
     marginHorizontal: "5@s",
     paddingHorizontal: "10@s",

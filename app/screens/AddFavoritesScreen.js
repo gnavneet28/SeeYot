@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Modal, View, ScrollView, TextInput } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-import { ScaledSheet } from "react-native-size-matters";
+import { ScaledSheet, scale } from "react-native-size-matters";
+import AntDesign from "react-native-vector-icons/AntDesign";
 
 import AddFavoriteList from "../components/AddFavoriteList";
 import AppActivityIndicator from "../components/ActivityIndicator";
@@ -271,13 +272,15 @@ function AddFavoritesScreen({ navigation }) {
               justifyContent: "flex-end",
             }}
           >
-            <View style={styles.messageMainContainer}>
-              <AppText
+            <View style={styles.closeMessageIconContainer}>
+              <AntDesign
                 onPress={processing === true ? () => null : handleCloseMessage}
-                style={styles.closeMessage}
-              >
-                Close
-              </AppText>
+                name="downcircle"
+                color={defaultStyles.colors.tomato}
+                size={scale(28)}
+              />
+            </View>
+            <View style={styles.messageMainContainer}>
               <View style={styles.inputBoxContainerMain}>
                 <AppImage
                   imageUrl={recipient.picture}
@@ -448,12 +451,11 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   addOptions: {
-    backgroundColor: defaultStyles.colors.tomato,
+    backgroundColor: defaultStyles.colors.dark_Variant,
     borderRadius: "20@s",
-    elevation: 5,
-    height: "35@s",
-    marginVertical: "20@s",
-    width: "100@s",
+    height: "30@s",
+    marginVertical: "10@s",
+    width: "85@s",
   },
   addOptionsSub: {
     fontSize: "14@s",
@@ -510,19 +512,24 @@ const styles = ScaledSheet.create({
     height: "32@s",
     width: "55@s",
   },
+  closeMessageIconContainer: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: "25@s",
+    bottom: "-25@s",
+    height: "40@s",
+    justifyContent: "center",
+    padding: "5@s",
+    width: "40@s",
+    zIndex: 222,
+  },
   closeButton: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "10@s",
     height: "32@s",
     marginRight: "20@s",
     width: "55@s",
-  },
-  closeMessage: {
-    color: defaultStyles.colors.danger,
-    marginBottom: "5@s",
-    marginTop: "5@s",
-    textAlign: "center",
-    width: "100%",
   },
   container: {
     alignItems: "center",
@@ -557,14 +564,15 @@ const styles = ScaledSheet.create({
   messageMainContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderTopLeftRadius: "20@s",
-    borderTopRightRadius: "20@s",
+    borderTopLeftRadius: "10@s",
+    borderTopRightRadius: "10@s",
     overflow: "hidden",
+    paddingTop: "25@s",
     width: "100%",
   },
   messageInput: {
     borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: "10@s",
+    borderRadius: "5@s",
     borderWidth: 1,
     fontFamily: "Comic-Bold",
     fontSize: "14.5@s",
@@ -608,7 +616,7 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "20@s",
     color: defaultStyles.colors.secondary,
-    fontSize: "14@s",
+    fontSize: "12@s",
     height: "32@s",
     marginLeft: "10@s",
     paddingHorizontal: "10@s",
@@ -629,6 +637,7 @@ const styles = ScaledSheet.create({
   },
   sendButton: {
     borderRadius: 0,
+    height: "40@s",
     marginTop: "10@s",
   },
   wordCount: {

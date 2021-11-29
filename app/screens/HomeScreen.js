@@ -17,6 +17,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet, scale } from "react-native-size-matters";
+import AntDesign from "react-native-vector-icons/AntDesign";
 
 import ApiActivity from "../components/ApiActivity";
 import AppImage from "../components/AppImage";
@@ -89,6 +90,10 @@ function HomeScreen({ navigation }) {
   useEffect(() => {
     if (isFocused && isVisible) {
       setIsVisible(false);
+      setMessageCreator({
+        name: "************",
+        picture: "",
+      });
     }
   }, [isFocused]);
 
@@ -339,13 +344,15 @@ function HomeScreen({ navigation }) {
               justifyContent: "flex-end",
             }}
           >
-            <View style={styles.messageMainContainer}>
-              <AppText
+            <View style={styles.closeMessageIconContainer}>
+              <AntDesign
                 onPress={sendingReply ? null : handleCloseMessage}
-                style={styles.closeMessage}
-              >
-                Close
-              </AppText>
+                name="downcircle"
+                color={defaultStyles.colors.tomato}
+                size={scale(28)}
+              />
+            </View>
+            <View style={styles.messageMainContainer}>
               <View style={styles.messageCreatorDetails}>
                 <AppImage
                   activeOpacity={1}
@@ -422,13 +429,17 @@ function HomeScreen({ navigation }) {
   );
 }
 const styles = ScaledSheet.create({
-  closeMessage: {
-    color: defaultStyles.colors.danger,
-    fontSize: "14@s",
-    marginBottom: "5@s",
-    marginTop: "5@s",
-    textAlign: "center",
-    width: "100%",
+  closeMessageIconContainer: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: "25@s",
+    bottom: "-25@s",
+    height: "40@s",
+    justifyContent: "center",
+    padding: "5@s",
+    width: "40@s",
+    zIndex: 222,
   },
   contactList: {
     marginTop: "2@s",
@@ -475,9 +486,10 @@ const styles = ScaledSheet.create({
   messageMainContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderTopLeftRadius: "20@s",
-    borderTopRightRadius: "20@s",
+    borderTopLeftRadius: "10@s",
+    borderTopRightRadius: "10@s",
     overflow: "hidden",
+    paddingTop: "10@s",
     width: "100%",
   },
   messageCreatorDetails: {
@@ -532,10 +544,9 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.light,
     borderRadius: "20@s",
     fontSize: "13@s",
-    height: "35@s",
     marginBottom: "10@s",
     marginLeft: "10@s",
-    paddingHorizontal: "20@s",
+    paddingHorizontal: "10@s",
     textAlign: "center",
     textAlignVertical: "center",
   },

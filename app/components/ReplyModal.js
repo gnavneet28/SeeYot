@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Modal, ScrollView } from "react-native";
-import { ScaledSheet } from "react-native-size-matters";
+import { ScaledSheet, scale } from "react-native-size-matters";
+import AntDesign from "react-native-vector-icons/AntDesign";
 
 import ReplyCardSub from "../components/ReplyCardSub";
 import ReplyOption from "../components/ReplyOption";
@@ -30,10 +31,15 @@ function ReplyModal({ message = defaultMessage, handleCloseModal }) {
             justifyContent: "flex-end",
           }}
         >
+          <View style={styles.closeMessageIconContainer}>
+            <AntDesign
+              onPress={handleCloseModal}
+              name="downcircle"
+              color={defaultStyles.colors.tomato}
+              size={scale(28)}
+            />
+          </View>
           <View style={styles.messageMainContainer}>
-            <AppText onPress={handleCloseModal} style={styles.closeMessage}>
-              Close
-            </AppText>
             <AppText style={styles.modalMessage}>
               {message.message.message}
             </AppText>
@@ -66,12 +72,17 @@ function ReplyModal({ message = defaultMessage, handleCloseModal }) {
   );
 }
 const styles = ScaledSheet.create({
-  closeMessage: {
-    color: defaultStyles.colors.danger,
-    marginBottom: "5@s",
-    marginTop: "5@s",
-    textAlign: "center",
-    width: "100%",
+  closeMessageIconContainer: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: "25@s",
+    bottom: "-25@s",
+    height: "40@s",
+    justifyContent: "center",
+    padding: "5@s",
+    width: "40@s",
+    zIndex: 222,
   },
   messageBackground: {
     flex: 1,
@@ -81,9 +92,10 @@ const styles = ScaledSheet.create({
   messageMainContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderTopLeftRadius: "20@s",
-    borderTopRightRadius: "20@s",
+    borderTopLeftRadius: "10@s",
+    borderTopRightRadius: "10@s",
     overflow: "hidden",
+    paddingTop: "25@s",
     width: "100%",
   },
   modalMessage: {
