@@ -95,7 +95,7 @@ const styles = ScaledSheet.create({
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
     overflow: "hidden",
-    paddingTop: "25@s",
+    paddingTop: "32@s",
     width: "100%",
   },
   modalMessage: {

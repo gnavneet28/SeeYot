@@ -9,10 +9,15 @@ const getEchoMessages = () => apiClient.get(endPoint + "/echoMessage");
 const getMyThoughts = () => apiClient.get(endPoint + "/thoughts");
 
 const updateMyContacts = () => apiClient.put(endPoint + "/contacts/update", {});
+
+const updateMyEchoMessages = () =>
+  apiClient.put(endPoint + "/echoMessages/update", {});
+
+const updateMyFavorites = () =>
+  apiClient.put(endPoint + "/favorites/update", {});
+
 const updateThisEchoMessage = (id) =>
   apiClient.put(endPoint + "/echoMessage/update/" + id, {});
-const updateThisSearchHistory = (id) =>
-  apiClient.put(endPoint + "/searchHistory/update/" + id, {});
 
 const updateThisContact = (id, savedName) =>
   apiClient.put(endPoint + "/contact/update/" + id, { savedName });
@@ -26,7 +31,10 @@ const deleteNotification = (id) =>
 const deleteAllNotifications = (id) =>
   apiClient.delete(endPoint + "/notifications");
 
+const clearExpiredData = () => apiClient.delete(endPoint + "/expired");
+
 export default {
+  clearExpiredData,
   deleteAllNotifications,
   deleteNotification,
   getBlockList,
@@ -36,7 +44,8 @@ export default {
   getNotifications,
   setNotificationSeen,
   updateMyContacts,
+  updateMyEchoMessages,
+  updateMyFavorites,
   updateThisContact,
   updateThisEchoMessage,
-  updateThisSearchHistory,
 };

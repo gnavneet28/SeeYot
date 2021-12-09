@@ -1,4 +1,10 @@
-import React, { memo, useCallback, useState, useEffect } from "react";
+import React, {
+  memo,
+  useCallback,
+  useState,
+  useEffect,
+  useContext,
+} from "react";
 import {
   View,
   Text,
@@ -23,6 +29,7 @@ import DataConstants from "../utilities/DataConstants";
 import debounce from "../utilities/debounce";
 
 import defaultStyles from "../config/styles";
+import ApiContext from "../utilities/apiContext";
 
 let defaultNotification = {
   type: "",
@@ -34,11 +41,13 @@ function NotificationCard({
   onTapToSeePress,
   notification = defaultNotification,
   tapToSeeMessage,
+  tapToSendMessage,
 }) {
   dayjs.extend(relativeTime);
   let customImage;
 
   const { user, setUser } = useAuth();
+  const { apiProcessing, setApiProcessing } = useContext(ApiContext);
   const [processing, setProcessing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
@@ -52,11 +61,11 @@ function NotificationCard({
   }, [notification._id]);
 
   if (notification.type && notification.type == "Unmatched")
-    customImage = require("../assets/thoughts.png");
+    customImage = require("../assets/logo.png");
   else if (notification.type && notification.type == "Vip")
-    customImage = require("../assets/vip.png");
+    customImage = require("../assets/logo.png");
   else if (notification.type && notification.type == "Official")
-    customImage = require("../assets/app-logo.png");
+    customImage = require("../assets/logo.png");
 
   // INFO ALERT ACTIONS
   const handleCloseInfoAlert = useCallback(async () => {
@@ -66,6 +75,7 @@ function NotificationCard({
   const handleDeletePress = useCallback(
     debounce(
       async () => {
+        setApiProcessing(true);
         setProcessing(true);
         let modifiedUser = { ...user };
 
@@ -80,10 +90,11 @@ function NotificationCard({
             DataConstants.NOTIFICATIONS,
             data.notifications
           );
-          return;
+          return setApiProcessing(false);
         }
 
         setProcessing(false);
+        setApiProcessing(false);
 
         if (problem) {
           if (data) {
@@ -121,6 +132,10 @@ function NotificationCard({
       return tapToSeeMessage;
     }
 
+    if (notification.type == "ActiveChat") {
+      return tapToSendMessage;
+    }
+
     return null;
   };
 
@@ -132,7 +147,8 @@ function NotificationCard({
         subStyle={styles.imageSub}
         imageUrl={
           (notification.type && notification.type == "Matched") ||
-          (notification.type && notification.type == "Replied")
+          (notification.type && notification.type == "Replied") ||
+          (notification.type && notification.type == "ActiveChat")
             ? notification.createdBy.picture
             : ""
         }
@@ -163,7 +179,7 @@ function NotificationCard({
           <MaterialCommunityIcons
             name="delete-circle-outline"
             size={scale(17)}
-            onPress={handleDeletePress}
+            onPress={apiProcessing ? () => null : handleDeletePress}
             color={defaultStyles.colors.danger}
           />
         ) : (

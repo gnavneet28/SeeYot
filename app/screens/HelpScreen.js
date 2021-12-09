@@ -23,15 +23,15 @@ function HelpScreen({ navigation }) {
   );
 
   const openPrivacyPage = () => {
-    Linking.openURL("https://seeyot-frontend.herokuapp.com/privacy_policy");
+    Linking.openURL("http://www.seeyot.com/privacy_policy");
   };
 
   const openTermsPage = () => {
-    Linking.openURL("https://seeyot-frontend.herokuapp.com/terms_of_service");
+    Linking.openURL("http://www.seeyot.com/terms_of_service");
   };
 
   const openHowItWorksPage = () => {
-    Linking.openURL("https://seeyot-frontend.herokuapp.com/how_it_works");
+    Linking.openURL("http://www.seeyot.com/how_it_works");
   };
 
   return (
@@ -48,7 +48,7 @@ function HelpScreen({ navigation }) {
           style={{ marginTop: scale(5), marginBottom: 0 }}
         />
         <UserDetailsCard
-          data="SeeYot@gmail.com"
+          data="help@seeyot.com"
           editable={false}
           iconName="email"
           size={scale(20)}

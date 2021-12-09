@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { StyleSheet, Share, Linking } from "react-native";
+import { Share, Linking } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as SMS from "expo-sms";
 import { ScaledSheet } from "react-native-size-matters";
@@ -16,12 +16,9 @@ import DataConstants from "../utilities/DataConstants";
 import usersApi from "../api/users";
 import useAuth from "../auth/useAuth";
 
-import defaultStyles from "../config/styles";
-
 import asyncStorage from "../utilities/cache";
 import debounce from "../utilities/debounce";
-
-const height = defaultStyles.height;
+import ApiContext from "../utilities/apiContext";
 
 function AddContactsScreen({ navigation }) {
   const { user } = useAuth();
@@ -39,6 +36,7 @@ function AddContactsScreen({ navigation }) {
   });
 
   const [refreshing, setRefreshing] = useState(false);
+  const [apiProcessing, setApiProcessing] = useState(false);
 
   // ON PAGE FOCUS ACTION
   const requestPermission = async () => {
@@ -56,6 +54,7 @@ function AddContactsScreen({ navigation }) {
                 ? c.phoneNumbers[0].number
                 : 1212121212,
             };
+
             if (contact.phoneNumber.length >= 10) {
               contacts.push(contact);
             }
@@ -90,6 +89,7 @@ function AddContactsScreen({ navigation }) {
           "91" + contact.phoneNumber.toString().replace(/[^\d]/g, "").slice(-10)
         ),
       };
+
       newListToSync.push(modifiedContact);
     }
 
@@ -118,8 +118,19 @@ function AddContactsScreen({ navigation }) {
     });
   };
 
+  const setUpPage = () => {
+    if (user.phoneContacts.length) {
+      setUsers(
+        user.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
+      );
+      setIsReady(true);
+      return requestPermission();
+    }
+    return requestPermission();
+  };
+
   useEffect(() => {
-    requestPermission();
+    setUpPage();
   }, []);
 
   // REFRESH ACTION
@@ -203,28 +214,23 @@ function AddContactsScreen({ navigation }) {
       {!isReady ? (
         <AppActivityIndicator />
       ) : (
-        <AddContactList
-          onRefresh={handleRefresh}
-          refreshing={refreshing}
-          onInvitePress={
-            SMS.isAvailableAsync() ? handleUserInvite : handleInvitePress
-          }
-          users={users}
-        />
+        <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
+          <AddContactList
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
+            onInvitePress={
+              SMS.isAvailableAsync() ? handleUserInvite : handleInvitePress
+            }
+            users={users}
+          />
+        </ApiContext.Provider>
       )}
     </Screen>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
-  },
-  info: {
-    backgroundColor: defaultStyles.colors.light,
-    height: height > 640 ? height * 0.0577 : height * 0.078,
-    padding: 5,
-    top: 300,
-    width: "80%",
   },
 });
 

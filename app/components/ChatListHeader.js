@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
@@ -7,7 +7,7 @@ import defaultStyles from "../config/styles";
 import AppImage from "./AppImage";
 import AppText from "./AppText";
 
-function ChatListHeader({ user }) {
+function ChatListHeader({ user, activeChat }) {
   return (
     <View style={styles.container}>
       <AppImage
@@ -19,21 +19,29 @@ function ChatListHeader({ user }) {
       <AppText style={styles.name}>{user.name}</AppText>
       {user.myNickName ? (
         <AppText style={styles.myNickName}>
-          {"Calls you by name" + " - " + user.myNickName}
+          {"calls you" + " - " + user.myNickName}
         </AppText>
       ) : null}
-      <AppText style={styles.infoText}>
-        Send your thoughts to {user.name} and within 10 minutes if {user.name}{" "}
-        does the same for you, your thoughts will match. You can see all your
-        matched thoughts here.
-      </AppText>
+      {activeChat ? (
+        <AppText style={styles.infoText}>
+          Send direct messages to {user.name} and have an active chat. These are
+          temporary messages and are not stored anywhere, except your device
+          until you refresh this page or visit another chat.
+        </AppText>
+      ) : (
+        <AppText style={styles.infoText}>
+          Send your thoughts to {user.name} and within 10 minutes if {user.name}{" "}
+          does the same for you, your thoughts will match. You can see all your
+          matched thoughts here.
+        </AppText>
+      )}
     </View>
   );
 }
 const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "rgba(255,255,255,0.15)",
     paddingVertical: "10@s",
     width: "100%",
   },

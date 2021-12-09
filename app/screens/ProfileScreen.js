@@ -168,14 +168,25 @@ function ProfileScreen({ navigation }) {
         };
         let picture = image;
 
-        const response = await usersApi.updateCurrentUserPhoto(picture);
-        if (response.ok) {
-          modifiedUser.picture = response.data.picture;
-          cachedUserDetails.picture = response.data.data;
+        if (image) {
+          const response = await usersApi.updateCurrentUserPhoto(picture);
+          if (response.ok) {
+            modifiedUser.picture = response.data.picture;
+            cachedUserDetails.picture = response.data.data;
+            setUser(modifiedUser);
+            await asyncStorage.store(DataConstants.DETAILS, cachedUserDetails);
+          }
+          return apiActivityStatus(response, setApiActivity);
+        }
+
+        const response2 = await usersApi.removeCurrentUserPhoto();
+        if (response2.ok) {
+          modifiedUser.picture = response2.data.picture;
+          cachedUserDetails.picture = response2.data.data;
           setUser(modifiedUser);
           await asyncStorage.store(DataConstants.DETAILS, cachedUserDetails);
         }
-        return apiActivityStatus(response, setApiActivity);
+        return apiActivityStatus(response2, setApiActivity);
       },
       1000,
       true

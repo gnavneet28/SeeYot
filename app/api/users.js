@@ -27,16 +27,31 @@ const updatePoints = () => apiClient.put(endPoint + "/me/points/add", {});
 const searchUser = (searchQuery) =>
   apiClient.get(endPoint + "/search", { searchQuery });
 
-const addToSearchHstory = (user) =>
-  apiClient.put(endPoint + "/searchHistory/add", user);
+const addToSearchHistory = (id) =>
+  apiClient.put(endPoint + "/searchHistory/add/" + id, {});
 
-const removeFromSearchHstory = (user) =>
-  apiClient.put(endPoint + "/searchHistory/remove", user);
+const removeFromSearchHstory = (id) =>
+  apiClient.put(endPoint + "/searchHistory/remove/" + id, {});
 
 const getCurrentUser = () => apiClient.get(endPoint + "/me");
 
-const updateCurrentUserPhoto = (picture) =>
-  apiClient.put(endPoint + "/me/update/picture", { picture: picture });
+const updateCurrentUserPhoto = (picture) => {
+  const formData = new FormData();
+
+  formData.append("picture", {
+    name: picture.split("/").pop(),
+    uri: picture,
+    type: "image/jpg",
+  });
+
+  return apiClient.put(endPoint + "/me/update/picture", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+const removeCurrentUserPhoto = () =>
+  apiClient.put(endPoint + "/me/remove/picture", {});
 
 const updateCurrentUserName = (name) =>
   apiClient.put(endPoint + "/me/update/name", { name: name });
@@ -80,18 +95,35 @@ const syncContacts = (phoneContacts) =>
 const redeemPoints = (pointsToRedeem) =>
   apiClient.put(endPoint + "/me/redeem", { pointsToRedeem });
 
+const notifyUserForActiveChat = (id) =>
+  apiClient.put(endPoint + "/activeChat/notify/" + id, {});
+
+const sendNewActiveMessage = (newMessage) =>
+  apiClient.put(endPoint + "/newActiveMessage", { newMessage });
+
+const makeCurrentUserActiveFor = (forUser, byUser) =>
+  apiClient.put(endPoint + "/setActiveFor", { for: forUser, by: byUser });
+
+const makeCurrentUserInActiveFor = (forUser, byUser) =>
+  apiClient.put(endPoint + "/setInActiveFor", { for: forUser, by: byUser });
+
 export default {
   addContact,
   addFavorite,
-  addToSearchHstory,
+  addToSearchHistory,
   blockContact,
   getCurrentUser,
+  sendNewActiveMessage,
+  makeCurrentUserActiveFor,
+  makeCurrentUserInActiveFor,
+  notifyUserForActiveChat,
   redeemPoints,
   registerUserWithoutPicture,
   registerUserWithPicture,
   removeContact,
   removeFavorite,
   removeFromSearchHstory,
+  removeCurrentUserPhoto,
   searchUser,
   setPrivacyMessage,
   setPrivacySearch,

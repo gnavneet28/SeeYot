@@ -41,7 +41,7 @@ function VipSearchScreen({ navigation }) {
   // DATA NEEDED
   const searchHistory = useMemo(
     () => (user.searchHistory ? user.searchHistory : defaultSearchHistory),
-    [user.searchHistory.length]
+    [user.searchHistory]
   );
 
   // INFO ALERT ACTION
@@ -170,34 +170,41 @@ function VipSearchScreen({ navigation }) {
     });
   }, [interestedUser]);
 
-  const hanldeRemoveFromSearchHistory = useCallback(async () => {
-    let modifiedUser = { ...user };
-    const { ok, problem, data } = await usersApi.removeFromSearchHstory(
-      interestedUser
-    );
-    if (ok) {
-      modifiedUser.searchHistory = data;
-      setUser(modifiedUser);
-      setIsVisible(false);
-      await asyncStorage.store("userSearchHistory", data);
-      return;
-    }
-    if (data) {
-      setIsVisible(false);
-      return setInfoAlert({
-        ...infoAlert,
-        infoAlertMessage: data.message,
-        showInfoAlert: true,
-      });
-    }
+  const hanldeRemoveFromSearchHistory = useCallback(
+    debounce(
+      async () => {
+        let modifiedUser = { ...user };
+        const { ok, problem, data } = await usersApi.removeFromSearchHstory(
+          interestedUser._id
+        );
+        if (ok) {
+          modifiedUser.searchHistory = data;
+          setUser(modifiedUser);
+          setIsVisible(false);
+          await asyncStorage.store("userSearchHistory", data);
+          return;
+        }
+        if (data) {
+          setIsVisible(false);
+          return setInfoAlert({
+            ...infoAlert,
+            infoAlertMessage: data.message,
+            showInfoAlert: true,
+          });
+        }
 
-    setIsVisible(false);
-    setInfoAlert({
-      ...infoAlert,
-      infoAlertMessage: problem,
-      showInfoAlert: true,
-    });
-  }, [interestedUser, user]);
+        setIsVisible(false);
+        setInfoAlert({
+          ...infoAlert,
+          infoAlertMessage: problem,
+          showInfoAlert: true,
+        });
+      },
+      5,
+      true
+    ),
+    [interestedUser, user]
+  );
 
   return (
     <>

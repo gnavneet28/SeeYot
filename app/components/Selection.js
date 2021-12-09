@@ -1,15 +1,23 @@
 import React, { memo } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";
 
 import defaultStyles from "../config/styles";
 
-function Selection({ style, onPress, opted, value = "" }) {
+function Selection({
+  style,
+  onPress,
+  opted,
+  dotStyle,
+  containerStyle,
+  value = "",
+}) {
   return (
     <View style={[styles.container, style]}>
-      <View
+      <TouchableOpacity
+        onPress={onPress}
         style={[
           [
             styles.checkBox,
@@ -18,20 +26,24 @@ function Selection({ style, onPress, opted, value = "" }) {
               height: opted ? scale(18) : scale(14),
               borderRadius: opted ? scale(9) : scale(7),
             },
+            containerStyle,
           ],
         ]}
       >
         <View
-          style={{
-            width: scale(8),
-            height: scale(8),
-            borderRadius: scale(4),
-            backgroundColor: opted
-              ? defaultStyles.colors.tomato
-              : defaultStyles.colors.light,
-          }}
+          style={[
+            {
+              width: scale(8),
+              height: scale(8),
+              borderRadius: scale(4),
+              backgroundColor: opted
+                ? defaultStyles.colors.tomato
+                : defaultStyles.colors.light,
+            },
+            dotStyle,
+          ]}
         />
-      </View>
+      </TouchableOpacity>
       <AppText style={{ fontSize: scale(15), opacity: 0.8 }} onPress={onPress}>
         {value}
       </AppText>

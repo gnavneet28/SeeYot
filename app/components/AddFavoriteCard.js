@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useContext } from "react";
 import { View, ActivityIndicator } from "react-native";
 import LottieView from "lottie-react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";
@@ -18,8 +18,10 @@ import asyncStorage from "../utilities/cache";
 import debounce from "../utilities/debounce";
 
 import defaultStyles from "../config/styles";
+import ApiContext from "../utilities/apiContext";
 
 const defaulFavoriteUser = {
+  _id: "",
   name: "",
   phoneNumber: parseInt(""),
   picture: "",
@@ -30,6 +32,7 @@ function AddContactCard({
   favoriteUser = defaulFavoriteUser,
   style,
 }) {
+  const { apiProcessing, setApiProcessing } = useContext(ApiContext);
   const { user, setUser } = useAuth();
   const [processing, setProcessing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
@@ -53,6 +56,7 @@ function AddContactCard({
   const handleAddPress = useCallback(
     debounce(
       async () => {
+        setApiProcessing(true);
         setProcessing(true);
 
         let modifiedUser = { ...user };
@@ -65,11 +69,13 @@ function AddContactCard({
           modifiedUser.favorites = data.favorites;
           setUser(modifiedUser);
           await asyncStorage.store(DataConstants.FAVORITES, data.favorites);
-          return setProcessing(false);
+          setProcessing(false);
+          return setApiProcessing(false);
         }
 
         if (problem) {
           if (data) {
+            setApiProcessing(false);
             setProcessing(false);
             return setInfoAlert({
               infoAlertMessage: data.message,
@@ -78,6 +84,7 @@ function AddContactCard({
           }
 
           setProcessing(false);
+          setApiProcessing(false);
           return setInfoAlert({
             infoAlertMessage: "Something went wrong! Please try again.",
             showInfoAlert: true,
@@ -87,12 +94,13 @@ function AddContactCard({
       1000,
       true
     ),
-    [user, favoriteUser._id]
+    [user, favoriteUser._id, user.favorites]
   );
 
   const handleRemovePress = useCallback(
     debounce(
       async () => {
+        setApiProcessing(true);
         setProcessing(true);
 
         let modifiedUser = { ...user };
@@ -105,17 +113,20 @@ function AddContactCard({
           modifiedUser.favorites = data.favorites;
           setUser(modifiedUser);
           await asyncStorage.store(DataConstants.FAVORITES, data.favorites);
+          setApiProcessing(false);
           return setProcessing(false);
         }
         if (problem) {
           if (data) {
             setProcessing(false);
+            setApiProcessing(false);
             return setInfoAlert({
               infoAlertMessage: data.message,
               showInfoAlert: true,
             });
           }
           setProcessing(false);
+          setApiProcessing(false);
           return setInfoAlert({
             infoAlertMessage: "Something went wrong! Please try again.",
             showInfoAlert: true,
@@ -125,7 +136,7 @@ function AddContactCard({
       1000,
       true
     ),
-    [user]
+    [user, user.favorites, favoriteUser._id]
   );
 
   if (!favoriteUser.name)
@@ -165,16 +176,17 @@ function AddContactCard({
           />
         ) : (
           <AppButton
+            disabled={apiProcessing ? true : false}
             title={inFavourites ? "Remove" : "Add"}
-            style={[
-              styles.addButton,
+            style={styles.addButton}
+            subStyle={[
+              styles.addButtonSub,
               {
-                backgroundColor: inFavourites
+                color: inFavourites
                   ? defaultStyles.colors.tomato
                   : defaultStyles.colors.blue,
               },
             ]}
-            subStyle={styles.addButtonSub}
             onPress={!inFavourites ? handleAddPress : handleRemovePress}
           />
         )}
@@ -197,7 +209,7 @@ function AddContactCard({
 const styles = ScaledSheet.create({
   buttonContainer: {
     alignItems: "center",
-    borderColor: defaultStyles.colors.light,
+    borderColor: defaultStyles.colors.lightGrey,
     borderRadius: "10@s",
     borderWidth: 1,
     height: "32@s",
@@ -207,6 +219,7 @@ const styles = ScaledSheet.create({
     width: "60@s",
   },
   addButton: {
+    backgroundColor: defaultStyles.colors.white,
     borderRadius: "10@s",
     height: "32@s",
     width: "60@s",

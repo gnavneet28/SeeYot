@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Dimensions,
-  View,
-  RefreshControl,
-  ActivityIndicator,
-} from "react-native";
+import { Dimensions, View, ActivityIndicator } from "react-native";
 import {
   RecyclerListView,
   DataProvider,
@@ -101,12 +96,6 @@ class VipSearchResultList extends React.Component {
             />
           ) : null}
           <RecyclerListView
-            refreshControl={
-              <RefreshControl
-                onRefresh={this.props.onRefresh}
-                refreshing={this.props.refreshing}
-              />
-            }
             canChangeSize={true}
             dataProvider={this.state.dataProvider}
             extendedState={this.state}

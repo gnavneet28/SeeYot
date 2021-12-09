@@ -28,6 +28,7 @@ import defaultStyles from "../config/styles";
 import myApi from "../api/my";
 
 import useAuth from "../auth/useAuth";
+import ApiContext from "../utilities/apiContext";
 
 function NotificationScreen({ navigation }) {
   const { user, setUser } = useAuth();
@@ -43,6 +44,7 @@ function NotificationScreen({ navigation }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+  const [apiProcessing, setApiProcessing] = useState(false);
 
   const [message, setMessage] = useState({
     isVisible: false,
@@ -128,6 +130,13 @@ function NotificationScreen({ navigation }) {
     apiActivityStatus(response, setApiActivity);
   }, []);
 
+  const handleSendMessage = (notification) => {
+    return navigation.navigate(Constant.SEND_THOUGHT_SCREEN, {
+      recipient: notification.data,
+      from: Constant.NOTIFICATION_SCREEN,
+    });
+  };
+
   const handleTapToSeeThought = useCallback((thought) => {
     setThought(thought.message);
     setVisible(true);
@@ -198,13 +207,16 @@ function NotificationScreen({ navigation }) {
                 Clear all notifications.
               </AppText>
             ) : null}
-            <NotificationListPro
-              onTapToSeeMessage={handleOpenModal}
-              onTapToSeePress={handleTapToSeeThought}
-              notifications={data}
-              onRefresh={handleRefresh}
-              refreshing={refreshing}
-            />
+            <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
+              <NotificationListPro
+                onTapToSendMessage={handleSendMessage}
+                onTapToSeeMessage={handleOpenModal}
+                onTapToSeePress={handleTapToSeeThought}
+                notifications={data}
+                onRefresh={handleRefresh}
+                refreshing={refreshing}
+              />
+            </ApiContext.Provider>
           </>
         )}
       </Screen>
@@ -222,13 +234,15 @@ const styles = ScaledSheet.create({
   },
   clearAll: {
     alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.dark_Variant,
+    backgroundColor: defaultStyles.colors.primary2,
     borderBottomLeftRadius: "20@s",
     borderTopLeftRadius: "20@s",
     color: defaultStyles.colors.white,
     fontSize: "14@s",
+    height: "30@s",
     paddingHorizontal: "10@s",
     textAlign: "right",
+    textAlignVertical: "center",
   },
   modalFallback: {
     backgroundColor: "rgba(0,0,0,0.7)",

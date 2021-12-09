@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Modal } from "react-native";
-import { ScaledSheet } from "react-native-size-matters";
+import { ScaledSheet, scale } from "react-native-size-matters";
+import AntDesign from "react-native-vector-icons/AntDesign";
 
 import defaultStyles from "../config/styles";
 import AppText from "./AppText";
@@ -14,10 +15,15 @@ function SeeThought({ visible = false, setVisible, message = "" }) {
       visible={visible}
     >
       <View style={styles.container}>
+        <View style={styles.closeMessageIconContainer}>
+          <AntDesign
+            onPress={() => setVisible(false)}
+            name="downcircle"
+            color={defaultStyles.colors.tomato}
+            size={scale(28)}
+          />
+        </View>
         <View style={styles.mainContainer}>
-          <AppText style={styles.close} onPress={() => setVisible(false)}>
-            Close
-          </AppText>
           <AppText style={styles.title}>Thought</AppText>
           <AppText style={styles.message}>{message}</AppText>
         </View>
@@ -26,14 +32,17 @@ function SeeThought({ visible = false, setVisible, message = "" }) {
   );
 }
 const styles = ScaledSheet.create({
-  close: {
+  closeMessageIconContainer: {
+    alignItems: "center",
+    alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
-    color: defaultStyles.colors.danger,
-    fontSize: "14@s",
-    height: "30@s",
-    marginBottom: "5@s",
-    textAlign: "center",
-    width: "100%",
+    borderRadius: "25@s",
+    bottom: "-25@s",
+    height: "40@s",
+    justifyContent: "center",
+    padding: "5@s",
+    width: "40@s",
+    zIndex: 222,
   },
   container: {
     alignItems: "center",
@@ -46,10 +55,11 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderRadius: "5@s",
-    borderTopLeftRadius: "20@s",
-    borderTopRightRadius: "20@s",
+    borderTopLeftRadius: "10@s",
+    borderTopRightRadius: "10@s",
     justifyContent: "center",
     overflow: "hidden",
+    paddingTop: "20@s",
     width: "100%",
   },
   message: {

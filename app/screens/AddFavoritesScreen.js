@@ -20,10 +20,15 @@ import defaultStyles from "../config/styles";
 
 import useAuth from "../auth/useAuth";
 import messagesApi from "../api/messages";
+import myApi from "../api/my";
 
 import Constants from "../navigation/NavigationConstants";
+import DataConstants from "../utilities/DataConstants";
+
+import asyncStorage from "../utilities/cache";
 
 import debounce from "../utilities/debounce";
+import ApiContext from "../utilities/apiContext";
 
 const defaultRecipient = {
   name: "",
@@ -39,7 +44,7 @@ const moodData = [
 ];
 
 function AddFavoritesScreen({ navigation }) {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
   const toast = useRef();
 
@@ -58,6 +63,7 @@ function AddFavoritesScreen({ navigation }) {
   const [showAddoption, setShowAddOption] = useState(false);
   const [optionalMessage, setOptionalMessage] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [apiProcessing, setApiProcessing] = useState(false);
 
   // ON PAGE FOCUS ACTION
   const setUsersList = () => {
@@ -77,6 +83,23 @@ function AddFavoritesScreen({ navigation }) {
     setUsers(finalList);
     setIsReady(true);
   };
+
+  const updateMyFavoritesList = async () => {
+    const { ok, data, problem } = await myApi.updateMyFavorites();
+    if (ok) {
+      let modifiedUser = { ...user };
+      modifiedUser.favorites = data.favorites;
+      setUser(modifiedUser);
+      setUsersList();
+      return await asyncStorage.store(DataConstants.FAVORITES, data.favorites);
+    }
+
+    if (problem) return;
+  };
+
+  useEffect(() => {
+    updateMyFavoritesList();
+  }, []);
 
   useEffect(() => {
     if (isFocused) {
@@ -172,6 +195,7 @@ function AddFavoritesScreen({ navigation }) {
   // REFRESH ACTION
   const handleRefresh = () => {
     setUsersList();
+    updateMyFavoritesList();
   };
 
   // HEADER ACTIONS
@@ -249,13 +273,15 @@ function AddFavoritesScreen({ navigation }) {
         {!isReady ? (
           <AppActivityIndicator />
         ) : (
-          <AddFavoriteList
-            onAllRepliesPress={handleOnAllRepliesPress}
-            onRefresh={handleRefresh}
-            refreshing={refreshing}
-            onMessagePress={handleMessagePress}
-            users={users}
-          />
+          <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
+            <AddFavoriteList
+              onAllRepliesPress={handleOnAllRepliesPress}
+              onRefresh={handleRefresh}
+              refreshing={refreshing}
+              onMessagePress={handleMessagePress}
+              users={users}
+            />
+          </ApiContext.Provider>
         )}
       </Screen>
       {isVisible ? <View style={styles.modalFallback} /> : null}
@@ -567,7 +593,7 @@ const styles = ScaledSheet.create({
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
     overflow: "hidden",
-    paddingTop: "25@s",
+    paddingTop: "32@s",
     width: "100%",
   },
   messageInput: {

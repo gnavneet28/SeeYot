@@ -50,7 +50,9 @@ function AddContactCard({
 }
 const styles = ScaledSheet.create({
   blockedButton: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
+    backgroundColor: defaultStyles.colors.white,
+    borderWidth: 2,
+    borderColor: defaultStyles.colors.lightGrey,
     borderRadius: "10@s",
     height: "30@s",
     marginRight: "5@s",
@@ -65,9 +67,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.light,
     borderRadius: "10@s",
-    borderWidth: 1,
     elevation: 1,
     flexDirection: "row",
     height: "50@s",

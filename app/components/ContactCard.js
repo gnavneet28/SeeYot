@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from "react";
+import React, { useState, useCallback, memo, useContext } from "react";
 import { Modal, View, TouchableOpacity, Image } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
@@ -17,6 +17,8 @@ import Animated, {
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
 import AppText from "./AppText";
+
+import ActiveForContext from "../utilities/activeForContext";
 
 import defaultStyles from "../config/styles";
 
@@ -43,6 +45,8 @@ function ContactCard({
     visible: false,
     echoMessage: null,
   });
+
+  const { activeFor, setActiveFor } = useContext(ActiveForContext);
 
   const handleImagePress = useCallback(async () => {
     setState({ visible: true, echoMessage: "" });
@@ -103,6 +107,8 @@ function ContactCard({
 
   if (!user.name) return <View style={styles.emptyContacts} />;
 
+  let isRecipientActive = activeFor.filter((u) => u == user._id)[0];
+
   return (
     <>
       <View style={[styles.container, style]}>
@@ -126,11 +132,22 @@ function ContactCard({
         </View>
         <TouchableOpacity
           onPress={onSendThoughtPress}
-          style={styles.sendThoughtIconContainer}
+          style={[
+            styles.sendThoughtIconContainer,
+            {
+              backgroundColor: !isRecipientActive
+                ? defaultStyles.colors.yellow_Variant
+                : "green",
+            },
+          ]}
         >
           <Feather
             onPress={onSendThoughtPress}
-            color={defaultStyles.colors.primary}
+            color={
+              !isRecipientActive
+                ? defaultStyles.colors.primary
+                : defaultStyles.colors.white
+            }
             name="send"
             size={scale(18)}
             style={styles.sendThoughtIcon}
@@ -209,7 +226,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: "15@s",
+    borderRadius: "10@s",
     borderWidth: 1,
     elevation: 10,
     overflow: "hidden",

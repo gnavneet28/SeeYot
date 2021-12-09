@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, ImageBackground } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import { LinearGradient } from "expo-linear-gradient";
 
 import AddPicture from "../components/AddPicture";
 import AppButton from "../components/AppButton";
@@ -8,6 +9,7 @@ import AppText from "../components/AppText";
 import AppTextInput from "../components/AppTextInput";
 import InfoAlert from "../components/InfoAlert";
 import LoadingIndicator from "../components/LoadingIndicator";
+import Screen from "../components/Screen";
 
 import usersApi from "../api/users";
 
@@ -109,42 +111,43 @@ function RegisterDetailsScreen({ route }) {
   };
 
   return (
-    <ImageBackground
-      fadeDuration={200}
-      style={styles.imageBackground}
-      source={require("../assets/chatWallPaper.png")}
-    >
-      <LoadingIndicator visible={isLoading} />
-      <InfoAlert
-        leftPress={handleCloseInfoAlert}
-        description={infoAlert.infoAlertMessage}
-        visible={infoAlert.showInfoAlert}
-      />
-      <View style={styles.enterDetailsContainer}>
-        <AddPicture
-          image={image}
-          onChangeImage={(image) => setImage(image)}
-          style={styles.addPhoto}
+    <Screen style={styles.container}>
+      <LinearGradient
+        colors={["#1c1d1f", "#1d1f24", "#6b6863"]}
+        style={styles.gradient}
+      >
+        <LoadingIndicator visible={isLoading} />
+        <InfoAlert
+          leftPress={handleCloseInfoAlert}
+          description={infoAlert.infoAlertMessage}
+          visible={infoAlert.showInfoAlert}
         />
-        <AppTextInput
-          maxLength={25}
-          onChangeText={(name) => setName(name)}
-          placeholder="Enter your name here..."
-          style={styles.enterName}
-          subStyle={styles.enterNameSub}
+        <View style={styles.enterDetailsContainer}>
+          <AddPicture
+            image={image}
+            onChangeImage={(image) => setImage(image)}
+            style={styles.addPhoto}
+          />
+          <AppTextInput
+            maxLength={25}
+            onChangeText={(name) => setName(name)}
+            placeholder="Enter your name here..."
+            style={styles.enterName}
+            subStyle={styles.enterNameSub}
+          />
+          <AppText style={styles.info}>
+            Name you enter here, will be visible to your friends.
+          </AppText>
+        </View>
+        <AppButton
+          disabled={name ? false : true}
+          onPress={handleSubmit}
+          style={[styles.button, { display: keyboardShown ? "none" : "flex" }]}
+          subStyle={styles.submitButtonSub}
+          title="Register"
         />
-        <AppText style={styles.info}>
-          Name you enter here, will be visible to your friends.
-        </AppText>
-      </View>
-      <AppButton
-        disabled={name ? false : true}
-        onPress={handleSubmit}
-        style={[styles.button, { display: keyboardShown ? "none" : "flex" }]}
-        subStyle={styles.submitButtonSub}
-        title="Register"
-      />
-    </ImageBackground>
+      </LinearGradient>
+    </Screen>
   );
 }
 const styles = ScaledSheet.create({
@@ -161,7 +164,7 @@ const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.primary,
-    padding: "20@s",
+    flex: 1,
   },
   enterDetailsContainer: {
     alignItems: "center",
@@ -172,6 +175,14 @@ const styles = ScaledSheet.create({
     borderRadius: "5@s",
     height: "40@s",
     marginBottom: "5@s",
+  },
+  gradient: {
+    alignItems: "center",
+    width: "100%",
+    flex: 1,
+    justifyContent: "space-between",
+    paddingVertical: "20@s",
+    paddingHorizontal: "10@s",
   },
   imageBackground: {
     alignItems: "center",

@@ -105,7 +105,6 @@ class AddContactList extends React.Component {
             favoriteUser={data}
             name={data.name}
             onMessagePress={() => this.props.onMessagePress(data)}
-            processing={this.props.processing}
           />
         );
       default:
@@ -148,7 +147,7 @@ class AddContactList extends React.Component {
             onPress={this.props.onAllRepliesPress}
             style={styles.allReplies}
           >
-            All Replies
+            See All Replies
           </AppText>
         </View>
         <View style={styles.listView}>
@@ -174,7 +173,7 @@ class AddContactList extends React.Component {
 const styles = ScaledSheet.create({
   allReplies: {
     alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.dark_Variant,
+    backgroundColor: defaultStyles.colors.primary2,
     borderBottomLeftRadius: "20@s",
     borderTopLeftRadius: "20@s",
     color: defaultStyles.colors.white,

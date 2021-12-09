@@ -14,8 +14,8 @@
         "expo-notifications",
         {
           "androidMode": "default",
-          "icon": "./app/assets/notificationicon.png",
-          "color": "#6F009E"
+          "icon": "./app/assets/ic_notification.png",
+          "color": "#ffffff"
         }
       ]
     ],
@@ -27,10 +27,10 @@
       }
     },
     "android": {
-      "icon": "./assets/app-logo.png",
+      "icon": "./assets/logo.png",
       "adaptiveIcon": {
-        "foregroundImage": "./app/assets/app-logo.png",
-        "backgroundColor": "#000000"
+        "foregroundImage": "./app/assets/logo.png",
+        "backgroundColor": "#ffffff"
       },
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-3410683473491694~8016350220"

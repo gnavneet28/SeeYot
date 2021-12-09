@@ -65,6 +65,8 @@ function AddPicture({
           underlayColor={defaultStyles.colors.white}
         >
           <Image
+            width={scale(108)}
+            height={scale(108)}
             style={styles.image}
             source={image ? { uri: image } : require("../assets/user.png")}
           />

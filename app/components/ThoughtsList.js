@@ -7,10 +7,13 @@ import ThoughtCard from "./ThoughtCard";
 
 import useAuth from "../auth/useAuth";
 
-function ThoughtsList({ thoughts = [], recipient }) {
+function ThoughtsList({ thoughts = [], recipient, activeChat }) {
   const { user } = useAuth();
 
-  const keyExtractor = useCallback((item) => item._id.toString(), []);
+  const keyExtractor = useCallback(
+    (item, index) => item._id.toString(),
+    [thoughts]
+  );
 
   const renderItem = useCallback(
     ({ item }) => (
@@ -23,16 +26,18 @@ function ThoughtsList({ thoughts = [], recipient }) {
   );
 
   const renderListHeader = useCallback(() => {
-    return <ChatListHeader user={recipient} />;
-  }, [recipient, user.contacts]);
+    return <ChatListHeader activeChat={activeChat} user={recipient} />;
+  }, [recipient, user.contacts, activeChat]);
 
   return (
     <View style={[styles.container]}>
       <FlatList
-        data={thoughts}
+        data={[...thoughts].reverse()}
         ItemSeperatorComponent={ItemSeperatorComponent}
         keyExtractor={keyExtractor}
-        ListHeaderComponent={renderListHeader}
+        //ListHeaderComponent={renderListHeader}
+        ListFooterComponent={renderListHeader}
+        inverted={-1}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
       />

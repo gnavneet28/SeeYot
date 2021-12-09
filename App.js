@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from "react";
-import { Image, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -8,6 +7,8 @@ import * as Font from "expo-font";
 
 import getDetails from "./app/utilities/getDetails";
 import storeDetails from "./app/utilities/storeDetails";
+
+import cache from "./app/utilities/cache";
 
 import { navigationRef } from "./app/navigation/rootNavigation";
 import AppNavigator from "./app/navigation/AppNavigator";
@@ -18,8 +19,9 @@ import OfflineNotice from "./app/components/OfflineNotice";
 import AuthContext from "./app/auth/context";
 import authStorage from "./app/auth/storage";
 
+import OnboardingContext from "./app/utilities/onboardingContext";
+
 import usersApi from "./app/api/users";
-import Screen from "./app/components/Screen";
 import Onboarding from "./app/components/Onboarding";
 
 export default function App() {
@@ -28,6 +30,8 @@ export default function App() {
     fontLoaded: false,
     isReady: false,
   });
+
+  const [onboarded, setOnboarded] = useState(false);
 
   const loadFont = useCallback(async () => {
     await Font.loadAsync({
@@ -67,6 +71,10 @@ export default function App() {
       await loadFont();
     }
     await restoreUser();
+
+    let userOnboarded = await cache.get("onboarded");
+    if (userOnboarded) return setOnboarded(true);
+    setOnboarded(false);
   };
 
   if (!state.isReady || !state.fontLoaded)
@@ -81,29 +89,20 @@ export default function App() {
     );
 
   return (
-    // <Screen>
-    //   <Onboarding />
-    // </Screen>
     <SafeAreaProvider>
       <AuthContext.Provider value={{ user, setUser }}>
-        <Image
-          style={styles.wallPaperImage}
-          source={require("./app/assets/chatWallPaper.png")}
-        />
-        <OfflineNotice />
-        <NavigationContainer ref={navigationRef}>
-          {user ? <AppNavigator /> : <AuthNavigator />}
-        </NavigationContainer>
-        <StatusBar style="light" />
+        <OnboardingContext.Provider value={{ onboarded, setOnboarded }}>
+          <OfflineNotice />
+          {onboarded ? (
+            <NavigationContainer ref={navigationRef}>
+              {user ? <AppNavigator /> : <AuthNavigator />}
+            </NavigationContainer>
+          ) : (
+            <Onboarding />
+          )}
+          <StatusBar style="light" />
+        </OnboardingContext.Provider>
       </AuthContext.Provider>
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  wallPaperImage: {
-    position: "absolute",
-    top: -20,
-    opacity: 0,
-  },
-});

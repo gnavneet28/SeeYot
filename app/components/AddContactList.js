@@ -96,7 +96,7 @@ class AddContactList extends React.Component {
     });
   }
 
-  registeredUsersLenght(users) {
+  registeredUsersLength(users) {
     return users.filter((u) => u.isRegistered === true).length;
   }
 
@@ -116,8 +116,9 @@ class AddContactList extends React.Component {
   componentDidUpdate(prevProps) {
     if (
       prevProps.users.length != this.props.users.length ||
-      this.registeredUsersLenght(prevProps.users) !=
-        this.registeredUsersLenght(this.props.users)
+      this.registeredUsersLength(prevProps.users) !=
+        this.registeredUsersLength(this.props.users) ||
+      prevProps.users != this.props.users
     ) {
       return this.setState({
         ...this.state,

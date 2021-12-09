@@ -1,9 +1,17 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { View, StyleSheet, Modal, ImageBackground } from "react-native";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useContext,
+  useRef,
+} from "react";
+import { View, Modal, AppState } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import { ScaledSheet } from "react-native-size-matters";
 
 import ApiActivity from "../components/ApiActivity";
+import Alert from "../components/Alert";
 import AppHeader from "../components/AppHeader";
 import Option from "../components/Option";
 import Screen from "../components/Screen";
@@ -26,6 +34,9 @@ import usersApi from "../api/users";
 import apiFlow from "../utilities/ApiActivityStatus";
 import asyncStorage from "../utilities/cache";
 import debounce from "../utilities/debounce";
+import ActiveForContext from "../utilities/activeForContext";
+import InfoAlert from "../components/InfoAlert";
+import ActiveMessagesContext from "../utilities/activeMessagesContext";
 
 const filterThoughts = (thoughts = [], recipient, creator) => {
   return thoughts
@@ -38,15 +49,26 @@ const filterThoughts = (thoughts = [], recipient, creator) => {
           t.createdBy == recipient._id &&
           t.matched == true)
     )
-    .sort((a, b) => a.createdAt < b.createdAt);
+    .sort((a, b) => a.createdAt > b.createdAt);
+};
+
+const filterActiveMessages = (messages = [], recipient, creator) => {
+  return messages.filter(
+    (m) =>
+      (m.createdFor == recipient._id && m.createdBy == creator._id) ||
+      (m.createdFor == creator._id && m.createdBy == recipient._id)
+  );
 };
 
 function SendThoughtsScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
   const { recipient, from } = route.params;
   const { apiActivityStatus, initialApiActivity } = apiFlow;
-
+  const { activeFor, setActiveFor } = useContext(ActiveForContext);
   const isFocused = useIsFocused();
+
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
 
   // STATES
   const [isVisible, setIsVisible] = useState(false);
@@ -63,6 +85,73 @@ function SendThoughtsScreen({ navigation, route }) {
     success: false,
     echoMessage: null,
   });
+  const [activeChat, setActiveChat] = useState(false);
+  const { activeMessages, setActiveMessages } = useContext(
+    ActiveMessagesContext
+  );
+  const [infoAlert, setInfoAlert] = useState({
+    infoAlertMessage: "",
+    showInfoAlert: false,
+  });
+
+  const [showAlert, setShowAlert] = useState(false);
+
+  // ALERT ACTION
+
+  const handleCloseAlert = useCallback(() => setShowAlert(false), []);
+
+  const handleSendNewMessageNotification = async () => {
+    const { ok, data, problem } = await usersApi.notifyUserForActiveChat(
+      recipient._id
+    );
+    if (ok) {
+      return setShowAlert(false);
+    }
+
+    setShowAlert(false);
+    if (data) {
+      return setInfoAlert({
+        infoAlertMessage: data.message,
+        showInfoAlert: true,
+      });
+    }
+
+    return setInfoAlert({
+      infoAlertMessage: problem,
+      showInfoAlert: true,
+    });
+  };
+
+  // useEffect(() => {
+  //   const subscription = AppState.addEventListener("change", (nextAppState) => {
+  //     // if (
+  //     //   appState.current.match(/inactive|background/) &&
+  //     //   nextAppState === "active"
+  //     // ) {
+  //     //   console.log("App has come to the foreground!");
+  //     // }
+
+  //     // appState.current = nextAppState;
+  //     // setAppStateVisible(appState.current);
+  //     // console.log("AppState", appState.current);
+
+  //     console.log(nextAppState, appState.current);
+  //   });
+
+  //   return () => {
+  //     subscription.remove();
+  //   };
+  // }, []);
+
+  // SETTING ACTIVECHATMESSAGES, ACTIVE CHAT TO NULL AND REMOVING THE ACTIVECHAT FOR USER
+  useEffect(() => {
+    setActiveMessages([]);
+    setActiveChat(false);
+
+    if (!isFocused) {
+      handleSetChatInActive();
+    }
+  }, [isFocused]);
 
   // HEADER ACTIONS
   const handleBack = useCallback(
@@ -92,7 +181,16 @@ function SendThoughtsScreen({ navigation, route }) {
     []
   );
 
+  // INFO ALERT ACTION
+  const handleCloseInfoAlert = useCallback(
+    () => setInfoAlert({ ...infoAlert, showInfoAlert: false }),
+    []
+  );
+
   // INFORMATION IN NEED
+
+  let isRecipientActive = activeFor.filter((u) => u == recipient._id)[0];
+
   let isBlocked = useMemo(
     () => user.blocked.filter((b) => b._id == recipient._id)[0],
     [recipient._id, user, isFocused]
@@ -112,6 +210,11 @@ function SendThoughtsScreen({ navigation, route }) {
   const thoughts = useMemo(
     () => filterThoughts(user.thoughts, recipient, user),
     [isFocused, user.thoughts.length, recipient._id, user.thoughts]
+  );
+
+  const activeMessagesList = useMemo(
+    () => filterActiveMessages(activeMessages, recipient, user),
+    [isFocused, activeMessages.length, recipient._id, activeMessages]
   );
 
   const latestThought = useMemo(
@@ -185,49 +288,45 @@ function SendThoughtsScreen({ navigation, route }) {
     [recipient._id, user.thoughts]
   );
 
+  const handleSendActiveMessage = async (textMessage) => {
+    if (!isRecipientActive) {
+      return setShowAlert(true);
+    }
+    let newMessage = {
+      _id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+      message: textMessage,
+      createdAt: new Date(),
+      createdBy: user._id,
+      createdFor: recipient._id,
+    };
+    const response = await usersApi.sendNewActiveMessage(newMessage);
+    if (response.ok) {
+      return setActiveMessages([...activeMessages, newMessage]);
+    }
+
+    if (response.problem)
+      return setInfoAlert({
+        infoAlertMessage: "Something went wrong! Please try again.",
+        showInfoAlert: true,
+      });
+  };
+
   // ON FOCUS PAGE ACTION
   const updateSearchHistory = async () => {
     let modifiedUser = { ...user };
-    const { ok, data, problem } = await usersApi.addToSearchHstory(recipient);
+    const { ok, data, problem } = await usersApi.addToSearchHistory(
+      recipient._id
+    );
     if (ok) {
       modifiedUser.searchHistory = data;
       setUser(modifiedUser);
       return await asyncStorage.store(DataConstants.SEARCH_HISTORY, data);
-    }
-    return;
+    } else return console.log(problem, data);
   };
-
-  const updateCurrentContact = useCallback(async () => {
-    let id = recipient._id;
-    let savedName = recipient.savedName ? recipient.savedName : recipient.name;
-
-    const { ok, data } = await myApi.updateThisContact(id, savedName);
-    if (ok) {
-      let modifiedUser = { ...user };
-      modifiedUser.contacts = data;
-
-      let modifiedContact = data.filter((c) => c._id == recipient._id)[0];
-      let originalContact = user.contacts.filter(
-        (c) => c._id == recipient._id
-      )[0];
-
-      let equalName = modifiedContact.name == originalContact.name;
-      let equalPicture = modifiedContact.picture == originalContact.picture;
-      let equalNickName =
-        modifiedContact.myNickName == originalContact.myNickName;
-
-      if (equalName && equalPicture && equalNickName) return;
-
-      await asyncStorage.store(DataConstants.CONTACTS, data);
-      return setUser(modifiedUser);
-    }
-  }, [isFocused]);
 
   useEffect(() => {
     if (isFocused) {
-      if (from == Constant.HOME_SCREEN) {
-        updateCurrentContact();
-      } else if (from == Constant.VIP_SEARCH_SCREEN) {
+      if (from == Constant.VIP_SEARCH_SCREEN) {
         updateSearchHistory();
       }
     }
@@ -373,45 +472,93 @@ function SendThoughtsScreen({ navigation, route }) {
     [user]
   );
 
+  // CHANGING THE CHAT ACTIVE STATUS
+
+  const handleSetChatActive = async () => {
+    setActiveChat(true);
+    const { ok } = await usersApi.makeCurrentUserActiveFor(
+      recipient._id,
+      user._id
+    );
+
+    if (ok) return;
+    return;
+  };
+
+  const handleSetChatInActive = async () => {
+    setActiveChat(false);
+
+    const { ok } = await usersApi.makeCurrentUserInActiveFor(
+      recipient._id,
+      user._id
+    );
+
+    if (ok) return;
+    return;
+  };
+
   return (
     <>
       <Screen style={styles.container}>
-        <ImageBackground
-          style={styles.imageBackground}
-          source={require("../assets/chatWallPaper.png")}
-        >
-          <AppHeader
-            leftIcon="arrow-back"
-            onPressLeft={handleBack}
-            onPressRight={handleOptionsPress}
-            rightIcon="more-vert"
-            title="Thoughts"
-          />
-          {latestThought ? <ThoughtTimer thought={latestThought} /> : null}
-          <SendingThoughtActivity
-            echoMessage={messageActivity.echoMessage}
-            message={messageActivity.message}
-            onDoneButtonPress={handleSendingActivityClose}
-            onRequestClose={handleSendingActivityClose}
-            processing={messageActivity.processing}
-            success={messageActivity.success}
-            visible={messageActivity.visible}
-          />
-          <ApiActivity
-            message={apiActivity.message}
-            onDoneButtonPress={handleApiActivityClose}
-            onRequestClose={handleApiActivityClose}
-            processing={apiActivity.processing}
-            success={apiActivity.success}
-            visible={apiActivity.visible}
-          />
-          <ThoughtsList thoughts={thoughts} recipient={recipient} />
-          <View style={styles.sendThoughtsInputPlaceholder} />
-          <SendThoughtsInput
-            style={[styles.inputBox]}
-            submit={handleSendThought}
-          />
-        </ImageBackground>
+        <AppHeader
+          leftIcon="arrow-back"
+          onPressLeft={handleBack}
+          onPressRight={handleOptionsPress}
+          rightIcon="more-vert"
+          title="Thoughts"
+        />
+        {latestThought ? <ThoughtTimer thought={latestThought} /> : null}
+        <SendingThoughtActivity
+          echoMessage={messageActivity.echoMessage}
+          message={messageActivity.message}
+          onDoneButtonPress={handleSendingActivityClose}
+          onRequestClose={handleSendingActivityClose}
+          processing={messageActivity.processing}
+          success={messageActivity.success}
+          visible={messageActivity.visible}
+        />
+        <ApiActivity
+          message={apiActivity.message}
+          onDoneButtonPress={handleApiActivityClose}
+          onRequestClose={handleApiActivityClose}
+          processing={apiActivity.processing}
+          success={apiActivity.success}
+          visible={apiActivity.visible}
+        />
+        <Alert
+          visible={showAlert}
+          title="Not Active"
+          description={`${recipient.name} is not active. Send a notification requesting to come online.`}
+          onRequestClose={handleCloseAlert}
+          leftOption="Cancel"
+          rightOption="Yes"
+          leftPress={handleCloseAlert}
+          rightPress={handleSendNewMessageNotification}
+        />
+        <InfoAlert
+          leftPress={handleCloseInfoAlert}
+          description={infoAlert.infoAlertMessage}
+          visible={infoAlert.showInfoAlert}
+        />
+
+        <ThoughtsList
+          activeChat={activeChat}
+          thoughts={activeChat ? activeMessagesList : thoughts}
+          recipient={recipient}
+        />
+        <View style={styles.sendThoughtsInputPlaceholder} />
+        <SendThoughtsInput
+          placeholder={
+            activeChat ? "Send direct messages..." : "Send your thoughts..."
+          }
+          activeChat={activeChat}
+          isRecipientActive={isRecipientActive}
+          onActiveChatSelection={
+            activeChat ? handleSetChatInActive : handleSetChatActive
+          }
+          style={[styles.inputBox]}
+          submit={activeChat ? handleSendActiveMessage : handleSendThought}
+        />
       </Screen>
       <Modal
         onRequestClose={handleModalClose}
@@ -452,6 +599,7 @@ function SendThoughtsScreen({ navigation, route }) {
 const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
+    backgroundColor: defaultStyles.colors.primary,
   },
   contactOptionMainContainer: {
     alignItems: "center",

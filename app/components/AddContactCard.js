@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useContext } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import LottieView from "lottie-react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
@@ -17,8 +17,10 @@ import asyncStorage from "../utilities/cache";
 import debounce from "../utilities/debounce";
 
 import defaultStyles from "../config/styles";
+import ApiContext from "../utilities/apiContext";
 
 function AddContactCard({ contact, onInvitePress, style }) {
+  const { apiProcessing, setApiProcessing } = useContext(ApiContext);
   const { user, setUser } = useAuth();
   const [processing, setProcessing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
@@ -42,6 +44,7 @@ function AddContactCard({ contact, onInvitePress, style }) {
   const handleAddPress = useCallback(
     debounce(
       async () => {
+        setApiProcessing(true);
         setProcessing(true);
 
         let modifiedUser = { ...user };
@@ -55,9 +58,11 @@ function AddContactCard({ contact, onInvitePress, style }) {
           modifiedUser.contacts = data.contacts;
           setUser(modifiedUser);
           await asyncStorage.store(DataConstants.CONTACTS, data.contacts);
+          setApiProcessing(false);
           return setProcessing(false);
         }
         setProcessing(false);
+        setApiProcessing(false);
 
         if (problem) {
           if (data) {
@@ -111,16 +116,16 @@ function AddContactCard({ contact, onInvitePress, style }) {
           {!processing ? (
             <AppButton
               title={inContacts ? "Added" : "Add"}
-              disabled={inContacts ? true : false}
-              style={[
-                styles.addButton,
+              disabled={inContacts || apiProcessing ? true : false}
+              style={styles.addButton}
+              subStyle={[
+                styles.addButtonSub,
                 {
-                  backgroundColor: inContacts
+                  color: inContacts
                     ? defaultStyles.colors.tomato
                     : defaultStyles.colors.blue,
                 },
               ]}
-              subStyle={styles.addButtonSub}
               onPress={handleAddPress}
             />
           ) : (
@@ -156,10 +161,11 @@ const styles = ScaledSheet.create({
     marginRight: "4@s",
     width: "60@s",
     borderWidth: 1,
-    borderColor: defaultStyles.colors.light,
+    borderColor: defaultStyles.colors.lightGrey,
     overflow: "hidden",
   },
   addButton: {
+    backgroundColor: defaultStyles.colors.white,
     borderRadius: "10@s",
     height: "32@s",
     width: "60@s",
@@ -218,7 +224,9 @@ const styles = ScaledSheet.create({
     paddingTop: 0,
   },
   inviteButton: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
+    backgroundColor: defaultStyles.colors.white,
+    borderWidth: "1@s",
+    borderColor: defaultStyles.colors.lightGrey,
     borderRadius: "10@s",
     height: "32@s",
     marginRight: "5@s",

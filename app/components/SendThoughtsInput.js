@@ -3,11 +3,15 @@ import { View, StyleSheet, TouchableOpacity, TextInput } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import Icon from "./Icon";
+import Selection from "./Selection";
 
 import defaultStyles from "../config/styles";
 import debounce from "../utilities/debounce";
 
 function SendThoughtsInput({
+  isRecipientActive,
+  activeChat,
+  onActiveChatSelection,
   onBlur,
   onFocus,
   placeholder = "Send your thoughts...",
@@ -27,6 +31,16 @@ function SendThoughtsInput({
 
   return (
     <View style={[styles.container, style]}>
+      <Selection
+        onPress={onActiveChatSelection}
+        opted={activeChat}
+        style={styles.selectActive}
+        containerStyle={{
+          borderColor: isRecipientActive
+            ? defaultStyles.colors.darkGreen
+            : defaultStyles.colors.yellow_Variant,
+        }}
+      />
       <TextInput
         maxLength={250}
         onBlur={onBlur}
@@ -86,6 +100,12 @@ const styles = ScaledSheet.create({
     justifyContent: "center",
     marginRight: "5@s",
     width: "40@s",
+  },
+  selectActive: {
+    width: "30@s",
+    height: "30@s",
+    //marginHorizontal: "5@s",
+    borderRadius: "15@s",
   },
 });
 

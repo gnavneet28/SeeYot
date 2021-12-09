@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { View, ImageBackground, Text, Linking } from "react-native";
+import { View, Text, Linking } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
+import { LinearGradient } from "expo-linear-gradient";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
 import InfoAlert from "../components/InfoAlert";
 import LoadingIndicator from "../components/LoadingIndicator";
+import Screen from "../components/Screen";
 
 import Constant from "../navigation/NavigationConstants";
 
@@ -107,67 +109,69 @@ export default function VerifyOtpScreen({ navigation, route }) {
   };
 
   return (
-    <ImageBackground
-      style={styles.imageBackground}
-      source={require("../assets/chatWallPaper.png")}
-    >
-      <LoadingIndicator visible={isLoading} />
-      <InfoAlert
-        leftPress={handleCloseInfoAlert}
-        description={infoAlert.infoAlertMessage}
-        visible={infoAlert.showInfoAlert}
-      />
-      <View style={styles.header}>
-        <AppText style={styles.verifyInfo}>Verify OTP.</AppText>
-      </View>
-      <View style={styles.inputContainer}>
-        <View style={styles.otpInputContainer}>
-          <CodeField
-            ref={ref}
-            {...props}
-            value={value}
-            onChangeText={setValue}
-            cellCount={6}
-            rootStyle={styles.codeFieldRoot}
-            keyboardType="number-pad"
-            textContentType="oneTimeCode"
-            renderCell={({ index, symbol, isFocused }) => (
-              <Text
-                key={index}
-                style={[
-                  styles.cell,
-                  isFocused && styles.focusCell,
-                  { fontFamily: "Comic-Bold" },
-                ]}
-                onLayout={getCellOnLayoutHandler(index)}
-              >
-                {symbol || (isFocused ? <Cursor /> : null)}
-              </Text>
-            )}
+    <Screen style={styles.container}>
+      <LinearGradient
+        colors={["#1c1d1f", "#1d1f24", "#6b6863"]}
+        style={styles.gradient}
+      >
+        <LoadingIndicator visible={isLoading} />
+        <InfoAlert
+          leftPress={handleCloseInfoAlert}
+          description={infoAlert.infoAlertMessage}
+          visible={infoAlert.showInfoAlert}
+        />
+        <View style={styles.header}>
+          <AppText style={styles.verifyInfo}>Verify OTP.</AppText>
+        </View>
+        <View style={styles.inputContainer}>
+          <View style={styles.otpInputContainer}>
+            <CodeField
+              ref={ref}
+              {...props}
+              value={value}
+              onChangeText={setValue}
+              cellCount={6}
+              rootStyle={styles.codeFieldRoot}
+              keyboardType="number-pad"
+              textContentType="oneTimeCode"
+              renderCell={({ index, symbol, isFocused }) => (
+                <Text
+                  key={index}
+                  style={[
+                    styles.cell,
+                    isFocused && styles.focusCell,
+                    { fontFamily: "Comic-Bold" },
+                  ]}
+                  onLayout={getCellOnLayoutHandler(index)}
+                >
+                  {symbol || (isFocused ? <Cursor /> : null)}
+                </Text>
+              )}
+            />
+          </View>
+          <AppButton
+            disabled={!value || value.length < 6 ? true : false}
+            onPress={handleSubmit}
+            style={styles.button}
+            subStyle={{
+              color: defaultStyles.colors.primary,
+              letterSpacing: scale(2),
+            }}
+            title="Next"
+          />
+          <AppButton
+            disabled={disabled}
+            title="Send Otp again"
+            style={styles.sendOtpAgain}
+            subStyle={{ fontSize: scale(10) }}
+            onPress={handleSendOtpAgainPress}
           />
         </View>
-        <AppButton
-          disabled={!value || value.length < 6 ? true : false}
-          onPress={handleSubmit}
-          style={styles.button}
-          subStyle={{
-            color: defaultStyles.colors.primary,
-            letterSpacing: scale(2),
-          }}
-          title="Next"
-        />
-        <AppButton
-          disabled={disabled}
-          title="Send Otp again"
-          style={styles.sendOtpAgain}
-          subStyle={{ fontSize: scale(10) }}
-          onPress={handleSendOtpAgainPress}
-        />
-      </View>
-      <AppText onPress={openPrivacyPage} style={styles.infoText}>
-        By continuing you agree to the Terms and Privacy policy.
-      </AppText>
-    </ImageBackground>
+        <AppText onPress={openPrivacyPage} style={styles.infoText}>
+          By continuing you agree to the Terms and Privacy policy.
+        </AppText>
+      </LinearGradient>
+    </Screen>
   );
 }
 
@@ -191,26 +195,31 @@ const styles = ScaledSheet.create({
     textAlignVertical: "center",
     width: "35@s",
   },
+  container: {
+    alignItems: "center",
+    backgroundColor: "#1c1d1f",
+  },
   focusCell: {
     borderColor: "#000",
   },
+  gradient: {
+    alignItems: "center",
+    width: "100%",
+    flex: 1,
+    paddingTop: "230@s",
+  },
   header: {
     alignItems: "center",
-    backgroundColor: "rgba(255, 80, 80, 0.8)",
+    backgroundColor: "rgba(255, 80, 80, 0.7)",
     borderBottomLeftRadius: "80@s",
     borderBottomRightRadius: "80@s",
     height: "75@s",
     justifyContent: "center",
     position: "absolute",
-    top: 0,
+    top: "-35@s",
     width: "100%",
   },
-  imageBackground: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.primary,
-    flex: 1,
-    paddingTop: "230@s",
-  },
+
   inputContainer: {
     alignItems: "center",
     bottom: "20@s",

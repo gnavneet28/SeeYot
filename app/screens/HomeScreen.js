@@ -36,6 +36,7 @@ import Constant from "../navigation/NavigationConstants";
 import useAuth from "../auth/useAuth";
 
 import usersApi from "../api/users";
+import myApi from "../api/my";
 import messagesApi from "../api/messages";
 
 import defaultStyles from "../config/styles";
@@ -81,6 +82,33 @@ function HomeScreen({ navigation }) {
   const [messagesList, setMessagesList] = useState([]);
   const [reply, setReply] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+
+  const clearJunkData = async () => {
+    const { ok, data, problem } = await myApi.clearExpiredData();
+
+    if (ok) {
+      await storeDetails(data.user);
+      return setUser(data.user);
+    }
+    return;
+  };
+
+  const updateAllContacts = async () => {
+    const { ok, data, problem } = await myApi.updateMyContacts();
+    if (ok) {
+      await storeDetails(data.user);
+      return setUser(data.user);
+    }
+    return;
+  };
+
+  useEffect(() => {
+    clearJunkData();
+  }, []);
+
+  useEffect(() => {
+    updateAllContacts();
+  }, []);
 
   useEffect(() => {
     let messages = user.messages ? user.messages : [];
@@ -135,7 +163,7 @@ function HomeScreen({ navigation }) {
   }, []);
 
   const handleLeftPress = useCallback(() => {
-    Linking.openURL("https://seeyot-frontend.herokuapp.com/how_it_works");
+    Linking.openURL("http://www.seeyot.com/how_it_works");
   }, []);
 
   // EMPTY FRIENDLIST
@@ -161,10 +189,10 @@ function HomeScreen({ navigation }) {
           success: false,
         });
 
-        const { data, ok } = await usersApi.getCurrentUser();
+        const { data, ok } = await myApi.updateMyContacts();
         if (ok) {
-          await storeDetails(data);
-          setUser(data);
+          await storeDetails(data.user);
+          setUser(data.user);
           return setApiActivity({
             processing: true,
             visible: false,
@@ -182,7 +210,7 @@ function HomeScreen({ navigation }) {
       5000,
       true
     ),
-    []
+    [user]
   );
 
   // CONTACT CARD OPTIONS
@@ -489,7 +517,7 @@ const styles = ScaledSheet.create({
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
     overflow: "hidden",
-    paddingTop: "10@s",
+    paddingTop: "20@s",
     width: "100%",
   },
   messageCreatorDetails: {

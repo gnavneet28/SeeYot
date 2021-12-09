@@ -30,5 +30,13 @@ export default [
     description: "Do not hesitate to interact with people. EVER!",
     subDescription:
       "Now ask or express yourself to people you care about without hesitation. They can only see your messages if they are INTERESTED in interacting with you but would not know who is asking until they have replied. It completely works on mutual interest.",
-  }, 
+  },
+  {
+    _id: "activeChat",
+    imageUri: require("../assets/activeChat.png"),
+    title: "ACTIVE CHATTING",
+    description: `Have a Quick chat with "ACTIVE FOR YOU" people.`,
+    subDescription:
+      "Whenever you feel like having a quick chat with someone, active for you, without storing the messages anywhere, go for active chatting.",
+  },
 ];

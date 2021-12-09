@@ -5,8 +5,8 @@
         "expo-notifications",
         {
           "androidMode": "default",
-          "icon": "./app/assets/notificationicon.png",
-          "color": "#6F009E"
+          "icon": "./app/assets/ic_notification.png",
+          "color": "#ffffff"
         }
       ]
     ]

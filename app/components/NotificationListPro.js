@@ -65,6 +65,7 @@ class NotificationListPro extends React.Component {
             onTapToSeePress={() => this.props.onTapToSeePress(data)}
             notification={data}
             onDeleteIconPress={() => this.props.onDeleteIconPress(data)}
+            tapToSendMessage={() => this.props.onTapToSendMessage(data)}
           />
         );
       default:

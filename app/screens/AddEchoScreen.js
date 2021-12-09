@@ -68,29 +68,24 @@ function AddEchoScreen({ navigation, route }) {
   );
 
   // ON PAGE FOCUS ACTION
-  const updateSearchHistory = async () => {
-    let modifiedUser = { ...user };
-    const { ok, data, problem } = await usersApi.addToSearchHstory(recipient);
-    if (ok) {
-      modifiedUser.searchHistory = data;
-      setUser(modifiedUser);
-      return await asyncStorage.store(DataConstants.SEARCH_HISTORY, data);
-    }
-    if (problem) return;
-  };
 
-  const updateThisEchoMessage = useCallback(async () => {
-    const { ok, problem, data } = await myApi.updateThisEchoMessage(
-      recipient._id
-    );
+  const updateAllEchoMessages = useCallback(async () => {
+    const { ok, data, problem } = await myApi.updateMyEchoMessages();
     if (ok) {
       let modifiedUser = { ...user };
-      modifiedUser.echoMessage = data;
+      modifiedUser.echoMessage = data.echoMessages;
       setUser(modifiedUser);
-      return await asyncStorage.store(DataConstants.ECHO_MESSAGE, data);
+      return await asyncStorage.store(
+        DataConstants.ECHO_MESSAGE,
+        data.echoMessages
+      );
     }
     if (problem) return;
   }, [user]);
+
+  useEffect(() => {
+    updateAllEchoMessages();
+  }, []);
 
   const setEchoMessage = useCallback(() => {
     let echoMessages =
@@ -104,7 +99,6 @@ function AddEchoScreen({ navigation, route }) {
   }, [recipient._id, isFocused]);
 
   const setUpPage = () => {
-    updateThisEchoMessage();
     const echoMessage = setEchoMessage();
     setMessage(echoMessage ? echoMessage.message : "");
     setInitialMessage(echoMessage ? echoMessage.message : "");
@@ -114,9 +108,6 @@ function AddEchoScreen({ navigation, route }) {
   useEffect(() => {
     if (isFocused) {
       setUpPage();
-      if (from == Constant.VIP_SEARCH_SCREEN) {
-        updateSearchHistory();
-      }
     }
   }, [isFocused]);
 
@@ -333,7 +324,7 @@ const styles = ScaledSheet.create({
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderColor: defaultStyles.colors.light,
-    borderRadius: "5@s",
+    borderRadius: "10@s",
     borderWidth: 2,
     height: "38@s",
     width: "90%",
@@ -357,7 +348,7 @@ const styles = ScaledSheet.create({
   inputBoxContainer: {
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: "5@s",
+    borderRadius: "10@s",
     borderWidth: 1,
     marginBottom: "5@s",
     overflow: "hidden",
