@@ -16,12 +16,6 @@ const updateMyEchoMessages = () =>
 const updateMyFavorites = () =>
   apiClient.put(endPoint + "/favorites/update", {});
 
-const updateThisEchoMessage = (id) =>
-  apiClient.put(endPoint + "/echoMessage/update/" + id, {});
-
-const updateThisContact = (id, savedName) =>
-  apiClient.put(endPoint + "/contact/update/" + id, { savedName });
-
 const setNotificationSeen = () =>
   apiClient.put(endPoint + "/notifications/read", {});
 
@@ -46,6 +40,4 @@ export default {
   updateMyContacts,
   updateMyEchoMessages,
   updateMyFavorites,
-  updateThisContact,
-  updateThisEchoMessage,
 };

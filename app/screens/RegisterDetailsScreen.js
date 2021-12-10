@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ImageBackground } from "react-native";
+import { View } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -41,50 +41,16 @@ function RegisterDetailsScreen({ route }) {
     setInfoAlert({ ...infoAlert, showInfoAlert: false });
 
   // SUBMIT ACTION
-  const handleSubmit = async () => {
+
+  const handleSubmitForm = async () => {
     setIsLoading(true);
 
-    let picture = image ? image : "";
-
-    if (!image) {
-      const { ok, problem, data, headers } =
-        await usersApi.registerUserWithoutPicture(
-          parseInt(number),
-          name,
-          verifiedId
-        );
-
-      if (ok) {
-        const authToken = headers["x-auth-token"];
-        await authStorage.storeToken(authToken);
-        await storeDetails(data);
-        setIsLoading(false);
-        return logIn(data);
-      }
-
-      if (problem) {
-        if (data) {
-          setIsLoading(false);
-          return setInfoAlert({
-            infoAlertMessage: data.message,
-            showInfoAlert: true,
-          });
-        }
-        setIsLoading(false);
-        return setInfoAlert({
-          infoAlertMessage: problem,
-          showInfoAlert: true,
-        });
-      }
-    }
-
-    const { ok, problem, data, headers } =
-      await usersApi.registerUserWithPicture(
-        parseInt(number),
-        picture,
-        name,
-        verifiedId
-      );
+    const { ok, problem, data, headers } = await usersApi.registerUser(
+      parseInt(number),
+      image,
+      name,
+      verifiedId
+    );
 
     if (ok) {
       const authToken = headers["x-auth-token"];
@@ -93,16 +59,15 @@ function RegisterDetailsScreen({ route }) {
       setIsLoading(false);
       return logIn(data);
     }
+    setIsLoading(false);
 
     if (problem) {
       if (data) {
-        setIsLoading(false);
         return setInfoAlert({
           infoAlertMessage: data.message,
           showInfoAlert: true,
         });
       }
-      setIsLoading(false);
       return setInfoAlert({
         infoAlertMessage: problem,
         showInfoAlert: true,
@@ -141,7 +106,7 @@ function RegisterDetailsScreen({ route }) {
         </View>
         <AppButton
           disabled={name ? false : true}
-          onPress={handleSubmit}
+          onPress={handleSubmitForm}
           style={[styles.button, { display: keyboardShown ? "none" : "flex" }]}
           subStyle={styles.submitButtonSub}
           title="Register"

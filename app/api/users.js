@@ -2,20 +2,25 @@ import apiClient from "./apiClient";
 
 const endPoint = "/users";
 
-const registerUserWithPicture = (phoneNumber, picture, name, verificationId) =>
-  apiClient.post(endPoint, {
-    phoneNumber: phoneNumber,
-    picture: picture,
-    name: name,
-    verificationId,
-  });
+const registerUser = (phoneNumber, picture, name, verificationId) => {
+  const formData = new FormData();
+  if (picture) {
+    formData.append("picture", {
+      name: picture.split("/").pop(),
+      uri: picture,
+      type: "image/jpg",
+    });
+  }
+  formData.append("phoneNumber", phoneNumber);
+  formData.append("name", name);
+  formData.append("verificationId", verificationId);
 
-const registerUserWithoutPicture = (phoneNumber, name, verificationId) =>
-  apiClient.post(endPoint, {
-    phoneNumber: phoneNumber,
-    name: name,
-    verificationId,
+  return apiClient.post(endPoint, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
   });
+};
 
 const addFavorite = (id) => apiClient.put(endPoint + "/favorite/add/" + id, {});
 
@@ -113,18 +118,17 @@ export default {
   addToSearchHistory,
   blockContact,
   getCurrentUser,
-  sendNewActiveMessage,
   makeCurrentUserActiveFor,
   makeCurrentUserInActiveFor,
   notifyUserForActiveChat,
   redeemPoints,
-  registerUserWithoutPicture,
-  registerUserWithPicture,
+  registerUser,
   removeContact,
+  removeCurrentUserPhoto,
   removeFavorite,
   removeFromSearchHstory,
-  removeCurrentUserPhoto,
   searchUser,
+  sendNewActiveMessage,
   setPrivacyMessage,
   setPrivacySearch,
   syncContacts,

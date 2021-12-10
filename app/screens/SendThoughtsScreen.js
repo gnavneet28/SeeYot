@@ -321,7 +321,7 @@ function SendThoughtsScreen({ navigation, route }) {
       modifiedUser.searchHistory = data;
       setUser(modifiedUser);
       return await asyncStorage.store(DataConstants.SEARCH_HISTORY, data);
-    } else return console.log(problem, data);
+    } else return;
   };
 
   useEffect(() => {
@@ -528,7 +528,7 @@ function SendThoughtsScreen({ navigation, route }) {
         <Alert
           visible={showAlert}
           title="Not Active"
-          description={`${recipient.name} is not active. Send a notification requesting to come online.`}
+          description={`${recipient.name} is not active for you right now.Send a notification requesting to come online.`}
           onRequestClose={handleCloseAlert}
           leftOption="Cancel"
           rightOption="Yes"

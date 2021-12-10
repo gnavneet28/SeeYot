@@ -102,8 +102,8 @@ function AddFavoritesScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
+    setIsVisible(false);
     if (isFocused) {
-      setIsVisible(false);
       setUsersList();
     }
   }, [isFocused]);
@@ -306,7 +306,17 @@ function AddFavoritesScreen({ navigation }) {
                 size={scale(28)}
               />
             </View>
-            <View style={styles.messageMainContainer}>
+            <View
+              style={[
+                styles.messageMainContainer,
+                {
+                  borderBottomColor:
+                    checkSendButtonDisability() || processing === true
+                      ? defaultStyles.colors.lightGrey
+                      : defaultStyles.colors.secondary,
+                },
+              ]}
+            >
               <View style={styles.inputBoxContainerMain}>
                 <AppImage
                   imageUrl={recipient.picture}
@@ -590,6 +600,7 @@ const styles = ScaledSheet.create({
   messageMainContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
+    borderBottomWidth: 2,
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
     overflow: "hidden",
