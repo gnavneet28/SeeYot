@@ -3,12 +3,14 @@ import { Share, Linking } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as SMS from "expo-sms";
 import { ScaledSheet } from "react-native-size-matters";
+import { useIsFocused } from "@react-navigation/native";
 
 import AddContactList from "../components/AddContactList";
 import AppActivityIndicator from "../components/ActivityIndicator";
 import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
 import Screen from "../components/Screen";
+import useMountedRef from "../hooks/useMountedRef";
 
 import Constant from "../navigation/NavigationConstants";
 import DataConstants from "../utilities/DataConstants";
@@ -22,6 +24,9 @@ import ApiContext from "../utilities/apiContext";
 
 function AddContactsScreen({ navigation }) {
   const { user } = useAuth();
+  const isFocused = useIsFocused();
+  const mounted = useMountedRef().current;
+
   const permission = async () => {
     const { granted } = await Contacts.getPermissionsAsync();
     return granted;
@@ -124,7 +129,6 @@ function AddContactsScreen({ navigation }) {
         user.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
       );
       setIsReady(true);
-      return requestPermission();
     }
     return requestPermission();
   };
@@ -132,6 +136,15 @@ function AddContactsScreen({ navigation }) {
   useEffect(() => {
     setUpPage();
   }, []);
+
+  useEffect(() => {
+    if (mounted && infoAlert.showInfoAlert === true) {
+      setInfoAlert({
+        infoAlertMessage: "",
+        showInfoAlert: false,
+      });
+    }
+  }, [isFocused, mounted]);
 
   // REFRESH ACTION
   const handleRefresh = useCallback(() => {
