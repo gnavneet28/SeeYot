@@ -14,12 +14,15 @@ import debounce from "../utilities/debounce";
 
 import messagesApi from "../api/messages";
 
+import useMountedRef from "../hooks/useMountedRef";
+
 import defaultStyles from "../config/styles";
 import defaultProps from "../utilities/defaultProps";
 
 function RepliesScreen({ navigation }) {
   const [replies, setReplies] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
 
   const [message, setMessage] = useState({
@@ -95,6 +98,30 @@ function RepliesScreen({ navigation }) {
       showInfoAlert: true,
     });
   };
+
+  useEffect(() => {
+    if (mounted && infoAlert.showInfoAlert === true) {
+      setInfoAlert({
+        infoAlertMessage: false,
+        showInfoAlert: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && message.isVisible === true) {
+      setMessage({
+        message: defaultProps.defaultMessage,
+        isVisible: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && showAlert === true) {
+      setShowAlert(false);
+    }
+  }, [isFocused, mounted]);
 
   useEffect(() => {
     if (isFocused) {

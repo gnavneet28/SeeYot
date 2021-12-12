@@ -106,10 +106,10 @@ function SubscriptionScreen({ navigation, route }) {
 const styles = ScaledSheet.create({
   manageSubscription: {
     alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.primary2,
+    backgroundColor: defaultStyles.colors.secondary,
     borderBottomLeftRadius: "20@s",
     borderTopLeftRadius: "20@s",
-    color: defaultStyles.colors.white,
+    color: defaultStyles.colors.yellow,
     fontSize: "14@s",
     height: "30@s",
     marginBottom: "10@s",

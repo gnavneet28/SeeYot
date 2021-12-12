@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { LinearGradient } from "expo-linear-gradient";
+import { useIsFocused } from "@react-navigation/native";
 
 import AddPicture from "../components/AddPicture";
 import AppButton from "../components/AppButton";
@@ -16,16 +17,19 @@ import usersApi from "../api/users";
 import useAuth from "../auth/useAuth";
 import authStorage from "../auth/storage";
 
+import useMountedRef from "../hooks/useMountedRef";
+
 import storeDetails from "../utilities/storeDetails";
 
 import defaultStyles from "../config/styles";
-import { useKeyboard } from "@react-native-community/hooks";
+import useKeyboard from "../hooks/useKeyboard";
 
 function RegisterDetailsScreen({ route }) {
   const { logIn } = useAuth();
+  const mounted = useMountedRef().current;
+  const isFocused = useIsFocused();
   const { number, verifiedId } = route.params;
-
-  const { keyboardShown } = useKeyboard();
+  let keyboardShown = useKeyboard();
 
   // STATES
   const [image, setImage] = useState("");
@@ -35,6 +39,21 @@ function RegisterDetailsScreen({ route }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+
+  useEffect(() => {
+    if (mounted && isLoading === true) {
+      setIsLoading(false);
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && infoAlert.showInfoAlert === true) {
+      setInfoAlert({
+        infoAlertMessage: "",
+        showInfoAlert: false,
+      });
+    }
+  }, [isFocused, mounted]);
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = () =>

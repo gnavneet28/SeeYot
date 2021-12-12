@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import { useIsFocused } from "@react-navigation/native";
 
 import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
@@ -17,6 +18,8 @@ import defaultStyles from "../config/styles";
 
 import usersApi from "../api/users";
 
+import useMountedRef from "../hooks/useMountedRef";
+
 import asyncStorage from "../utilities/cache";
 import debounce from "../utilities/debounce";
 
@@ -26,6 +29,8 @@ let defaultSearchHistory = [];
 
 function VipSearchScreen({ navigation }) {
   const { user, setUser } = useAuth();
+  const mounted = useMountedRef().current;
+  const isFocused = useIsFocused();
 
   // STATES
   const [interestedUser, setInterestedUser] = useState(null);
@@ -37,6 +42,21 @@ function VipSearchScreen({ navigation }) {
     showInfoAlert: false,
   });
   const [showHelp, setShowHelp] = useState(false);
+
+  useEffect(() => {
+    if (mounted && infoAlert.showInfoAlert === true) {
+      setInfoAlert({
+        infoAlertMessage: "",
+        showInfoAlert: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && isVisible === true) {
+      setIsVisible(false);
+    }
+  }, [isFocused, mounted]);
 
   // DATA NEEDED
   const searchHistory = useMemo(

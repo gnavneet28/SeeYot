@@ -6,6 +6,7 @@ import ProfileScreen from "../screens/ProfileScreen";
 import SubscriptionNavigator from "./SubscriptionNavigator";
 import HelpScreen from "../screens/HelpScreen";
 import Constant from "./NavigationConstants";
+import SettingsScreen from "../screens/SettingsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -24,6 +25,7 @@ function ProfileNavigator(props) {
         component={SubscriptionNavigator}
       />
       <Tab.Screen name={Constant.HELP_SCREEN} component={HelpScreen} />
+      <Tab.Screen name={Constant.SETTINGS} component={SettingsScreen} />
     </Tab.Navigator>
   );
 }

@@ -219,7 +219,7 @@ const styles = ScaledSheet.create({
     width: "60@s",
   },
   addButton: {
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: defaultStyles.colors.light,
     borderRadius: "10@s",
     height: "32@s",
     width: "60@s",
@@ -268,7 +268,7 @@ const styles = ScaledSheet.create({
   infoNameText: {
     color: defaultStyles.colors.primary,
     fontSize: "15@s",
-    opacity: 0.8,
+    opacity: 0.9,
     paddingBottom: 0,
   },
 });

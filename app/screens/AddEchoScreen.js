@@ -16,6 +16,7 @@ import Screen from "../components/Screen";
 
 import Constant from "../navigation/NavigationConstants";
 import DataConstants from "../utilities/DataConstants";
+import useMountedRef from "../hooks/useMountedRef";
 
 import InfoAlert from "../components/InfoAlert";
 
@@ -37,6 +38,7 @@ function AddEchoScreen({ navigation, route }) {
 
   const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
+  const mounted = useMountedRef().current;
 
   const [isReady, setIsReady] = useState(false);
   const [initialMessage, setInitialMessage] = useState("");
@@ -110,6 +112,32 @@ function AddEchoScreen({ navigation, route }) {
       setUpPage();
     }
   }, [isFocused]);
+
+  useEffect(() => {
+    if (mounted && isVisible) {
+      setIsVisible(false);
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && infoAlert.showInfoAlert === true) {
+      setInfoAlert({
+        infoAlertMessage: "",
+        showInfoAlert: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && apiActivity.visible === true) {
+      setApiActivity({
+        message: "",
+        processing: true,
+        visible: false,
+        success: false,
+      });
+    }
+  }, [isFocused, mounted]);
 
   // ECHO_MESSAGE LIST DATA AND ACTION
   const data = useMemo(

@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { View } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { LinearGradient } from "expo-linear-gradient";
+import { useIsFocused } from "@react-navigation/native";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
@@ -14,10 +15,14 @@ import Constant from "../navigation/NavigationConstants";
 
 import defaultStyles from "../config/styles";
 
+import useMountedRef from "../hooks/useMountedRef";
+
 import verifyApi from "../api/verify";
 import Screen from "../components/Screen";
 
 function SendOtpScreen({ navigation }) {
+  const mounted = useMountedRef().current;
+  const isFocused = useIsFocused();
   //STATES
   const [visible, setVisible] = useState(false);
   const [code, setCode] = useState("+91");
@@ -28,6 +33,27 @@ function SendOtpScreen({ navigation }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+
+  useEffect(() => {
+    if (mounted && infoAlert.showInfoAlert === true) {
+      setInfoAlert({
+        infoAlertMessage: "",
+        showInfoAlert: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && isLoading === true) {
+      setIsLoading(false);
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && visible === true) {
+      setVisible(false);
+    }
+  }, [isFocused, mounted]);
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
@@ -164,7 +190,6 @@ const styles = ScaledSheet.create({
     top: "-35@s",
     width: "100%",
   },
-
   inputContainer: {
     alignItems: "center",
     justifyContent: "center",

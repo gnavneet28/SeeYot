@@ -25,6 +25,8 @@ import defaultProps from "../utilities/defaultProps";
 
 import defaultStyles from "../config/styles";
 
+import useMountedRef from "../hooks/useMountedRef";
+
 import myApi from "../api/my";
 
 import useAuth from "../auth/useAuth";
@@ -32,6 +34,7 @@ import ApiContext from "../utilities/apiContext";
 
 function NotificationScreen({ navigation }) {
   const { user, setUser } = useAuth();
+  const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
   const { apiActivityStatus, initialApiActivity } = apiFlow;
 
@@ -56,6 +59,41 @@ function NotificationScreen({ navigation }) {
     visible: false,
     success: false,
   });
+
+  useEffect(() => {
+    if (mounted && apiActivity.visible === true) {
+      setApiActivity({
+        message: "",
+        processing: true,
+        visible: false,
+        success: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && infoAlert.showInfoAlert === true) {
+      setInfoAlert({
+        infoAlertMessage: "",
+        showInfoAlert: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && message.isVisible === true) {
+      setMessage({
+        message: "",
+        isVisible: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && visible === true) {
+      setVisible(false);
+    }
+  }, [isFocused, mounted]);
 
   // MODAL MESSAGE ACTION
 
@@ -204,7 +242,7 @@ function NotificationScreen({ navigation }) {
             <VipAdCard onPress={handleVipCardPress} style={styles.adCard} />
             {data && data.length >= 1 ? (
               <AppText style={styles.clearAll} onPress={handleClearAllPress}>
-                Clear all notifications.
+                Clear all notifications
               </AppText>
             ) : null}
             <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
@@ -234,10 +272,10 @@ const styles = ScaledSheet.create({
   },
   clearAll: {
     alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.primary2,
+    backgroundColor: defaultStyles.colors.secondary,
     borderBottomLeftRadius: "20@s",
     borderTopLeftRadius: "20@s",
-    color: defaultStyles.colors.white,
+    color: defaultStyles.colors.yellow,
     fontSize: "14@s",
     height: "30@s",
     paddingHorizontal: "10@s",

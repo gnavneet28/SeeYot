@@ -18,6 +18,7 @@ export default Constant = {
   REPLY_SCREEN: "RepliesScreen",
   SEND_OTP_SCREEN: "SendOtp",
   SEND_THOUGHT_SCREEN: "SendThought",
+  SETTINGS: "SettingsScreen",
   SUBSCRIPTION_NAVIGATOR_FROM_NOTIFICATION: "SubscriptionNavigatorNotification",
   SUBSCRIPTION_NAVIGATOR: "SubscriptionNavigator",
   SUBSCRIPTION_SCREEN: "Subscription",

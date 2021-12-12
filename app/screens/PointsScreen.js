@@ -3,6 +3,7 @@ import { View, ScrollView } from "react-native";
 import { AdMobRewarded } from "expo-ads-admob";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
+import { useIsFocused } from "@react-navigation/native";
 
 import Screen from "../components/Screen";
 import AppHeader from "../components/AppHeader";
@@ -25,6 +26,8 @@ import asyncStorage from "../utilities/cache";
 import debounce from "../utilities/debounce";
 import DataConstants from "../utilities/DataConstants";
 
+import useMountedRef from "../hooks/useMountedRef";
+
 import usersApi from "../api/users";
 
 const Points = {
@@ -33,6 +36,8 @@ const Points = {
 
 function PointsScreen({ navigation }) {
   const { user, setUser } = useAuth();
+  const mounted = useMountedRef().current;
+  const isFocused = useIsFocused();
   const { apiActivityStatus, initialApiActivity } = apiFlow;
 
   // STATES
@@ -49,6 +54,38 @@ function PointsScreen({ navigation }) {
     visible: false,
     success: false,
   });
+
+  useEffect(() => {
+    if (mounted && infoAlert.showInfoAlert === true) {
+      setInfoAlert({
+        infoAlertMessage: "",
+        showInfoAlert: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && apiActivity.visible === true) {
+      setApiActivity({
+        message: "",
+        processing: true,
+        visible: false,
+        success: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && showAlert === true) {
+      setShowAlert(false);
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && isLoading === true) {
+      setIsLoading(false);
+    }
+  }, [isFocused, mounted]);
 
   // ALERT ACTION
   const handleCloseAlert = useCallback(() => {
@@ -228,7 +265,7 @@ function PointsScreen({ navigation }) {
 
         <Details title="Total Points:" value={user.points.totalPoints} />
         <Details
-          style={{ marginBottom: 20 }}
+          style={{ marginBottom: scale(20) }}
           title="Redeemable Points:"
           value={calculateTotalRedeemablePoints(user.points.totalPoints)}
         />

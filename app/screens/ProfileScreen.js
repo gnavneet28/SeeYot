@@ -1,13 +1,8 @@
-import React, { useState, useCallback } from "react";
-import {
-  Modal,
-  ScrollView,
-  Share,
-  TouchableHighlight,
-  View,
-} from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import { Modal, ScrollView, Share, View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import { useIsFocused } from "@react-navigation/native";
 
 import AddPicture from "../components/AddPicture";
 import ApiActivity from "../components/ApiActivity";
@@ -35,13 +30,15 @@ import expoPushTokensApi from "../api/expoPushTokens";
 import problemsApi from "../api/problems";
 import usersApi from "../api/users";
 
+import useMountedRef from "../hooks/useMountedRef";
+
 import defaultStyles from "../config/styles";
 import Alert from "../components/Alert";
 
-const height = defaultStyles.height;
-
 function ProfileScreen({ navigation }) {
   const { user, setUser, logOut } = useAuth();
+  const mounted = useMountedRef().current;
+  const isFocused = useIsFocused();
   const { apiActivityStatus, initialApiActivity } = apiFlow;
 
   // STATES
@@ -60,6 +57,38 @@ function ProfileScreen({ navigation }) {
     success: false,
   });
   const [showLogOut, setShowLogOut] = useState(false);
+
+  useEffect(() => {
+    if (mounted && isLoading === true) {
+      setIsLoading(false);
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && infoAlert.showInfoAlert === true) {
+      setInfoAlert({
+        infoAlertMessage: "",
+        showInfoAlert: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && apiActivity.visible === true) {
+      setApiActivity({
+        message: "",
+        processing: true,
+        visible: false,
+        success: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && showLogOut === true) {
+      setShowLogOut(false);
+    }
+  }, [isFocused, mounted]);
 
   //LOG OUT ACTION
   const handleCloseLogout = useCallback(() => setShowLogOut(false), []);
@@ -151,6 +180,11 @@ function ProfileScreen({ navigation }) {
   const handleHelpPress = useCallback(() => {
     setVisible(false);
     navigation.navigate(Constant.HELP_SCREEN);
+  }, []);
+
+  const handleSettingsPress = useCallback(() => {
+    setVisible(false);
+    navigation.navigate(Constant.SETTINGS);
   }, []);
 
   // PICTURE CHANGE ACTION
@@ -370,7 +404,7 @@ function ProfileScreen({ navigation }) {
               fw={true}
               iconName="user-o"
               onNameChange={handleNameChange}
-              size={height * 0.027}
+              size={scale(20)}
               style={styles.userDetailsName}
               title="Name"
               userName={user.name}
@@ -379,7 +413,7 @@ function ProfileScreen({ navigation }) {
               data={user.phoneNumber.toString().slice(-10)}
               fw={true}
               iconName="phone"
-              size={height * 0.027}
+              size={scale(20)}
               title="Phone Number"
             />
             <View style={styles.echoBox}>
@@ -443,6 +477,12 @@ function ProfileScreen({ navigation }) {
               icon="help-center"
               onPress={handleHelpPress}
               title="Help"
+            />
+
+            <ProfileOption
+              icon="settings"
+              onPress={handleSettingsPress}
+              title="Settings"
             />
 
             <ProfileOption
@@ -577,7 +617,7 @@ const styles = ScaledSheet.create({
     borderTopRightRadius: "10@s",
     borderTopWidth: 1,
     bottom: 0,
-    height: "240@s",
+    height: "260@s",
     overflow: "hidden",
     paddingTop: "20@s",
     width: "100%",

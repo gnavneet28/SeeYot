@@ -47,7 +47,7 @@ const styles = ScaledSheet.create({
   },
   recipientName: {
     color: defaultStyles.colors.secondary,
-    paddingBottom: "5@s",
+    paddingBottom: "2@s",
   },
   replyCard: {
     flexDirection: "row",

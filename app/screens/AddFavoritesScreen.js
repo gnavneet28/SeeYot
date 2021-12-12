@@ -22,6 +22,8 @@ import useAuth from "../auth/useAuth";
 import messagesApi from "../api/messages";
 import myApi from "../api/my";
 
+import useMountedRef from "../hooks/useMountedRef";
+
 import Constants from "../navigation/NavigationConstants";
 import DataConstants from "../utilities/DataConstants";
 
@@ -46,6 +48,7 @@ const moodData = [
 function AddFavoritesScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
+  const mounted = useMountedRef().current;
   const toast = useRef();
 
   // STATES
@@ -102,11 +105,16 @@ function AddFavoritesScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    setIsVisible(false);
-    if (isFocused) {
+    if (isFocused && mounted) {
       setUsersList();
     }
-  }, [isFocused]);
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && isVisible) {
+      setIsVisible(false);
+    }
+  }, [isFocused, mounted]);
 
   // ADD OPTION MODAL ACTION
 

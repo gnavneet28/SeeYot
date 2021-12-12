@@ -173,10 +173,10 @@ class AddContactList extends React.Component {
 const styles = ScaledSheet.create({
   allReplies: {
     alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.primary2,
+    backgroundColor: defaultStyles.colors.secondary,
     borderBottomLeftRadius: "20@s",
     borderTopLeftRadius: "20@s",
-    color: defaultStyles.colors.white,
+    color: defaultStyles.colors.yellow,
     fontSize: "14@s",
     height: "30@s",
     marginVertical: "5@s",

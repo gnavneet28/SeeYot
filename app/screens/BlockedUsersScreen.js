@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { FlatList } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import { useIsFocused } from "@react-navigation/native";
 
 import AppHeader from "../components/AppHeader";
 import ApiActivity from "../components/ApiActivity";
@@ -16,11 +17,15 @@ import DataConstants from "../utilities/DataConstants";
 
 import useAuth from "../auth/useAuth";
 
+import useMountedRef from "../hooks/useMountedRef";
+
 import myApi from "../api/my";
 import userApi from "../api/users";
 
 function BlockedUsersScreen({ navigation }) {
   const { user, setUser } = useAuth();
+  const mounted = useMountedRef().current;
+  const isFocused = useIsFocused();
   const { apiActivityStatus, initialApiActivity } = apiFlow;
 
   // STATES
@@ -31,6 +36,17 @@ function BlockedUsersScreen({ navigation }) {
     visible: false,
     success: false,
   });
+
+  useEffect(() => {
+    if (mounted && apiActivity.visible === true) {
+      setApiActivity({
+        message: "",
+        processing: true,
+        visible: false,
+        success: false,
+      });
+    }
+  }, [isFocused, mounted]);
 
   // API ACTIVITY ACTIONS
   const handleApiActivityClose = useCallback(

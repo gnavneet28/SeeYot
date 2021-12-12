@@ -4,9 +4,8 @@ import React, {
   useCallback,
   useMemo,
   useContext,
-  useRef,
 } from "react";
-import { View, Modal, AppState } from "react-native";
+import { View, Modal } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
 
@@ -27,7 +26,6 @@ import defaultStyles from "../config/styles";
 
 import useAuth from "../auth/useAuth";
 
-import myApi from "../api/my";
 import thoughtsApi from "../api/thoughts";
 import usersApi from "../api/users";
 
@@ -37,6 +35,8 @@ import debounce from "../utilities/debounce";
 import ActiveForContext from "../utilities/activeForContext";
 import InfoAlert from "../components/InfoAlert";
 import ActiveMessagesContext from "../utilities/activeMessagesContext";
+
+import useMountedRef from "../hooks/useMountedRef";
 
 const filterThoughts = (thoughts = [], recipient, creator) => {
   return thoughts
@@ -65,10 +65,8 @@ function SendThoughtsScreen({ navigation, route }) {
   const { recipient, from } = route.params;
   const { apiActivityStatus, initialApiActivity } = apiFlow;
   const { activeFor, setActiveFor } = useContext(ActiveForContext);
+  const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
-
-  const appState = useRef(AppState.currentState);
-  const [appStateVisible, setAppStateVisible] = useState(appState.current);
 
   // STATES
   const [isVisible, setIsVisible] = useState(false);
@@ -122,36 +120,61 @@ function SendThoughtsScreen({ navigation, route }) {
     });
   };
 
-  // useEffect(() => {
-  //   const subscription = AppState.addEventListener("change", (nextAppState) => {
-  //     // if (
-  //     //   appState.current.match(/inactive|background/) &&
-  //     //   nextAppState === "active"
-  //     // ) {
-  //     //   console.log("App has come to the foreground!");
-  //     // }
-
-  //     // appState.current = nextAppState;
-  //     // setAppStateVisible(appState.current);
-  //     // console.log("AppState", appState.current);
-
-  //     console.log(nextAppState, appState.current);
-  //   });
-
-  //   return () => {
-  //     subscription.remove();
-  //   };
-  // }, []);
-
   // SETTING ACTIVECHATMESSAGES, ACTIVE CHAT TO NULL AND REMOVING THE ACTIVECHAT FOR USER
   useEffect(() => {
-    setActiveMessages([]);
-    setActiveChat(false);
+    if (mounted) {
+      setActiveMessages([]);
+      setActiveChat(false);
+    }
 
-    if (!isFocused) {
+    if (!isFocused && mounted) {
       handleSetChatInActive();
     }
-  }, [isFocused]);
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && infoAlert.showInfoAlert === true) {
+      setInfoAlert({
+        infoAlertMessage: "",
+        showInfoAlert: true,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && isVisible === true) {
+      setIsVisible(false);
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && showAlert === true) {
+      setShowAlert(false);
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && apiActivity.visible === true) {
+      setApiActivity({
+        message: "",
+        processing: true,
+        visible: false,
+        success: false,
+      });
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && messageActivity.visible === true) {
+      setMessageActivity({
+        message: "",
+        processing: true,
+        visible: false,
+        success: false,
+        echoMessage: null,
+      });
+    }
+  }, [isFocused, mounted]);
 
   // HEADER ACTIONS
   const handleBack = useCallback(

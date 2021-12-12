@@ -41,11 +41,11 @@ class RepliesList extends React.Component {
         switch (type) {
           case ViewTypes.Full:
             dim.width = width;
-            dim.height = scale(150);
+            dim.height = scale(116);
             break;
           default:
             dim.width = width;
-            dim.height = scale(150);
+            dim.height = scale(116);
         }
       }
     );
@@ -98,11 +98,12 @@ class RepliesList extends React.Component {
     });
   }
 
-  _rowRenderer(type, data) {
+  _rowRenderer(type, data, index) {
     switch (type) {
       case ViewTypes.Full:
         return (
           <ReplyCard
+            index={index}
             message={data}
             onDeletePress={() => this.props.onDeletePress(data)}
             onModalOpenPress={() => this.props.onModalOpenPress(data)}

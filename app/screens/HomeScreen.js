@@ -12,6 +12,7 @@ import {
   TextInput,
   TouchableOpacity,
   Linking,
+  BackHandler,
 } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -35,9 +36,10 @@ import Constant from "../navigation/NavigationConstants";
 
 import useAuth from "../auth/useAuth";
 
-import usersApi from "../api/users";
 import myApi from "../api/my";
 import messagesApi from "../api/messages";
+
+import useMountedRef from "../hooks/useMountedRef";
 
 import defaultStyles from "../config/styles";
 
@@ -57,6 +59,7 @@ const defaultMessage = {
 function HomeScreen({ navigation }) {
   dayjs.extend(relativeTime);
   const { user, setUser } = useAuth();
+  const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
 
   const toast = useRef();
@@ -102,6 +105,15 @@ function HomeScreen({ navigation }) {
     return;
   };
 
+  // useEffect(() => {
+  //   BackHandler.addEventListener("hardwareBackPress", () => {
+  //     BackHandler.exitApp()
+  //   }
+  //   );
+
+  //   return () => BackHandler.removeEventListener("hardwareBackPress");
+  // });
+
   useEffect(() => {
     clearJunkData();
   }, []);
@@ -111,19 +123,39 @@ function HomeScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    let messages = user.messages ? user.messages : [];
-    setMessagesList(messages);
-  }, [user]);
+    if (mounted && apiActivity.visible === true) {
+      setApiActivity({
+        message: "",
+        processing: true,
+        visible: false,
+        success: false,
+      });
+    }
+  }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (isFocused && isVisible) {
+    let messages = user.messages ? user.messages : [];
+    setMessagesList(messages);
+  }, [user.messages]);
+
+  useEffect(() => {
+    if (mounted && isVisible) {
       setIsVisible(false);
       setMessageCreator({
         name: "************",
         picture: "",
       });
     }
-  }, [isFocused]);
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (mounted && state.showInfoAlert === true) {
+      setState({
+        infoAlertMessage: "",
+        showInfoAlert: false,
+      });
+    }
+  }, [isFocused, mounted]);
 
   // APIACTIVITY ACTIONS
   const handleApiActivityClose = useCallback(

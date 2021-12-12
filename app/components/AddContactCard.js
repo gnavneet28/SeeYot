@@ -165,7 +165,7 @@ const styles = ScaledSheet.create({
     overflow: "hidden",
   },
   addButton: {
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: defaultStyles.colors.light,
     borderRadius: "10@s",
     height: "32@s",
     width: "60@s",
@@ -214,7 +214,7 @@ const styles = ScaledSheet.create({
   infoNameText: {
     color: defaultStyles.colors.primary,
     fontSize: "15@s",
-    opacity: 0.8,
+    opacity: 0.9,
     paddingBottom: 0,
   },
   infoNumberText: {
@@ -224,7 +224,7 @@ const styles = ScaledSheet.create({
     paddingTop: 0,
   },
   inviteButton: {
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: defaultStyles.colors.light,
     borderWidth: "1@s",
     borderColor: defaultStyles.colors.lightGrey,
     borderRadius: "10@s",
