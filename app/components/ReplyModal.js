@@ -26,6 +26,7 @@ function ReplyModal({ message = defaultMessage, handleCloseModal }) {
     >
       <View style={styles.messageBackground}>
         <ScrollView
+          keyboardShouldPersistTaps="always"
           contentContainerStyle={{
             flexGrow: 1,
             justifyContent: "flex-end",
@@ -47,7 +48,7 @@ function ReplyModal({ message = defaultMessage, handleCloseModal }) {
 
             {message.message.options.length >= 1 ? (
               <View style={styles.optionContainerMain}>
-                <ScrollView>
+                <ScrollView keyboardShouldPersistTaps="always">
                   {message.message.options.map((d, index) => (
                     <ReplyOption
                       key={d._id + index.toString()}

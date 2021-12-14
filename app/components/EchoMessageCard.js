@@ -32,8 +32,15 @@ function EchoMessageCard({
 const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.light,
+    borderRadius: "10@s",
     height: "75@s",
     justifyContent: "center",
+    marginHorizontal: "5@s",
+    paddingLeft: "2@s",
+    paddingRight: "2@s",
+    paddingTop: "5@s",
     width: "70@s",
   },
   image: {
@@ -46,7 +53,7 @@ const styles = ScaledSheet.create({
     width: "40@s",
   },
   name: {
-    color: defaultStyles.colors.secondary,
+    color: defaultStyles.colors.dark,
     fontSize: "12@s",
   },
   subImage: {

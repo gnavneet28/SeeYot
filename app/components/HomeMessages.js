@@ -1,8 +1,8 @@
 import React, { memo } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import { ScaledSheet } from "react-native-size-matters";
 
 import Message from "./Message";
 
@@ -13,6 +13,7 @@ function HomeMessages({ messages = [], onMessagePress }) {
   return (
     <View style={styles.container}>
       <ScrollView
+        keyboardShouldPersistTaps="always"
         contentContainerStyle={styles.contentContainerStyle}
         horizontal
         showsHorizontalScrollIndicator={false}

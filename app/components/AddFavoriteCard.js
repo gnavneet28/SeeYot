@@ -209,7 +209,7 @@ function AddContactCard({
 const styles = ScaledSheet.create({
   buttonContainer: {
     alignItems: "center",
-    borderColor: defaultStyles.colors.lightGrey,
+    borderColor: defaultStyles.colors.light,
     borderRadius: "10@s",
     borderWidth: 1,
     height: "32@s",
@@ -234,7 +234,6 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.light,
     borderRadius: "10@s",
-    elevation: 1,
     flexDirection: "row",
     height: "50@s",
     marginVertical: "3@s",

@@ -41,11 +41,11 @@ class RepliesList extends React.Component {
         switch (type) {
           case ViewTypes.Full:
             dim.width = width;
-            dim.height = scale(116);
+            dim.height = scale(95);
             break;
           default:
             dim.width = width;
-            dim.height = scale(116);
+            dim.height = scale(95);
         }
       }
     );
@@ -168,28 +168,28 @@ class RepliesList extends React.Component {
 
 const styles = ScaledSheet.create({
   container: {
-    backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.lightGrey,
+    backgroundColor: defaultStyles.colors.light,
+    borderColor: defaultStyles.colors.light,
     borderRadius: "25@s",
     borderWidth: 1,
-    elevation: 2,
     marginVertical: "8@s",
     overflow: "hidden",
-    width: "95%",
+    width: "90%",
   },
   inputBoxContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: defaultStyles.colors.light,
     flexDirection: "row",
-    height: "38@s",
+    height: "32@s",
     justifyContent: "space-between",
     paddingHorizontal: "10@s",
     width: "100%",
   },
   inputBox: {
+    backgroundColor: defaultStyles.colors.light,
     borderRadius: "20@s",
     flexShrink: 1,
-    height: "36@s",
+    height: "30@s",
     marginHorizontal: "5@s",
     paddingHorizontal: "10@s",
     width: "100%",

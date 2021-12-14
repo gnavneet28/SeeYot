@@ -138,7 +138,7 @@ function AddContactCard({ contact, onInvitePress, style }) {
           onPress={onInvitePress}
           style={[styles.inviteButton]}
           subStyle={{
-            color: defaultStyles.colors.dark,
+            color: defaultStyles.colors.blue,
             fontSize: scale(14),
             letterSpacing: 1,
           }}
@@ -161,7 +161,7 @@ const styles = ScaledSheet.create({
     marginRight: "4@s",
     width: "60@s",
     borderWidth: 1,
-    borderColor: defaultStyles.colors.lightGrey,
+    borderColor: defaultStyles.colors.light,
     overflow: "hidden",
   },
   addButton: {
@@ -180,7 +180,6 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.light,
     borderRadius: "10@s",
-    elevation: 1,
     flexDirection: "row",
     height: "50@s",
     marginVertical: "3@s",
@@ -226,7 +225,7 @@ const styles = ScaledSheet.create({
   inviteButton: {
     backgroundColor: defaultStyles.colors.light,
     borderWidth: "1@s",
-    borderColor: defaultStyles.colors.lightGrey,
+    borderColor: defaultStyles.colors.light,
     borderRadius: "10@s",
     height: "32@s",
     marginRight: "5@s",

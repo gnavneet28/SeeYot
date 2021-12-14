@@ -31,27 +31,34 @@ function VipThoughtCard({ user = defaultUser, style, onPress }) {
 const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.light,
+    borderRadius: "10@s",
     height: "75@s",
     justifyContent: "center",
+    marginRight: "8@s",
+    paddingLeft: "2@s",
+    paddingRight: "2@s",
+    paddingTop: "5@s",
     width: "70@s",
   },
   image: {
     alignItems: "center",
     borderColor: defaultStyles.colors.light,
-    borderRadius: "22@s",
+    borderRadius: "20@s",
     borderWidth: 2,
-    height: "44@s",
+    height: "40@s",
     justifyContent: "center",
-    width: "44@s",
+    width: "40@s",
   },
   name: {
-    color: defaultStyles.colors.secondary,
+    color: defaultStyles.colors.dark,
     fontSize: "12@s",
   },
   subImage: {
-    borderRadius: "22@s",
-    height: "44@s",
-    width: "44@s",
+    borderRadius: "19@s",
+    height: "38@s",
+    width: "38@s",
   },
 });
 

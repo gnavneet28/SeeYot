@@ -45,7 +45,7 @@ function EchoMessageList({ echoMessages = [], onEchoMessagePress, style }) {
 }
 const styles = ScaledSheet.create({
   container: {
-    height: "75@s",
+    height: "80@s",
     justifyContent: "center",
   },
 });

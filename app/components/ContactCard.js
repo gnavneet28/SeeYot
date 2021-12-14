@@ -145,7 +145,7 @@ function ContactCard({
             onPress={onSendThoughtPress}
             color={
               !isRecipientActive
-                ? defaultStyles.colors.primary
+                ? defaultStyles.colors.secondary
                 : defaultStyles.colors.white
             }
             name="send"
@@ -244,7 +244,7 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   image: {
-    borderColor: defaultStyles.colors.lightGrey,
+    borderColor: defaultStyles.colors.light,
     borderRadius: "22.5@s",
     borderWidth: 1,
     height: "45@s",

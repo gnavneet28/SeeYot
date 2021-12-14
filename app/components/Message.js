@@ -1,6 +1,5 @@
 import React from "react";
-import { StyleSheet, TouchableHighlight } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { TouchableHighlight } from "react-native";
 import LottieView from "lottie-react-native";
 import defaultStyles from "../config/styles";
 import { ScaledSheet, scale } from "react-native-size-matters";
@@ -27,21 +26,20 @@ function Message({ mood = "Happy", onPress, seen = false }) {
       style={[
         styles.container,
         {
-          backgroundColor: seen
-            ? defaultStyles.colors.lightGrey
-            : defaultStyles.colors.blue,
+          borderWidth: seen ? 0 : 2,
+          borderColor: seen
+            ? defaultStyles.colors.light
+            : defaultStyles.colors.green,
         },
       ]}
     >
       <>
-        <LinearGradient colors={["#8e9eab", "#eef2f3"]} style={styles.gradient}>
-          <LottieView
-            autoPlay
-            loop
-            source={emoji}
-            style={{ width: scale(40), height: scale(40) }}
-          />
-        </LinearGradient>
+        <LottieView
+          autoPlay
+          loop
+          source={emoji}
+          style={{ width: scale(30), height: scale(30) }}
+        />
       </>
     </TouchableHighlight>
   );
@@ -49,20 +47,13 @@ function Message({ mood = "Happy", onPress, seen = false }) {
 const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
+    backgroundColor: defaultStyles.colors.light,
     borderRadius: "25@s",
     height: "50@s",
     justifyContent: "center",
     marginHorizontal: "5@s",
     padding: "5@s",
     width: "50@s",
-  },
-  gradient: {
-    alignItems: "center",
-    borderRadius: "22.5@s",
-    height: "45@s",
-    justifyContent: "center",
-    padding: "2@s",
-    width: "45@s",
   },
 });
 

@@ -91,8 +91,8 @@ class VipSearchResultList extends React.Component {
           {this.props.isLoading ? (
             <ActivityIndicator
               animating={this.props.isLoading}
-              color={defaultStyles.colors.secondary}
-              size={scale(28)}
+              color={defaultStyles.colors.dark_Variant}
+              size={scale(22)}
             />
           ) : null}
           <RecyclerListView

@@ -22,11 +22,10 @@ function DescriptionItem({ name = "", style, description = "" }) {
 const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: defaultStyles.colors.light,
     borderRadius: "10@s",
-    elevation: 1,
     flexDirection: "row",
-    marginVertical: "2@s",
+    marginVertical: "4@s",
     minHeight: "50@s",
     paddingVertical: "5@s",
     width: "100%",

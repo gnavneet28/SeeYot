@@ -69,7 +69,11 @@ function ReplyCard({
           imageUrl={message.createdFor.picture}
         />
         <View style={styles.recipientDetailsContainerSub}>
-          <AppText numberOfLines={1} style={styles.recipientName}>
+          <AppText
+            onPress={onModalOpenPress}
+            numberOfLines={1}
+            style={styles.recipientName}
+          >
             {message.createdFor.name}
           </AppText>
           <AppText
@@ -104,10 +108,9 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "10@s",
-    elevation: 2,
-    height: "110@s",
-    marginBottom: "3@s",
+    borderBottomWidth: 1,
+    borderColor: defaultStyles.colors.light,
+    height: "95@s",
     padding: "5@s",
     width: "95%",
   },
@@ -140,12 +143,11 @@ const styles = ScaledSheet.create({
   },
   message: {
     alignSelf: "flex-start",
-    backgroundColor: defaultStyles.colors.light,
     borderRadius: "10@s",
     color: defaultStyles.colors.blue,
-    marginVertical: "1@s",
+    fontSize: "13.5@s",
     maxWidth: "95%",
-    paddingHorizontal: "10@s",
+    paddingBottom: 0,
   },
   image: {
     backgroundColor: defaultStyles.colors.white,
@@ -169,8 +171,13 @@ const styles = ScaledSheet.create({
   },
   recipientName: {
     alignSelf: "flex-start",
+    backgroundColor: defaultStyles.colors.light,
+    borderRadius: "15@s",
     color: defaultStyles.colors.dark,
-    paddingBottom: 0,
+    fontSize: "14@s",
+    paddingHorizontal: "10@s",
+    paddingVertical: "3@s",
+    textAlignVertical: "center",
   },
   repliesCount: {
     alignSelf: "flex-start",
