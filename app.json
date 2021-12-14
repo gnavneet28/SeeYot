@@ -9,17 +9,6 @@
       "fallbackToCacheTimeout": 0
     },
 
-    "plugins": [
-      [
-        "expo-notifications",
-        {
-          "androidMode": "default",
-          "icon": "./app/assets/ic_notification.png",
-          "color": "#ffffff"
-        }
-      ]
-    ],
-
     "ios": {
       "supportsTablet": true,
       "config": {
