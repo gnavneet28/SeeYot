@@ -100,7 +100,7 @@ function RepliesScreen({ navigation }) {
   };
 
   useEffect(() => {
-    if (mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: false,
         showInfoAlert: false,
@@ -109,7 +109,7 @@ function RepliesScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && message.isVisible === true) {
+    if (!isFocused && mounted && message.isVisible === true) {
       setMessage({
         message: defaultProps.defaultMessage,
         isVisible: false,
@@ -118,7 +118,7 @@ function RepliesScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && showAlert === true) {
+    if (!isFocused && mounted && showAlert === true) {
       setShowAlert(false);
     }
   }, [isFocused, mounted]);
@@ -186,7 +186,7 @@ function RepliesScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.white,
   },
   modalFallback: {
     backgroundColor: "rgba(0,0,0,0.7)",

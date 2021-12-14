@@ -41,13 +41,13 @@ function RegisterDetailsScreen({ route }) {
   });
 
   useEffect(() => {
-    if (mounted && isLoading === true) {
+    if (!isFocused && mounted && isLoading === true) {
       setIsLoading(false);
     }
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,

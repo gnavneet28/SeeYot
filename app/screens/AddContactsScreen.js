@@ -138,7 +138,7 @@ function AddContactsScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    if (mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,

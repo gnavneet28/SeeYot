@@ -44,7 +44,7 @@ function VipSearchScreen({ navigation }) {
   const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
-    if (mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
@@ -53,7 +53,7 @@ function VipSearchScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && isVisible === true) {
+    if (!isFocused && mounted && isVisible === true) {
       setIsVisible(false);
     }
   }, [isFocused, mounted]);
@@ -301,8 +301,9 @@ const styles = ScaledSheet.create({
     alignItems: "center",
   },
   matchedThoughtsContainer: {
+    alignItems: "center",
     borderRadius: "5@s",
-    height: "75@s",
+    height: "80@s",
     paddingHorizontal: "10@s",
     width: "100%",
   },

@@ -59,13 +59,13 @@ function ProfileScreen({ navigation }) {
   const [showLogOut, setShowLogOut] = useState(false);
 
   useEffect(() => {
-    if (mounted && isLoading === true) {
+    if (!isFocused && mounted && isLoading === true) {
       setIsLoading(false);
     }
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
@@ -74,7 +74,7 @@ function ProfileScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && apiActivity.visible === true) {
+    if (!isFocused && mounted && apiActivity.visible === true) {
       setApiActivity({
         message: "",
         processing: true,
@@ -85,7 +85,7 @@ function ProfileScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && showLogOut === true) {
+    if (!isFocused && mounted && showLogOut === true) {
       setShowLogOut(false);
     }
   }, [isFocused, mounted]);
@@ -389,7 +389,10 @@ function ProfileScreen({ navigation }) {
           description={infoAlert.infoAlertMessage}
           visible={infoAlert.showInfoAlert}
         />
-        <ScrollView style={{ width: "100%" }}>
+        <ScrollView
+          keyboardShouldPersistTaps="always"
+          style={{ width: "100%" }}
+        >
           <View style={styles.container}>
             <AddPicture
               icon={user.picture ? "edit" : "camera-alt"}

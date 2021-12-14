@@ -56,7 +56,7 @@ function PointsScreen({ navigation }) {
   });
 
   useEffect(() => {
-    if (mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
@@ -65,7 +65,7 @@ function PointsScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && apiActivity.visible === true) {
+    if (!isFocused && mounted && apiActivity.visible === true) {
       setApiActivity({
         message: "",
         processing: true,
@@ -76,13 +76,13 @@ function PointsScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && showAlert === true) {
+    if (!isFocused && mounted && showAlert === true) {
       setShowAlert(false);
     }
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && isLoading === true) {
+    if (!isFocused && mounted && isLoading === true) {
       setIsLoading(false);
     }
   }, [isFocused, mounted]);
@@ -258,7 +258,10 @@ function PointsScreen({ navigation }) {
         visible={apiActivity.visible}
       />
       <LoadingIndicator visible={isLoading} />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        keyboardShouldPersistTaps="always"
+        contentContainerStyle={styles.container}
+      >
         <AppText style={styles.infoText}>
           Collect points to avail Subscription to SeeYot Vip.
         </AppText>

@@ -114,13 +114,13 @@ function AddEchoScreen({ navigation, route }) {
   }, [isFocused]);
 
   useEffect(() => {
-    if (mounted && isVisible) {
+    if (!isFocused && mounted && isVisible) {
       setIsVisible(false);
     }
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
@@ -129,7 +129,7 @@ function AddEchoScreen({ navigation, route }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && apiActivity.visible === true) {
+    if (!isFocused && mounted && apiActivity.visible === true) {
       setApiActivity({
         message: "",
         processing: true,
@@ -264,7 +264,10 @@ function AddEchoScreen({ navigation, route }) {
           success={apiActivity.success}
           visible={apiActivity.visible}
         />
-        <ScrollView contentContainerStyle={{ flex: 1 }}>
+        <ScrollView
+          keyboardShouldPersistTaps="always"
+          contentContainerStyle={{ flex: 1 }}
+        >
           <View
             style={{
               flexGrow: 1,
@@ -287,6 +290,10 @@ function AddEchoScreen({ navigation, route }) {
                   ) : null}
                 </View>
                 <View style={styles.inputBoxContainer}>
+                  <AppText style={styles.saveEchoInfo}>
+                    What would you like to say when {recipient.name} taps on
+                    your Display Picture or sends you thoughts.
+                  </AppText>
                   <AppTextInput
                     maxLength={100}
                     multiline={true}
@@ -301,10 +308,6 @@ function AddEchoScreen({ navigation, route }) {
                     {message.length}/100
                   </AppText>
                 </View>
-                <AppText style={styles.saveEchoInfo}>
-                  What would you like to say when {recipient.name} taps on your
-                  Display Picture or sends you thoughts.
-                </AppText>
                 <AppButton
                   disabled={
                     message.replace(/\s/g, "").length >= 1 ? false : true
@@ -343,18 +346,22 @@ function AddEchoScreen({ navigation, route }) {
 }
 const styles = ScaledSheet.create({
   allEchoMessagesText: {
+    alignSelf: "flex-start",
+    borderRadius: 20,
     color: defaultStyles.colors.dark,
     fontSize: "14@s",
-    textAlign: "left",
-    width: "100%",
+    marginVertical: "5@s",
+    paddingHorizontal: "10@s",
+    textAlign: "center",
   },
   button: {
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderColor: defaultStyles.colors.light,
-    borderRadius: "10@s",
+    borderRadius: "5@s",
     borderWidth: 2,
     height: "38@s",
+    marginTop: "5@s",
     width: "90%",
   },
   container: {
@@ -362,8 +369,8 @@ const styles = ScaledSheet.create({
   },
   echoMessageListContainer: {
     marginTop: "2@s",
-    marginBottom: "5@s",
-    paddingHorizontal: "10@s",
+    marginBottom: "15@s",
+    paddingLeft: "5@s",
     width: "100%",
   },
   echoOptionMainContainer: {
@@ -375,12 +382,12 @@ const styles = ScaledSheet.create({
   },
   inputBoxContainer: {
     backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: "10@s",
+    borderColor: defaultStyles.colors.light,
+    borderRadius: "5@s",
     borderWidth: 1,
     marginBottom: "5@s",
+    marginTop: "10@s",
     overflow: "hidden",
-    padding: "5@s",
     width: "90%",
   },
   inputBox: {
@@ -405,11 +412,12 @@ const styles = ScaledSheet.create({
     opacity: 1,
   },
   saveEchoInfo: {
-    color: defaultStyles.colors.dark_Variant,
-    fontSize: "12@s",
-    letterSpacing: "0.5@s",
-    marginBottom: "20@s",
-    width: "90%",
+    backgroundColor: defaultStyles.colors.light,
+    color: defaultStyles.colors.secondary,
+    fontSize: "10@s",
+    letterSpacing: "0.3@s",
+    paddingHorizontal: "10@s",
+    width: "100%",
   },
   textInputSub: {
     fontSize: "14.5@s",

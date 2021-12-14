@@ -105,13 +105,13 @@ function AddFavoritesScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    if (isFocused && mounted) {
+    if (isFocused) {
       setUsersList();
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (mounted && isVisible) {
+    if (!isFocused && mounted && isVisible) {
       setIsVisible(false);
     }
   }, [isFocused, mounted]);
@@ -155,7 +155,7 @@ function AddFavoritesScreen({ navigation }) {
     debounce(
       async () => {
         setProcessing(true);
-        toast.current.show("Sending...", 30000);
+        toast.current.show("Sending...", 60000);
         let msg = message.textMessage;
         let mood = message.mood ? message.mood : "Happy";
         let optionalReplies = optionalAnswer;
@@ -301,6 +301,7 @@ function AddFavoritesScreen({ navigation }) {
       >
         <View style={styles.messageBackground}>
           <ScrollView
+            keyboardShouldPersistTaps="always"
             contentContainerStyle={{
               flexGrow: 1,
               justifyContent: "flex-end",
@@ -357,6 +358,7 @@ function AddFavoritesScreen({ navigation }) {
               </View>
               <View style={styles.moodContainerMain}>
                 <ScrollView
+                  keyboardShouldPersistTaps="always"
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.moodContainerSub}
@@ -616,7 +618,7 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   messageInput: {
-    borderColor: defaultStyles.colors.lightGrey,
+    borderColor: defaultStyles.colors.light,
     borderRadius: "5@s",
     borderWidth: 1,
     fontFamily: "Comic-Bold",

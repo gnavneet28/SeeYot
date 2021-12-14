@@ -89,11 +89,8 @@ function HomeScreen({ navigation }) {
   const clearJunkData = async () => {
     const { ok, data, problem } = await myApi.clearExpiredData();
 
-    if (ok) {
-      await storeDetails(data.user);
-      return setUser(data.user);
-    }
-    return;
+    if (ok) return;
+    if (problem) return;
   };
 
   const updateAllContacts = async () => {
@@ -105,25 +102,20 @@ function HomeScreen({ navigation }) {
     return;
   };
 
-  // useEffect(() => {
-  //   BackHandler.addEventListener("hardwareBackPress", () => {
-  //     BackHandler.exitApp()
-  //   }
-  //   );
-
-  //   return () => BackHandler.removeEventListener("hardwareBackPress");
-  // });
+  const updateAllReadMessages = async () => {
+    const { ok, problem } = await messagesApi.updateAllMessages();
+    if (ok) return;
+    if (problem) return;
+  };
 
   useEffect(() => {
     clearJunkData();
-  }, []);
-
-  useEffect(() => {
     updateAllContacts();
+    updateAllReadMessages();
   }, []);
 
   useEffect(() => {
-    if (mounted && apiActivity.visible === true) {
+    if (!isFocused && mounted && apiActivity.visible === true) {
       setApiActivity({
         message: "",
         processing: true,
@@ -136,10 +128,10 @@ function HomeScreen({ navigation }) {
   useEffect(() => {
     let messages = user.messages ? user.messages : [];
     setMessagesList(messages);
-  }, [user.messages]);
+  }, [user]);
 
   useEffect(() => {
-    if (mounted && isVisible) {
+    if (!isFocused && mounted && isVisible) {
       setIsVisible(false);
       setMessageCreator({
         name: "************",
@@ -149,7 +141,7 @@ function HomeScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && state.showInfoAlert === true) {
+    if (!isFocused && mounted && state.showInfoAlert === true) {
       setState({
         infoAlertMessage: "",
         showInfoAlert: false,
@@ -399,6 +391,7 @@ function HomeScreen({ navigation }) {
       >
         <View style={styles.messageBackground}>
           <ScrollView
+            keyboardShouldPersistTaps="always"
             contentContainerStyle={{
               flexGrow: 1,
               justifyContent: "flex-end",
@@ -433,7 +426,7 @@ function HomeScreen({ navigation }) {
 
               {message.options.length >= 1 ? (
                 <View style={styles.optionContainerMain}>
-                  <ScrollView>
+                  <ScrollView keyboardShouldPersistTaps="always">
                     <AppText style={styles.selectOption}>
                       Select a Reply
                     </AppText>
@@ -518,16 +511,13 @@ const styles = ScaledSheet.create({
   inputContainer: {
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.light,
     borderRadius: "30@s",
-    borderWidth: 1,
-    elevation: 1,
     flexDirection: "row",
-    height: defaultStyles.dimensionConstants.height,
+    height: "38@s",
     justifyContent: "space-between",
     marginVertical: "15@s",
-    width: "92%",
+    width: "90%",
   },
   inputBox: {
     borderRadius: "30@s",
@@ -588,7 +578,7 @@ const styles = ScaledSheet.create({
     width: "44@s",
   },
   message: {
-    borderColor: defaultStyles.colors.blue,
+    borderColor: defaultStyles.colors.yellow_Variant,
     borderLeftWidth: 2,
     color: defaultStyles.colors.secondary,
     opacity: 0.8,

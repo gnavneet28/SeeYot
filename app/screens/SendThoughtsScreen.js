@@ -122,18 +122,16 @@ function SendThoughtsScreen({ navigation, route }) {
 
   // SETTING ACTIVECHATMESSAGES, ACTIVE CHAT TO NULL AND REMOVING THE ACTIVECHAT FOR USER
   useEffect(() => {
-    if (mounted) {
-      setActiveMessages([]);
-      setActiveChat(false);
-    }
+    setActiveMessages([]);
+    setActiveChat(false);
 
-    if (!isFocused && mounted) {
+    if (!isFocused) {
       handleSetChatInActive();
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: true,
@@ -142,19 +140,19 @@ function SendThoughtsScreen({ navigation, route }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && isVisible === true) {
+    if (!isFocused && mounted && isVisible === true) {
       setIsVisible(false);
     }
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && showAlert === true) {
+    if (!isFocused && mounted && showAlert === true) {
       setShowAlert(false);
     }
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && apiActivity.visible === true) {
+    if (!isFocused && mounted && apiActivity.visible === true) {
       setApiActivity({
         message: "",
         processing: true,
@@ -165,7 +163,7 @@ function SendThoughtsScreen({ navigation, route }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && messageActivity.visible === true) {
+    if (!isFocused && mounted && messageActivity.visible === true) {
       setMessageActivity({
         message: "",
         processing: true,

@@ -61,7 +61,7 @@ function NotificationScreen({ navigation }) {
   });
 
   useEffect(() => {
-    if (mounted && apiActivity.visible === true) {
+    if (!isFocused && mounted && apiActivity.visible === true) {
       setApiActivity({
         message: "",
         processing: true,
@@ -72,7 +72,7 @@ function NotificationScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
@@ -81,7 +81,7 @@ function NotificationScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && message.isVisible === true) {
+    if (!isFocused && mounted && message.isVisible === true) {
       setMessage({
         message: "",
         isVisible: false,
@@ -90,7 +90,7 @@ function NotificationScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && visible === true) {
+    if (!isFocused && mounted && visible === true) {
       setVisible(false);
     }
   }, [isFocused, mounted]);
@@ -272,10 +272,10 @@ const styles = ScaledSheet.create({
   },
   clearAll: {
     alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.secondary,
+    backgroundColor: defaultStyles.colors.yellow_Variant,
     borderBottomLeftRadius: "20@s",
     borderTopLeftRadius: "20@s",
-    color: defaultStyles.colors.yellow,
+    color: defaultStyles.colors.secondary,
     fontSize: "14@s",
     height: "30@s",
     paddingHorizontal: "10@s",

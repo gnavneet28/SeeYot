@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { FlatList } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
@@ -38,7 +38,7 @@ function BlockedUsersScreen({ navigation }) {
   });
 
   useEffect(() => {
-    if (mounted && apiActivity.visible === true) {
+    if (!isFocused && mounted && apiActivity.visible === true) {
       setApiActivity({
         message: "",
         processing: true,

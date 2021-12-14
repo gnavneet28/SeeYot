@@ -48,7 +48,10 @@ function ManageSubscriptionScreen({ navigation }) {
         title="Current Subscription"
         onPressLeft={handleBack}
       />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        keyboardShouldPersistTaps="always"
+        contentContainerStyle={styles.container}
+      >
         {subscription == "Inactive" ? (
           <AppText style={styles.noActiveSubsInfo}>
             There are no active subscriptions.

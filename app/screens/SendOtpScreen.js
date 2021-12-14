@@ -35,7 +35,7 @@ function SendOtpScreen({ navigation }) {
   });
 
   useEffect(() => {
-    if (mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
@@ -44,13 +44,13 @@ function SendOtpScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && isLoading === true) {
+    if (!isFocused && mounted && isLoading === true) {
       setIsLoading(false);
     }
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && visible === true) {
+    if (!isFocused && mounted && visible === true) {
       setVisible(false);
     }
   }, [isFocused, mounted]);

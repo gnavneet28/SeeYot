@@ -51,7 +51,7 @@ function SubscriptionScreen({ navigation, route }) {
       >
         Current Subscriptions
       </AppText>
-      <ScrollView>
+      <ScrollView keyboardShouldPersistTaps="always">
         <View style={styles.scrollView}>
           <DescriptionItem
             description="You can only be blocked by other vip members."
@@ -74,7 +74,11 @@ function SubscriptionScreen({ navigation, route }) {
             name="bell-circle"
           />
           <AppText style={styles.selectPlanText}>Select a Plan</AppText>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <ScrollView
+            keyboardShouldPersistTaps="always"
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          >
             <PlanCard planName="Plan A" planRate={250} planDuration="1 Month" />
             <PlanCard
               planDuration="2 Months"
@@ -106,10 +110,10 @@ function SubscriptionScreen({ navigation, route }) {
 const styles = ScaledSheet.create({
   manageSubscription: {
     alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.secondary,
+    backgroundColor: defaultStyles.colors.yellow_Variant,
     borderBottomLeftRadius: "20@s",
     borderTopLeftRadius: "20@s",
-    color: defaultStyles.colors.yellow,
+    color: defaultStyles.colors.secondary,
     fontSize: "14@s",
     height: "30@s",
     marginBottom: "10@s",
