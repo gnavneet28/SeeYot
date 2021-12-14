@@ -14,10 +14,14 @@ const deleteMessage = (id) => apiClient.delete(endPoint + "/delete/" + id);
 
 const getAllRepliedMessages = () => apiClient.get(endPoint + "/allReplied");
 
+const updateAllMessages = () =>
+  apiClient.put(endPoint + "/update/allReadMessages", {});
+
 export default {
   deleteMessage,
   getAllRepliedMessages,
   markRead,
   reply,
   sendMessage,
+  updateAllMessages,
 };

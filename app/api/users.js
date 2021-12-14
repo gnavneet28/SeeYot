@@ -43,12 +43,13 @@ const getCurrentUser = () => apiClient.get(endPoint + "/me");
 const updateCurrentUserPhoto = (picture) => {
   const formData = new FormData();
 
-  formData.append("picture", {
-    name: picture.split("/").pop(),
-    uri: picture,
-    type: "image/jpg",
-  });
-
+  if (picture) {
+    formData.append("picture", {
+      name: picture.split("/").pop(),
+      uri: picture,
+      type: "image/jpg",
+    });
+  }
   return apiClient.put(endPoint + "/me/update/picture", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
@@ -112,6 +113,9 @@ const makeCurrentUserActiveFor = (forUser, byUser) =>
 const makeCurrentUserInActiveFor = (forUser, byUser) =>
   apiClient.put(endPoint + "/setInActiveFor", { for: forUser, by: byUser });
 
+const removeUserPhoneContacts = () =>
+  apiClient.put(endPoint + "/remove/phoneContacts", {});
+
 export default {
   addContact,
   addFavorite,
@@ -127,6 +131,7 @@ export default {
   removeCurrentUserPhoto,
   removeFavorite,
   removeFromSearchHstory,
+  removeUserPhoneContacts,
   searchUser,
   sendNewActiveMessage,
   setPrivacyMessage,
