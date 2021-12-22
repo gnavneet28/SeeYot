@@ -4,10 +4,12 @@ import { ScaledSheet } from "react-native-size-matters";
 
 import AppText from "../components/AppText";
 import AppButton from "../components/AppButton";
+import ApiProcessingContainer from "./ApiProcessingContainer";
 
 import defaultStyles from "../config/styles";
 
 function SettingsAction({
+  processing,
   onPress,
   buttonTitle,
   info,
@@ -20,21 +22,34 @@ function SettingsAction({
     <View style={[styles.container, containerStyle]}>
       <AppText style={[styles.title, titleStyle]}>{title}</AppText>
       <AppText style={styles.info}>{info}</AppText>
-      <AppButton
-        title={buttonTitle}
-        onPress={onPress}
-        style={[styles.button, buttonStyle]}
-      />
+      <ApiProcessingContainer
+        style={styles.apiProcessingContainer}
+        processing={processing}
+      >
+        <AppButton
+          title={buttonTitle}
+          onPress={onPress}
+          style={[styles.button, buttonStyle]}
+        />
+      </ApiProcessingContainer>
     </View>
   );
 }
 
 const styles = ScaledSheet.create({
+  apiProcessingContainer: {
+    borderColor: defaultStyles.colors.lightGrey,
+    borderRadius: "5@s",
+    borderWidth: 1,
+    height: "30@s",
+    marginVertical: "5@s",
+    padding: 0,
+    width: "90%",
+  },
   button: {
     backgroundColor: defaultStyles.colors.tomato,
     height: "30@s",
-    marginVertical: "5@s",
-    width: "90%",
+    width: "100%",
   },
   container: {
     alignItems: "center",

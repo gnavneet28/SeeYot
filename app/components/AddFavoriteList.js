@@ -136,7 +136,7 @@ class AddContactList extends React.Component {
             <AppTextInput
               maxLength={10}
               onChangeText={(text) => this.handleChange(text)}
-              placeholder="Search..."
+              placeholder="Search in your favorites..."
               style={styles.inputBox}
             />
           </View>

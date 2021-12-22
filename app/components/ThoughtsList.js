@@ -35,7 +35,6 @@ function ThoughtsList({ thoughts = [], recipient, activeChat }) {
         data={[...thoughts].reverse()}
         ItemSeperatorComponent={ItemSeperatorComponent}
         keyExtractor={keyExtractor}
-        //ListHeaderComponent={renderListHeader}
         ListFooterComponent={renderListHeader}
         inverted={-1}
         renderItem={renderItem}

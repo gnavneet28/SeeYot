@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -7,6 +7,7 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";
 import InfoAlert from "./InfoAlert";
+import DeleteAction from "./DeleteAction";
 
 import useAuth from "../auth/useAuth";
 
@@ -97,21 +98,11 @@ function ThoughtTimer({ thought }) {
           minutes left.
         </AppText>
       </View>
-      <View style={styles.deleteContainer}>
-        {!processing ? (
-          <MaterialCommunityIcons
-            color={defaultStyles.colors.danger}
-            name="delete-circle-outline"
-            onPress={handleDeletePress}
-            size={scale(20)}
-          />
-        ) : (
-          <ActivityIndicator
-            size={scale(16)}
-            color={defaultStyles.colors.tomato}
-          />
-        )}
-      </View>
+      <DeleteAction
+        apiAction={true}
+        processing={processing}
+        onPress={handleDeletePress}
+      />
       <InfoAlert
         description={infoAlert.infoAlertMessage}
         leftPress={handleCloseInfoAlert}

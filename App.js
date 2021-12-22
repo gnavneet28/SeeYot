@@ -23,12 +23,19 @@ import OnboardingContext from "./app/utilities/onboardingContext";
 
 import usersApi from "./app/api/users";
 import Onboarding from "./app/components/Onboarding";
+import SuccessMessage from "./app/components/SuccessMessage";
+import SuccessMessageContext from "./app/utilities/successMessageContext";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [state, setState] = useState({
     fontLoaded: false,
     isReady: false,
+  });
+
+  const [success, setSuccess] = useState({
+    message: "",
+    show: false,
   });
 
   const [onboarded, setOnboarded] = useState(false);
@@ -92,15 +99,18 @@ export default function App() {
     <SafeAreaProvider>
       <AuthContext.Provider value={{ user, setUser }}>
         <OnboardingContext.Provider value={{ onboarded, setOnboarded }}>
-          <OfflineNotice />
-          {onboarded ? (
-            <NavigationContainer ref={navigationRef}>
-              {user ? <AppNavigator /> : <AuthNavigator />}
-            </NavigationContainer>
-          ) : (
-            <Onboarding />
-          )}
-          <StatusBar style="light" />
+          <SuccessMessageContext.Provider value={{ success, setSuccess }}>
+            <OfflineNotice />
+            {success.show ? <SuccessMessage message={success.message} /> : null}
+            {onboarded ? (
+              <NavigationContainer ref={navigationRef}>
+                {user ? <AppNavigator /> : <AuthNavigator />}
+              </NavigationContainer>
+            ) : (
+              <Onboarding />
+            )}
+            <StatusBar style="light" />
+          </SuccessMessageContext.Provider>
         </OnboardingContext.Provider>
       </AuthContext.Provider>
     </SafeAreaProvider>

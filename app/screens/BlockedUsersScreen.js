@@ -1,56 +1,37 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { FlatList } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
-import { useIsFocused } from "@react-navigation/native";
 
 import AppHeader from "../components/AppHeader";
-import ApiActivity from "../components/ApiActivity";
+import InfoAlert from "../components/InfoAlert";
 import AppText from "../components/AppText";
 import BlockedUserCard from "../components/BlockedUserCard";
 import ItemSeperatorComponent from "../components/ItemSeperatorComponent";
 import Screen from "../components/Screen";
 
-import asyncStorage from "../utilities/cache";
-import apiFlow from "../utilities/ApiActivityStatus";
 import debounce from "../utilities/debounce";
-import DataConstants from "../utilities/DataConstants";
+import storeDetails from "../utilities/storeDetails";
+import ApiContext from "../utilities/apiContext";
+import apiActivity from "../utilities/apiActivity";
 
 import useAuth from "../auth/useAuth";
 
-import useMountedRef from "../hooks/useMountedRef";
-
 import myApi from "../api/my";
-import userApi from "../api/users";
 
 function BlockedUsersScreen({ navigation }) {
   const { user, setUser } = useAuth();
-  const mounted = useMountedRef().current;
-  const isFocused = useIsFocused();
-  const { apiActivityStatus, initialApiActivity } = apiFlow;
+  const { tackleProblem, showSucessMessage } = apiActivity;
 
   // STATES
+  const [apiProcessing, setApiProcessing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [apiActivity, setApiActivity] = useState({
-    message: "",
-    processing: true,
-    visible: false,
-    success: false,
+  const [infoAlert, setInfoAlert] = useState({
+    infoAlertMessage: "",
+    showInfoAlert: false,
   });
-
-  useEffect(() => {
-    if (!isFocused && mounted && apiActivity.visible === true) {
-      setApiActivity({
-        message: "",
-        processing: true,
-        visible: false,
-        success: false,
-      });
-    }
-  }, [isFocused, mounted]);
-
-  // API ACTIVITY ACTIONS
-  const handleApiActivityClose = useCallback(
-    () => setApiActivity({ ...apiActivity, visible: false }),
+  // INFO ALERT ACTION
+  const handleCloseInfoAlert = useCallback(
+    () => setInfoAlert({ ...infoAlert, showInfoAlert: false }),
     []
   );
 
@@ -63,21 +44,6 @@ function BlockedUsersScreen({ navigation }) {
     () => (typeof user.blocked !== "undefined" ? user.blocked : []),
     [user.blocked.length]
   );
-
-  // BLOCK ACTION
-  const handleUnblockPress = async (userToUnblock) => {
-    initialApiActivity(setApiActivity, `Unblocking ${userToUnblock.name}...`);
-    let modifiedUser = { ...user };
-
-    const response = await userApi.unBlockContact(userToUnblock._id);
-
-    if (response.ok) {
-      modifiedUser.blocked = response.data.blocked;
-      await asyncStorage.store(DataConstants.BLOCKED, response.data.blocked);
-      setUser(modifiedUser);
-    }
-    return apiActivityStatus(response, setApiActivity);
-  };
 
   // HAEDER ACTION
   const handleBackPress = useCallback(
@@ -93,25 +59,21 @@ function BlockedUsersScreen({ navigation }) {
 
   // BLOCK LIST ACTION
   const handleRefresh = async () => {
-    initialApiActivity(setApiActivity, "Getting blocklist...");
-    let modifiedUser = { ...user };
+    setRefreshing(true);
 
-    const response = await myApi.getBlockList();
-    if (response.ok) {
-      modifiedUser.blocked = response.data.blocked;
-      await asyncStorage.store(DataConstants.BLOCKED, response.data.blocked);
-      setUser(modifiedUser);
+    const { ok, data, problem } = await myApi.getBlockList();
+    if (ok) {
+      await storeDetails(data.user);
+      setUser(data.user);
+      return setRefreshing(false);
     }
-    return apiActivityStatus(response, setApiActivity);
+
+    setRefreshing(false);
+    tackleProblem(problem, data, setInfoAlert);
   };
 
   const renderItem = useCallback(
-    ({ item }) => (
-      <BlockedUserCard
-        blockedUser={item}
-        onUnBlockPress={() => handleUnblockPress(item)}
-      />
-    ),
+    ({ item }) => <BlockedUserCard blockedUser={item} />,
     []
   );
 
@@ -124,26 +86,25 @@ function BlockedUsersScreen({ navigation }) {
         onPressLeft={handleBackPress}
         title="Blocklist"
       />
-      <ApiActivity
-        message={apiActivity.message}
-        onDoneButtonPress={handleApiActivityClose}
-        onRequestClose={handleApiActivityClose}
-        processing={apiActivity.processing}
-        success={apiActivity.success}
-        visible={apiActivity.visible}
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
       />
       {user && !currentUser.blocked.length ? (
         <AppText style={styles.emptyBlocklistInfo}>Blocklist is empty.</AppText>
       ) : null}
-      <FlatList
-        data={data}
-        ItemSeparatorComponent={ItemSeperatorComponent}
-        keyExtractor={keyExtractor}
-        onRefresh={handleRefresh}
-        refreshing={refreshing}
-        renderItem={renderItem}
-        style={styles.blockList}
-      />
+      <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
+        <FlatList
+          data={data}
+          ItemSeparatorComponent={ItemSeperatorComponent}
+          keyExtractor={keyExtractor}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          renderItem={renderItem}
+          style={styles.blockList}
+        />
+      </ApiContext.Provider>
     </Screen>
   );
 }

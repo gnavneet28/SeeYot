@@ -47,6 +47,7 @@ const styles = ScaledSheet.create({
   },
   recipientName: {
     color: defaultStyles.colors.dark,
+    fontSize: "13@s",
     paddingBottom: "2@s",
     paddingTop: 0,
   },
@@ -64,7 +65,7 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.light,
     borderRadius: "15@s",
     color: defaultStyles.colors.secondary,
-    fontSize: "14@s",
+    fontSize: "12.5@s",
     paddingHorizontal: "10@s",
     paddingVertical: "5@s",
     textAlignVertical: "center",

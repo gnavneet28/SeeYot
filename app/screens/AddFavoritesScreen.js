@@ -1,36 +1,39 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Modal, View, ScrollView, TextInput } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "react-native-vector-icons/AntDesign";
 
 import AddFavoriteList from "../components/AddFavoriteList";
+import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppActivityIndicator from "../components/ActivityIndicator";
 import AppButton from "../components/AppButton";
 import AppHeader from "../components/AppHeader";
 import AppImage from "../components/AppImage";
 import AppText from "../components/AppText";
 import HelpDialogueBox from "../components/HelpDialogueBox";
+import InfoAlert from "../components/InfoAlert";
 import Mood from "../components/Mood";
 import OptionalAnswer from "../components/OptionalAnswer";
 import Screen from "../components/Screen";
-import ToastMessage from "../components/ToastMessage";
+import SuccessMessageContext from "../utilities/successMessageContext";
 
 import defaultStyles from "../config/styles";
 
 import useAuth from "../auth/useAuth";
 import messagesApi from "../api/messages";
 import myApi from "../api/my";
+import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
 
 import Constants from "../navigation/NavigationConstants";
-import DataConstants from "../utilities/DataConstants";
 
-import asyncStorage from "../utilities/cache";
-
+import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
 import ApiContext from "../utilities/apiContext";
+import apiActivity from "../utilities/apiActivity";
+import ModalFallback from "../components/ModalFallback";
 
 const defaultRecipient = {
   name: "",
@@ -49,7 +52,8 @@ function AddFavoritesScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
-  const toast = useRef();
+  const { setSuccess } = useContext(SuccessMessageContext);
+  const { tackleProblem, showSucessMessage } = apiActivity;
 
   // STATES
   const [isVisible, setIsVisible] = useState(false);
@@ -67,6 +71,10 @@ function AddFavoritesScreen({ navigation }) {
   const [optionalMessage, setOptionalMessage] = useState("");
   const [processing, setProcessing] = useState(false);
   const [apiProcessing, setApiProcessing] = useState(false);
+  const [infoAlert, setInfoAlert] = useState({
+    infoAlertMessage: "",
+    showInfoAlert: false,
+  });
 
   // ON PAGE FOCUS ACTION
   const setUsersList = () => {
@@ -90,11 +98,17 @@ function AddFavoritesScreen({ navigation }) {
   const updateMyFavoritesList = async () => {
     const { ok, data, problem } = await myApi.updateMyFavorites();
     if (ok) {
-      let modifiedUser = { ...user };
-      modifiedUser.favorites = data.favorites;
-      setUser(modifiedUser);
-      setUsersList();
-      return await asyncStorage.store(DataConstants.FAVORITES, data.favorites);
+      const res = await usersApi.getCurrentUser();
+      if (res.ok && res.data) {
+        if (res.data.__v > data.user.__v) {
+          await storeDetails(res.data);
+          setUser(res.data);
+          return setUsersList();
+        }
+      }
+      await storeDetails(data.user);
+      setUser(data.user);
+      return setUsersList();
     }
 
     if (problem) return;
@@ -155,7 +169,6 @@ function AddFavoritesScreen({ navigation }) {
     debounce(
       async () => {
         setProcessing(true);
-        toast.current.show("Sending...", 60000);
         let msg = message.textMessage;
         let mood = message.mood ? message.mood : "Happy";
         let optionalReplies = optionalAnswer;
@@ -174,18 +187,11 @@ function AddFavoritesScreen({ navigation }) {
           });
           setOptionalAnswer([]);
           setProcessing(false);
-          return toast.current.show(data.message, 1000);
+          setIsVisible(false);
+          return showSucessMessage(setSuccess, "Message Sent!");
         }
         setProcessing(false);
-        if (problem) {
-          if (data) {
-            return toast.current.show(data.message, 3000);
-          }
-          return toast.current.show(
-            "Problem connecting to network. Please try again!",
-            3000
-          );
-        }
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -200,11 +206,19 @@ function AddFavoritesScreen({ navigation }) {
     });
   };
 
+  // INFO ALERT ACTION
+  const handleCloseInfoAlert = useCallback(
+    () => setInfoAlert({ ...infoAlert, showInfoAlert: false }),
+    []
+  );
+
   // REFRESH ACTION
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
     setUsersList();
-    updateMyFavoritesList();
-  };
+    await updateMyFavoritesList();
+    setRefreshing(false);
+  }, []);
 
   // HEADER ACTIONS
   const handleBack = useCallback(
@@ -273,10 +287,15 @@ function AddFavoritesScreen({ navigation }) {
           onPressRight={handleHelpPress}
         />
         <HelpDialogueBox
-          information="Add people to your Favorites to receive messages from them. When you send a message to someone who has added you in Favorites, he/she could see the sender's name only when they reply to your messages."
+          information="Add people to your Favorites to receive messages from them. When you send a message to someone who has added you in Favorites, he/she could see your name only when they reply to your messages.This way of interaction ensures mutual interest."
           onPress={handleCloseHelp}
           setVisible={setShowHelp}
           visible={showHelp}
+        />
+        <InfoAlert
+          leftPress={handleCloseInfoAlert}
+          description={infoAlert.infoAlertMessage}
+          visible={infoAlert.showInfoAlert}
         />
         {!isReady ? (
           <AppActivityIndicator />
@@ -292,7 +311,7 @@ function AddFavoritesScreen({ navigation }) {
           </ApiContext.Provider>
         )}
       </Screen>
-      {isVisible ? <View style={styles.modalFallback} /> : null}
+      {isVisible ? <ModalFallback /> : null}
       <Modal
         visible={isVisible}
         onRequestClose={processing === true ? () => null : handleCloseMessage}
@@ -408,10 +427,9 @@ function AddFavoritesScreen({ navigation }) {
                   subStyle={styles.addOptionsSub}
                 />
               ) : null}
-              <AppButton
-                disabled={checkSendButtonDisability() ? true : false}
+              <ApiProcessingContainer
                 style={[
-                  styles.sendButton,
+                  styles.apiProcessingContainer,
                   {
                     backgroundColor:
                       checkSendButtonDisability() || processing === true
@@ -419,15 +437,28 @@ function AddFavoritesScreen({ navigation }) {
                         : defaultStyles.colors.secondary,
                   },
                 ]}
-                title="Send"
-                onPress={
-                  processing === true ? () => null : handleSendMessagePress
-                }
-              />
+                processing={processing}
+              >
+                <AppButton
+                  disabled={checkSendButtonDisability() ? true : false}
+                  style={[
+                    styles.sendButton,
+                    {
+                      backgroundColor:
+                        checkSendButtonDisability() || processing === true
+                          ? defaultStyles.colors.lightGrey
+                          : defaultStyles.colors.secondary,
+                    },
+                  ]}
+                  title="Send"
+                  onPress={
+                    processing === true ? () => null : handleSendMessagePress
+                  }
+                />
+              </ApiProcessingContainer>
             </View>
           </ScrollView>
         </View>
-        <ToastMessage reference={toast} position="center" />
       </Modal>
       <Modal
         visible={showAddoption}
@@ -558,6 +589,11 @@ const styles = ScaledSheet.create({
     height: "32@s",
     width: "55@s",
   },
+  apiProcessingContainer: {
+    height: "40@s",
+    marginTop: "10@s",
+    width: "100%",
+  },
   closeMessageIconContainer: {
     alignItems: "center",
     alignSelf: "center",
@@ -629,13 +665,6 @@ const styles = ScaledSheet.create({
     textAlignVertical: "top",
     width: "94%",
   },
-  modalFallback: {
-    backgroundColor: "rgba(0,0,0,0.7)",
-    height: "100%",
-    position: "absolute",
-    width: "100%",
-    zIndex: 22,
-  },
   moodContainerMain: {
     height: "50@s",
     marginVertical: "5@s",
@@ -685,7 +714,6 @@ const styles = ScaledSheet.create({
   sendButton: {
     borderRadius: 0,
     height: "40@s",
-    marginTop: "10@s",
   },
   wordCount: {
     fontSize: "12@s",

@@ -79,23 +79,23 @@ function SubscriptionScreen({ navigation, route }) {
             horizontal
             showsHorizontalScrollIndicator={false}
           >
-            <PlanCard planName="Plan A" planRate={250} planDuration="1 Month" />
+            <PlanCard planName="Plan A" planRate={125} planDuration="1 Month" />
             <PlanCard
               planDuration="2 Months"
               planName="Plan B"
-              planRate={450}
+              planRate={225}
             />
             <PlanCard
               planDuration="3 Months"
               planName="Plan C"
-              planRate={700}
+              planRate={350}
             />
             <PlanCard
               planDuration="6 Months"
               planName="Plan D"
-              planRate={1250}
+              planRate={625}
             />
-            <PlanCard planName="Plan E" planRate={2450} planDuration="1 Year" />
+            <PlanCard planName="Plan E" planRate={1150} planDuration="1 Year" />
           </ScrollView>
           <AppButton
             onPress={handleCollectButtonPress}

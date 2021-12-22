@@ -1,9 +1,16 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { View, Modal, ScrollView } from "react-native";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useContext,
+} from "react";
+import { View, Modal, ScrollView, Keyboard } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
-import ApiActivity from "../components/ApiActivity";
+import ApiOption from "../components/ApiOption";
+import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppActivityIndicator from "../components/ActivityIndicator";
 import AppButton from "../components/AppButton";
 import AppHeader from "../components/AppHeader";
@@ -11,18 +18,16 @@ import AppText from "../components/AppText";
 import AppTextInput from "../components/AppTextInput";
 import EchoMessageList from "../components/EchoMessageList";
 import HelpDialogueBox from "../components/HelpDialogueBox";
+import InfoAlert from "../components/InfoAlert";
 import Option from "../components/Option";
 import Screen from "../components/Screen";
 
-import Constant from "../navigation/NavigationConstants";
-import DataConstants from "../utilities/DataConstants";
 import useMountedRef from "../hooks/useMountedRef";
+import storeDetails from "../utilities/storeDetails";
+import SuccessMessageContext from "../utilities/successMessageContext";
 
-import InfoAlert from "../components/InfoAlert";
-
-import asyncStorage from "../utilities/cache";
-import apiFlow from "../utilities/ApiActivityStatus";
 import debounce from "../utilities/debounce";
+import apiActivity from "../utilities/apiActivity";
 
 import useAuth from "../auth/useAuth";
 
@@ -34,12 +39,15 @@ import defaultStyles from "../config/styles";
 
 function AddEchoScreen({ navigation, route }) {
   const { recipient, from } = route.params;
-  const { apiActivityStatus, initialApiActivity } = apiFlow;
+  const { setSuccess } = useContext(SuccessMessageContext);
+  const { tackleProblem, showSucessMessage } = apiActivity;
 
   const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
 
+  const [savingEcho, setSavingEcho] = useState(false);
+  const [removingEcho, setRemovingEcho] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [initialMessage, setInitialMessage] = useState("");
   const [message, setMessage] = useState("");
@@ -49,19 +57,7 @@ function AddEchoScreen({ navigation, route }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
-  const [apiActivity, setApiActivity] = useState({
-    message: "",
-    processing: true,
-    visible: false,
-    success: false,
-  });
   const [showHelp, setShowHelp] = useState(false);
-
-  // API ACTIVITY ACTIONS
-  const handleApiActivityClose = useCallback(
-    () => setApiActivity({ ...apiActivity, visible: false }),
-    []
-  );
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
@@ -74,13 +70,8 @@ function AddEchoScreen({ navigation, route }) {
   const updateAllEchoMessages = useCallback(async () => {
     const { ok, data, problem } = await myApi.updateMyEchoMessages();
     if (ok) {
-      let modifiedUser = { ...user };
-      modifiedUser.echoMessage = data.echoMessages;
-      setUser(modifiedUser);
-      return await asyncStorage.store(
-        DataConstants.ECHO_MESSAGE,
-        data.echoMessages
-      );
+      await storeDetails(data.user);
+      return setUser(data.user);
     }
     if (problem) return;
   }, [user]);
@@ -128,17 +119,6 @@ function AddEchoScreen({ navigation, route }) {
     }
   }, [isFocused, mounted]);
 
-  useEffect(() => {
-    if (!isFocused && mounted && apiActivity.visible === true) {
-      setApiActivity({
-        message: "",
-        processing: true,
-        visible: false,
-        success: false,
-      });
-    }
-  }, [isFocused, mounted]);
-
   // ECHO_MESSAGE LIST DATA AND ACTION
   const data = useMemo(
     () => user.echoMessage,
@@ -155,20 +135,33 @@ function AddEchoScreen({ navigation, route }) {
     debounce(
       async () => {
         if (message == initialMessage) return;
-        initialApiActivity(setApiActivity, "Updating your Echo Message...");
-        let modifiedUser = { ...user };
+        setSavingEcho(true);
 
-        const response = await usersApi.updateEcho(recipient._id, message);
-        if (response.ok) {
-          modifiedUser.echoMessage = response.data.echoMessage;
-          await asyncStorage.store(
-            DataConstants.ECHO_MESSAGE,
-            response.data.echoMessage
-          );
-          setUser(modifiedUser);
+        const { ok, data, problem } = await usersApi.updateEcho(
+          recipient._id,
+          message
+        );
+        if (ok) {
+          Keyboard.dismiss();
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              setSavingEcho(false);
+              return showSucessMessage(
+                setSuccess,
+                "Echo Updated successfully."
+              );
+            }
+          }
+          await storeDetails(res.data);
+          setUser(res.data);
+          setSavingEcho(false);
+          return showSucessMessage(setSuccess, "Echo Updated successfully.");
         }
-
-        return apiActivityStatus(response, setApiActivity);
+        setSavingEcho(false);
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -211,23 +204,34 @@ function AddEchoScreen({ navigation, route }) {
   const handleDeleteEchoPress = useCallback(
     debounce(
       async () => {
-        initialApiActivity(setApiActivity, "Deleting this Echo Message...");
-        let modifiedUser = { ...user };
+        setRemovingEcho(true);
 
-        const response = await echosApi.deleteEcho(echoMessageOption._id);
+        const { data, ok, problem } = await echosApi.deleteEcho(
+          echoMessageOption._id
+        );
 
-        if (response.ok) {
-          modifiedUser.echoMessage = response.data.echoMessage;
-          await asyncStorage.store(
-            DataConstants.ECHO_MESSAGE,
-            response.data.echoMessage
-          );
-          setUser(modifiedUser);
+        if (ok) {
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              setRemovingEcho(false);
+              setIsVisible(false);
+              return setEchoMessageOption(null);
+            }
+          }
+          await storeDetails(data.user);
+          setUser(data.user);
+          setRemovingEcho(false);
           setIsVisible(false);
-          setEchoMessageOption(null);
+          return setEchoMessageOption(null);
         }
 
-        return apiActivityStatus(response, setApiActivity);
+        setRemovingEcho(false);
+        setIsVisible(false);
+        setEchoMessageOption(null);
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -255,14 +259,6 @@ function AddEchoScreen({ navigation, route }) {
           leftPress={handleCloseInfoAlert}
           description={infoAlert.infoAlertMessage}
           visible={infoAlert.showInfoAlert}
-        />
-        <ApiActivity
-          message={apiActivity.message}
-          onDoneButtonPress={handleApiActivityClose}
-          onRequestClose={handleApiActivityClose}
-          processing={apiActivity.processing}
-          success={apiActivity.success}
-          visible={apiActivity.visible}
         />
         <ScrollView
           keyboardShouldPersistTaps="always"
@@ -308,15 +304,21 @@ function AddEchoScreen({ navigation, route }) {
                     {message.length}/100
                   </AppText>
                 </View>
-                <AppButton
-                  disabled={
-                    message.replace(/\s/g, "").length >= 1 ? false : true
-                  }
-                  onPress={handleSave}
-                  style={styles.button}
-                  subStyle={{ color: defaultStyles.colors.secondary }}
-                  title="Save"
-                />
+
+                <ApiProcessingContainer
+                  style={styles.apiProcessingContainer}
+                  processing={savingEcho}
+                >
+                  <AppButton
+                    disabled={
+                      message.replace(/\s/g, "").length >= 1 ? false : true
+                    }
+                    onPress={handleSave}
+                    style={styles.button}
+                    subStyle={{ color: defaultStyles.colors.secondary }}
+                    title="Save"
+                  />
+                </ApiProcessingContainer>
               </>
             )}
           </View>
@@ -335,8 +337,11 @@ function AddEchoScreen({ navigation, route }) {
               onPress={handleCloseModal}
             />
 
-            <Option title="Delete" onPress={handleDeleteEchoPress} />
-
+            <ApiOption
+              title="Delete"
+              onPress={handleDeleteEchoPress}
+              processing={removingEcho}
+            />
             <Option title="Use this echo" onPress={handleUseThisEchoPress} />
           </View>
         </View>
@@ -354,6 +359,11 @@ const styles = ScaledSheet.create({
     paddingHorizontal: "10@s",
     textAlign: "center",
   },
+  apiProcessingContainer: {
+    height: "38@s",
+    marginTop: "5@s",
+    width: "100%",
+  },
   button: {
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.yellow_Variant,
@@ -361,7 +371,6 @@ const styles = ScaledSheet.create({
     borderRadius: "5@s",
     borderWidth: 2,
     height: "38@s",
-    marginTop: "5@s",
     width: "90%",
   },
   container: {
@@ -417,6 +426,12 @@ const styles = ScaledSheet.create({
     fontSize: "10@s",
     letterSpacing: "0.3@s",
     paddingHorizontal: "10@s",
+    width: "100%",
+  },
+  saveButtonContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "40@s",
     width: "100%",
   },
   textInputSub: {

@@ -43,7 +43,6 @@ function VipThoughtCardList({
 const styles = ScaledSheet.create({
   container: {
     height: "80@s",
-    justifyContent: "center",
   },
 });
 

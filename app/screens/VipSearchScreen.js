@@ -4,6 +4,7 @@ import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 
 import AppHeader from "../components/AppHeader";
+import ApiOption from "../components/ApiOption";
 import InfoAlert from "../components/InfoAlert";
 import Option from "../components/Option";
 import Screen from "../components/Screen";
@@ -20,8 +21,9 @@ import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
 
-import asyncStorage from "../utilities/cache";
 import debounce from "../utilities/debounce";
+import storeDetails from "../utilities/storeDetails";
+import apiActivity from "../utilities/apiActivity";
 
 import useAuth from "../auth/useAuth";
 
@@ -31,8 +33,10 @@ function VipSearchScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
+  const { tackleProblem } = apiActivity;
 
   // STATES
+  const [apiProcessing, setApiProcessing] = useState(false);
   const [interestedUser, setInterestedUser] = useState(null);
   const [searchResult, setSearchResult] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -106,21 +110,8 @@ function VipSearchScreen({ navigation }) {
           setIsLoading(false);
           return setSearchResult(data);
         }
-        if (data) {
-          setIsLoading(false);
-          return setInfoAlert({
-            ...infoAlert,
-            infoAlertMessage: data.message,
-            showInfoAlert: true,
-          });
-        }
-
         setIsLoading(false);
-        return setInfoAlert({
-          ...infoAlert,
-          infoAlertMessage: problem,
-          showInfoAlert: true,
-        });
+        tackleProblem(problem, data, setInfoAlert);
       }
       setSearchResult([]);
     },
@@ -151,7 +142,6 @@ function VipSearchScreen({ navigation }) {
       });
     }
     setInfoAlert({
-      ...infoAlert,
       infoAlertMessage: "Something went wrong! Please try again.",
       showInfoAlert: true,
     });
@@ -193,34 +183,30 @@ function VipSearchScreen({ navigation }) {
   const hanldeRemoveFromSearchHistory = useCallback(
     debounce(
       async () => {
-        let modifiedUser = { ...user };
+        setApiProcessing(true);
         const { ok, problem, data } = await usersApi.removeFromSearchHstory(
           interestedUser._id
         );
         if (ok) {
-          modifiedUser.searchHistory = data;
-          setUser(modifiedUser);
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              setApiProcessing(false);
+              return setIsVisible(false);
+            }
+          }
+          setApiProcessing(false);
           setIsVisible(false);
-          await asyncStorage.store("userSearchHistory", data);
-          return;
+          await storeDetails(data.user);
+          return setUser(data.user);
         }
-        if (data) {
-          setIsVisible(false);
-          return setInfoAlert({
-            ...infoAlert,
-            infoAlertMessage: data.message,
-            showInfoAlert: true,
-          });
-        }
-
+        setApiProcessing(false);
         setIsVisible(false);
-        setInfoAlert({
-          ...infoAlert,
-          infoAlertMessage: problem,
-          showInfoAlert: true,
-        });
+        tackleProblem(problem, data, setInfoAlert);
       },
-      5,
+      5000,
       true
     ),
     [interestedUser, user]
@@ -282,8 +268,11 @@ function VipSearchScreen({ navigation }) {
               title="Close"
               titleStyle={styles.optionClose}
             />
-
-            <Option title="Remove" onPress={hanldeRemoveFromSearchHistory} />
+            <ApiOption
+              processing={apiProcessing}
+              title="Remove"
+              onPress={hanldeRemoveFromSearchHistory}
+            />
 
             <Option title="Add Echo" onPress={handlePopUpAddEchoButtonPress} />
             <Option
@@ -301,7 +290,6 @@ const styles = ScaledSheet.create({
     alignItems: "center",
   },
   matchedThoughtsContainer: {
-    alignItems: "center",
     borderRadius: "5@s",
     height: "80@s",
     paddingHorizontal: "10@s",
@@ -320,6 +308,12 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.dark_Variant,
     color: defaultStyles.colors.white,
     opacity: 1,
+  },
+  removeFromSearchHstoryButtonContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "40@s",
+    width: "100%",
   },
   searchHistoryMainContainer: {
     alignItems: "center",

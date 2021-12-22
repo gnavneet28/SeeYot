@@ -1,34 +1,38 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { View, ScrollView } from "react-native";
+import React, { useCallback, useEffect, useState, useContext } from "react";
+import { View, ScrollView, Modal } from "react-native";
 import { AdMobRewarded } from "expo-ads-admob";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
+import AntDesign from "react-native-vector-icons/AntDesign";
 
-import Screen from "../components/Screen";
+import ApiProcessingContainer from "../components/ApiProcessingContainer";
+import AppButton from "../components/AppButton";
 import AppHeader from "../components/AppHeader";
+import AppText from "../components/AppText";
+import AppTextInput from "../components/AppTextInput";
+import Details from "../components/Details";
+import InfoAlert from "../components/InfoAlert";
+import InfoText from "../components/InfoText";
+import LoadingIndicator from "../components/LoadingIndicator";
+import Screen from "../components/Screen";
 
 import useAuth from "../auth/useAuth";
 
 import defaultStyles from "../config/styles";
 
-import ApiActivity from "../components/ApiActivity";
-import AppButton from "../components/AppButton";
-import AppText from "../components/AppText";
-import AppTextInput from "../components/AppTextInput";
-import Details from "../components/Details";
-import InfoAlert from "../components/InfoAlert";
-import LoadingIndicator from "../components/LoadingIndicator";
-import Alert from "../components/Alert";
-
-import apiFlow from "../utilities/ApiActivityStatus";
-import asyncStorage from "../utilities/cache";
+import SuccessMessageContext from "../utilities/successMessageContext";
 import debounce from "../utilities/debounce";
+import storeDetails from "../utilities/storeDetails";
+import apiActivity from "../utilities/apiActivity";
+import asyncStorage from "../utilities/cache";
 import DataConstants from "../utilities/DataConstants";
+import authorizeAds from "../utilities/authorizeAds";
 
 import useMountedRef from "../hooks/useMountedRef";
 
 import usersApi from "../api/users";
+import ModalFallback from "../components/ModalFallback";
 
 const Points = {
   totalPoints: 0,
@@ -38,22 +42,19 @@ function PointsScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
-  const { apiActivityStatus, initialApiActivity } = apiFlow;
+  const { setSuccess } = useContext(SuccessMessageContext);
+  const { tackleProblem, showSucessMessage } = apiActivity;
 
   // STATES
-  const [showAlert, setShowAlert] = useState(false);
+  const [collectingPoints, setCollectingPoints] = useState(false);
+  const [showAdsInfo, setShowAdsInfo] = useState(false);
+  const [redeeming, setRedeeming] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
   });
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [apiActivity, setApiActivity] = useState({
-    message: "",
-    processing: true,
-    visible: false,
-    success: false,
-  });
 
   useEffect(() => {
     if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
@@ -65,43 +66,10 @@ function PointsScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (!isFocused && mounted && apiActivity.visible === true) {
-      setApiActivity({
-        message: "",
-        processing: true,
-        visible: false,
-        success: false,
-      });
-    }
-  }, [isFocused, mounted]);
-
-  useEffect(() => {
-    if (!isFocused && mounted && showAlert === true) {
-      setShowAlert(false);
-    }
-  }, [isFocused, mounted]);
-
-  useEffect(() => {
     if (!isFocused && mounted && isLoading === true) {
       setIsLoading(false);
     }
   }, [isFocused, mounted]);
-
-  // ALERT ACTION
-  const handleCloseAlert = useCallback(() => {
-    setShowAlert(false);
-  }, []);
-
-  const handleEarnMorePointsPress = useCallback(() => {
-    setShowAlert(false);
-    handleShowAd();
-  });
-
-  // API ACTIVITY ACTIONS
-  const handleApiActivityClose = useCallback(
-    () => setApiActivity({ ...apiActivity, visible: false }),
-    []
-  );
 
   // HEADER ACTION
   const handleBack = useCallback(
@@ -126,27 +94,26 @@ function PointsScreen({ navigation }) {
   };
 
   const updatePoints = async () => {
-    let modifiedUser = { ...user };
     const { ok, problem, data } = await usersApi.updatePoints();
     if (ok) {
-      modifiedUser.points = data.points;
-      setUser(modifiedUser);
-      await asyncStorage.store(DataConstants.POINTS, data.points);
-      return setShowAlert(true);
-    }
+      let newAdStats = await asyncStorage.get(DataConstants.ADSSTATS);
+      newAdStats.numberOfAdsSeen.push(new Date());
 
-    if (problem) {
-      if (data) {
-        return setInfoAlert({
-          infoAlertMessage: data.message,
-          showInfoAlert: true,
-        });
+      const res = await usersApi.getCurrentUser();
+      if (res.ok && res.data) {
+        if (res.data.__v > data.user.__v) {
+          await asyncStorage.store(DataConstants.ADSSTATS, newAdStats);
+          await storeDetails(res.data);
+          setUser(res.data);
+          return showSucessMessage(setSuccess, "Congrats you earned 5 points.");
+        }
       }
-      return setInfoAlert({
-        infoAlertMessage: "Something went wrong! Please try again.",
-        showInfoAlert: true,
-      });
+      await asyncStorage.store(DataConstants.ADSSTATS, newAdStats);
+      await storeDetails(data.user);
+      setUser(data.user);
+      return showSucessMessage(setSuccess, "Congrats you earned 5 points.");
     }
+    tackleProblem(problem, data, setInfoAlert);
   };
 
   const subscription1 = async () =>
@@ -179,7 +146,12 @@ function PointsScreen({ navigation }) {
 
   const handleShowAd = debounce(
     async () => {
-      setIsLoading(true);
+      setCollectingPoints(true);
+      const canShowAd = await authorizeAds();
+      if (!canShowAd) {
+        setCollectingPoints(false);
+        return setShowAdsInfo(true);
+      }
       try {
         await AdMobRewarded.setAdUnitID(
           "ca-app-pub-3940256099942544/5224354917"
@@ -187,7 +159,7 @@ function PointsScreen({ navigation }) {
         await AdMobRewarded.requestAdAsync();
         await AdMobRewarded.showAdAsync();
       } catch (error) {
-        setIsLoading(false);
+        setCollectingPoints(false);
         setInfoAlert({
           infoAlertMessage:
             "Problem has occured while loading the ad. Please try again.",
@@ -208,20 +180,35 @@ function PointsScreen({ navigation }) {
 
   const handleRedeemPoints = debounce(
     async () => {
-      initialApiActivity(setApiActivity, "Redeeming Points...");
-      let modifiedUser = { ...user };
-
-      const response = await usersApi.redeemPoints(pointsToRedeem);
-
-      if (response.ok) {
+      setRedeeming(true);
+      const { ok, data, problem } = await usersApi.redeemPoints(pointsToRedeem);
+      if (ok) {
         setPointsToRedeem(0);
-        modifiedUser.vip = response.data.vip;
-        modifiedUser.points = response.data.points;
-        setUser(modifiedUser);
-        await asyncStorage.store(DataConstants.VIP, response.data.vip);
-        await asyncStorage.store(DataConstants.POINTS, response.data.points);
+        const res = await usersApi.getCurrentUser();
+        if (res.ok && res.data) {
+          if (res.data.__v > data.user.__v) {
+            await storeDetails(res.data);
+            setUser(res.data);
+            setRedeeming(false);
+            return showSucessMessage(
+              setSuccess,
+              "Congrats! You have now become a SeeYot Vip member. Enjoy connecting with more people without hesitation.",
+              6000
+            );
+          }
+        }
+        await storeDetails(data.user);
+        setUser(data.user);
+        setRedeeming(false);
+        return showSucessMessage(
+          setSuccess,
+          "Congrats! You have now become a SeeYot Vip member. Enjoy connecting with more people without hesitation.",
+          6000
+        );
       }
-      return apiActivityStatus(response, setApiActivity);
+      setPointsToRedeem(0);
+      setRedeeming(false);
+      tackleProblem(problem, data, setInfoAlert);
     },
     1000,
     true
@@ -234,28 +221,10 @@ function PointsScreen({ navigation }) {
         title="Points"
         onPressLeft={handleBack}
       />
-      <Alert
-        title="Points"
-        description="Congratulations! You earned 5 points. Want to collect more points?"
-        leftOption="Close"
-        rightOption="Yes"
-        visible={showAlert}
-        onRequestClose={handleCloseAlert}
-        rightPress={handleEarnMorePointsPress}
-        leftPress={handleCloseAlert}
-      />
       <InfoAlert
         description={infoAlert.infoAlertMessage}
         visible={infoAlert.showInfoAlert}
         leftPress={handleCloseInfoAlert}
-      />
-      <ApiActivity
-        message={apiActivity.message}
-        onDoneButtonPress={handleApiActivityClose}
-        onRequestClose={handleApiActivityClose}
-        processing={apiActivity.processing}
-        success={apiActivity.success}
-        visible={apiActivity.visible}
       />
       <LoadingIndicator visible={isLoading} />
       <ScrollView
@@ -286,27 +255,37 @@ function PointsScreen({ navigation }) {
               subStyle={styles.inputSub}
               style={styles.input}
               placeholder="Enter no. of points to redeem"
+              value={pointsToRedeem.toString()}
             />
-            <AppButton
-              disabled={
-                pointsToRedeem.toString().replace(/\s/g, "").length >= 2
-                  ? false
-                  : true
-              }
-              onPress={handleRedeemPoints}
-              title="Redeem"
-              style={styles.redeemButton}
-              subStyle={styles.redeemButtonSub}
-            />
+            <ApiProcessingContainer
+              style={styles.apiProcessingContainer}
+              processing={redeeming}
+            >
+              <AppButton
+                disabled={
+                  pointsToRedeem.toString().replace(/\s/g, "").length >= 2
+                    ? false
+                    : true
+                }
+                onPress={handleRedeemPoints}
+                title="Redeem"
+                style={styles.redeemButton}
+                subStyle={styles.redeemButtonSub}
+              />
+            </ApiProcessingContainer>
           </View>
         </View>
-
-        <AppButton
-          onPress={handleShowAd}
-          style={styles.collectPointsButton}
-          subStyle={styles.collectPointsButtonSub}
-          title="Collect Points"
-        />
+        <ApiProcessingContainer
+          style={styles.collectPointsApiProcessingContainer}
+          processing={collectingPoints}
+        >
+          <AppButton
+            onPress={handleShowAd}
+            style={styles.collectPointsButton}
+            subStyle={styles.collectPointsButtonSub}
+            title="Collect Points"
+          />
+        </ApiProcessingContainer>
         <View style={styles.collectPointsInfoContainer}>
           <MaterialCommunityIcon
             name="google-ads"
@@ -319,7 +298,36 @@ function PointsScreen({ navigation }) {
             you will be awarded 5 points.
           </AppText>
         </View>
+        <AppText onPress={() => setShowAdsInfo(true)}>
+          Terms and Condition.
+        </AppText>
       </ScrollView>
+      {showAdsInfo ? <ModalFallback /> : null}
+      <Modal
+        visible={showAdsInfo}
+        onRequestClose={() => setShowAdsInfo(false)}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={styles.adsInfoContainerBackground}>
+          <View style={styles.closeAdsInfoIconContainer}>
+            <AntDesign
+              onPress={() => setShowAdsInfo(false)}
+              name="downcircle"
+              color={defaultStyles.colors.tomato}
+              size={scale(28)}
+            />
+          </View>
+          <View style={styles.adsInfoContainer}>
+            <AppText style={styles.adsTermAndConditionInfo}>
+              Terms and Conditions to use Ads to avail SeeYot Vip membership.
+            </AppText>
+            <InfoText information="a. You account should be minimum 15 days old." />
+            <InfoText information="b. You can watch only 6 ads within 24 hours. (successful watch)" />
+            <InfoText information="c. You can watch only 1 ad within 10 minutes. (successful watch)" />
+          </View>
+        </View>
+      </Modal>
     </Screen>
   );
 }
@@ -331,12 +339,71 @@ const styles = ScaledSheet.create({
     paddingHorizontal: "5@s",
     width: "100%",
   },
+  adsInfoContainerBackground: {
+    flex: 1,
+    justifyContent: "flex-end",
+    overflow: "hidden",
+    width: "100%",
+  },
+  adsInfoContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderLeftColor: defaultStyles.colors.light,
+    borderLeftWidth: 1,
+    borderRightColor: defaultStyles.colors.light,
+    borderRightWidth: 1,
+    borderTopColor: defaultStyles.colors.light,
+    borderTopLeftRadius: "10@s",
+    borderTopRightRadius: "10@s",
+    borderTopWidth: 1,
+    bottom: 0,
+    height: "150@s",
+    overflow: "hidden",
+    paddingTop: "20@s",
+    width: "100%",
+  },
+  adsTermAndConditionInfo: {
+    color: defaultStyles.colors.secondary,
+    fontSize: "13@s",
+    marginVertical: "10@s",
+    paddingHorizontal: "10@s",
+    textAlign: "center",
+    textAlignVertical: "center",
+    width: "100%",
+  },
+  apiProcessingContainer: {
+    borderColor: defaultStyles.colors.tomato,
+    borderRadius: "5@s",
+    borderWidth: 1,
+    height: "35@s",
+    padding: 0,
+    width: "24%",
+  },
+  closeAdsInfoIconContainer: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: "25@s",
+    bottom: "-25@s",
+    height: "40@s",
+    justifyContent: "center",
+    padding: "5@s",
+    width: "40@s",
+    zIndex: 222,
+  },
+  collectPointsApiProcessingContainer: {
+    borderColor: defaultStyles.colors.tomato,
+    borderRadius: "20@s",
+    borderWidth: "1@s",
+    height: "35@s",
+    marginBottom: "10@s",
+    marginTop: "100@s",
+    width: "110@s",
+  },
   collectPointsButton: {
     backgroundColor: defaultStyles.colors.tomato,
     borderRadius: "20@s",
     height: "35@s",
-    marginBottom: "10@s",
-    marginTop: "100@s",
     width: "110@s",
   },
   collectPointsButtonSub: {
@@ -404,7 +471,7 @@ const styles = ScaledSheet.create({
   redeemButton: {
     backgroundColor: defaultStyles.colors.tomato,
     height: "35@s",
-    width: "24%",
+    width: "100%",
   },
   redeemButtonSub: {
     color: defaultStyles.colors.white,

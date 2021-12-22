@@ -18,12 +18,14 @@ import useMountedRef from "../hooks/useMountedRef";
 
 import defaultStyles from "../config/styles";
 import defaultProps from "../utilities/defaultProps";
+import apiActivity from "../utilities/apiActivity";
 
 function RepliesScreen({ navigation }) {
   const [replies, setReplies] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
+  const { tackleProblem } = apiActivity;
 
   const [message, setMessage] = useState({
     isVisible: false,
@@ -73,19 +75,7 @@ function RepliesScreen({ navigation }) {
       return;
     }
     setReplies(originalList);
-    if (problem) {
-      if (data) {
-        return setInfoAlert({
-          infoAlertMessage: data.message,
-          showInfoAlert: true,
-        });
-      }
-
-      return setInfoAlert({
-        infoAlertMessage: "Something went wrong! Please try again.",
-        showInfoAlert: true,
-      });
-    }
+    tackleProblem(problem, data, setInfoAlert);
   };
 
   const allReplies = async () => {
@@ -93,10 +83,7 @@ function RepliesScreen({ navigation }) {
     if (ok) {
       return setReplies(data.allReplies);
     }
-    setInfoAlert({
-      infoAlertMessage: "Something went wrong! Please try again.",
-      showInfoAlert: true,
-    });
+    tackleProblem(problem, data, setInfoAlert);
   };
 
   useEffect(() => {
@@ -132,9 +119,11 @@ function RepliesScreen({ navigation }) {
     }
   }, [isFocused]);
 
-  const handleRefresh = () => {
-    allReplies();
-  };
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await allReplies();
+    setRefreshing(false);
+  }, []);
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(

@@ -103,6 +103,7 @@ const styles = ScaledSheet.create({
     borderLeftColor: defaultStyles.colors.yellow_Variant,
     borderLeftWidth: 2,
     color: defaultStyles.colors.blue,
+    fontSize: "14@s",
     marginBottom: "10@s",
     maxWidth: "80%",
     paddingHorizontal: "10@s",

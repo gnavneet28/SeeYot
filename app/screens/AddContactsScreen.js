@@ -13,19 +13,20 @@ import Screen from "../components/Screen";
 import useMountedRef from "../hooks/useMountedRef";
 
 import Constant from "../navigation/NavigationConstants";
-import DataConstants from "../utilities/DataConstants";
 
 import usersApi from "../api/users";
 import useAuth from "../auth/useAuth";
 
-import asyncStorage from "../utilities/cache";
+import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
 import ApiContext from "../utilities/apiContext";
+import apiActivity from "../utilities/apiActivity";
 
 function AddContactsScreen({ navigation }) {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
+  const { tackleProblem } = apiActivity;
 
   const permission = async () => {
     const { granted } = await Contacts.getPermissionsAsync();
@@ -100,27 +101,30 @@ function AddContactsScreen({ navigation }) {
 
     const { ok, data, problem } = await usersApi.syncContacts(newListToSync);
     if (ok) {
-      await asyncStorage.store(DataConstants.PHONE_CONTACTS, data);
-      return setUsers(data.sort((a, b) => a.isRegistered < b.isRegistered));
+      const res = await usersApi.getCurrentUser();
+      if (res.ok && res.data) {
+        if (res.data.__v > data.user.__v) {
+          await storeDetails(res.data);
+          setUser(res.data);
+          return setUsers(
+            res.data.phoneContacts.sort(
+              (a, b) => a.isRegistered < b.isRegistered
+            )
+          );
+        }
+      }
+      await storeDetails(data.user);
+      setUser(data.user);
+      return setUsers(
+        data.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
+      );
     }
-
-    if (user.phoneContacts) {
+    if (user.phoneContacts.length) {
       setUsers(
         user.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
       );
     }
-
-    if (data) {
-      return setInfoAlert({
-        infoAlertMessage: "Something went wrong! Please try again.",
-        showInfoAlert: true,
-      });
-    }
-
-    setInfoAlert({
-      infoAlertMessage: "Something went wrong! Please try again.",
-      showInfoAlert: true,
-    });
+    tackleProblem(problem, data, setInfoAlert);
   };
 
   const setUpPage = () => {
@@ -147,8 +151,10 @@ function AddContactsScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   // REFRESH ACTION
-  const handleRefresh = useCallback(() => {
-    requestPermission();
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await requestPermission();
+    setRefreshing(false);
   }, []);
 
   // HEADER ACTIONS

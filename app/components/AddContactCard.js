@@ -8,16 +8,15 @@ import AppImage from "./AppImage";
 import AppText from "./AppText";
 import InfoAlert from "../components/InfoAlert";
 
-import DataConstants from "../utilities/DataConstants";
-
 import useAuth from "../auth/useAuth";
 import usersApi from "../api/users";
 
-import asyncStorage from "../utilities/cache";
+import apiActivity from "../utilities/apiActivity";
 import debounce from "../utilities/debounce";
+import storeDetails from "../utilities/storeDetails";
+import ApiContext from "../utilities/apiContext";
 
 import defaultStyles from "../config/styles";
-import ApiContext from "../utilities/apiContext";
 
 function AddContactCard({ contact, onInvitePress, style }) {
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
@@ -27,6 +26,7 @@ function AddContactCard({ contact, onInvitePress, style }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+  const { tackleProblem } = apiActivity;
 
   const contacts = user.contacts;
 
@@ -47,36 +47,29 @@ function AddContactCard({ contact, onInvitePress, style }) {
         setApiProcessing(true);
         setProcessing(true);
 
-        let modifiedUser = { ...user };
-
         const { ok, data, problem } = await usersApi.addContact(
           contact.phoneNumber,
           contact.name
         );
 
         if (ok) {
-          modifiedUser.contacts = data.contacts;
-          setUser(modifiedUser);
-          await asyncStorage.store(DataConstants.CONTACTS, data.contacts);
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              setProcessing(false);
+              return setApiProcessing(false);
+            }
+          }
+          await storeDetails(data.user);
+          setUser(data.user);
           setApiProcessing(false);
           return setProcessing(false);
         }
         setProcessing(false);
         setApiProcessing(false);
-
-        if (problem) {
-          if (data) {
-            return setInfoAlert({
-              infoAlertMessage: data.message,
-              showInfoAlert: true,
-            });
-          }
-
-          setInfoAlert({
-            infoAlertMessage: "Something went wrong! Please try again.",
-            showInfoAlert: true,
-          });
-        }
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true

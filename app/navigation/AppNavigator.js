@@ -6,6 +6,7 @@ import IndexNavigator from "./IndexNavigator";
 import ProfileNavigator from "./ProfileNavigator";
 import VipNavigator from "./VipNavigator";
 import Constant from "./NavigationConstants";
+import storeDetails from "../utilities/storeDetails";
 
 import socket from "../api/socketClient";
 
@@ -30,9 +31,10 @@ function AppNavigator(props) {
 
   useEffect(() => {
     const subscription1 = socket.on(`newNotification${user._id}`, (data) => {
-      let modifiedUser = { ...user };
-      modifiedUser.notifications = data.notifications;
-      return setUser(modifiedUser);
+      if (data.user) {
+        return setUser(data.user);
+      }
+      return;
     });
 
     const subscription2 = socket.on(`thoughtMatched${user._id}`, (data) => {

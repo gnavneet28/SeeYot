@@ -9,8 +9,8 @@ import { View, Modal } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
 
-import ApiActivity from "../components/ApiActivity";
 import Alert from "../components/Alert";
+import ApiOption from "../components/ApiOption";
 import AppHeader from "../components/AppHeader";
 import Option from "../components/Option";
 import Screen from "../components/Screen";
@@ -20,7 +20,7 @@ import ThoughtsList from "../components/ThoughtsList";
 import ThoughtTimer from "../components/ThoughtTimer";
 
 import Constant from "../navigation/NavigationConstants";
-import DataConstants from "../utilities/DataConstants";
+import storeDetails from "../utilities/storeDetails";
 
 import defaultStyles from "../config/styles";
 
@@ -29,14 +29,14 @@ import useAuth from "../auth/useAuth";
 import thoughtsApi from "../api/thoughts";
 import usersApi from "../api/users";
 
-import apiFlow from "../utilities/ApiActivityStatus";
-import asyncStorage from "../utilities/cache";
 import debounce from "../utilities/debounce";
 import ActiveForContext from "../utilities/activeForContext";
 import InfoAlert from "../components/InfoAlert";
 import ActiveMessagesContext from "../utilities/activeMessagesContext";
+import apiActivity from "../utilities/apiActivity";
 
 import useMountedRef from "../hooks/useMountedRef";
+import useAppState from "../hooks/useAppState";
 
 const filterThoughts = (thoughts = [], recipient, creator) => {
   return thoughts
@@ -63,19 +63,17 @@ const filterActiveMessages = (messages = [], recipient, creator) => {
 function SendThoughtsScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
   const { recipient, from } = route.params;
-  const { apiActivityStatus, initialApiActivity } = apiFlow;
   const { activeFor, setActiveFor } = useContext(ActiveForContext);
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
+  const { tackleProblem } = apiActivity;
+  const appStateVisible = useAppState();
 
   // STATES
   const [isVisible, setIsVisible] = useState(false);
-  const [apiActivity, setApiActivity] = useState({
-    message: "",
-    processing: true,
-    visible: false,
-    success: false,
-  });
+  const [unfriendProcessing, setUnfriendProcessing] = useState(false);
+  const [favoriteProcessing, setFavoriteProcessing] = useState(false);
+  const [blockProcessing, setBlockProcessing] = useState(false);
   const [messageActivity, setMessageActivity] = useState({
     message: "",
     processing: true,
@@ -107,17 +105,7 @@ function SendThoughtsScreen({ navigation, route }) {
     }
 
     setShowAlert(false);
-    if (data) {
-      return setInfoAlert({
-        infoAlertMessage: data.message,
-        showInfoAlert: true,
-      });
-    }
-
-    return setInfoAlert({
-      infoAlertMessage: problem,
-      showInfoAlert: true,
-    });
+    tackleProblem(problem, data, setInfoAlert);
   };
 
   // SETTING ACTIVECHATMESSAGES, ACTIVE CHAT TO NULL AND REMOVING THE ACTIVECHAT FOR USER
@@ -125,10 +113,12 @@ function SendThoughtsScreen({ navigation, route }) {
     setActiveMessages([]);
     setActiveChat(false);
 
-    if (!isFocused) {
+    if (!isFocused || appStateVisible !== "active") {
       handleSetChatInActive();
+      setActiveMessages([]);
+      setActiveChat(false);
     }
-  }, [isFocused]);
+  }, [isFocused, appStateVisible]);
 
   useEffect(() => {
     if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
@@ -148,17 +138,6 @@ function SendThoughtsScreen({ navigation, route }) {
   useEffect(() => {
     if (!isFocused && mounted && showAlert === true) {
       setShowAlert(false);
-    }
-  }, [isFocused, mounted]);
-
-  useEffect(() => {
-    if (!isFocused && mounted && apiActivity.visible === true) {
-      setApiActivity({
-        message: "",
-        processing: true,
-        visible: false,
-        success: false,
-      });
     }
   }, [isFocused, mounted]);
 
@@ -189,12 +168,6 @@ function SendThoughtsScreen({ navigation, route }) {
   const handleOptionsPress = useCallback(() => {
     setIsVisible(true);
   }, []);
-
-  // API ACTIVITY ACTIONS
-  const handleApiActivityClose = useCallback(
-    () => setApiActivity({ ...apiActivity, visible: false }),
-    []
-  );
 
   // SENDING ACTIVITY ACTIONS
   const handleSendingActivityClose = useCallback(
@@ -271,9 +244,8 @@ function SendThoughtsScreen({ navigation, route }) {
         );
         if (ok) {
           if (!data.matched) {
-            let modifiedUser = { ...user };
-            modifiedUser.thoughts = data.thoughts;
-            setUser(modifiedUser);
+            await storeDetails(data.user);
+            setUser(data.user);
           }
           return setMessageActivity({
             message: data.matched
@@ -320,28 +292,32 @@ function SendThoughtsScreen({ navigation, route }) {
       createdBy: user._id,
       createdFor: recipient._id,
     };
-    const response = await usersApi.sendNewActiveMessage(newMessage);
-    if (response.ok) {
+    const { ok, data, problem } = await usersApi.sendNewActiveMessage(
+      newMessage
+    );
+    if (ok) {
       return setActiveMessages([...activeMessages, newMessage]);
     }
 
-    if (response.problem)
-      return setInfoAlert({
-        infoAlertMessage: "Something went wrong! Please try again.",
-        showInfoAlert: true,
-      });
+    tackleProblem(problem, data, setInfoAlert);
   };
 
   // ON FOCUS PAGE ACTION
   const updateSearchHistory = async () => {
-    let modifiedUser = { ...user };
     const { ok, data, problem } = await usersApi.addToSearchHistory(
       recipient._id
     );
     if (ok) {
-      modifiedUser.searchHistory = data;
-      setUser(modifiedUser);
-      return await asyncStorage.store(DataConstants.SEARCH_HISTORY, data);
+      const res = await usersApi.getCurrentUser();
+      if (res.ok && res.data) {
+        if (res.data.__v > data.user.__v) {
+          await storeDetails(res.data);
+          return setUser(res.data);
+        }
+      }
+
+      setUser(data.user);
+      return await storeDetails(data.user);
     } else return;
   };
 
@@ -359,25 +335,28 @@ function SendThoughtsScreen({ navigation, route }) {
   const handleUnfriendPress = useCallback(
     debounce(
       async () => {
-        initialApiActivity(
-          setApiActivity,
-          `Removing ${recipient.name} from your friendlist...`
+        setUnfriendProcessing(true);
+
+        const { ok, data, problem } = await usersApi.removeContact(
+          recipient._id
         );
 
-        let modifiedUser = { ...user };
-
-        const response = await usersApi.removeContact(recipient._id);
-
-        if (response.ok) {
-          modifiedUser.contacts = response.data.contacts;
-          await asyncStorage.store(
-            DataConstants.CONTACTS,
-            response.data.contacts
-          );
-          setUser(modifiedUser);
+        if (ok) {
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              return setUnfriendProcessing(false);
+            }
+          }
+          await storeDetails(data.user);
+          setUser(data.user);
+          return setUnfriendProcessing(false);
         }
 
-        return apiActivityStatus(response, setApiActivity);
+        setUnfriendProcessing(false);
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -388,21 +367,28 @@ function SendThoughtsScreen({ navigation, route }) {
   const handleBlockPress = useCallback(
     debounce(
       async () => {
-        initialApiActivity(setApiActivity, `Blocking ${recipient.name} ...`);
+        setBlockProcessing(true);
 
-        let modifiedUser = { ...user };
-        const response = await usersApi.blockContact(recipient._id);
+        const { ok, data, problem } = await usersApi.blockContact(
+          recipient._id
+        );
 
-        if (response.ok) {
-          modifiedUser.blocked = response.data.blocked;
-          await asyncStorage.store(
-            DataConstants.BLOCKED,
-            response.data.blocked
-          );
-          setUser(modifiedUser);
+        if (ok) {
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              return setBlockProcessing(false);
+            }
+          }
+
+          await storeDetails(data.user);
+          setUser(data.user);
+          return setBlockProcessing(false);
         }
-
-        return apiActivityStatus(response, setApiActivity);
+        setBlockProcessing(false);
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -413,21 +399,29 @@ function SendThoughtsScreen({ navigation, route }) {
   const handleUnblockPress = useCallback(
     debounce(
       async () => {
-        initialApiActivity(setApiActivity, `Unblocking ${recipient.name} ...`);
+        setBlockProcessing(true);
 
-        let modifiedUser = { ...user };
-        const response = await usersApi.unBlockContact(recipient._id);
+        const { ok, data, problem } = await usersApi.unBlockContact(
+          recipient._id
+        );
 
-        if (response.ok) {
-          modifiedUser.blocked = response.data.blocked;
-          await asyncStorage.store(
-            DataConstants.BLOCKED,
-            response.data.blocked
-          );
-          setUser(modifiedUser);
+        if (ok) {
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              return setBlockProcessing(false);
+            }
+          }
+
+          await storeDetails(data.user);
+          setUser(data.user);
+          return setBlockProcessing(false);
         }
 
-        return apiActivityStatus(response, setApiActivity);
+        setBlockProcessing(false);
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -438,25 +432,27 @@ function SendThoughtsScreen({ navigation, route }) {
   const handleAddFavoritePress = useCallback(
     debounce(
       async () => {
-        initialApiActivity(
-          setApiActivity,
-          "Adding" + " " + recipient.name + "..."
-        );
+        setFavoriteProcessing(true);
 
-        let modifiedUser = { ...user };
+        const { data, ok, problem } = await usersApi.addFavorite(recipient._id);
 
-        const response = await usersApi.addFavorite(recipient._id);
+        if (ok) {
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              return setFavoriteProcessing(false);
+            }
+          }
 
-        if (response.ok) {
-          modifiedUser.favorites = response.data.favorites;
-          setUser(modifiedUser);
-          await asyncStorage.store(
-            DataConstants.FAVORITES,
-            response.data.favorites
-          );
+          await storeDetails(data.user);
+          setUser(data.user);
+          return setFavoriteProcessing(false);
         }
 
-        return apiActivityStatus(response, setApiActivity);
+        setFavoriteProcessing(false);
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -467,25 +463,29 @@ function SendThoughtsScreen({ navigation, route }) {
   const handleRemoveFavoritePress = useCallback(
     debounce(
       async () => {
-        initialApiActivity(
-          setApiActivity,
-          "Removing" + " " + recipient.name + "..."
+        setFavoriteProcessing(true);
+
+        const { ok, data, problem } = await usersApi.removeFavorite(
+          recipient._id
         );
 
-        let modifiedUser = { ...user };
+        if (ok) {
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              return setFavoriteProcessing(false);
+            }
+          }
 
-        const response = await usersApi.removeFavorite(recipient._id);
-
-        if (response.ok) {
-          modifiedUser.favorites = response.data.favorites;
-          setUser(modifiedUser);
-          await asyncStorage.store(
-            DataConstants.FAVORITES,
-            response.data.favorites
-          );
+          await storeDetails(data.user);
+          setUser(data.user);
+          return setFavoriteProcessing(false);
         }
 
-        return apiActivityStatus(response, setApiActivity);
+        setFavoriteProcessing(false);
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -538,14 +538,6 @@ function SendThoughtsScreen({ navigation, route }) {
           success={messageActivity.success}
           visible={messageActivity.visible}
         />
-        <ApiActivity
-          message={apiActivity.message}
-          onDoneButtonPress={handleApiActivityClose}
-          onRequestClose={handleApiActivityClose}
-          processing={apiActivity.processing}
-          success={apiActivity.success}
-          visible={apiActivity.visible}
-        />
         <Alert
           visible={showAlert}
           title="Not Active"
@@ -595,21 +587,26 @@ function SendThoughtsScreen({ navigation, route }) {
             />
 
             {inContacts ? (
-              <Option title="Unfriend" onPress={handleUnfriendPress} />
+              <ApiOption
+                title="Unfriend"
+                onPress={handleUnfriendPress}
+                processing={unfriendProcessing}
+              />
             ) : null}
 
-            <Option
+            <ApiOption
               title={inFavorites ? "Remove from Favorites" : "Add to Favorites"}
               onPress={
                 !inFavorites
                   ? handleAddFavoritePress
                   : handleRemoveFavoritePress
               }
+              processing={favoriteProcessing}
             />
-
-            <Option
+            <ApiOption
               title={isBlocked ? "Unblock" : "Block"}
               onPress={!isBlocked ? handleBlockPress : handleUnblockPress}
+              processing={blockProcessing}
             />
           </View>
         </View>

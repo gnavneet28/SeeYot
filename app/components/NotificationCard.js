@@ -5,31 +5,26 @@ import React, {
   useEffect,
   useContext,
 } from "react";
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  TouchableHighlight,
-} from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { View, Text, TouchableHighlight } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
 import InfoAlert from "../components/InfoAlert";
+import DeleteAction from "./DeleteAction";
 
 import useAuth from "../auth/useAuth";
 import myApi from "../api/my";
-
-import asyncStorage from "../utilities/cache";
-import DataConstants from "../utilities/DataConstants";
+import usersApi from "../api/users";
 
 import debounce from "../utilities/debounce";
+import storeDetails from "../utilities/storeDetails";
+import apiActivity from "../utilities/apiActivity";
+import ApiContext from "../utilities/apiContext";
 
 import defaultStyles from "../config/styles";
-import ApiContext from "../utilities/apiContext";
 
 let defaultNotification = {
   type: "",
@@ -48,6 +43,8 @@ function NotificationCard({
 
   const { user, setUser } = useAuth();
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
+  const { tackleProblem } = apiActivity;
+
   const [processing, setProcessing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
@@ -77,38 +74,30 @@ function NotificationCard({
       async () => {
         setApiProcessing(true);
         setProcessing(true);
-        let modifiedUser = { ...user };
 
         const { ok, data, problem } = await myApi.deleteNotification(
           notification._id
         );
 
         if (ok) {
-          modifiedUser.notifications = data.notifications;
-          setUser(modifiedUser);
-          await asyncStorage.store(
-            DataConstants.NOTIFICATIONS,
-            data.notifications
-          );
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              setProcessing(false);
+              return setApiProcessing(false);
+            }
+          }
+          setProcessing(false);
+          await storeDetails(data.user);
+          setUser(data.user);
           return setApiProcessing(false);
         }
 
         setProcessing(false);
         setApiProcessing(false);
-
-        if (problem) {
-          if (data) {
-            return setInfoAlert({
-              infoAlertMessage: data.message,
-              showInfoAlert: true,
-            });
-          }
-
-          return setInfoAlert({
-            infoAlertMessage: "Something went wrong! Please try again.",
-            showInfoAlert: true,
-          });
-        }
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -139,6 +128,20 @@ function NotificationCard({
     return null;
   };
 
+  const color = () => {
+    if (notification.type == "Vip") return defaultStyles.colors.dark;
+
+    if (notification.type == "Replied") {
+      return defaultStyles.colors.dark;
+    }
+
+    if (notification.type == "ActiveChat") {
+      return defaultStyles.colors.dark;
+    }
+
+    return defaultStyles.colors.dark_Variant;
+  };
+
   return (
     <View style={styles.container}>
       <AppImage
@@ -163,7 +166,7 @@ function NotificationCard({
           <Text
             numberOfLines={2}
             onPress={doWhenTappedWithType()}
-            style={styles.notificationMessage}
+            style={[styles.notificationMessage, { color: color() }]}
           >
             {notification.type != "Vip"
               ? notification.message
@@ -174,21 +177,11 @@ function NotificationCard({
           </Text>
         </>
       </TouchableHighlight>
-      <View style={styles.deleteContainer}>
-        {!processing ? (
-          <MaterialCommunityIcons
-            name="delete-circle-outline"
-            size={scale(17)}
-            onPress={apiProcessing ? () => null : handleDeletePress}
-            color={defaultStyles.colors.danger}
-          />
-        ) : (
-          <ActivityIndicator
-            size={scale(16)}
-            color={defaultStyles.colors.tomato}
-          />
-        )}
-      </View>
+      <DeleteAction
+        apiAction={true}
+        processing={processing}
+        onPress={apiProcessing ? () => null : handleDeletePress}
+      />
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
@@ -212,19 +205,8 @@ const styles = ScaledSheet.create({
     fontSize: "10@s",
     opacity: 0.8,
   },
-  deleteContainer: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
-    borderColor: defaultStyles.colors.light,
-    borderRadius: "10@s",
-    borderWidth: 1,
-    height: "30@s",
-    justifyContent: "center",
-    marginHorizontal: "15@s",
-    width: "30@s",
-  },
   emptyNotificationInfo: {
-    fontSize: "18@s",
+    fontSize: "15@s",
     textAlign: "center",
   },
   emptyNotificationContainer: {
@@ -236,12 +218,13 @@ const styles = ScaledSheet.create({
   },
   image: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "18@s",
-    elevation: 2,
-    height: "36@s",
+    borderRadius: "17.5@s",
+    borderWidth: 1,
+    borderColor: defaultStyles.colors.light,
+    height: "35@s",
     marginLeft: "10@s",
     marginRight: "2@s",
-    width: "36@s",
+    width: "35@s",
   },
   imageSub: {
     borderRadius: "18@s",
@@ -259,7 +242,7 @@ const styles = ScaledSheet.create({
     ...defaultStyles.text,
     fontFamily: "Comic-Bold",
     fontSize: "14@s",
-    opacity: 0.8,
+    opacity: 0.9,
   },
   text: {
     ...defaultStyles.text,

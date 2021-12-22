@@ -3,42 +3,43 @@ import { View } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
 
-import ApiActivity from "../components/ApiActivity";
+import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppActivityIndicator from "../components/ActivityIndicator";
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
 import InfoAlert from "../components/InfoAlert";
 import NotificationListPro from "../components/NotificationListPro";
+import ReplyModal from "../components/ReplyModal";
 import Screen from "../components/Screen";
 import SeeThought from "../components/SeeThought";
 import VipAdCard from "../components/VipAdCard";
 
-import ReplyModal from "../components/ReplyModal";
-
 import Constant from "../navigation/NavigationConstants";
-import DataConstants from "../utilities/DataConstants";
 
-import asyncStorage from "../utilities/cache";
-import apiFlow from "../utilities/ApiActivityStatus";
+import storeDetails from "../utilities/storeDetails";
+
 import debounce from "../utilities/debounce";
 import defaultProps from "../utilities/defaultProps";
+import ApiContext from "../utilities/apiContext";
+import apiActivity from "../utilities/apiActivity";
 
 import defaultStyles from "../config/styles";
 
 import useMountedRef from "../hooks/useMountedRef";
 
 import myApi from "../api/my";
+import usersApi from "../api/users";
 
 import useAuth from "../auth/useAuth";
-import ApiContext from "../utilities/apiContext";
 
 function NotificationScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
-  const { apiActivityStatus, initialApiActivity } = apiFlow;
+  const { tackleProblem } = apiActivity;
 
   // STATES
+  const [clearNotification, setClearNotification] = useState(false);
   const [visible, setVisible] = useState(false);
   const [thought, setThought] = useState("");
   const [isReady, setIsReady] = useState(false);
@@ -53,23 +54,6 @@ function NotificationScreen({ navigation }) {
     isVisible: false,
     message: defaultProps.defaultMessage,
   });
-  const [apiActivity, setApiActivity] = useState({
-    message: "",
-    processing: true,
-    visible: false,
-    success: false,
-  });
-
-  useEffect(() => {
-    if (!isFocused && mounted && apiActivity.visible === true) {
-      setApiActivity({
-        message: "",
-        processing: true,
-        visible: false,
-        success: false,
-      });
-    }
-  }, [isFocused, mounted]);
 
   useEffect(() => {
     if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
@@ -105,12 +89,6 @@ function NotificationScreen({ navigation }) {
     setMessage({ message: notification.data, isVisible: true });
   }, []);
 
-  // API ACTIVITY ACTIONS
-  const handleApiActivityClose = useCallback(
-    () => setApiActivity({ ...apiActivity, visible: false }),
-    []
-  );
-
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
     () => setInfoAlert({ ...infoAlert, showInfoAlert: false }),
@@ -120,17 +98,21 @@ function NotificationScreen({ navigation }) {
   const updateNotifications = useCallback(async () => {
     const { ok, data, problem } = await myApi.setNotificationSeen();
     if (ok) {
-      let modifiedUser = { ...user };
-      modifiedUser.notifications = data;
-      setUser(modifiedUser);
-      await asyncStorage.store(DataConstants.NOTIFICATIONS, data);
+      const res = await usersApi.getCurrentUser();
+      if (res.ok && res.data) {
+        if (res.data.__v > data.user.__v) {
+          await storeDetails(res.data);
+          setUser(res.data);
+          return setIsReady(true);
+        }
+      }
+
+      await storeDetails(data.user);
+      setUser(data.user);
       return setIsReady(true);
     }
     setIsReady(true);
-    return setInfoAlert({
-      infoAlertMessage: "Something went wrong! Please try again.",
-      showInfoAlert: true,
-    });
+    tackleProblem(problem, data, setInfoAlert);
   }, [user]);
 
   useEffect(() => {
@@ -153,19 +135,25 @@ function NotificationScreen({ navigation }) {
 
   // NOTIFICATION ACTION
   const handleClearAllPress = useCallback(async () => {
-    initialApiActivity(setApiActivity, `Deleting all notifications...`);
+    setClearNotification(true);
 
-    let modifiedUser = { ...user };
-    const response = await myApi.deleteAllNotifications();
-    if (response.ok) {
-      await asyncStorage.store(
-        DataConstants.NOTIFICATIONS,
-        response.data.notifications
-      );
-      modifiedUser.notifications = response.data.notifications;
-      setUser(modifiedUser);
+    const { ok, data, problem } = await myApi.deleteAllNotifications();
+    if (ok) {
+      const res = await usersApi.getCurrentUser();
+      if (res.ok && res.data) {
+        if (res.data.__v > data.user.__v) {
+          await storeDetails(res.data);
+          setUser(res.data);
+          return setClearNotification(false);
+        }
+      }
+
+      await storeDetails(data.user);
+      setUser(data.user);
+      return setClearNotification(false);
     }
-    apiActivityStatus(response, setApiActivity);
+    setClearNotification(false);
+    tackleProblem(problem, data, setInfoAlert);
   }, []);
 
   const handleSendMessage = (notification) => {
@@ -181,17 +169,24 @@ function NotificationScreen({ navigation }) {
   }, []);
 
   const handleRefresh = useCallback(async () => {
-    setRefreshing(false);
-    let modifiedUser = { ...user };
+    setRefreshing(true);
 
     const { ok, data, problem } = await myApi.setNotificationSeen();
     if (ok) {
-      if (modifiedUser.notifications.length == data.length) return;
-      modifiedUser.notifications = data;
-      setUser(modifiedUser);
-      return await asyncStorage.store(DataConstants.NOTIFICATIONS, data);
+      setRefreshing(false);
+      const res = await usersApi.getCurrentUser();
+      if (res.ok && res.data) {
+        if (res.data.__v > data.user.__v) {
+          await storeDetails(res.data);
+          setUser(res.data);
+          return setIsReady(true);
+        }
+      }
+      await storeDetails(data.user);
+      return setUser(data.user);
     }
-    if (problem) return;
+    setRefreshing(false);
+    tackleProblem(problem, data, setInfoAlert);
   }, [user]);
 
   // VIP CARD ACTION
@@ -226,24 +221,20 @@ function NotificationScreen({ navigation }) {
           description={infoAlert.infoAlertMessage}
           visible={infoAlert.showInfoAlert}
         />
-        <ApiActivity
-          message={apiActivity.message}
-          onDoneButtonPress={handleApiActivityClose}
-          onRequestClose={handleApiActivityClose}
-          processing={apiActivity.processing}
-          success={apiActivity.success}
-          visible={apiActivity.visible}
-        />
-
         {!isReady ? (
           <AppActivityIndicator />
         ) : (
           <>
             <VipAdCard onPress={handleVipCardPress} style={styles.adCard} />
             {data && data.length >= 1 ? (
-              <AppText style={styles.clearAll} onPress={handleClearAllPress}>
-                Clear all notifications
-              </AppText>
+              <ApiProcessingContainer
+                style={styles.apiProcessingContainer}
+                processing={clearNotification}
+              >
+                <AppText style={styles.clearAll} onPress={handleClearAllPress}>
+                  Clear all notifications
+                </AppText>
+              </ApiProcessingContainer>
             ) : null}
             <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
               <NotificationListPro
@@ -266,6 +257,12 @@ function NotificationScreen({ navigation }) {
 const styles = ScaledSheet.create({
   adCard: {
     marginVertical: "5@s",
+  },
+  apiProcessingContainer: {
+    alignSelf: "flex-end",
+    height: "30@s",
+    padding: 0,
+    width: "100%",
   },
   container: {
     alignItems: "center",

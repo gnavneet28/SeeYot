@@ -1,24 +1,86 @@
-import React from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { View } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 
+import ApiProcessingContainer from "./ApiProcessingContainer";
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
 import AppText from "./AppText";
+import InfoAlert from "./InfoAlert";
 
 import useAuth from "../auth/useAuth";
 
 import defaultStyles from "../config/styles";
+
 import defaultProps from "../utilities/defaultProps";
+import ApiContext from "../utilities/apiContext";
+import debounce from "../utilities/debounce";
+import storeDetails from "../utilities/storeDetails";
+import apiActivity from "../utilities/apiActivity";
+
+import usersApi from "../api/users";
 
 function AddContactCard({
   style,
-  onUnBlockPress = () => null,
   blockedUser = defaultProps.defaultBlockedUser,
 }) {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
+  const { apiProcessing, setApiProcessing } = useContext(ApiContext);
+  const [processing, setProcessing] = useState(false);
+  const [infoAlert, setInfoAlert] = useState({
+    infoAlertMessage: "",
+    showInfoAlert: false,
+  });
+  const { tackleProblem } = apiActivity;
 
   const blockedUsers = user.blocked;
+
+  useEffect(() => {
+    setProcessing(false);
+
+    return () => setProcessing(false);
+  }, [blockedUser._id]);
+
+  // INFO ALERT ACTIONS
+  const handleCloseInfoAlert = useCallback(async () => {
+    setInfoAlert({ showInfoAlert: false });
+  }, []);
+
+  const handleUnBlockPress = useCallback(
+    debounce(
+      async () => {
+        setApiProcessing(true);
+        setProcessing(true);
+
+        const { ok, data, problem } = await usersApi.unBlockContact(
+          blockedUser._id
+        );
+
+        if (ok) {
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              setProcessing(false);
+              return setApiProcessing(false);
+            }
+          }
+          setProcessing(false);
+          await storeDetails(data.user);
+          setUser(data.user);
+          return setApiProcessing(false);
+        }
+
+        setProcessing(false);
+        setApiProcessing(false);
+        tackleProblem(problem, data, setInfoAlert);
+      },
+      1000,
+      true
+    ),
+    [blockedUser._id, user]
+  );
 
   const isBlocked = blockedUsers.filter((b) => b._id == blockedUser._id)[0];
 
@@ -38,40 +100,54 @@ function AddContactCard({
           {blockedUser.phoneNumber}
         </AppText>
       </View>
-      <AppButton
-        disabled={isBlocked ? false : true}
-        onPress={onUnBlockPress}
-        style={styles.blockedButton}
-        subStyle={styles.blockButtonSub}
-        title={isBlocked ? "Unblock" : "Unblocked"}
+      <ApiProcessingContainer
+        style={styles.apiProcessingContainer}
+        processing={processing}
+      >
+        <AppButton
+          disabled={isBlocked ? false : true}
+          onPress={apiProcessing ? () => null : handleUnBlockPress}
+          style={styles.blockedButton}
+          subStyle={styles.blockButtonSub}
+          title={isBlocked ? "Unblock" : "Unblocked"}
+        />
+      </ApiProcessingContainer>
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
       />
     </View>
   );
 }
 const styles = ScaledSheet.create({
-  blockedButton: {
-    backgroundColor: defaultStyles.colors.white,
-    borderWidth: 2,
-    borderColor: defaultStyles.colors.lightGrey,
+  apiProcessingContainer: {
+    borderColor: defaultStyles.colors.light,
     borderRadius: "10@s",
-    height: "30@s",
-    marginRight: "5@s",
-    width: "70@s",
+    borderWidth: 1,
+    height: "32@s",
+    width: "65@s",
+  },
+  blockedButton: {
+    backgroundColor: defaultStyles.colors.light,
+    borderRadius: "10@s",
+    height: "32@s",
+    width: "65@s",
   },
   blockButtonSub: {
-    color: defaultStyles.colors.primary,
-    fontSize: "14.5@s",
-    letterSpacing: "0.5@s",
+    color: defaultStyles.colors.dark,
+    fontSize: "14@s",
+    letterSpacing: 0.2,
   },
   container: {
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
+    borderColor: defaultStyles.colors.light,
     borderRadius: "10@s",
-    elevation: 1,
     flexDirection: "row",
     height: "50@s",
-    marginVertical: "5@s",
+    marginVertical: "3@s",
     padding: "2@s",
     paddingHorizontal: "5@s",
     width: "95%",

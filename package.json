@@ -40,7 +40,6 @@
     "react-dom": "16.13.1",
     "react-native": "~0.63.4",
     "react-native-confirmation-code-field": "6",
-    "react-native-easy-toast": "^2.0.0",
     "react-native-gesture-handler": "~1.10.2",
     "react-native-image-crop-picker": "^0.36.2",
     "react-native-reanimated": "~2.2.0",

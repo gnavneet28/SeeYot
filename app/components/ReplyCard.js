@@ -1,13 +1,13 @@
 import React from "react";
 import { View } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import LottieView from "lottie-react-native";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
+import DeleteAction from "./DeleteAction";
 
 import defaultStyles from "../config/styles";
 
@@ -91,14 +91,7 @@ function ReplyCard({
             {dayjs(message.createdAt).fromNow()}
           </AppText>
         </View>
-        <View style={styles.deleteIconContainer}>
-          <MaterialCommunityIcons
-            name="delete-circle-outline"
-            size={scale(18)}
-            onPress={onDeletePress}
-            color={defaultStyles.colors.danger}
-          />
-        </View>
+        <DeleteAction apiAction={false} onPress={onDeletePress} />
       </View>
     </View>
   );
@@ -113,17 +106,6 @@ const styles = ScaledSheet.create({
     height: "95@s",
     padding: "5@s",
     width: "95%",
-  },
-  deleteIconContainer: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
-    borderColor: defaultStyles.colors.light,
-    borderRadius: "10@s",
-    borderWidth: 1,
-    height: "30@s",
-    justifyContent: "center",
-    marginHorizontal: "15@s",
-    width: "30@s",
   },
   emptyDataContainer: {
     alignItems: "center",
@@ -144,7 +126,7 @@ const styles = ScaledSheet.create({
   message: {
     alignSelf: "flex-start",
     borderRadius: "10@s",
-    color: defaultStyles.colors.blue,
+    color: defaultStyles.colors.dark_Variant,
     fontSize: "13.5@s",
     maxWidth: "95%",
     paddingBottom: 0,

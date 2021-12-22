@@ -7,18 +7,20 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
 import AppText from "./AppText";
+import EchoMessageModal from "./EchoMessageModal";
 import InfoAlert from "../components/InfoAlert";
 
-import DataConstants from "../utilities/DataConstants";
+import storeDetails from "../utilities/storeDetails";
 
 import useAuth from "../auth/useAuth";
 import usersApi from "../api/users";
+import echosApi from "../api/echos";
 
-import asyncStorage from "../utilities/cache";
 import debounce from "../utilities/debounce";
 
 import defaultStyles from "../config/styles";
 import ApiContext from "../utilities/apiContext";
+import apiActivity from "../utilities/apiActivity";
 
 const defaulFavoriteUser = {
   _id: "",
@@ -34,11 +36,32 @@ function AddContactCard({
 }) {
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
   const { user, setUser } = useAuth();
+  const { tackleProblem } = apiActivity;
+
   const [processing, setProcessing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+  const [state, setState] = useState({
+    visible: false,
+    echoMessage: null,
+  });
+
+  const handleImagePress = useCallback(async () => {
+    setState({ visible: true, echoMessage: "" });
+    const { data, problem, ok } = await echosApi.getEcho(favoriteUser._id);
+    if (ok) {
+      return setState({ visible: true, echoMessage: data });
+    }
+
+    if (problem) return;
+  }, [favoriteUser._id]);
+
+  const handleCloseModal = useCallback(
+    () => setState({ ...state, visible: false }),
+    []
+  );
 
   const favorites = user.favorites;
 
@@ -59,37 +82,30 @@ function AddContactCard({
         setApiProcessing(true);
         setProcessing(true);
 
-        let modifiedUser = { ...user };
-
         const { ok, data, problem } = await usersApi.addFavorite(
           favoriteUser._id
         );
 
         if (ok) {
-          modifiedUser.favorites = data.favorites;
-          setUser(modifiedUser);
-          await asyncStorage.store(DataConstants.FAVORITES, data.favorites);
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              setProcessing(false);
+              return setApiProcessing(false);
+            }
+          }
+
+          await storeDetails(data.user);
+          setUser(data.user);
           setProcessing(false);
           return setApiProcessing(false);
         }
+        setApiProcessing(false);
+        setProcessing(false);
 
-        if (problem) {
-          if (data) {
-            setApiProcessing(false);
-            setProcessing(false);
-            return setInfoAlert({
-              infoAlertMessage: data.message,
-              showInfoAlert: true,
-            });
-          }
-
-          setProcessing(false);
-          setApiProcessing(false);
-          return setInfoAlert({
-            infoAlertMessage: "Something went wrong! Please try again.",
-            showInfoAlert: true,
-          });
-        }
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -103,35 +119,28 @@ function AddContactCard({
         setApiProcessing(true);
         setProcessing(true);
 
-        let modifiedUser = { ...user };
-
         const { ok, data, problem } = await usersApi.removeFavorite(
           favoriteUser._id
         );
 
         if (ok) {
-          modifiedUser.favorites = data.favorites;
-          setUser(modifiedUser);
-          await asyncStorage.store(DataConstants.FAVORITES, data.favorites);
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              setProcessing(false);
+              return setApiProcessing(false);
+            }
+          }
+          await storeDetails(data.user);
+          setUser(data.user);
           setApiProcessing(false);
           return setProcessing(false);
         }
-        if (problem) {
-          if (data) {
-            setProcessing(false);
-            setApiProcessing(false);
-            return setInfoAlert({
-              infoAlertMessage: data.message,
-              showInfoAlert: true,
-            });
-          }
-          setProcessing(false);
-          setApiProcessing(false);
-          return setInfoAlert({
-            infoAlertMessage: "Something went wrong! Please try again.",
-            showInfoAlert: true,
-          });
-        }
+        setProcessing(false);
+        setApiProcessing(false);
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -154,7 +163,8 @@ function AddContactCard({
   return (
     <View style={[styles.container, style]}>
       <AppImage
-        activeOpacity={1}
+        onPress={handleImagePress}
+        activeOpacity={0.8}
         imageUrl={favoriteUser.picture}
         style={styles.image}
         subStyle={styles.imageSub}
@@ -202,6 +212,11 @@ function AddContactCard({
         description={infoAlert.infoAlertMessage}
         leftPress={handleCloseInfoAlert}
         visible={infoAlert.showInfoAlert}
+      />
+      <EchoMessageModal
+        user={favoriteUser}
+        handleCloseModal={handleCloseModal}
+        state={state}
       />
     </View>
   );

@@ -1,55 +1,37 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { View } from "react-native";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import React, { useCallback, useState, useEffect, useContext } from "react";
+import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 
-import Screen from "../components/Screen";
-import AppHeader from "../components/AppHeader";
-import AppText from "../components/AppText";
-import AppButton from "../components/AppButton";
-import SettingsAction from "../components/SettingsAction";
-import ApiActivity from "../components/ApiActivity";
-import apiFlow from "../utilities/ApiActivityStatus";
 import Alert from "../components/Alert";
+import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
+import Screen from "../components/Screen";
+import SettingsAction from "../components/SettingsAction";
+
+import SuccessMessageContext from "../utilities/successMessageContext";
+import storeDetails from "../utilities/storeDetails";
+import debounce from "../utilities/debounce";
+import apiActivity from "../utilities/apiActivity";
 
 import usersApi from "../api/users";
 
-import asyncStorage from "../utilities/cache";
-
-import DataConstants from "../utilities/DataConstants";
 import useMountedRef from "../hooks/useMountedRef";
 
-import defaultStyles from "../config/styles";
-
-import debounce from "../utilities/debounce";
-
 function SettingsScreen({ navigation }) {
-  const { apiActivityStatus, initialApiActivity } = apiFlow;
-
-  const { user, setUser } = useAuth();
+  const { setUser } = useAuth();
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
+  const { setSuccess } = useContext(SuccessMessageContext);
+  const { tackleProblem, showSucessMessage, updateUserDate } = apiActivity;
 
-  const [apiActivity, setApiActivity] = useState({
-    message: "",
-    processing: true,
-    visible: false,
-    success: false,
-  });
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
   });
 
   const [contactAlert, setContactAlert] = useState(false);
-  const [accountAlert, setAccountAlert] = useState(false);
-
-  // API ACTIVITY ACTIONS
-  const handleApiActivityClose = useCallback(
-    () => setApiActivity({ ...apiActivity, visible: false }),
-    []
-  );
+  const [removingContact, setRemovingContact] = useState(false);
+  // const [accountAlert, setAccountAlert] = useState(false);
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
@@ -67,37 +49,38 @@ function SettingsScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (!isFocused && mounted && apiActivity.visible === true) {
-      setApiActivity({
-        message: "",
-        processing: true,
-        visible: false,
-        success: false,
-      });
-    }
-  }, [isFocused, mounted]);
-
-  useEffect(() => {
     if (!isFocused && mounted && contactAlert === true) {
       setContactAlert(false);
     }
   }, [isFocused, mounted]);
 
   const deletePhoneContacts = async () => {
-    initialApiActivity(setApiActivity, "Removing contacts from server...");
-    let modifiedUser = { ...user };
+    setContactAlert(false);
+    setRemovingContact(true);
 
-    const response = await usersApi.removeUserPhoneContacts();
-    if (response.ok) {
-      modifiedUser.echoMessage = response.data.echoMessage;
-      await asyncStorage.store(
-        DataConstants.PHONE_CONTACTS,
-        response.data.phoneContacts
-      );
-      setUser(modifiedUser);
+    const { ok, data, problem } = await usersApi.removeUserPhoneContacts();
+    if (ok) {
+      const res = await usersApi.getCurrentUser();
+      if (res.ok && res.data) {
+        if (res.data.__v > data.user.__v) {
+          await storeDetails(res.data);
+          setUser(res.data);
+          setRemovingContact(false);
+          return showSucessMessage(
+            setSuccess,
+            "Contacts deleted successfully."
+          );
+        }
+      }
+
+      await storeDetails(data.user);
+      setUser(data.user);
+      setRemovingContact(false);
+      return showSucessMessage(setSuccess, "Contacts deleted successfully.");
     }
 
-    return apiActivityStatus(response, setApiActivity);
+    setRemovingContact(false);
+    tackleProblem(problem, data, setInfoAlert);
   };
   // HEADER ACTIONS
   const handleBack = useCallback(
@@ -111,7 +94,7 @@ function SettingsScreen({ navigation }) {
     []
   );
 
-  const handleDeleteContacts = () => console.log("Contacts deleted!");
+  // const handleDeleteContacts = () => console.log("Contacts deleted!");
 
   const handleOpenContactsAlert = useCallback(() => {
     setContactAlert(true);
@@ -126,26 +109,19 @@ function SettingsScreen({ navigation }) {
           title="Settings"
         />
         <SettingsAction
+          processing={removingContact}
           title="Remove my Contacts from the server."
           info="We store your contacts available on your device to let you discover people who are on SeeYot, if you give access to your contacts. You can opt to remove your contacts from our server anytime you want. We recommend you disabling the contacts access from your device first before removing the contacts from the server."
           buttonTitle="Remove my Contacts"
           onPress={handleOpenContactsAlert}
         />
-        <SettingsAction
+        {/* <SettingsAction
           title="Delete my Account."
           info="If you want to delete your account, you can do it here. This action is irreversible and cannot be undone. You will lose every data that are stored against you like your matched thoughts, echoMessages etc."
           buttonTitle="Delete my Account"
           onPress={handleDeleteContacts}
-        />
+        /> */}
       </Screen>
-      <ApiActivity
-        message={apiActivity.message}
-        onDoneButtonPress={handleApiActivityClose}
-        onRequestClose={handleApiActivityClose}
-        processing={apiActivity.processing}
-        success={apiActivity.success}
-        visible={apiActivity.visible}
-      />
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}

@@ -1,30 +1,32 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useContext } from "react";
 import { Modal, ScrollView, Share, View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useIsFocused } from "@react-navigation/native";
 
 import AddPicture from "../components/AddPicture";
-import ApiActivity from "../components/ApiActivity";
+import Alert from "../components/Alert";
+import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppButton from "../components/AppButton";
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
 import AppTextInput from "../components/AppTextInput";
 import InfoAlert from "../components/InfoAlert";
 import LoadingIndicator from "../components/LoadingIndicator";
+import ModalFallback from "../components/ModalFallback";
 import ProfileOption from "../components/ProfileOption";
 import Screen from "../components/Screen";
 import Selection from "../components/Selection";
+import SuccessMessageContext from "../utilities/successMessageContext";
 import UserDetailsCard from "../components/UserDetailsCard";
 
 import Constant from "../navigation/NavigationConstants";
-import DataConstants from "../utilities/DataConstants";
+
+import storeDetails from "../utilities/storeDetails";
+import debounce from "../utilities/debounce";
+import apiActivity from "../utilities/apiActivity";
 
 import useAuth from "../auth/useAuth";
-
-import asyncStorage from "../utilities/cache";
-import apiFlow from "../utilities/ApiActivityStatus";
-import debounce from "../utilities/debounce";
 
 import expoPushTokensApi from "../api/expoPushTokens";
 import problemsApi from "../api/problems";
@@ -33,15 +35,18 @@ import usersApi from "../api/users";
 import useMountedRef from "../hooks/useMountedRef";
 
 import defaultStyles from "../config/styles";
-import Alert from "../components/Alert";
 
 function ProfileScreen({ navigation }) {
   const { user, setUser, logOut } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
-  const { apiActivityStatus, initialApiActivity } = apiFlow;
+  const { setSuccess } = useContext(SuccessMessageContext);
+  const { tackleProblem, showSucessMessage } = apiActivity;
 
   // STATES
+  const [name, setName] = useState(user.name);
+  const [openEditName, setOpenEditName] = useState(false);
+  const [savingName, setSavingName] = useState(false);
   const [visible, setVisible] = useState(false);
   const [openReport, setOpenReport] = useState(false);
   const [problemDescription, setProblemDescription] = useState("");
@@ -49,12 +54,6 @@ function ProfileScreen({ navigation }) {
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
-  });
-  const [apiActivity, setApiActivity] = useState({
-    message: "",
-    processing: true,
-    visible: false,
-    success: false,
   });
   const [showLogOut, setShowLogOut] = useState(false);
 
@@ -74,17 +73,6 @@ function ProfileScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (!isFocused && mounted && apiActivity.visible === true) {
-      setApiActivity({
-        message: "",
-        processing: true,
-        visible: false,
-        success: false,
-      });
-    }
-  }, [isFocused, mounted]);
-
-  useEffect(() => {
     if (!isFocused && mounted && showLogOut === true) {
       setShowLogOut(false);
     }
@@ -94,12 +82,6 @@ function ProfileScreen({ navigation }) {
   const handleCloseLogout = useCallback(() => setShowLogOut(false), []);
 
   const handleOpenLogout = useCallback(() => setShowLogOut(true), []);
-
-  // API ACTIVITY ACTIONS
-  const handleApiActivityClose = useCallback(
-    () => setApiActivity({ ...apiActivity, visible: false }),
-    []
-  );
 
   // HEADER ACTION
   const handleBack = useCallback(
@@ -152,29 +134,21 @@ function ProfileScreen({ navigation }) {
       setIsLoading(false);
       setProblemDescription("");
       return setInfoAlert({
-        ...infoAlert,
         infoAlertMessage: data.message,
         showInfoAlert: true,
       });
     }
 
     setIsLoading(false);
-    setInfoAlert({
-      ...infoAlert,
-      infoAlertMessage: problem,
-      showInfoAlert: true,
-    });
+    tackleProblem(problem, data, setInfoAlert);
   }, [problemDescription]);
 
   const handleLogOutPress = useCallback(async () => {
-    const { ok } = await expoPushTokensApi.removeToken();
+    const { ok, data, problem } = await expoPushTokensApi.removeToken();
     if (ok) {
       return logOut();
     }
-    setInfoAlert({
-      infoAlertMessage: "Action failed! Please try again.",
-      showInfoAlert: true,
-    });
+    tackleProblem(problem, data, setInfoAlert);
   }, []);
 
   const handleHelpPress = useCallback(() => {
@@ -191,36 +165,47 @@ function ProfileScreen({ navigation }) {
   const handleImageChange = useCallback(
     debounce(
       async (image) => {
-        initialApiActivity(setApiActivity, "Updating your picture...");
+        setIsLoading(true);
 
-        let modifiedUser = { ...user };
-        let cachedUserDetails = {
-          _id: user._id,
-          name: user.name,
-          picture: user.picture,
-          phoneNumber: user.phoneNumber,
-        };
         let picture = image;
 
         if (image) {
-          const response = await usersApi.updateCurrentUserPhoto(picture);
-          if (response.ok) {
-            modifiedUser.picture = response.data.picture;
-            cachedUserDetails.picture = response.data.data;
-            setUser(modifiedUser);
-            await asyncStorage.store(DataConstants.DETAILS, cachedUserDetails);
+          const { ok, data, problem } = await usersApi.updateCurrentUserPhoto(
+            picture
+          );
+          if (ok) {
+            const res = await usersApi.getCurrentUser();
+            if (res.ok && res.data) {
+              if (res.data.__v > data.user.__v) {
+                await storeDetails(res.data);
+                setUser(res.data);
+                return setIsLoading(false);
+              }
+            }
+            await storeDetails(data.user);
+            setUser(data.user);
+            return setIsLoading(false);
           }
-          return apiActivityStatus(response, setApiActivity);
+          setIsLoading(false);
+          tackleProblem(problem, data, setInfoAlert);
         }
 
-        const response2 = await usersApi.removeCurrentUserPhoto();
-        if (response2.ok) {
-          modifiedUser.picture = response2.data.picture;
-          cachedUserDetails.picture = response2.data.data;
-          setUser(modifiedUser);
-          await asyncStorage.store(DataConstants.DETAILS, cachedUserDetails);
+        const { ok, data, problem } = await usersApi.removeCurrentUserPhoto();
+        if (ok) {
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              return setIsLoading(false);
+            }
+          }
+          await storeDetails(data.user);
+          setUser(data.user);
+          return setIsLoading(false);
         }
-        return apiActivityStatus(response2, setApiActivity);
+        setIsLoading(false);
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -233,32 +218,26 @@ function ProfileScreen({ navigation }) {
     debounce(
       async () => {
         setIsLoading(true);
-        let modifiedUser = { ...user };
 
         const { data, ok, problem } = await usersApi.updateEchoWhenMessage();
 
         if (ok) {
-          modifiedUser.echoWhen = data;
-          await asyncStorage.store(DataConstants.ECHO_WHEN, data);
-          setUser(modifiedUser);
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              return setIsLoading(false);
+            }
+          }
+
+          await storeDetails(data.user);
+          setUser(data.user);
           return setIsLoading(false);
         }
 
-        if (data) {
-          setIsLoading(false);
-          return setInfoAlert({
-            ...infoAlert,
-            infoAlertMessage: data.message,
-            showInfoAlert: true,
-          });
-        }
-
         setIsLoading(false);
-        return setInfoAlert({
-          ...infoAlert,
-          infoAlertMessage: problem,
-          showInfoAlert: true,
-        });
+        tackleProblem(problem, data, setInfoAlert);
       },
       1000,
       true
@@ -270,30 +249,26 @@ function ProfileScreen({ navigation }) {
     debounce(
       async () => {
         setIsLoading(true);
-        let modifiedUser = { ...user };
 
         const { data, ok, problem } = await usersApi.updateEchoWhenPhotoTap();
 
         if (ok) {
-          modifiedUser.echoWhen = data;
-          await asyncStorage.store(DataConstants.ECHO_WHEN, data);
-          setUser(modifiedUser);
+          const res = await usersApi.getCurrentUser();
+          if (res.ok && res.data) {
+            if (res.data.__v > data.user.__v) {
+              await storeDetails(res.data);
+              setUser(res.data);
+              return setIsLoading(false);
+            }
+          }
+
+          await storeDetails(data.user);
+          setUser(data.user);
           return setIsLoading(false);
         }
 
-        if (data) {
-          setIsLoading(false);
-          return setInfoAlert({
-            infoAlertMessage: data.message,
-            showInfoAlert: true,
-          });
-        }
-
         setIsLoading(false);
-        return setInfoAlert({
-          infoAlertMessage: problem,
-          showInfoAlert: true,
-        });
+        tackleProblem(problem, data, setInfoAlert);
       },
       2000,
       true
@@ -302,29 +277,33 @@ function ProfileScreen({ navigation }) {
   );
 
   // NAME CHANGE ACTION
-  const handleNameChange = useCallback(
-    async (name) => {
-      initialApiActivity(setApiActivity, "Updating your name...");
-      let modifiedUser = { ...user };
-      let cachedUserDetails = {
-        _id: user._id,
-        name: user.name,
-        picture: user.picture,
-        phoneNumber: user.phoneNumber,
-      };
+  const handleNameChange = useCallback(async () => {
+    setSavingName(true);
 
-      const response = await usersApi.updateCurrentUserName(name);
+    const { ok, data, problem } = await usersApi.updateCurrentUserName(name);
 
-      if (response.ok) {
-        modifiedUser.name = response.data.name;
-        cachedUserDetails.name = response.data.name;
-        await asyncStorage.store(DataConstants.DETAILS, cachedUserDetails);
-        setUser(modifiedUser);
+    if (ok) {
+      const res = await usersApi.getCurrentUser();
+      if (res.ok && res.data) {
+        if (res.data.__v > data.user.__v) {
+          await storeDetails(res.data);
+          setUser(res.data);
+          setSavingName(false);
+          setOpenEditName(false);
+          return showSucessMessage(setSuccess, "Name Updated.");
+        }
       }
-      return apiActivityStatus(response, setApiActivity);
-    },
-    [user]
-  );
+
+      await storeDetails(data.user);
+      setUser(data.user);
+      setSavingName(false);
+      setOpenEditName(false);
+      return showSucessMessage(setSuccess, "Name Updated.");
+    }
+    setOpenEditName(false);
+    setSavingName(false);
+    tackleProblem(problem, data, setInfoAlert);
+  }, [user, name]);
 
   // INVITE ACTION
   const handleInvitePress = useCallback(
@@ -358,20 +337,11 @@ function ProfileScreen({ navigation }) {
     <>
       <Screen style={styles.container}>
         <AppHeader
-          fwr={true}
           leftIcon="arrow-back"
           onPressLeft={handleBack}
           onPressRight={handleRightHeaderPress}
-          rightIcon="gear"
+          rightIcon="more-vert"
           title="Profile"
-        />
-        <ApiActivity
-          message={apiActivity.message}
-          onDoneButtonPress={handleApiActivityClose}
-          onRequestClose={handleApiActivityClose}
-          processing={apiActivity.processing}
-          success={apiActivity.success}
-          visible={apiActivity.visible}
         />
         <Alert
           visible={showLogOut}
@@ -406,11 +376,10 @@ function ProfileScreen({ navigation }) {
               editable={true}
               fw={true}
               iconName="user-o"
-              onNameChange={handleNameChange}
               size={scale(20)}
               style={styles.userDetailsName}
               title="Name"
-              userName={user.name}
+              onEditIconPress={() => setOpenEditName(true)}
             />
             <UserDetailsCard
               data={user.phoneNumber.toString().slice(-10)}
@@ -442,7 +411,7 @@ function ProfileScreen({ navigation }) {
           </View>
         </ScrollView>
       </Screen>
-      {visible || openReport ? <View style={styles.modalFallback} /> : null}
+      {visible || openReport ? <ModalFallback /> : null}
       <Modal
         animationType="slide"
         onRequestClose={() => setVisible(false)}
@@ -539,6 +508,58 @@ function ProfileScreen({ navigation }) {
           </View>
         </View>
       </Modal>
+      <Modal
+        onRequestClose={() => setOpenEditName(false)}
+        transparent={true}
+        visible={openEditName}
+      >
+        <View style={styles.modal}>
+          <View style={styles.editContainer}>
+            <AppText style={styles.editName}>Edit your name</AppText>
+            <View style={styles.inputBoxContainer}>
+              <AppTextInput
+                autoFocus={true}
+                maxLength={30}
+                minLength={3}
+                onChangeText={(text) => setName(text)}
+                placeholder={user.name}
+                style={styles.inputBox}
+                subStyle={{ opacity: 0.8, paddingHorizontal: scale(5) }}
+                value={name}
+              />
+              <AppText style={styles.nameLength}>{name.length}/30</AppText>
+            </View>
+            <View style={styles.actionButtonContainer}>
+              <AppButton
+                onPress={() => {
+                  setOpenEditName(false);
+                  setName(user.name);
+                }}
+                style={[
+                  styles.button,
+                  { backgroundColor: defaultStyles.colors.light },
+                ]}
+                subStyle={{ color: defaultStyles.colors.dark, opacity: 0.8 }}
+                title="Cancel"
+              />
+              <ApiProcessingContainer
+                processing={savingName}
+                style={styles.apiProcessingContainer}
+              >
+                <AppButton
+                  disabled={
+                    name && name.replace(/\s/g, "").length >= 4 ? false : true
+                  }
+                  onPress={handleNameChange}
+                  style={styles.button}
+                  subStyle={styles.saveButtonSub}
+                  title="Save"
+                />
+              </ApiProcessingContainer>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -594,13 +615,6 @@ const styles = ScaledSheet.create({
     borderTopWidth: 1,
     marginVertical: "15@s",
     width: "95%",
-  },
-  modalFallback: {
-    backgroundColor: "rgba(0,0,0,0.7)",
-    height: "100%",
-    position: "absolute",
-    width: "100%",
-    zIndex: 22,
   },
   optionsContainerBackground: {
     flex: 1,
@@ -671,6 +685,67 @@ const styles = ScaledSheet.create({
   },
   userDetailsName: {
     borderBottomWidth: 1,
+  },
+
+  actionButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  apiProcessingContainer: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "5@s",
+    height: "30@s",
+    marginHorizontal: "10@s",
+    overflow: "hidden",
+    width: "60@s",
+  },
+  button: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    height: "30@s",
+    width: "60@s",
+  },
+  editName: {
+    backgroundColor: defaultStyles.colors.light,
+    color: defaultStyles.colors.dark_Variant,
+    fontSize: "14@s",
+    height: "35@s",
+    textAlign: "center",
+    textAlignVertical: "center",
+  },
+  editContainer: {
+    backgroundColor: defaultStyles.colors.white,
+    borderTopRightRadius: "10@s",
+    borderTopStartRadius: "10@s",
+    height: "150@s",
+    overflow: "hidden",
+    width: "100%",
+  },
+  inputBoxContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderBottomWidth: 1,
+    borderColor: defaultStyles.colors.light,
+    flexDirection: "row",
+    height: defaultStyles.dimensionConstants.height,
+    justifyContent: "space-between",
+    marginBottom: "10@s",
+    paddingHorizontal: "5@s",
+  },
+  inputBox: {
+    paddingHorizontal: "5@s",
+    width: "85%",
+  },
+  modal: {
+    backgroundColor: "rgba(0,0,0,0.7)",
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  nameLength: {
+    opacity: 0.7,
+    fontSize: "12@s",
+  },
+  saveButtonSub: {
+    color: defaultStyles.colors.secondary,
   },
 });
 

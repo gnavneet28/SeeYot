@@ -3,7 +3,7 @@ import React, {
   useCallback,
   useMemo,
   useEffect,
-  useRef,
+  useContext,
 } from "react";
 import {
   Modal,
@@ -12,7 +12,6 @@ import {
   TextInput,
   TouchableOpacity,
   Linking,
-  BackHandler,
 } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -20,7 +19,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "react-native-vector-icons/AntDesign";
 
-import ApiActivity from "../components/ApiActivity";
+import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppImage from "../components/AppImage";
 import AppText from "../components/AppText";
 import ContactList from "../components/ContactList";
@@ -30,13 +29,13 @@ import Icon from "../components/Icon";
 import InfoAlert from "../components/InfoAlert";
 import ReplyOption from "../components/ReplyOption";
 import Screen from "../components/Screen";
-import ToastMessage from "../components/ToastMessage";
 
 import Constant from "../navigation/NavigationConstants";
 
 import useAuth from "../auth/useAuth";
 
 import myApi from "../api/my";
+import usersApi from "../api/users";
 import messagesApi from "../api/messages";
 
 import useMountedRef from "../hooks/useMountedRef";
@@ -45,7 +44,8 @@ import defaultStyles from "../config/styles";
 
 import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
-import asyncStorage from "../utilities/cache";
+import SuccessMessageContext from "../utilities/successMessageContext";
+import apiActivity from "../utilities/apiActivity";
 
 const defaultMessage = {
   _id: "",
@@ -61,18 +61,12 @@ function HomeScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
+  const { setSuccess } = useContext(SuccessMessageContext);
+  const { tackleProblem, showSucessMessage } = apiActivity;
 
-  const toast = useRef();
-
-  const [state, setState] = useState({
+  const [infoAlert, setInfoAlert] = useState({
     showInfoAlert: false,
     infoAlertMessage: "",
-  });
-  const [apiActivity, setApiActivity] = useState({
-    message: "",
-    processing: true,
-    visible: false,
-    success: false,
   });
   const [selectedMessageId, setSelectedMessageId] = useState("");
 
@@ -85,6 +79,7 @@ function HomeScreen({ navigation }) {
   const [messagesList, setMessagesList] = useState([]);
   const [reply, setReply] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const clearJunkData = async () => {
     const { ok, data, problem } = await myApi.clearExpiredData();
@@ -96,6 +91,13 @@ function HomeScreen({ navigation }) {
   const updateAllContacts = async () => {
     const { ok, data, problem } = await myApi.updateMyContacts();
     if (ok) {
+      const res = await usersApi.getCurrentUser();
+      if (res.ok && res.data) {
+        if (res.data.__v > data.user.__v) {
+          await storeDetails(res.data);
+          return setUser(res.data);
+        }
+      }
       await storeDetails(data.user);
       return setUser(data.user);
     }
@@ -110,20 +112,9 @@ function HomeScreen({ navigation }) {
 
   useEffect(() => {
     clearJunkData();
-    updateAllContacts();
     updateAllReadMessages();
+    updateAllContacts();
   }, []);
-
-  useEffect(() => {
-    if (!isFocused && mounted && apiActivity.visible === true) {
-      setApiActivity({
-        message: "",
-        processing: true,
-        visible: false,
-        success: false,
-      });
-    }
-  }, [isFocused, mounted]);
 
   useEffect(() => {
     let messages = user.messages ? user.messages : [];
@@ -141,19 +132,13 @@ function HomeScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (!isFocused && mounted && state.showInfoAlert === true) {
-      setState({
+    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
+      setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
       });
     }
   }, [isFocused, mounted]);
-
-  // APIACTIVITY ACTIONS
-  const handleApiActivityClose = useCallback(
-    () => setApiActivity({ ...apiActivity, visible: false }),
-    []
-  );
 
   // MESSAGES ACTION
 
@@ -165,13 +150,21 @@ function HomeScreen({ navigation }) {
         if (message.seen === false) {
           const { ok, data, problem } = await messagesApi.markRead(message._id);
           if (ok) {
+            const res = await usersApi.getCurrentUser();
+            if (res.ok && res.data) {
+              if (res.data.__v > data.user.__v) {
+                message.seen = true;
+                setMessagesList(data.messages);
+                await storeDetails(res.data);
+                return setUser(res.data);
+              }
+            }
             message.seen = true;
             setMessagesList(data.messages);
-            return await asyncStorage.store(
-              DataConstants.MESSAGES,
-              data.messages
-            );
+            await storeDetails(data.user);
+            return setUser(data.user);
           }
+          return;
         }
         return;
       },
@@ -198,7 +191,7 @@ function HomeScreen({ navigation }) {
 
   // INFO ALERT ACTIONS
   const handleCloseInfoAlert = useCallback(
-    () => setState({ ...state, showInfoAlert: false }),
+    () => setInfoAlert({ ...infoAlert, showInfoAlert: false }),
     []
   );
 
@@ -206,30 +199,16 @@ function HomeScreen({ navigation }) {
   const handleRefresh = useCallback(
     debounce(
       async () => {
-        setApiActivity({
-          processing: true,
-          message: "Refreshing...",
-          visible: true,
-          success: false,
-        });
+        setRefreshing(true);
 
-        const { data, ok } = await myApi.updateMyContacts();
+        const { data, ok, problem } = await myApi.updateMyContacts();
         if (ok) {
           await storeDetails(data.user);
           setUser(data.user);
-          return setApiActivity({
-            processing: true,
-            visible: false,
-            message: "",
-            success: true,
-          });
+          return setRefreshing(false);
         }
-        setApiActivity({
-          message: "Something failed! Please try again.",
-          success: false,
-          processing: false,
-          visible: true,
-        });
+        setRefreshing(false);
+        tackleProblem(problem, data, setInfoAlert);
       },
       5000,
       true
@@ -246,13 +225,12 @@ function HomeScreen({ navigation }) {
           from: Constant.HOME_SCREEN,
         });
       }
-      setState({
-        ...state,
+      setInfoAlert({
         infoAlertMessage: "Something went wrong! Please try again.",
         showInfoAlert: true,
       });
     },
-    [state.infoAlertMessage, state.showInfoAlert]
+    [infoAlert.infoAlertMessage, infoAlert.showInfoAlert]
   );
 
   const handleAddEchoButtonPress = useCallback(
@@ -263,13 +241,12 @@ function HomeScreen({ navigation }) {
           from: Constant.HOME_SCREEN,
         });
       }
-      setState({
-        ...state,
+      setInfoAlert({
         infoAlertMessage: "Something went wrong! Please try again.",
         showInfoAlert: true,
       });
     },
-    [state.infoAlertMessage, state.showInfoAlert]
+    [infoAlert.infoAlertMessage, infoAlert.showInfoAlert]
   );
 
   const data = useMemo(
@@ -277,7 +254,7 @@ function HomeScreen({ navigation }) {
       typeof user.contacts !== "undefined"
         ? user.contacts.sort((a, b) => a.name > b.name)
         : [],
-    [user.contacts.length, user.contacts]
+    [user, user.contacts]
   );
 
   //MESSAGE MODAL ACTION
@@ -292,8 +269,6 @@ function HomeScreen({ navigation }) {
   const handleMessageReply = debounce(
     async () => {
       setSendingReply(true);
-      toast.current.show("Sending!", 30000);
-
       if (selectedMessageId) {
         const { data, ok, problem } = await messagesApi.reply(
           message._id,
@@ -307,16 +282,10 @@ function HomeScreen({ navigation }) {
             name: data.name,
             picture: data.picture,
           });
-          return toast.current.show(data.message, 1000);
+          return showSucessMessage(setSuccess, "Reply Sent!");
         }
         setSendingReply(false);
-        if (problem) {
-          if (data) {
-            return toast.current.show(data.message, 3000);
-          }
-
-          return toast.current.show(problem, 3000);
-        }
+        tackleProblem(problem, data, setInfoAlert);
       }
 
       const { data, ok, problem } = await messagesApi.reply(message._id, reply);
@@ -327,17 +296,10 @@ function HomeScreen({ navigation }) {
           name: data.name,
           picture: data.picture,
         });
-        return toast.current.show(data.message, 1000);
+        return showSucessMessage(setSuccess, "Reply Sent!");
       }
       setSendingReply(false);
-
-      if (problem) {
-        if (data) {
-          return toast.current.show(data.message, 3000);
-        }
-
-        return toast.current.show(problem, 3000);
-      }
+      tackleProblem(problem, data, setInfoAlert);
     },
     1000,
     true
@@ -361,24 +323,17 @@ function HomeScreen({ navigation }) {
             onMessagePress={handleMessagePress}
           />
         ) : null}
-        <ApiActivity
-          message={apiActivity.message}
-          onDoneButtonPress={handleApiActivityClose}
-          processing={apiActivity.processing}
-          success={apiActivity.success}
-          visible={apiActivity.visible}
-        />
         <InfoAlert
-          description={state.infoAlertMessage}
+          description={infoAlert.infoAlertMessage}
           leftPress={handleCloseInfoAlert}
-          visible={state.showInfoAlert}
+          visible={infoAlert.showInfoAlert}
         />
         <ContactList
           onAddEchoPress={handleAddEchoButtonPress}
           onAddFriendPress={handleAddFriendPress}
           onRefresh={handleRefresh}
           onSendThoughtsPress={handleOnSendThoughtButtonPress}
-          refreshing={false}
+          refreshing={refreshing}
           users={data}
         />
       </Screen>
@@ -462,21 +417,22 @@ function HomeScreen({ navigation }) {
                   onPress={sendingReply ? null : handleMessageReply}
                   style={styles.send}
                 >
-                  <Icon
-                    color={
-                      reply.replace(/\s/g, "").length >= 1 && !sendingReply
-                        ? defaultStyles.colors.secondary
-                        : defaultStyles.colors.lightGrey
-                    }
-                    name="send"
-                    size={scale(28)}
-                  />
+                  <ApiProcessingContainer processing={sendingReply}>
+                    <Icon
+                      color={
+                        reply.replace(/\s/g, "").length >= 1 && !sendingReply
+                          ? defaultStyles.colors.secondary
+                          : defaultStyles.colors.lightGrey
+                      }
+                      name="send"
+                      size={scale(28)}
+                    />
+                  </ApiProcessingContainer>
                 </TouchableOpacity>
               </View>
             </View>
           </ScrollView>
         </View>
-        <ToastMessage reference={toast} />
       </Modal>
     </>
   );
@@ -581,6 +537,7 @@ const styles = ScaledSheet.create({
     borderColor: defaultStyles.colors.yellow_Variant,
     borderLeftWidth: 2,
     color: defaultStyles.colors.secondary,
+    fontSize: "14@s",
     opacity: 0.8,
     paddingHorizontal: "10@s",
     textAlign: "left",
