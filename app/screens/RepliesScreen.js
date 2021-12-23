@@ -81,9 +81,14 @@ function RepliesScreen({ navigation }) {
   const allReplies = async () => {
     let { ok, data, problem } = await messagesApi.getAllRepliedMessages();
     if (ok) {
-      return setReplies(data.allReplies);
+      if ((!isReady, mounted)) {
+        return setReplies(data.allReplies);
+      }
+      return;
     }
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isReady || mounted) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   useEffect(() => {
@@ -112,12 +117,14 @@ function RepliesScreen({ navigation }) {
 
   useEffect(() => {
     if (isFocused) {
-      allReplies();
-      if (!isReady) {
+      if (!isReady || mounted) {
+        allReplies();
+      }
+      if (!isReady || mounted) {
         setIsReady(true);
       }
     }
-  }, [isFocused]);
+  }, [isFocused, mounted, isReady]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);

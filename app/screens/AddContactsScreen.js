@@ -67,8 +67,21 @@ function AddContactsScreen({ navigation }) {
           });
         }
         await syncContacts(contacts);
-        setIsReady(true);
+        if (!isReady || mounted) {
+          setIsReady(true);
+        }
       } else {
+        if (!isReady || mounted) {
+          setIsReady(true);
+          return setInfoAlert({
+            infoAlertMessage:
+              "Please allow contacts access to add them as friends!",
+            showInfoAlert: true,
+          });
+        }
+      }
+    } catch (error) {
+      if (!isReady || mounted) {
         setIsReady(true);
         return setInfoAlert({
           infoAlertMessage:
@@ -76,12 +89,6 @@ function AddContactsScreen({ navigation }) {
           showInfoAlert: true,
         });
       }
-    } catch (error) {
-      setIsReady(true);
-      return setInfoAlert({
-        infoAlertMessage: error.message,
-        showInfoAlert: true,
-      });
     }
   };
 
@@ -106,33 +113,43 @@ function AddContactsScreen({ navigation }) {
         if (res.data.__v > data.user.__v) {
           await storeDetails(res.data);
           setUser(res.data);
-          return setUsers(
-            res.data.phoneContacts.sort(
-              (a, b) => a.isRegistered < b.isRegistered
-            )
-          );
+          if (!isReady || mounted) {
+            return setUsers(
+              res.data.phoneContacts.sort(
+                (a, b) => a.isRegistered < b.isRegistered
+              )
+            );
+          }
         }
       }
       await storeDetails(data.user);
       setUser(data.user);
-      return setUsers(
-        data.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
-      );
+      if (!isReady || mounted) {
+        return setUsers(
+          res.data.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
+        );
+      }
     }
     if (user.phoneContacts.length) {
-      setUsers(
-        user.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
-      );
+      if (!isReady || mounted) {
+        setUsers(
+          user.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
+        );
+      }
     }
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isReady || mounted) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   const setUpPage = () => {
     if (user.phoneContacts.length) {
-      setUsers(
-        user.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
-      );
-      setIsReady(true);
+      if (!isReady || mounted) {
+        setUsers(
+          user.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
+        );
+        setIsReady(true);
+      }
     }
     return requestPermission();
   };
@@ -152,10 +169,12 @@ function AddContactsScreen({ navigation }) {
 
   // REFRESH ACTION
   const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await requestPermission();
-    setRefreshing(false);
-  }, []);
+    if (!isReady || mounted) {
+      setRefreshing(true);
+      await requestPermission();
+      setRefreshing(false);
+    }
+  }, [isReady, mounted]);
 
   // HEADER ACTIONS
   const handleBack = useCallback(

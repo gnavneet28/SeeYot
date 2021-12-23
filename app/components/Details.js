@@ -22,7 +22,7 @@ const styles = ScaledSheet.create({
     borderRadius: "5@s",
     borderWidth: 1,
     flexDirection: "row",
-    height: "35@s",
+    height: "30@s",
     justifyContent: "space-between",
     marginVertical: "5@s",
     paddingHorizontal: "10@s",
@@ -30,9 +30,11 @@ const styles = ScaledSheet.create({
   },
   descriptionTitle: {
     color: defaultStyles.colors.secondary,
+    fontSize: "13@s",
   },
   value: {
     color: defaultStyles.colors.blue,
+    fontSize: "13@s",
   },
 });
 

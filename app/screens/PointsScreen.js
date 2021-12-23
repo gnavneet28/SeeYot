@@ -27,7 +27,11 @@ import storeDetails from "../utilities/storeDetails";
 import apiActivity from "../utilities/apiActivity";
 import asyncStorage from "../utilities/cache";
 import DataConstants from "../utilities/DataConstants";
-import authorizeAds from "../utilities/authorizeAds";
+import authorizeAds, {
+  showAdsSeenInLastTenMinutes,
+  showAdsSeenInLastTwentyFourHours,
+  showAccountDays,
+} from "../utilities/authorizeAds";
 
 import useMountedRef from "../hooks/useMountedRef";
 
@@ -46,6 +50,11 @@ function PointsScreen({ navigation }) {
   const { tackleProblem, showSucessMessage } = apiActivity;
 
   // STATES
+  const [currentAdsStats, setCurrentAdsStats] = useState({
+    seenInLastTenMinutes: 0,
+    seenInLastTwentyFourHours: 0,
+    accountLife: 0,
+  });
   const [collectingPoints, setCollectingPoints] = useState(false);
   const [showAdsInfo, setShowAdsInfo] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
@@ -70,6 +79,23 @@ function PointsScreen({ navigation }) {
       setIsLoading(false);
     }
   }, [isFocused, mounted]);
+
+  // TODO:
+  const calculateAdsStats = async () => {
+    let seenInLastTenMinutes = await showAdsSeenInLastTenMinutes();
+    let seenInLastTwentyFourHours = await showAdsSeenInLastTwentyFourHours();
+    let accountLife = showAccountDays(user);
+
+    setCurrentAdsStats({
+      seenInLastTenMinutes,
+      seenInLastTwentyFourHours,
+      accountLife,
+    });
+  };
+
+  useEffect(() => {
+    calculateAdsStats();
+  }, [collectingPoints, showAdsInfo, user]);
 
   // HEADER ACTION
   const handleBack = useCallback(
@@ -320,11 +346,27 @@ function PointsScreen({ navigation }) {
           </View>
           <View style={styles.adsInfoContainer}>
             <AppText style={styles.adsTermAndConditionInfo}>
-              Terms and Conditions to use Ads to avail SeeYot Vip membership.
+              Terms to use Ads to avail SeeYot Vip membership.
             </AppText>
             <InfoText information="a. You account should be minimum 15 days old." />
             <InfoText information="b. You can watch only 6 ads within 24 hours. (successful watch)" />
-            <InfoText information="c. You can watch only 1 ad within 10 minutes. (successful watch)" />
+            <InfoText
+              style={{ marginBottom: scale(10) }}
+              information="c. You can watch only 1 ad within 10 minutes. (successful watch)"
+            />
+
+            <Details
+              title="Account Life (Days): "
+              value={currentAdsStats.accountLife}
+            />
+            <Details
+              title="Ads seen in last 10 minutes: "
+              value={currentAdsStats.seenInLastTenMinutes}
+            />
+            <Details
+              title="Ads seen in last 24 hours: "
+              value={currentAdsStats.seenInLastTwentyFourHours}
+            />
           </View>
         </View>
       </Modal>
@@ -357,13 +399,13 @@ const styles = ScaledSheet.create({
     borderTopRightRadius: "10@s",
     borderTopWidth: 1,
     bottom: 0,
-    height: "150@s",
+    height: "270@s",
     overflow: "hidden",
     paddingTop: "20@s",
     width: "100%",
   },
   adsTermAndConditionInfo: {
-    color: defaultStyles.colors.secondary,
+    color: defaultStyles.colors.dark,
     fontSize: "13@s",
     marginVertical: "10@s",
     paddingHorizontal: "10@s",

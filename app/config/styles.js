@@ -17,7 +17,7 @@ export default {
   dimensionConstants,
   text: {
     color: colors.dark,
-    fontSize: scale(15),
+    fontSize: scale(14),
     fontFamily: Platform.OS === "android" ? "Roboto" : "Avenir",
   },
 };

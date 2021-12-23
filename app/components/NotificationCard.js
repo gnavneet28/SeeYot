@@ -128,18 +128,18 @@ function NotificationCard({
     return null;
   };
 
-  const color = () => {
-    if (notification.type == "Vip") return defaultStyles.colors.dark;
+  const opacity = () => {
+    if (notification.type == "Vip") return 0.9;
 
     if (notification.type == "Replied") {
-      return defaultStyles.colors.dark;
+      return 0.9;
     }
 
     if (notification.type == "ActiveChat") {
-      return defaultStyles.colors.dark;
+      return 0.9;
     }
 
-    return defaultStyles.colors.dark_Variant;
+    return 0.7;
   };
 
   return (
@@ -166,7 +166,7 @@ function NotificationCard({
           <Text
             numberOfLines={2}
             onPress={doWhenTappedWithType()}
-            style={[styles.notificationMessage, { color: color() }]}
+            style={[styles.notificationMessage, { opacity: opacity() }]}
           >
             {notification.type != "Vip"
               ? notification.message
@@ -242,7 +242,6 @@ const styles = ScaledSheet.create({
     ...defaultStyles.text,
     fontFamily: "Comic-Bold",
     fontSize: "14@s",
-    opacity: 0.9,
   },
   text: {
     ...defaultStyles.text,

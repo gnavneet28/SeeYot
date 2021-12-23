@@ -39,4 +39,31 @@ const authorizeAds = async () => {
   return true;
 };
 
+const showAdsSeenInLastTenMinutes = async () => {
+  let currentDate = new Date();
+  const adsStats = await asyncStorage.get(DataConstants.ADSSTATS);
+  return adsStats.numberOfAdsSeen.filter(
+    (a) => dayjs(currentDate).diff(a, "minutes") < 10
+  ).length;
+};
+
+const showAdsSeenInLastTwentyFourHours = async () => {
+  let currentDate = new Date();
+  const adsStats = await asyncStorage.get(DataConstants.ADSSTATS);
+  return adsStats.numberOfAdsSeen.filter(
+    (a) => dayjs(currentDate).diff(a, "hours") <= 24
+  ).length;
+};
+
+const showAccountDays = (user) => {
+  let currentDate = new Date();
+  return dayjs(currentDate).diff(user.joinedAt, "days");
+};
+
 export default authorizeAds;
+
+export {
+  showAdsSeenInLastTenMinutes,
+  showAdsSeenInLastTwentyFourHours,
+  showAccountDays,
+};

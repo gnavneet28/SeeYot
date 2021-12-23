@@ -90,9 +90,10 @@ function AddFavoritesScreen({ navigation }) {
         finalList.push(user);
       }
     }
-
-    setUsers(finalList);
-    setIsReady(true);
+    if (!isReady || mounted) {
+      setUsers(finalList);
+      setIsReady(true);
+    }
   };
 
   const updateMyFavoritesList = async () => {
@@ -103,12 +104,17 @@ function AddFavoritesScreen({ navigation }) {
         if (res.data.__v > data.user.__v) {
           await storeDetails(res.data);
           setUser(res.data);
-          return setUsersList();
+          if (!isReady || mounted) {
+            return setUsersList();
+          }
+          return;
         }
       }
       await storeDetails(data.user);
       setUser(data.user);
-      return setUsersList();
+      if (!isReady || mounted) {
+        return setUsersList();
+      }
     }
 
     if (problem) return;
@@ -214,11 +220,13 @@ function AddFavoritesScreen({ navigation }) {
 
   // REFRESH ACTION
   const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    setUsersList();
-    await updateMyFavoritesList();
-    setRefreshing(false);
-  }, []);
+    if (!isReady || mounted) {
+      setRefreshing(true);
+      setUsersList();
+      await updateMyFavoritesList();
+      setRefreshing(false);
+    }
+  }, [isReady, mounted]);
 
   // HEADER ACTIONS
   const handleBack = useCallback(

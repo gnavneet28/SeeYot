@@ -103,23 +103,36 @@ function NotificationScreen({ navigation }) {
         if (res.data.__v > data.user.__v) {
           await storeDetails(res.data);
           setUser(res.data);
-          return setIsReady(true);
+          if (!isReady || mounted) {
+            return setIsReady(true);
+          }
+          return;
         }
       }
 
       await storeDetails(data.user);
       setUser(data.user);
-      return setIsReady(true);
+      if (!isReady || mounted) {
+        return setIsReady(true);
+      }
+      return;
     }
-    setIsReady(true);
-    tackleProblem(problem, data, setInfoAlert);
-  }, [user]);
+
+    if (!isReady || mounted) {
+      setIsReady(true);
+      tackleProblem(problem, data, setInfoAlert);
+    }
+  }, [user, isReady, mounted]);
 
   useEffect(() => {
-    if (isFocused) {
+    if (
+      (isFocused &&
+        user.notifications.filter((n) => n.seen === false).length) ||
+      !isReady
+    ) {
       updateNotifications();
     }
-  }, [isFocused]);
+  }, [isFocused, user, isReady]);
 
   // HEADER ACTION
   const handleBack = useCallback(

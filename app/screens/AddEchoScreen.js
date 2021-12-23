@@ -93,9 +93,11 @@ function AddEchoScreen({ navigation, route }) {
 
   const setUpPage = () => {
     const echoMessage = setEchoMessage();
-    setMessage(echoMessage ? echoMessage.message : "");
-    setInitialMessage(echoMessage ? echoMessage.message : "");
-    setIsReady(true);
+    if (!isReady || mounted) {
+      setMessage(echoMessage ? echoMessage.message : "");
+      setInitialMessage(echoMessage ? echoMessage.message : "");
+      setIsReady(true);
+    }
   };
 
   useEffect(() => {
