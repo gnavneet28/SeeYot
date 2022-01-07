@@ -8,7 +8,11 @@ const sendMessage = (id, message, mood, optionalAnswer) =>
 const markRead = (id) => apiClient.put(endPoint + "/read/" + id, {});
 
 const reply = (id, reply, selectedMessageId) =>
-  apiClient.put(endPoint + "/reply/" + id, { reply, selectedMessageId });
+  apiClient.put(
+    endPoint + "/reply/" + id,
+    { reply, selectedMessageId },
+    { timeout: 5000, timeoutErrorMessage: "Slow Connection" }
+  );
 
 const deleteMessage = (id) => apiClient.delete(endPoint + "/delete/" + id);
 

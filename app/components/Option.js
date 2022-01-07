@@ -6,9 +6,10 @@ import defaultStyles from "../config/styles";
 
 import AppText from "./AppText";
 
-function Option({ onPress, title, titleStyle, containerStyle }) {
+function Option({ onPress, title, titleStyle, containerStyle, disabled }) {
   return (
     <TouchableHighlight
+      disabled={disabled}
       underlayColor={defaultStyles.colors.light}
       onPress={onPress}
       style={[styles.container, containerStyle]}

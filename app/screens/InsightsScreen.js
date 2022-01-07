@@ -4,7 +4,7 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
-import Details from "../components/Details";
+import AccountStatDetail from "../components/AccountStatDetail";
 import Screen from "../components/Screen";
 
 import useAuth from "../auth/useAuth";
@@ -14,7 +14,7 @@ import defaultStyles from "../config/styles";
 import formatDate from "../utilities/formatDate";
 import debounce from "../utilities/debounce";
 
-function ManageSubscriptionScreen({ navigation }) {
+function InsightsScreen({ navigation }) {
   const { user } = useAuth();
 
   // HEADER ACTION
@@ -45,7 +45,7 @@ function ManageSubscriptionScreen({ navigation }) {
     <Screen>
       <AppHeader
         leftIcon="arrow-back"
-        title="Current Subscription"
+        title="Account Information"
         onPressLeft={handleBack}
       />
       <ScrollView
@@ -54,23 +54,35 @@ function ManageSubscriptionScreen({ navigation }) {
       >
         {subscription == "Inactive" ? (
           <AppText style={styles.noActiveSubsInfo}>
-            There are no active subscriptions.
+            There are no active subscriptions. Subscribe to SeeYot Vip and get
+            insights on the number of people who tapped on your Display Picture,
+            sent you Thoughts and Messages.
           </AppText>
         ) : (
           <>
-            <Details
+            <AccountStatDetail
               style={{ marginTop: scale(20) }}
-              title="Subscription:"
-              value={subscription}
+              title="Total Photo Taps:"
+              value={user.stats.photoTaps}
             />
-            <Details title="Subscription Mode:" value={subscriptionType} />
-            <Details
-              title="Subscription Start Date:"
-              value={subscriptionStartDate}
+            <AccountStatDetail
+              title="Total Messages Received:"
+              value={user.stats.messagesReceived}
             />
-            <Details
-              title="Subscription End Date:"
-              value={subscriptionEndDate}
+            <AppText
+              style={[
+                styles.noActiveSubsInfo,
+                { textAlign: "left", fontSize: scale(12) },
+              ]}
+            >
+              Note: This number shown above for total messages received is the
+              total number of time, people tried to send you message, that
+              includes people in your favorites as well as others. Messages sent
+              by people other than in your favorites are not delivered to you.
+            </AppText>
+            <AccountStatDetail
+              title="Total Thoughts Received:"
+              value={user.stats.thoughtsReceived}
             />
           </>
         )}
@@ -99,4 +111,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default ManageSubscriptionScreen;
+export default InsightsScreen;

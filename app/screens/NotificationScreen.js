@@ -26,15 +26,16 @@ import apiActivity from "../utilities/apiActivity";
 import defaultStyles from "../config/styles";
 
 import useMountedRef from "../hooks/useMountedRef";
+import useConnection from "../hooks/useConnection";
 
 import myApi from "../api/my";
-import usersApi from "../api/users";
 
 import useAuth from "../auth/useAuth";
 
 function NotificationScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;
+  const isConnected = useConnection();
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
 
@@ -98,18 +99,6 @@ function NotificationScreen({ navigation }) {
   const updateNotifications = useCallback(async () => {
     const { ok, data, problem } = await myApi.setNotificationSeen();
     if (ok) {
-      const res = await usersApi.getCurrentUser();
-      if (res.ok && res.data) {
-        if (res.data.__v > data.user.__v) {
-          await storeDetails(res.data);
-          setUser(res.data);
-          if (!isReady || mounted) {
-            return setIsReady(true);
-          }
-          return;
-        }
-      }
-
       await storeDetails(data.user);
       setUser(data.user);
       if (!isReady || mounted) {
@@ -152,15 +141,6 @@ function NotificationScreen({ navigation }) {
 
     const { ok, data, problem } = await myApi.deleteAllNotifications();
     if (ok) {
-      const res = await usersApi.getCurrentUser();
-      if (res.ok && res.data) {
-        if (res.data.__v > data.user.__v) {
-          await storeDetails(res.data);
-          setUser(res.data);
-          return setClearNotification(false);
-        }
-      }
-
       await storeDetails(data.user);
       setUser(data.user);
       return setClearNotification(false);
@@ -185,20 +165,11 @@ function NotificationScreen({ navigation }) {
     setRefreshing(true);
 
     const { ok, data, problem } = await myApi.setNotificationSeen();
+    setRefreshing(false);
     if (ok) {
-      setRefreshing(false);
-      const res = await usersApi.getCurrentUser();
-      if (res.ok && res.data) {
-        if (res.data.__v > data.user.__v) {
-          await storeDetails(res.data);
-          setUser(res.data);
-          return setIsReady(true);
-        }
-      }
       await storeDetails(data.user);
       return setUser(data.user);
     }
-    setRefreshing(false);
     tackleProblem(problem, data, setInfoAlert);
   }, [user]);
 
@@ -244,7 +215,14 @@ function NotificationScreen({ navigation }) {
                 style={styles.apiProcessingContainer}
                 processing={clearNotification}
               >
-                <AppText style={styles.clearAll} onPress={handleClearAllPress}>
+                <AppText
+                  style={styles.clearAll}
+                  onPress={
+                    isConnected && !clearNotification
+                      ? handleClearAllPress
+                      : null
+                  }
+                >
                   Clear all notifications
                 </AppText>
               </ApiProcessingContainer>

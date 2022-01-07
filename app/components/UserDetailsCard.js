@@ -16,6 +16,8 @@ function UserDetailsCard({
   style,
   title = "",
   onEditIconPress,
+  onDataPress,
+  dataStyle,
 }) {
   return (
     <>
@@ -38,7 +40,11 @@ function UserDetailsCard({
           >
             {title}
           </AppText>
-          <AppText numberOfLines={1} style={styles.data}>
+          <AppText
+            onPress={onDataPress}
+            numberOfLines={1}
+            style={[styles.data, dataStyle]}
+          >
             {data}
           </AppText>
         </View>

@@ -23,11 +23,13 @@ import Option from "../components/Option";
 import Screen from "../components/Screen";
 
 import useMountedRef from "../hooks/useMountedRef";
+import useConnection from "../hooks/useConnection";
 import storeDetails from "../utilities/storeDetails";
 import SuccessMessageContext from "../utilities/successMessageContext";
 
 import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
+import authorizeUpdates from "../utilities/authorizeUpdates";
 
 import useAuth from "../auth/useAuth";
 
@@ -39,6 +41,7 @@ import defaultStyles from "../config/styles";
 
 function AddEchoScreen({ navigation, route }) {
   const { recipient, from } = route.params;
+  const isConnected = useConnection();
   const { setSuccess } = useContext(SuccessMessageContext);
   const { tackleProblem, showSucessMessage } = apiActivity;
 
@@ -68,10 +71,13 @@ function AddEchoScreen({ navigation, route }) {
   // ON PAGE FOCUS ACTION
 
   const updateAllEchoMessages = useCallback(async () => {
+    let canUpdate = await authorizeUpdates.authorizeEchoMessagesUpdate();
+    if (!canUpdate) return;
     const { ok, data, problem } = await myApi.updateMyEchoMessages();
     if (ok) {
       await storeDetails(data.user);
-      return setUser(data.user);
+      setUser(data.user);
+      return await authorizeUpdates.updateEchoMessagesUpdate();
     }
     if (problem) return;
   }, [user]);
@@ -145,20 +151,8 @@ function AddEchoScreen({ navigation, route }) {
         );
         if (ok) {
           Keyboard.dismiss();
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              setSavingEcho(false);
-              return showSucessMessage(
-                setSuccess,
-                "Echo Updated successfully."
-              );
-            }
-          }
-          await storeDetails(res.data);
-          setUser(res.data);
+          await storeDetails(data.user);
+          setUser(data.user);
           setSavingEcho(false);
           return showSucessMessage(setSuccess, "Echo Updated successfully.");
         }
@@ -213,16 +207,6 @@ function AddEchoScreen({ navigation, route }) {
         );
 
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              setRemovingEcho(false);
-              setIsVisible(false);
-              return setEchoMessageOption(null);
-            }
-          }
           await storeDetails(data.user);
           setUser(data.user);
           setRemovingEcho(false);
@@ -293,6 +277,7 @@ function AddEchoScreen({ navigation, route }) {
                     your Display Picture or sends you thoughts.
                   </AppText>
                   <AppTextInput
+                    editable={!savingEcho}
                     maxLength={100}
                     multiline={true}
                     numberOfLines={4}
@@ -313,7 +298,11 @@ function AddEchoScreen({ navigation, route }) {
                 >
                   <AppButton
                     disabled={
-                      message.replace(/\s/g, "").length >= 1 ? false : true
+                      message.replace(/\s/g, "").length >= 1 &&
+                      !savingEcho &&
+                      isConnected
+                        ? false
+                        : true
                     }
                     onPress={handleSave}
                     style={styles.button}
@@ -437,7 +426,7 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   textInputSub: {
-    fontSize: "14.5@s",
+    fontSize: "14@s",
     textAlignVertical: "top",
   },
 });

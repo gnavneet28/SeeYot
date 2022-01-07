@@ -116,6 +116,14 @@ const makeCurrentUserInActiveFor = (forUser, byUser) =>
 const removeUserPhoneContacts = () =>
   apiClient.put(endPoint + "/remove/phoneContacts", {});
 
+const updatePhotoTapsCount = (id) =>
+  apiClient.put(endPoint + "/stats/photoTaps/update/" + id, {});
+const updateReceivedThoughtsCount = (id) =>
+  apiClient.put(endPoint + "/stats/thoughtsReceived/update/" + id, {});
+
+const updateReceivedMessagesCount = (id) =>
+  apiClient.put(endPoint + "/stats/messagesReceived/update/" + id, {});
+
 export default {
   addContact,
   addFavorite,
@@ -143,7 +151,10 @@ export default {
   updateEcho,
   updateEchoWhenMessage,
   updateEchoWhenPhotoTap,
+  updatePhotoTapsCount,
   updatePoints,
+  updateReceivedMessagesCount,
+  updateReceivedThoughtsCount,
   vipSubscribe,
   vipUnSubscribe,
 };

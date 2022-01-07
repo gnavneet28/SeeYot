@@ -130,6 +130,7 @@ const styles = ScaledSheet.create({
     fontSize: "13.5@s",
     maxWidth: "95%",
     paddingBottom: 0,
+    paddingTop: 0,
   },
   image: {
     backgroundColor: defaultStyles.colors.white,
@@ -153,12 +154,10 @@ const styles = ScaledSheet.create({
   },
   recipientName: {
     alignSelf: "flex-start",
-    backgroundColor: defaultStyles.colors.light,
     borderRadius: "15@s",
     color: defaultStyles.colors.dark,
     fontSize: "14@s",
-    paddingHorizontal: "10@s",
-    paddingVertical: "3@s",
+    paddingBottom: 0,
     textAlignVertical: "center",
   },
   repliesCount: {

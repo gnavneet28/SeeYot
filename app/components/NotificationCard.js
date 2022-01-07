@@ -17,12 +17,13 @@ import DeleteAction from "./DeleteAction";
 
 import useAuth from "../auth/useAuth";
 import myApi from "../api/my";
-import usersApi from "../api/users";
 
 import debounce from "../utilities/debounce";
 import storeDetails from "../utilities/storeDetails";
 import apiActivity from "../utilities/apiActivity";
 import ApiContext from "../utilities/apiContext";
+
+import useConnection from "../hooks/useConnection";
 
 import defaultStyles from "../config/styles";
 
@@ -42,6 +43,7 @@ function NotificationCard({
   let customImage;
 
   const { user, setUser } = useAuth();
+  const isConnected = useConnection();
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
   const { tackleProblem } = apiActivity;
 
@@ -80,15 +82,6 @@ function NotificationCard({
         );
 
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              setProcessing(false);
-              return setApiProcessing(false);
-            }
-          }
           setProcessing(false);
           await storeDetails(data.user);
           setUser(data.user);
@@ -180,7 +173,7 @@ function NotificationCard({
       <DeleteAction
         apiAction={true}
         processing={processing}
-        onPress={apiProcessing ? () => null : handleDeletePress}
+        onPress={apiProcessing || !isConnected ? () => null : handleDeletePress}
       />
       <InfoAlert
         leftPress={handleCloseInfoAlert}

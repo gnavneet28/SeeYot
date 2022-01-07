@@ -8,6 +8,7 @@ export default Constant = {
   HELP_SCREEN: "Help",
   HOME_SCREEN: "Home",
   INDEX_NAVIGATOR: "Index",
+  INSIGHTS_SCREEN: "InsightsScreen",
   MANAGER_SCREEN: "Manager",
   NOTIFICATION_NAVIGATOR: "NotificationNavigator",
   NOTIFICATION_SCREEN: "Notification",

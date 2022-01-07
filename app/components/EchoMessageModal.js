@@ -77,7 +77,9 @@ function EchoMessageModal({
               style={styles.closeIcon}
             />
 
-            <AppText style={{ zIndex: 222 }}>{user.name}</AppText>
+            <AppText style={{ zIndex: 222, fontSize: scale(15) }}>
+              {user.name}
+            </AppText>
           </View>
           <GestureHandlerRootView>
             <PinchGestureHandler onGestureEvent={pinchHandler}>
@@ -111,7 +113,6 @@ const styles = ScaledSheet.create({
   contentContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.dark_Variant,
     borderRadius: "10@s",
     borderWidth: 1,
     elevation: 10,

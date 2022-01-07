@@ -8,13 +8,15 @@ const tackleProblem = (problem, data, setInfoAlert) => {
     }
 
     return setInfoAlert({
-      infoAlertMessage: "Something went wrong! Please try again.",
+      infoAlertMessage: problem
+        ? problem
+        : "Something failed! Please try again.",
       showInfoAlert: true,
     });
   }
 };
 
-const showSucessMessage = (setSuccess, message, timeOut = 4000) => {
+const showSucessMessage = (setSuccess, message, timeOut = 2500) => {
   setSuccess({
     message: message,
     show: true,

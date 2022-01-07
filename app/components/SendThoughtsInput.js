@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, TextInput } from "react-native";
+import { View, TouchableOpacity, TextInput } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import Icon from "./Icon";
@@ -7,6 +7,7 @@ import Selection from "./Selection";
 
 import defaultStyles from "../config/styles";
 import debounce from "../utilities/debounce";
+import useConnection from "../hooks/useConnection";
 
 function SendThoughtsInput({
   isRecipientActive,
@@ -15,10 +16,12 @@ function SendThoughtsInput({
   onBlur,
   onFocus,
   placeholder = "Send your thoughts...",
+  processing,
   style,
   submit,
 }) {
   const [message, setMessage] = useState("");
+  const isConnected = useConnection();
 
   const handlePress = debounce(
     () => {
@@ -54,13 +57,15 @@ function SendThoughtsInput({
         value={message}
       />
       <TouchableOpacity
-        disabled={message.replace(/\s/g, "").length >= 1 ? false : true}
+        disabled={
+          message.replace(/\s/g, "").length >= 1 && isConnected ? false : true
+        }
         onPress={handlePress}
         style={styles.send}
       >
         <Icon
           color={
-            message.replace(/\s/g, "").length >= 1
+            message.replace(/\s/g, "").length >= 1 && isConnected
               ? defaultStyles.colors.secondary
               : defaultStyles.colors.lightGrey
           }
@@ -88,7 +93,7 @@ const styles = ScaledSheet.create({
   inputBox: {
     borderRadius: "30@s",
     flex: 1,
-    fontSize: "15@s",
+    fontSize: "14@s",
     height: "100%",
     marginRight: "5@s",
     paddingHorizontal: "10@s",
@@ -102,10 +107,14 @@ const styles = ScaledSheet.create({
     width: "40@s",
   },
   selectActive: {
-    width: "30@s",
-    height: "30@s",
-    //marginHorizontal: "5@s",
-    borderRadius: "15@s",
+    alignItems: "center",
+    borderColor: defaultStyles.colors.light,
+    borderRadius: "18@s",
+    borderWidth: "1@s",
+    elevation: 2,
+    height: "35@s",
+    justifyContent: "center",
+    width: "35@s",
   },
 });
 

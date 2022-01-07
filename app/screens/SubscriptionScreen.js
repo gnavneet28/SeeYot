@@ -73,29 +73,33 @@ function SubscriptionScreen({ navigation, route }) {
             description="You will be notified when someone add you to his/her Fovorite People list."
             name="bell-circle"
           />
+
+          <DescriptionItem
+            description="Get insights on the number of people who tapped on your Display Picture, sent you Thoughts and Messages."
+            name="information-outline"
+          />
           <AppText style={styles.selectPlanText}>Select a Plan</AppText>
           <ScrollView
             keyboardShouldPersistTaps="always"
             horizontal
             showsHorizontalScrollIndicator={false}
           >
-            <PlanCard planName="Plan A" planRate={125} planDuration="1 Month" />
+            <PlanCard planName="Plan A" planRate={250} planDuration="1 Month" />
             <PlanCard
               planDuration="2 Months"
               planName="Plan B"
-              planRate={225}
+              planRate={450}
             />
             <PlanCard
               planDuration="3 Months"
               planName="Plan C"
-              planRate={350}
+              planRate={700}
             />
             <PlanCard
               planDuration="6 Months"
               planName="Plan D"
-              planRate={625}
+              planRate={1250}
             />
-            <PlanCard planName="Plan E" planRate={1150} planDuration="1 Year" />
           </ScrollView>
           <AppButton
             onPress={handleCollectButtonPress}

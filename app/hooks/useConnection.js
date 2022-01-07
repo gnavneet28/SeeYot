@@ -4,9 +4,9 @@ const useConnection = () => {
   const netInfo = useNetInfo();
 
   if (netInfo.type !== "unknown" && netInfo.isInternetReachable === false)
-    return true;
+    return false;
 
-  return false;
+  return true;
 };
 
 export default useConnection;

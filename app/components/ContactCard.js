@@ -14,6 +14,8 @@ import defaultStyles from "../config/styles";
 import EchoMessageModal from "./EchoMessageModal";
 
 import echosApi from "../api/echos";
+import usersApi from "../api/users";
+import useAuth from "../auth/useAuth";
 
 let defaultUser = {
   _id: "",
@@ -34,12 +36,17 @@ function ContactCard({
     echoMessage: null,
   });
 
+  const { user: currentUser } = useAuth();
+
   const { activeFor } = useContext(ActiveForContext);
 
   const handleImagePress = useCallback(async () => {
-    setState({ visible: true, echoMessage: "" });
+    setState({ visible: true, echoMessage: null });
     const { data, problem, ok } = await echosApi.getEcho(user._id);
     if (ok) {
+      if (currentUser._id != user._id) {
+        usersApi.updatePhotoTapsCount(user._id);
+      }
       return setState({ visible: true, echoMessage: data });
     }
 

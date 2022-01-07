@@ -1,13 +1,15 @@
-import React, { useState, memo } from "react";
+import React, { useState, memo, useCallback } from "react";
 import { Image, Modal, TouchableHighlight, View } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import ImagePicker from "react-native-image-crop-picker";
 import { ScaledSheet, scale } from "react-native-size-matters";
+import AntDesign from "react-native-vector-icons/AntDesign";
 
 import defaultStyles from "../config/styles";
 
 import Alert from "./Alert";
 import AppImage from "./AppImage";
+import AppText from "./AppText";
 
 const width = defaultStyles.width;
 
@@ -20,11 +22,12 @@ function AddPicture({
 }) {
   const [showAlert, setShowAlert] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [showImageEdit, setShowImageEdit] = useState(false);
 
   const selectImage = () => {
     ImagePicker.openPicker({
-      width: 300,
-      height: 300,
+      width: 800,
+      height: 800,
       cropping: true,
       mediaType: "photo",
       compressImageQuality: 1,
@@ -36,11 +39,20 @@ function AddPicture({
   };
 
   const handleEditPress = () => {
-    if (!image) selectImage();
-    else {
-      setShowAlert(true);
-    }
+    if (!image) return selectImage();
+    setShowImageEdit(true);
   };
+
+  const hanldeRemovePicturePress = useCallback(() => {
+    if (!image) return;
+    setShowImageEdit(false);
+    setShowAlert(true);
+  }, []);
+
+  const handleSelectPicture = useCallback(() => {
+    setShowImageEdit(false);
+    selectImage();
+  }, []);
 
   return (
     <>
@@ -107,6 +119,37 @@ function AddPicture({
           </View>
         </View>
       </Modal>
+      <Modal
+        animationType="slide"
+        onRequestClose={() => setShowImageEdit(false)}
+        transparent={true}
+        visible={showImageEdit}
+      >
+        <View style={styles.imageEditContainer}>
+          <View style={styles.closeMessageIconContainer}>
+            <AntDesign
+              onPress={() => setShowImageEdit(false)}
+              name="downcircle"
+              color={defaultStyles.colors.tomato}
+              size={scale(28)}
+            />
+          </View>
+          <View style={styles.imageEditOptionContainer}>
+            <AppText
+              onPress={hanldeRemovePicturePress}
+              style={styles.imageEditButtonRemovePicture}
+            >
+              Remove Picture
+            </AppText>
+            <AppText
+              onPress={handleSelectPicture}
+              style={styles.imageEditButtonSelectPicture}
+            >
+              Select from Gallery
+            </AppText>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -121,6 +164,18 @@ const styles = ScaledSheet.create({
     flex: 1,
     justifyContent: "center",
     width: "100%",
+  },
+  closeMessageIconContainer: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: "25@s",
+    bottom: "-25@s",
+    height: "40@s",
+    justifyContent: "center",
+    padding: "5@s",
+    width: "40@s",
+    zIndex: 222,
   },
   container: {
     alignItems: "center",
@@ -141,6 +196,27 @@ const styles = ScaledSheet.create({
     right: "8@s",
     width: "25@s",
   },
+  imageEditButtonRemovePicture: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "5@s",
+    color: defaultStyles.colors.secondary,
+    elevation: 2,
+    height: "30@s",
+    marginVertical: "15@s",
+    textAlign: "center",
+    textAlignVertical: "center",
+    width: "70%",
+  },
+  imageEditButtonSelectPicture: {
+    backgroundColor: defaultStyles.colors.secondary,
+    borderRadius: "5@s",
+    color: defaultStyles.colors.yellow_Variant,
+    elevation: 2,
+    height: "30@s",
+    textAlign: "center",
+    textAlignVertical: "center",
+    width: "70%",
+  },
   imageContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
@@ -151,6 +227,26 @@ const styles = ScaledSheet.create({
     justifyContent: "center",
     width: "115@s",
   },
+  imageEditContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    overflow: "hidden",
+    width: "100%",
+  },
+  imageEditOptionContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.light,
+    borderTopColor: defaultStyles.colors.light,
+    borderTopLeftRadius: "10@s",
+    borderTopRightRadius: "10@s",
+    borderTopWidth: 1,
+    bottom: 0,
+    height: "140@s",
+    overflow: "hidden",
+    paddingTop: "20@s",
+    width: "100%",
+  },
+
   image: {
     borderRadius: "60@s",
     height: "108@s",

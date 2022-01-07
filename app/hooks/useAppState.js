@@ -1,18 +1,19 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { AppState } from "react-native";
 
 export default useAppState = () => {
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
 
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      appState.current = nextAppState;
-      setAppStateVisible(appState.current);
-    });
+  const handleAppStateChange = (nextAppState) => {
+    appState.current = nextAppState;
+    setAppStateVisible(appState.current);
+  };
 
+  useEffect(() => {
+    AppState.addEventListener("change", handleAppStateChange);
     return () => {
-      subscription.remove();
+      AppState.removeEventListener("change", handleAppStateChange);
     };
   }, []);
 

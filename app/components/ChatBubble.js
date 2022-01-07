@@ -1,8 +1,9 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import Svg, { Path } from "react-native-svg";
 import { moderateScale, scale } from "react-native-size-matters";
+import Autolink from "react-native-autolink";
 
 import defaultStyles from "../config/styles";
 
@@ -19,14 +20,31 @@ function ChatBubble({ text = "", mine }) {
           },
         ]}
       >
-        <Text
-          style={[
-            styles.text,
-            { color: defaultStyles.colors.white, fontFamily: "Comic-Bold" },
-          ]}
-        >
-          {text}
-        </Text>
+        <Autolink
+          showAlert={true}
+          text={text}
+          linkProps={{
+            suppressHighlighting: true,
+            testID: "link",
+          }}
+          linkStyle={{
+            ...styles.text,
+            color: defaultStyles.colors.yellow,
+            fontFamily: "Comic-Bold",
+          }}
+          textProps={{
+            selectable: false,
+            style: {
+              ...styles.text,
+              color: defaultStyles.colors.white,
+              fontFamily: "Comic-Bold",
+            },
+          }}
+          email={true}
+          hashtag="instagram"
+          phone="sms"
+          mention="instagram"
+        />
         <View
           style={[
             styles.arrow_container,

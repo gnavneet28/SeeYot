@@ -32,7 +32,8 @@ function AppNavigator(props) {
   useEffect(() => {
     const subscription1 = socket.on(`newNotification${user._id}`, (data) => {
       if (data.user) {
-        return setUser(data.user);
+        setUser(data.user);
+        return storeDetails(data.user);
       }
       return;
     });

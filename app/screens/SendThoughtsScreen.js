@@ -34,6 +34,7 @@ import ActiveForContext from "../utilities/activeForContext";
 import InfoAlert from "../components/InfoAlert";
 import ActiveMessagesContext from "../utilities/activeMessagesContext";
 import apiActivity from "../utilities/apiActivity";
+import SuccessMessageContext from "../utilities/successMessageContext";
 
 import useMountedRef from "../hooks/useMountedRef";
 import useAppState from "../hooks/useAppState";
@@ -64,9 +65,10 @@ function SendThoughtsScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
   const { recipient, from } = route.params;
   const { activeFor, setActiveFor } = useContext(ActiveForContext);
+  const { setSuccess } = useContext(SuccessMessageContext);
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
-  const { tackleProblem } = apiActivity;
+  const { tackleProblem, showSucessMessage } = apiActivity;
   const appStateVisible = useAppState();
 
   // STATES
@@ -96,29 +98,38 @@ function SendThoughtsScreen({ navigation, route }) {
 
   const handleCloseAlert = useCallback(() => setShowAlert(false), []);
 
-  const handleSendNewMessageNotification = async () => {
-    const { ok, data, problem } = await usersApi.notifyUserForActiveChat(
-      recipient._id
-    );
-    if (ok) {
-      return setShowAlert(false);
-    }
+  const handleSendNewMessageNotification = debounce(
+    async () => {
+      setShowAlert(false);
+      const { ok, data, problem } = await usersApi.notifyUserForActiveChat(
+        recipient._id
+      );
+      if (ok) {
+        return showSucessMessage(setSuccess, "Request sent!", 3000);
+      }
 
-    setShowAlert(false);
-    tackleProblem(problem, data, setInfoAlert);
-  };
+      setShowAlert(false);
+      tackleProblem(problem, data, setInfoAlert);
+    },
+    5000,
+    true
+  );
 
   // SETTING ACTIVECHATMESSAGES, ACTIVE CHAT TO NULL AND REMOVING THE ACTIVECHAT FOR USER
   useEffect(() => {
-    setActiveMessages([]);
-    setActiveChat(false);
-
-    if (!isFocused || appStateVisible !== "active") {
-      handleSetChatInActive();
+    if (mounted) {
       setActiveMessages([]);
       setActiveChat(false);
     }
-  }, [isFocused, appStateVisible]);
+
+    if (!isFocused || appStateVisible !== "active") {
+      if (mounted) {
+        handleSetChatInActive();
+        setActiveMessages([]);
+        setActiveChat(false);
+      }
+    }
+  }, [isFocused, appStateVisible, mounted]);
 
   useEffect(() => {
     if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
@@ -243,6 +254,9 @@ function SendThoughtsScreen({ navigation, route }) {
           messageFor
         );
         if (ok) {
+          if (recipient._id != user._id) {
+            usersApi.updateReceivedThoughtsCount(recipient._id);
+          }
           if (!data.matched) {
             await storeDetails(data.user);
             setUser(data.user);
@@ -282,7 +296,7 @@ function SendThoughtsScreen({ navigation, route }) {
   );
 
   const handleSendActiveMessage = async (textMessage) => {
-    if (!isRecipientActive) {
+    if (!isRecipientActive && mounted) {
       return setShowAlert(true);
     }
     let newMessage = {
@@ -296,10 +310,14 @@ function SendThoughtsScreen({ navigation, route }) {
       newMessage
     );
     if (ok) {
-      return setActiveMessages([...activeMessages, newMessage]);
+      if (mounted) {
+        return setActiveMessages([...activeMessages, newMessage]);
+      }
     }
 
-    tackleProblem(problem, data, setInfoAlert);
+    if (mounted) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   // ON FOCUS PAGE ACTION
@@ -308,14 +326,6 @@ function SendThoughtsScreen({ navigation, route }) {
       recipient._id
     );
     if (ok) {
-      const res = await usersApi.getCurrentUser();
-      if (res.ok && res.data) {
-        if (res.data.__v > data.user.__v) {
-          await storeDetails(res.data);
-          return setUser(res.data);
-        }
-      }
-
       setUser(data.user);
       return await storeDetails(data.user);
     } else return;
@@ -342,14 +352,6 @@ function SendThoughtsScreen({ navigation, route }) {
         );
 
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              return setUnfriendProcessing(false);
-            }
-          }
           await storeDetails(data.user);
           setUser(data.user);
           return setUnfriendProcessing(false);
@@ -374,15 +376,6 @@ function SendThoughtsScreen({ navigation, route }) {
         );
 
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              return setBlockProcessing(false);
-            }
-          }
-
           await storeDetails(data.user);
           setUser(data.user);
           return setBlockProcessing(false);
@@ -406,15 +399,6 @@ function SendThoughtsScreen({ navigation, route }) {
         );
 
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              return setBlockProcessing(false);
-            }
-          }
-
           await storeDetails(data.user);
           setUser(data.user);
           return setBlockProcessing(false);
@@ -437,15 +421,6 @@ function SendThoughtsScreen({ navigation, route }) {
         const { data, ok, problem } = await usersApi.addFavorite(recipient._id);
 
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              return setFavoriteProcessing(false);
-            }
-          }
-
           await storeDetails(data.user);
           setUser(data.user);
           return setFavoriteProcessing(false);
@@ -470,15 +445,6 @@ function SendThoughtsScreen({ navigation, route }) {
         );
 
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              return setFavoriteProcessing(false);
-            }
-          }
-
           await storeDetails(data.user);
           setUser(data.user);
           return setFavoriteProcessing(false);
@@ -497,6 +463,9 @@ function SendThoughtsScreen({ navigation, route }) {
 
   const handleSetChatActive = async () => {
     setActiveChat(true);
+    if (!isRecipientActive && mounted) {
+      setShowAlert(true);
+    }
     const { ok } = await usersApi.makeCurrentUserActiveFor(
       recipient._id,
       user._id
@@ -541,7 +510,7 @@ function SendThoughtsScreen({ navigation, route }) {
         <Alert
           visible={showAlert}
           title="Not Active"
-          description={`${recipient.name} is not active for you right now.Send a notification requesting to come online.`}
+          description={`${recipient.name} is not active for you right now. Send a notification requesting to come online.`}
           onRequestClose={handleCloseAlert}
           leftOption="Cancel"
           rightOption="Yes"
@@ -561,6 +530,7 @@ function SendThoughtsScreen({ navigation, route }) {
         />
         <View style={styles.sendThoughtsInputPlaceholder} />
         <SendThoughtsInput
+          processing={messageActivity.processing}
           placeholder={
             activeChat ? "Send direct messages..." : "Send your thoughts..."
           }

@@ -18,6 +18,8 @@ import debounce from "../utilities/debounce";
 import storeDetails from "../utilities/storeDetails";
 import apiActivity from "../utilities/apiActivity";
 
+import useConnection from "../hooks/useConnection";
+
 import usersApi from "../api/users";
 
 function AddContactCard({
@@ -26,6 +28,7 @@ function AddContactCard({
 }) {
   const { user, setUser } = useAuth();
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
+  const isConnected = useConnection();
   const [processing, setProcessing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
@@ -57,15 +60,6 @@ function AddContactCard({
         );
 
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              setProcessing(false);
-              return setApiProcessing(false);
-            }
-          }
           setProcessing(false);
           await storeDetails(data.user);
           setUser(data.user);
@@ -76,7 +70,7 @@ function AddContactCard({
         setApiProcessing(false);
         tackleProblem(problem, data, setInfoAlert);
       },
-      1000,
+      5000,
       true
     ),
     [blockedUser._id, user]
@@ -96,17 +90,14 @@ function AddContactCard({
         <AppText numberOfLines={1} style={styles.infoNameText}>
           {blockedUser.name}
         </AppText>
-        <AppText style={styles.infoNumberText}>
-          {blockedUser.phoneNumber}
-        </AppText>
       </View>
       <ApiProcessingContainer
         style={styles.apiProcessingContainer}
         processing={processing}
       >
         <AppButton
-          disabled={isBlocked ? false : true}
-          onPress={apiProcessing ? () => null : handleUnBlockPress}
+          disabled={isBlocked && isConnected && !apiProcessing ? false : true}
+          onPress={handleUnBlockPress}
           style={styles.blockedButton}
           subStyle={styles.blockButtonSub}
           title={isBlocked ? "Unblock" : "Unblocked"}

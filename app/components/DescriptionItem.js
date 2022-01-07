@@ -12,7 +12,7 @@ function DescriptionItem({ name = "", style, description = "" }) {
       <MaterialCommunityIcons
         color={defaultStyles.colors.tomato}
         name={name}
-        size={scale(20)}
+        size={scale(18)}
         style={{ marginHorizontal: scale(8) }}
       />
       <AppText style={styles.description}>{description}</AppText>
@@ -26,13 +26,13 @@ const styles = ScaledSheet.create({
     borderRadius: "10@s",
     flexDirection: "row",
     marginVertical: "4@s",
-    minHeight: "50@s",
+    minHeight: "40@s",
     paddingVertical: "5@s",
     width: "100%",
   },
   description: {
     flexShrink: 1,
-    fontSize: "14@s",
+    fontSize: "13@s",
     letterSpacing: "0.3@s",
     paddingVertical: 0,
     textAlignVertical: "center",

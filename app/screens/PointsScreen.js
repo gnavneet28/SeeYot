@@ -34,6 +34,7 @@ import authorizeAds, {
 } from "../utilities/authorizeAds";
 
 import useMountedRef from "../hooks/useMountedRef";
+import useConnection from "../hooks/useConnection";
 
 import usersApi from "../api/users";
 import ModalFallback from "../components/ModalFallback";
@@ -46,6 +47,7 @@ function PointsScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
+  const isConnected = useConnection();
   const { setSuccess } = useContext(SuccessMessageContext);
   const { tackleProblem, showSucessMessage } = apiActivity;
 
@@ -125,20 +127,13 @@ function PointsScreen({ navigation }) {
       let newAdStats = await asyncStorage.get(DataConstants.ADSSTATS);
       newAdStats.numberOfAdsSeen.push(new Date());
 
-      const res = await usersApi.getCurrentUser();
-      if (res.ok && res.data) {
-        if (res.data.__v > data.user.__v) {
-          await asyncStorage.store(DataConstants.ADSSTATS, newAdStats);
-          await storeDetails(res.data);
-          setUser(res.data);
-          return showSucessMessage(setSuccess, "Congrats you earned 5 points.");
-        }
-      }
       await asyncStorage.store(DataConstants.ADSSTATS, newAdStats);
       await storeDetails(data.user);
+      setCollectingPoints(false);
       setUser(data.user);
       return showSucessMessage(setSuccess, "Congrats you earned 5 points.");
     }
+    setCollectingPoints(false);
     tackleProblem(problem, data, setInfoAlert);
   };
 
@@ -146,25 +141,31 @@ function PointsScreen({ navigation }) {
     await AdMobRewarded.addEventListener(
       "rewardedVideoUserDidEarnReward",
       () => {
-        setIsLoading(false);
         return updatePoints();
       }
     );
 
-  const subsciption2 = async () =>
+  const subscription2 = async () =>
     await AdMobRewarded.addEventListener("rewardedVideoDidFailToLoad", () => {
-      setIsLoading(false);
+      setCollectingPoints(false);
       return setInfoAlert({
         infoAlertMessage: "Something went wrong! Please try again.",
         showInfoAlert: true,
       });
     });
 
+  const subscription3 = async () => {
+    await AdMobRewarded.addEventListener("rewardedVideoDidDismiss", () => {
+      return setCollectingPoints(false);
+    });
+  };
+
   useEffect(() => {
     let listenEvents = true;
     if (listenEvents) {
       subscription1();
-      subsciption2();
+      subscription2();
+      subscription3();
     }
 
     return () => removeAllListeners();
@@ -210,19 +211,6 @@ function PointsScreen({ navigation }) {
       const { ok, data, problem } = await usersApi.redeemPoints(pointsToRedeem);
       if (ok) {
         setPointsToRedeem(0);
-        const res = await usersApi.getCurrentUser();
-        if (res.ok && res.data) {
-          if (res.data.__v > data.user.__v) {
-            await storeDetails(res.data);
-            setUser(res.data);
-            setRedeeming(false);
-            return showSucessMessage(
-              setSuccess,
-              "Congrats! You have now become a SeeYot Vip member. Enjoy connecting with more people without hesitation.",
-              6000
-            );
-          }
-        }
         await storeDetails(data.user);
         setUser(data.user);
         setRedeeming(false);
@@ -276,6 +264,7 @@ function PointsScreen({ navigation }) {
 
           <View style={styles.actionConatiner}>
             <AppTextInput
+              editable={!redeeming}
               keyboardType="numeric"
               onChangeText={setPointsToRedeem}
               subStyle={styles.inputSub}
@@ -289,7 +278,8 @@ function PointsScreen({ navigation }) {
             >
               <AppButton
                 disabled={
-                  pointsToRedeem.toString().replace(/\s/g, "").length >= 2
+                  pointsToRedeem.toString().replace(/\s/g, "").length >= 2 &&
+                  isConnected
                     ? false
                     : true
                 }
@@ -306,6 +296,7 @@ function PointsScreen({ navigation }) {
           processing={collectingPoints}
         >
           <AppButton
+            disabled={!isConnected}
             onPress={handleShowAd}
             style={styles.collectPointsButton}
             subStyle={styles.collectPointsButtonSub}
@@ -349,10 +340,10 @@ function PointsScreen({ navigation }) {
               Terms to use Ads to avail SeeYot Vip membership.
             </AppText>
             <InfoText information="a. You account should be minimum 15 days old." />
-            <InfoText information="b. You can watch only 6 ads within 24 hours. (successful watch)" />
+            <InfoText information="b. You can watch only 8 ads within 24 hours. (successful watch)" />
             <InfoText
               style={{ marginBottom: scale(10) }}
-              information="c. You can watch only 1 ad within 10 minutes. (successful watch)"
+              information="c. You can watch only 1 ad within 5 minutes. (successful watch)"
             />
 
             <Details
@@ -360,7 +351,7 @@ function PointsScreen({ navigation }) {
               value={currentAdsStats.accountLife}
             />
             <Details
-              title="Ads seen in last 10 minutes: "
+              title="Ads seen in last 5 minutes: "
               value={currentAdsStats.seenInLastTenMinutes}
             />
             <Details
@@ -496,9 +487,7 @@ const styles = ScaledSheet.create({
   redeemConatainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
-    borderColor: defaultStyles.colors.lightGrey,
     borderRadius: "5@s",
-    borderWidth: 1,
     elevation: 2,
     padding: "10@s",
     width: "90%",

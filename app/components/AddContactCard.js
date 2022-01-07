@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useContext } from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import LottieView from "lottie-react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
@@ -16,10 +16,13 @@ import debounce from "../utilities/debounce";
 import storeDetails from "../utilities/storeDetails";
 import ApiContext from "../utilities/apiContext";
 
+import useConnection from "../hooks/useConnection";
+
 import defaultStyles from "../config/styles";
 
 function AddContactCard({ contact, onInvitePress, style }) {
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
+  const isConnected = useConnection();
   const { user, setUser } = useAuth();
   const [processing, setProcessing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
@@ -53,15 +56,6 @@ function AddContactCard({ contact, onInvitePress, style }) {
         );
 
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              setProcessing(false);
-              return setApiProcessing(false);
-            }
-          }
           await storeDetails(data.user);
           setUser(data.user);
           setApiProcessing(false);
@@ -109,14 +103,16 @@ function AddContactCard({ contact, onInvitePress, style }) {
           {!processing ? (
             <AppButton
               title={inContacts ? "Added" : "Add"}
-              disabled={inContacts || apiProcessing ? true : false}
+              disabled={
+                inContacts || apiProcessing || !isConnected ? true : false
+              }
               style={styles.addButton}
               subStyle={[
                 styles.addButtonSub,
                 {
                   color: inContacts
                     ? defaultStyles.colors.tomato
-                    : defaultStyles.colors.blue,
+                    : defaultStyles.colors.green,
                 },
               ]}
               onPress={handleAddPress}

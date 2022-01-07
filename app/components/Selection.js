@@ -4,6 +4,8 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";
 
+import useConnection from "../hooks/useConnection";
+
 import defaultStyles from "../config/styles";
 
 function Selection({
@@ -14,9 +16,11 @@ function Selection({
   containerStyle,
   value = "",
 }) {
+  const isConnected = useConnection();
   return (
     <View style={[styles.container, style]}>
       <TouchableOpacity
+        disabled={!isConnected}
         onPress={onPress}
         style={[
           [
@@ -44,9 +48,14 @@ function Selection({
           ]}
         />
       </TouchableOpacity>
-      <AppText style={{ fontSize: scale(15), opacity: 0.8 }} onPress={onPress}>
-        {value}
-      </AppText>
+      {value ? (
+        <AppText
+          style={{ fontSize: scale(15), opacity: 0.8 }}
+          onPress={isConnected ? onPress : null}
+        >
+          {value}
+        </AppText>
+      ) : null}
     </View>
   );
 }

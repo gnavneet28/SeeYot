@@ -7,6 +7,7 @@ import { useIsFocused } from "@react-navigation/native";
 
 import AddContactList from "../components/AddContactList";
 import AppActivityIndicator from "../components/ActivityIndicator";
+import Alert from "../components/Alert";
 import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
 import Screen from "../components/Screen";
@@ -21,6 +22,7 @@ import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
 import ApiContext from "../utilities/apiContext";
 import apiActivity from "../utilities/apiActivity";
+import authorizeUpdates from "../utilities/authorizeUpdates";
 
 function AddContactsScreen({ navigation }) {
   const { user, setUser } = useAuth();
@@ -41,8 +43,29 @@ function AddContactsScreen({ navigation }) {
     showInfoAlert: false,
   });
 
+  const [
+    contactaAccessDeniedAlertVisibility,
+    setContactsAccessDeniedAlertVisibility,
+  ] = useState(false);
+
   const [refreshing, setRefreshing] = useState(false);
   const [apiProcessing, setApiProcessing] = useState(false);
+
+  // Alert Action
+
+  const handleContactsAccessDeniedAlertVisibility = useCallback(() => {
+    setContactsAccessDeniedAlertVisibility(false);
+  }, []);
+
+  const openPermissionSettings = useCallback(async () => {
+    const contactIsAccessible = await permission();
+
+    if (contactIsAccessible == true) {
+      return setContactsAccessDeniedAlertVisibility(false);
+    }
+    setContactsAccessDeniedAlertVisibility(false);
+    await Linking.openSettings();
+  }, []);
 
   // ON PAGE FOCUS ACTION
   const requestPermission = async () => {
@@ -73,19 +96,14 @@ function AddContactsScreen({ navigation }) {
       } else {
         if (!isReady || mounted) {
           setIsReady(true);
-          return setInfoAlert({
-            infoAlertMessage:
-              "Please allow contacts access to add them as friends!",
-            showInfoAlert: true,
-          });
+          return setContactsAccessDeniedAlertVisibility(true);
         }
       }
     } catch (error) {
       if (!isReady || mounted) {
         setIsReady(true);
         return setInfoAlert({
-          infoAlertMessage:
-            "Please allow contacts access to add them as friends!",
+          infoAlertMessage: `${error}`,
           showInfoAlert: true,
         });
       }
@@ -108,25 +126,13 @@ function AddContactsScreen({ navigation }) {
 
     const { ok, data, problem } = await usersApi.syncContacts(newListToSync);
     if (ok) {
-      const res = await usersApi.getCurrentUser();
-      if (res.ok && res.data) {
-        if (res.data.__v > data.user.__v) {
-          await storeDetails(res.data);
-          setUser(res.data);
-          if (!isReady || mounted) {
-            return setUsers(
-              res.data.phoneContacts.sort(
-                (a, b) => a.isRegistered < b.isRegistered
-              )
-            );
-          }
-        }
-      }
       await storeDetails(data.user);
       setUser(data.user);
       if (!isReady || mounted) {
         return setUsers(
-          res.data.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
+          data.user.phoneContacts.sort(
+            (a, b) => a.isRegistered < b.isRegistered
+          )
         );
       }
     }
@@ -142,7 +148,7 @@ function AddContactsScreen({ navigation }) {
     }
   };
 
-  const setUpPage = () => {
+  const setUpPage = async () => {
     if (user.phoneContacts.length) {
       if (!isReady || mounted) {
         setUsers(
@@ -151,6 +157,9 @@ function AddContactsScreen({ navigation }) {
         setIsReady(true);
       }
     }
+    let canUpdate = await authorizeUpdates.authorizePhoneContactsUpdate();
+    if (!canUpdate) return;
+    await authorizeUpdates.updatePhoneContactsUpdate();
     return requestPermission();
   };
 
@@ -194,13 +203,7 @@ function AddContactsScreen({ navigation }) {
 
   // INFO ALERT ACTIONS
   const handleCloseInfoAlert = useCallback(async () => {
-    const contactIsAccessible = await permission();
-
-    if (contactIsAccessible == true) {
-      return setInfoAlert({ showInfoAlert: false });
-    }
-    setInfoAlert({ showInfoAlert: false });
-    await Linking.openSettings();
+    setInfoAlert({ infoAlertMessage: "", showInfoAlert: false });
   }, []);
 
   //INVITE ACTIONS
@@ -243,6 +246,16 @@ function AddContactsScreen({ navigation }) {
         onPressRight={handleRightPress}
         rightIcon="person-search"
         title="Add Contacts"
+      />
+      <Alert
+        visible={contactaAccessDeniedAlertVisibility}
+        title="Contacts Access Denied"
+        description="Please give access to your contacts to find out your contacts on SeeYot."
+        onRequestClose={handleContactsAccessDeniedAlertVisibility}
+        leftOption="Cancel"
+        rightOption="Ok"
+        leftPress={handleContactsAccessDeniedAlertVisibility}
+        rightPress={openPermissionSettings}
       />
       <InfoAlert
         leftPress={handleCloseInfoAlert}

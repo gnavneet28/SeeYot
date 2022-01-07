@@ -34,7 +34,7 @@ const styles = ScaledSheet.create({
   title: {
     borderBottomColor: defaultStyles.colors.light,
     borderBottomWidth: 1,
-    fontSize: "16@s",
+    fontSize: "15@s",
     textAlign: "left",
   },
 });

@@ -188,15 +188,6 @@ function VipSearchScreen({ navigation }) {
           interestedUser._id
         );
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              setApiProcessing(false);
-              return setIsVisible(false);
-            }
-          }
           setApiProcessing(false);
           setIsVisible(false);
           await storeDetails(data.user);

@@ -16,11 +16,13 @@ import apiActivity from "../utilities/apiActivity";
 import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
+import useConnection from "../hooks/useConnection";
 
 function SettingsScreen({ navigation }) {
   const { setUser } = useAuth();
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
+  const isConnected = useConnection();
   const { setSuccess } = useContext(SuccessMessageContext);
   const { tackleProblem, showSucessMessage, updateUserDate } = apiActivity;
 
@@ -60,19 +62,6 @@ function SettingsScreen({ navigation }) {
 
     const { ok, data, problem } = await usersApi.removeUserPhoneContacts();
     if (ok) {
-      const res = await usersApi.getCurrentUser();
-      if (res.ok && res.data) {
-        if (res.data.__v > data.user.__v) {
-          await storeDetails(res.data);
-          setUser(res.data);
-          setRemovingContact(false);
-          return showSucessMessage(
-            setSuccess,
-            "Contacts deleted successfully."
-          );
-        }
-      }
-
       await storeDetails(data.user);
       setUser(data.user);
       setRemovingContact(false);
@@ -133,7 +122,7 @@ function SettingsScreen({ navigation }) {
         leftPress={() => setContactAlert(false)}
         leftOption="Cancel"
         rightOption="Ok"
-        rightPress={deletePhoneContacts}
+        rightPress={isConnected ? deletePhoneContacts : null}
         setVisible={setContactAlert}
         title="Delete this Message"
         visible={contactAlert}

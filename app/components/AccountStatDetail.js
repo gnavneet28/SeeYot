@@ -6,7 +6,7 @@ import AppText from "./AppText";
 
 import defaultStyles from "../config/styles";
 
-function Details({ title, value, style }) {
+function AccountStatDetail({ title, value, style }) {
   return (
     <View style={[styles.descriptionContainer, style]}>
       <AppText style={styles.descriptionTitle}>{title}</AppText>
@@ -28,7 +28,7 @@ const styles = ScaledSheet.create({
     width: "85%",
   },
   descriptionTitle: {
-    color: defaultStyles.colors.secondary,
+    color: defaultStyles.colors.tomato,
     fontSize: "13@s",
   },
   value: {
@@ -37,4 +37,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default Details;
+export default AccountStatDetail;

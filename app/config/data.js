@@ -13,7 +13,7 @@ export default [
     title: "Send Thoughts",
     description: "No more guessing when you get hiccups!",
     subDescription:
-      "When you remember someone, just send them your thoughts! They would be notified but could only see them and the sender's name when they do the same for you within 10 minutes.",
+      "When you remember someone, just send them your thoughts! They would be notified but could only see them and your name when they do the same for you within 10 minutes.",
   },
   {
     _id: "contactsNickname",
@@ -34,7 +34,7 @@ export default [
   {
     _id: "activeChat",
     imageUri: require("../assets/activeChat.png"),
-    title: "ACTIVE CHATTING",
+    title: "Active Conversation",
     description: `Have a Quick chat with "ACTIVE FOR YOU" people.`,
     subDescription:
       "Whenever you feel like having a quick chat with someone, active for you, without storing the messages anywhere, go for active chatting.",

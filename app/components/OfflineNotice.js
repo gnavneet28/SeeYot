@@ -11,7 +11,7 @@ import colors from "../config/colors";
 function OfflineNotice(props) {
   const isConnected = useConnection();
 
-  if (isConnected)
+  if (!isConnected)
     return (
       <View style={styles.container}>
         <AppText style={styles.text}>No internet connection available!</AppText>
@@ -24,9 +24,7 @@ const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: colors.yellow,
-    borderBottomRightRadius: "5@s",
-    borderBottomLeftRadius: "5@s",
+    backgroundColor: colors.danger,
     elevation: Platform.OS === "android" ? 1 : 0,
     height: "25@s",
     justifyContent: "center",
@@ -36,7 +34,7 @@ const styles = ScaledSheet.create({
     zIndex: 1,
   },
   text: {
-    color: colors.danger,
+    color: colors.white,
     fontSize: "13@s",
   },
 });

@@ -16,7 +16,7 @@ import InfoAlert from "../components/InfoAlert";
 import Mood from "../components/Mood";
 import OptionalAnswer from "../components/OptionalAnswer";
 import Screen from "../components/Screen";
-import SuccessMessageContext from "../utilities/successMessageContext";
+import ModalFallback from "../components/ModalFallback";
 
 import defaultStyles from "../config/styles";
 
@@ -26,14 +26,16 @@ import myApi from "../api/my";
 import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
+import useConnection from "../hooks/useConnection";
 
 import Constants from "../navigation/NavigationConstants";
 
 import storeDetails from "../utilities/storeDetails";
+import SuccessMessageContext from "../utilities/successMessageContext";
 import debounce from "../utilities/debounce";
 import ApiContext from "../utilities/apiContext";
 import apiActivity from "../utilities/apiActivity";
-import ModalFallback from "../components/ModalFallback";
+import authorizeUpdates from "../utilities/authorizeUpdates";
 
 const defaultRecipient = {
   name: "",
@@ -52,6 +54,7 @@ function AddFavoritesScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
+  const isConnected = useConnection();
   const { setSuccess } = useContext(SuccessMessageContext);
   const { tackleProblem, showSucessMessage } = apiActivity;
 
@@ -59,7 +62,7 @@ function AddFavoritesScreen({ navigation }) {
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState({
     textMessage: "",
-    mood: "",
+    mood: "Happy",
   });
   const [recipient, setRecipient] = useState(defaultRecipient);
   const [isReady, setIsReady] = useState(false);
@@ -97,21 +100,13 @@ function AddFavoritesScreen({ navigation }) {
   };
 
   const updateMyFavoritesList = async () => {
+    let canUpdate = await authorizeUpdates.authorizeFavoritesUpdate();
+    if (!canUpdate) return;
     const { ok, data, problem } = await myApi.updateMyFavorites();
     if (ok) {
-      const res = await usersApi.getCurrentUser();
-      if (res.ok && res.data) {
-        if (res.data.__v > data.user.__v) {
-          await storeDetails(res.data);
-          setUser(res.data);
-          if (!isReady || mounted) {
-            return setUsersList();
-          }
-          return;
-        }
-      }
       await storeDetails(data.user);
       setUser(data.user);
+      await authorizeUpdates.updateFavoritesUpdate();
       if (!isReady || mounted) {
         return setUsersList();
       }
@@ -133,6 +128,12 @@ function AddFavoritesScreen({ navigation }) {
   useEffect(() => {
     if (!isFocused && mounted && isVisible) {
       setIsVisible(false);
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (!isFocused && mounted && showAddoption) {
+      setShowAddOption(false);
     }
   }, [isFocused, mounted]);
 
@@ -167,7 +168,7 @@ function AddFavoritesScreen({ navigation }) {
 
   const handleCloseMessage = useCallback(() => {
     setRecipient(defaultRecipient);
-    setMessage({ textMessage: "", mood: "" });
+    setMessage({ textMessage: "", mood: "Happy" });
     setIsVisible(false);
   }, []);
 
@@ -176,7 +177,7 @@ function AddFavoritesScreen({ navigation }) {
       async () => {
         setProcessing(true);
         let msg = message.textMessage;
-        let mood = message.mood ? message.mood : "Happy";
+        let mood = message.mood;
         let optionalReplies = optionalAnswer;
 
         const { data, ok, problem } = await messagesApi.sendMessage(
@@ -189,11 +190,14 @@ function AddFavoritesScreen({ navigation }) {
         if (ok) {
           setMessage({
             mood: "",
-            textMessage: "",
+            textMessage: "Happy",
           });
           setOptionalAnswer([]);
           setProcessing(false);
           setIsVisible(false);
+          if (recipient._id != user._id) {
+            usersApi.updateReceivedMessagesCount(recipient._id);
+          }
           return showSucessMessage(setSuccess, "Message Sent!");
         }
         setProcessing(false);
@@ -264,6 +268,7 @@ function AddFavoritesScreen({ navigation }) {
   );
 
   const checkSendButtonDisability = () => {
+    if (!isConnected) return true;
     if (optionalAnswer.length) {
       if (
         message.textMessage.replace(/\s/g, "").length >= 1 &&
@@ -361,6 +366,7 @@ function AddFavoritesScreen({ navigation }) {
                 />
                 <View style={styles.inputBoxContainer}>
                   <TextInput
+                    editable={!processing}
                     placeholder={
                       "What would you like to say to" +
                       " " +
@@ -370,11 +376,8 @@ function AddFavoritesScreen({ navigation }) {
                     multiline={true}
                     value={message.textMessage}
                     maxLength={250}
-                    onChangeText={
-                      processing === true
-                        ? () => null
-                        : (text) =>
-                            setMessage({ ...message, textMessage: text })
+                    onChangeText={(text) =>
+                      setMessage({ ...message, textMessage: text })
                     }
                     style={styles.messageInput}
                   />

@@ -8,6 +8,7 @@ import Screen from "../components/Screen";
 import UserDetailsCard from "../components/UserDetailsCard";
 
 import debounce from "../utilities/debounce";
+import defaultStyles from "../config/styles";
 
 function HelpScreen({ navigation }) {
   // HEADER ACTION
@@ -34,6 +35,12 @@ function HelpScreen({ navigation }) {
     Linking.openURL("http://www.seeyot.com/how_it_works");
   };
 
+  const handleOpenMail = () => {
+    Linking.openURL(
+      `mailto:help@seeyot.com?subject=Help&body=write your concern here...`
+    );
+  };
+
   return (
     <Screen style={styles.container}>
       <AppHeader
@@ -49,8 +56,10 @@ function HelpScreen({ navigation }) {
         />
         <UserDetailsCard
           data="help@seeyot.com"
+          dataStyle={{ color: defaultStyles.colors.blue }}
           editable={false}
           iconName="email"
+          onDataPress={handleOpenMail}
           size={scale(20)}
           title="Email"
         />

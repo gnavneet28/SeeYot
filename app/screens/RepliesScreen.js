@@ -15,6 +15,7 @@ import debounce from "../utilities/debounce";
 import messagesApi from "../api/messages";
 
 import useMountedRef from "../hooks/useMountedRef";
+import useConnection from "../hooks/useConnection";
 
 import defaultStyles from "../config/styles";
 import defaultProps from "../utilities/defaultProps";
@@ -24,6 +25,7 @@ function RepliesScreen({ navigation }) {
   const [replies, setReplies] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const mounted = useMountedRef().current;
+  const isConnected = useConnection();
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
 
@@ -81,7 +83,7 @@ function RepliesScreen({ navigation }) {
   const allReplies = async () => {
     let { ok, data, problem } = await messagesApi.getAllRepliedMessages();
     if (ok) {
-      if ((!isReady, mounted)) {
+      if (!isReady || mounted) {
         return setReplies(data.allReplies);
       }
       return;
@@ -169,7 +171,7 @@ function RepliesScreen({ navigation }) {
         leftPress={() => setShowAlert(false)}
         leftOption="Cancel"
         rightOption="Ok"
-        rightPress={handleDeletePress}
+        rightPress={isConnected ? handleDeletePress : null}
         setVisible={setShowAlert}
         title="Delete this Message"
         visible={showAlert}

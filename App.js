@@ -89,7 +89,7 @@ export default function App() {
       <AppLoading
         startAsync={setUp}
         onFinish={() => {
-          setState({ ...state, isReady: true, fontLoaded: true });
+          setState({ isReady: true, fontLoaded: true });
         }}
         onError={console.warn}
       />

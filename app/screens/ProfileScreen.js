@@ -33,6 +33,7 @@ import problemsApi from "../api/problems";
 import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
+import useConnection from "../hooks/useConnection";
 
 import defaultStyles from "../config/styles";
 
@@ -40,6 +41,7 @@ function ProfileScreen({ navigation }) {
   const { user, setUser, logOut } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
+  const isConnected = useConnection();
   const { setSuccess } = useContext(SuccessMessageContext);
   const { tackleProblem, showSucessMessage } = apiActivity;
 
@@ -161,6 +163,11 @@ function ProfileScreen({ navigation }) {
     navigation.navigate(Constant.SETTINGS);
   }, []);
 
+  const handleInsightsPress = useCallback(() => {
+    setVisible(false);
+    navigation.navigate(Constant.INSIGHTS_SCREEN);
+  }, []);
+
   // PICTURE CHANGE ACTION
   const handleImageChange = useCallback(
     debounce(
@@ -174,14 +181,6 @@ function ProfileScreen({ navigation }) {
             picture
           );
           if (ok) {
-            const res = await usersApi.getCurrentUser();
-            if (res.ok && res.data) {
-              if (res.data.__v > data.user.__v) {
-                await storeDetails(res.data);
-                setUser(res.data);
-                return setIsLoading(false);
-              }
-            }
             await storeDetails(data.user);
             setUser(data.user);
             return setIsLoading(false);
@@ -192,14 +191,6 @@ function ProfileScreen({ navigation }) {
 
         const { ok, data, problem } = await usersApi.removeCurrentUserPhoto();
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              return setIsLoading(false);
-            }
-          }
           await storeDetails(data.user);
           setUser(data.user);
           return setIsLoading(false);
@@ -222,15 +213,6 @@ function ProfileScreen({ navigation }) {
         const { data, ok, problem } = await usersApi.updateEchoWhenMessage();
 
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              return setIsLoading(false);
-            }
-          }
-
           await storeDetails(data.user);
           setUser(data.user);
           return setIsLoading(false);
@@ -253,15 +235,6 @@ function ProfileScreen({ navigation }) {
         const { data, ok, problem } = await usersApi.updateEchoWhenPhotoTap();
 
         if (ok) {
-          const res = await usersApi.getCurrentUser();
-          if (res.ok && res.data) {
-            if (res.data.__v > data.user.__v) {
-              await storeDetails(res.data);
-              setUser(res.data);
-              return setIsLoading(false);
-            }
-          }
-
           await storeDetails(data.user);
           setUser(data.user);
           return setIsLoading(false);
@@ -283,17 +256,6 @@ function ProfileScreen({ navigation }) {
     const { ok, data, problem } = await usersApi.updateCurrentUserName(name);
 
     if (ok) {
-      const res = await usersApi.getCurrentUser();
-      if (res.ok && res.data) {
-        if (res.data.__v > data.user.__v) {
-          await storeDetails(res.data);
-          setUser(res.data);
-          setSavingName(false);
-          setOpenEditName(false);
-          return showSucessMessage(setSuccess, "Name Updated.");
-        }
-      }
-
       await storeDetails(data.user);
       setUser(data.user);
       setSavingName(false);
@@ -351,7 +313,7 @@ function ProfileScreen({ navigation }) {
           leftOption="Cancel"
           rightOption="Yes"
           leftPress={handleCloseLogout}
-          rightPress={handleLogOutPress}
+          rightPress={isConnected ? handleLogOutPress : null}
         />
         <LoadingIndicator visible={isLoading} />
         <InfoAlert
@@ -391,12 +353,16 @@ function ProfileScreen({ navigation }) {
             <View style={styles.echoBox}>
               <AppText style={styles.echoWhen}>Echo when?</AppText>
               <Selection
-                onPress={handleMessageSelection}
+                onPress={
+                  isConnected && !isLoading ? handleMessageSelection : null
+                }
                 opted={user.echoWhen.message}
                 value="Someone sends you their thoughts."
               />
               <Selection
-                onPress={handlePhotoTapSelection}
+                onPress={
+                  isConnected && !isLoading ? handlePhotoTapSelection : null
+                }
                 opted={user.echoWhen.photoTap}
                 value="Someone taps on your profile picture."
               />
@@ -458,6 +424,12 @@ function ProfileScreen({ navigation }) {
             />
 
             <ProfileOption
+              icon="info-outline"
+              onPress={handleInsightsPress}
+              title="Insights"
+            />
+
+            <ProfileOption
               icon="logout"
               onPress={handleOpenLogout}
               title="Log Out"
@@ -482,6 +454,7 @@ function ProfileScreen({ navigation }) {
           </View>
           <View style={styles.optionsContainerReport}>
             <AppTextInput
+              editable={!isLoading}
               maxLength={250}
               multiline={true}
               onChangeText={setProblemDescription}
@@ -495,7 +468,9 @@ function ProfileScreen({ navigation }) {
               </AppText>
               <AppButton
                 disabled={
-                  problemDescription.replace(/\s/g, "").length >= 1
+                  problemDescription.replace(/\s/g, "").length >= 1 &&
+                  isConnected &&
+                  !isLoading
                     ? false
                     : true
                 }
@@ -509,7 +484,7 @@ function ProfileScreen({ navigation }) {
         </View>
       </Modal>
       <Modal
-        onRequestClose={() => setOpenEditName(false)}
+        onRequestClose={savingName ? null : () => setOpenEditName(false)}
         transparent={true}
         visible={openEditName}
       >
@@ -518,6 +493,7 @@ function ProfileScreen({ navigation }) {
             <AppText style={styles.editName}>Edit your name</AppText>
             <View style={styles.inputBoxContainer}>
               <AppTextInput
+                editable={!savingName}
                 autoFocus={true}
                 maxLength={30}
                 minLength={3}
@@ -531,6 +507,7 @@ function ProfileScreen({ navigation }) {
             </View>
             <View style={styles.actionButtonContainer}>
               <AppButton
+                disabled={savingName}
                 onPress={() => {
                   setOpenEditName(false);
                   setName(user.name);
@@ -548,7 +525,12 @@ function ProfileScreen({ navigation }) {
               >
                 <AppButton
                   disabled={
-                    name && name.replace(/\s/g, "").length >= 4 ? false : true
+                    name &&
+                    name.replace(/\s/g, "").length >= 4 &&
+                    isConnected &&
+                    !savingName
+                      ? false
+                      : true
                   }
                   onPress={handleNameChange}
                   style={styles.button}
@@ -634,7 +616,7 @@ const styles = ScaledSheet.create({
     borderTopRightRadius: "10@s",
     borderTopWidth: 1,
     bottom: 0,
-    height: "260@s",
+    height: "280@s",
     overflow: "hidden",
     paddingTop: "20@s",
     width: "100%",

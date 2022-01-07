@@ -24,9 +24,10 @@ function ChatListHeader({ user, activeChat }) {
       ) : null}
       {activeChat ? (
         <AppText style={styles.infoText}>
-          Send direct messages to {user.name} and have an active chat. These are
-          temporary messages and are not stored anywhere, except your device
-          until you refresh this page or visit another chat.
+          Send direct messages to {user.name} and have an active conversation.
+          These are temporary messages and are not stored anywhere, except your
+          device until you refresh this page, visit another chat or the app
+          becomes inactive.
         </AppText>
       ) : (
         <AppText style={styles.infoText}>
@@ -69,18 +70,20 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "20@s",
     color: defaultStyles.colors.dark,
-    fontSize: "14@s",
+    fontSize: "13@s",
     paddingHorizontal: "10@s",
+    paddingVertical: "2@s",
     textAlign: "center",
   },
   name: {
     backgroundColor: defaultStyles.colors.blue,
     borderRadius: "20@s",
     color: defaultStyles.colors.white,
-    fontSize: "14@s",
+    fontSize: "13@s",
     marginTop: "10@s",
     marginBottom: "5@s",
     paddingHorizontal: "10@s",
+    paddingVertical: "2@s",
     textAlign: "center",
   },
 });

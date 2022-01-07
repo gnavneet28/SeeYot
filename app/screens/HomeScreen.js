@@ -12,10 +12,11 @@ import {
   TextInput,
   TouchableOpacity,
   Linking,
+  BackHandler,
 } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useIsFocused } from "@react-navigation/native";
+import { useIsFocused, useFocusEffect } from "@react-navigation/native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "react-native-vector-icons/AntDesign";
 
@@ -35,10 +36,10 @@ import Constant from "../navigation/NavigationConstants";
 import useAuth from "../auth/useAuth";
 
 import myApi from "../api/my";
-import usersApi from "../api/users";
 import messagesApi from "../api/messages";
 
 import useMountedRef from "../hooks/useMountedRef";
+import useConnection from "../hooks/useConnection";
 
 import defaultStyles from "../config/styles";
 
@@ -46,6 +47,7 @@ import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
 import SuccessMessageContext from "../utilities/successMessageContext";
 import apiActivity from "../utilities/apiActivity";
+import authorizeUpdates from "../utilities/authorizeUpdates";
 
 const defaultMessage = {
   _id: "",
@@ -61,8 +63,10 @@ function HomeScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
+  const isConnected = useConnection();
   const { setSuccess } = useContext(SuccessMessageContext);
   const { tackleProblem, showSucessMessage } = apiActivity;
+  const [onHome, setOnHome] = useState(true);
 
   const [infoAlert, setInfoAlert] = useState({
     showInfoAlert: false,
@@ -81,32 +85,59 @@ function HomeScreen({ navigation }) {
   const [sendingReply, setSendingReply] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const clearJunkData = async () => {
-    const { ok, data, problem } = await myApi.clearExpiredData();
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     const onBackPress = () => {
+  //       if (onHome) {
+  //         KeepAwake.deactivate();
+  //         return true;
+  //       } else {
+  //         return false;
+  //       }
+  //     };
 
-    if (ok) return;
+  //     BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+  //     return () =>
+  //       BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+  //   }, [onHome])
+  // );
+
+  // useEffect(() => {
+  //   if (!isFocused && mounted) {
+  //     return setOnHome(false);
+  //   }
+  // }, [isFocused, mounted]);
+
+  // useEffect(() => {
+
+  // }, []);
+
+  const clearJunkData = async () => {
+    let canUpdate = await authorizeUpdates.authorizeExpiredUpdate();
+    if (!canUpdate) return;
+    const { ok, data, problem } = await myApi.clearExpiredData();
+    if (ok) return await authorizeUpdates.updateExpiredUpdate();
     if (problem) return;
   };
 
   const updateAllContacts = async () => {
+    let canUpdate = await authorizeUpdates.authorizeContactsUpdate();
+    if (!canUpdate) return;
     const { ok, data, problem } = await myApi.updateMyContacts();
     if (ok) {
-      const res = await usersApi.getCurrentUser();
-      if (res.ok && res.data) {
-        if (res.data.__v > data.user.__v) {
-          await storeDetails(res.data);
-          return setUser(res.data);
-        }
-      }
+      setUser(data.user);
       await storeDetails(data.user);
-      return setUser(data.user);
+      return await authorizeUpdates.updateContactsUpdate();
     }
     return;
   };
 
   const updateAllReadMessages = async () => {
+    let canUpdate = await authorizeUpdates.authorizeReadMessagesUpdate();
+    if (!canUpdate) return;
     const { ok, problem } = await messagesApi.updateAllMessages();
-    if (ok) return;
+    if (ok) return await authorizeUpdates.updateReadMessagesUpdate();
     if (problem) return;
   };
 
@@ -124,6 +155,11 @@ function HomeScreen({ navigation }) {
   useEffect(() => {
     if (!isFocused && mounted && isVisible) {
       setIsVisible(false);
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (!isFocused && mounted && messageCreator.picture) {
       setMessageCreator({
         name: "************",
         picture: "",
@@ -140,6 +176,12 @@ function HomeScreen({ navigation }) {
     }
   }, [isFocused, mounted]);
 
+  useEffect(() => {
+    if (mounted && selectedMessageId) {
+      setSelectedMessageId("");
+    }
+  }, [isFocused, mounted]);
+
   // MESSAGES ACTION
 
   const handleMessagePress = useCallback(
@@ -150,16 +192,6 @@ function HomeScreen({ navigation }) {
         if (message.seen === false) {
           const { ok, data, problem } = await messagesApi.markRead(message._id);
           if (ok) {
-            const res = await usersApi.getCurrentUser();
-            if (res.ok && res.data) {
-              if (res.data.__v > data.user.__v) {
-                message.seen = true;
-                setMessagesList(data.messages);
-                await storeDetails(res.data);
-                return setUser(res.data);
-              }
-            }
-            message.seen = true;
             setMessagesList(data.messages);
             await storeDetails(data.user);
             return setUser(data.user);
@@ -403,8 +435,9 @@ function HomeScreen({ navigation }) {
 
               <View style={styles.inputContainer}>
                 <TextInput
+                  editable={!sendingReply}
                   maxLength={250}
-                  onChangeText={sendingReply ? null : setReply}
+                  onChangeText={setReply}
                   placeholder="Reply to know who sent this message..."
                   style={[
                     styles.inputBox,
@@ -413,14 +446,22 @@ function HomeScreen({ navigation }) {
                   value={reply}
                 />
                 <TouchableOpacity
-                  disabled={reply.replace(/\s/g, "").length >= 1 ? false : true}
-                  onPress={sendingReply ? null : handleMessageReply}
+                  disabled={
+                    reply.replace(/\s/g, "").length >= 1 && isConnected
+                      ? false
+                      : true
+                  }
+                  onPress={
+                    sendingReply || !isConnected ? null : handleMessageReply
+                  }
                   style={styles.send}
                 >
                   <ApiProcessingContainer processing={sendingReply}>
                     <Icon
                       color={
-                        reply.replace(/\s/g, "").length >= 1 && !sendingReply
+                        reply.replace(/\s/g, "").length >= 1 &&
+                        !sendingReply &&
+                        isConnected
                           ? defaultStyles.colors.secondary
                           : defaultStyles.colors.lightGrey
                       }
@@ -478,7 +519,7 @@ const styles = ScaledSheet.create({
   inputBox: {
     borderRadius: "30@s",
     flex: 1,
-    fontSize: "15@s",
+    fontSize: "14@s",
     height: "100%",
     marginRight: "5@s",
     paddingHorizontal: "10@s",

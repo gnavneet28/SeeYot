@@ -65,7 +65,8 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   description: {
-    fontSize: "15@s",
+    color: defaultStyles.colors.dark_Variant,
+    fontSize: "14@s",
     marginBottom: "15@s",
     marginTop: "2@s",
     opacity: 0.8,
