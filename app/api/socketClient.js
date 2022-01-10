@@ -1,6 +1,6 @@
 import io from "socket.io-client";
 
-const socket = io("http://192.168.124.96:3000", {
+const socket = io("http://192.168.5.96:3000", {
   transports: ["websocket", "polling"],
 });
 

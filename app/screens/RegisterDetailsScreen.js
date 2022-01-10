@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
-import { LinearGradient } from "expo-linear-gradient";
 import { useIsFocused } from "@react-navigation/native";
 
 import AddPicture from "../components/AddPicture";
@@ -96,41 +95,36 @@ function RegisterDetailsScreen({ route }) {
 
   return (
     <Screen style={styles.container}>
-      <LinearGradient
-        colors={["#1c1d1f", "#1d1f24", "#6b6863"]}
-        style={styles.gradient}
-      >
-        <LoadingIndicator visible={isLoading} />
-        <InfoAlert
-          leftPress={handleCloseInfoAlert}
-          description={infoAlert.infoAlertMessage}
-          visible={infoAlert.showInfoAlert}
+      <LoadingIndicator visible={isLoading} />
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
+      />
+      <View style={styles.enterDetailsContainer}>
+        <AddPicture
+          image={image}
+          onChangeImage={(image) => setImage(image)}
+          style={styles.addPhoto}
         />
-        <View style={styles.enterDetailsContainer}>
-          <AddPicture
-            image={image}
-            onChangeImage={(image) => setImage(image)}
-            style={styles.addPhoto}
-          />
-          <AppTextInput
-            maxLength={25}
-            onChangeText={(name) => setName(name)}
-            placeholder="Enter your name here..."
-            style={styles.enterName}
-            subStyle={styles.enterNameSub}
-          />
-          <AppText style={styles.info}>
-            Name you enter here, will be visible to your friends.
-          </AppText>
-        </View>
-        <AppButton
-          disabled={name ? false : true}
-          onPress={handleSubmitForm}
-          style={[styles.button, { display: keyboardShown ? "none" : "flex" }]}
-          subStyle={styles.submitButtonSub}
-          title="Register"
+        <AppTextInput
+          maxLength={25}
+          onChangeText={(name) => setName(name)}
+          placeholder="Enter your name here..."
+          style={styles.enterName}
+          subStyle={styles.enterNameSub}
         />
-      </LinearGradient>
+        <AppText style={styles.info}>
+          Name you enter here, will be visible to your friends.
+        </AppText>
+      </View>
+      <AppButton
+        disabled={name ? false : true}
+        onPress={handleSubmitForm}
+        style={[styles.button, { display: keyboardShown ? "none" : "flex" }]}
+        subStyle={styles.submitButtonSub}
+        title="Register"
+      />
     </Screen>
   );
 }
@@ -142,13 +136,18 @@ const styles = ScaledSheet.create({
   button: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "5@s",
-    height: "40@s",
+    elevation: 2,
+    height: "35@s",
     width: "90%",
   },
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.primary,
+    backgroundColor: defaultStyles.colors.light,
     flex: 1,
+    justifyContent: "space-between",
+    paddingHorizontal: "10@s",
+    paddingVertical: "20@s",
+    width: "100%",
   },
   enterDetailsContainer: {
     alignItems: "center",
@@ -157,26 +156,12 @@ const styles = ScaledSheet.create({
   },
   enterName: {
     borderRadius: "5@s",
+    elevation: 2,
     height: "40@s",
     marginBottom: "5@s",
   },
-  gradient: {
-    alignItems: "center",
-    width: "100%",
-    flex: 1,
-    justifyContent: "space-between",
-    paddingVertical: "20@s",
-    paddingHorizontal: "10@s",
-  },
-  imageBackground: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.primary,
-    flex: 1,
-    justifyContent: "space-between",
-    paddingVertical: "20@s",
-  },
   info: {
-    color: defaultStyles.colors.white,
+    color: defaultStyles.colors.dark_Variant,
     fontSize: "12@s",
     textAlign: "left",
     width: "100%",

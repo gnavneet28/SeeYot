@@ -8,6 +8,11 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
+    "splash": {
+      "image": "./app/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
 
     "ios": {
       "supportsTablet": true,

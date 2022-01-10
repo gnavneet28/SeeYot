@@ -122,7 +122,7 @@ const authorizePhoneContactsUpdate = async () => {
   let currentDate = Date.now();
   dayjs.extend(relativeTime);
 
-  const TIME_LIMIT = 6;
+  const TIME_LIMIT = 12;
 
   let phoneContactsUpdate = await asyncStorage.get(
     DataConstants.PHONE_CONTACTS_UPDATE
@@ -144,9 +144,7 @@ const authorizePhoneContactsUpdate = async () => {
 };
 
 const updateContactsUpdate = async () => {
-  const contactsUpdate = await asyncStorage.get(DataConstants.CONTACTS_UPDATE);
-
-  let newContactsUpdate = [...contactsUpdate];
+  let newContactsUpdate = [];
   newContactsUpdate.push(new Date());
 
   return await asyncStorage.store(
@@ -156,11 +154,7 @@ const updateContactsUpdate = async () => {
 };
 
 const updateFavoritesUpdate = async () => {
-  const favoritesUpdate = await asyncStorage.get(
-    DataConstants.FAVORITES_UPDATE
-  );
-
-  let newFavoritesUpdate = [...favoritesUpdate];
+  let newFavoritesUpdate = [];
   newFavoritesUpdate.push(new Date());
 
   return await asyncStorage.store(
@@ -170,9 +164,7 @@ const updateFavoritesUpdate = async () => {
 };
 
 const updateExpiredUpdate = async () => {
-  const expiredUpdate = await asyncStorage.get(DataConstants.EXPIRED_UPDATE);
-
-  let newExpiredUpdate = [...expiredUpdate];
+  let newExpiredUpdate = [];
   newExpiredUpdate.push(new Date());
 
   return await asyncStorage.store(
@@ -182,11 +174,7 @@ const updateExpiredUpdate = async () => {
 };
 
 const updatePhoneContactsUpdate = async () => {
-  const phoneContactsUpdate = await asyncStorage.get(
-    DataConstants.PHONE_CONTACTS_UPDATE
-  );
-
-  let newPhoneContactsUpdate = [...phoneContactsUpdate];
+  let newPhoneContactsUpdate = [];
   newPhoneContactsUpdate.push(new Date());
 
   return await asyncStorage.store(
@@ -196,9 +184,7 @@ const updatePhoneContactsUpdate = async () => {
 };
 
 const updateReadMessagesUpdate = async () => {
-  const messagesUpdate = await asyncStorage.get(DataConstants.MESSAGES_UPDATE);
-
-  let newMessagesUpdate = [...messagesUpdate];
+  let newMessagesUpdate = [];
   newMessagesUpdate.push(new Date());
 
   return await asyncStorage.store(
@@ -207,11 +193,7 @@ const updateReadMessagesUpdate = async () => {
   );
 };
 const updateEchoMessagesUpdate = async () => {
-  const echoMessagesUpdate = await asyncStorage.get(
-    DataConstants.ECHO_MESSAGE_UPDATE
-  );
-
-  let newEchoMessagesUpdate = [...echoMessagesUpdate];
+  let newEchoMessagesUpdate = [];
   newEchoMessagesUpdate.push(new Date());
 
   return await asyncStorage.store(

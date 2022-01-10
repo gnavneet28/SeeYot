@@ -26,8 +26,8 @@ function AddPicture({
 
   const selectImage = () => {
     ImagePicker.openPicker({
-      width: 800,
-      height: 800,
+      width: 700,
+      height: 700,
       cropping: true,
       mediaType: "photo",
       compressImageQuality: 1,

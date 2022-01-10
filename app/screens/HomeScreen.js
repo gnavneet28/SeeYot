@@ -12,11 +12,10 @@ import {
   TextInput,
   TouchableOpacity,
   Linking,
-  BackHandler,
 } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useIsFocused, useFocusEffect } from "@react-navigation/native";
+import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "react-native-vector-icons/AntDesign";
 
@@ -66,7 +65,6 @@ function HomeScreen({ navigation }) {
   const isConnected = useConnection();
   const { setSuccess } = useContext(SuccessMessageContext);
   const { tackleProblem, showSucessMessage } = apiActivity;
-  const [onHome, setOnHome] = useState(true);
 
   const [infoAlert, setInfoAlert] = useState({
     showInfoAlert: false,
@@ -84,34 +82,6 @@ function HomeScreen({ navigation }) {
   const [reply, setReply] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     const onBackPress = () => {
-  //       if (onHome) {
-  //         KeepAwake.deactivate();
-  //         return true;
-  //       } else {
-  //         return false;
-  //       }
-  //     };
-
-  //     BackHandler.addEventListener("hardwareBackPress", onBackPress);
-
-  //     return () =>
-  //       BackHandler.removeEventListener("hardwareBackPress", onBackPress);
-  //   }, [onHome])
-  // );
-
-  // useEffect(() => {
-  //   if (!isFocused && mounted) {
-  //     return setOnHome(false);
-  //   }
-  // }, [isFocused, mounted]);
-
-  // useEffect(() => {
-
-  // }, []);
 
   const clearJunkData = async () => {
     let canUpdate = await authorizeUpdates.authorizeExpiredUpdate();

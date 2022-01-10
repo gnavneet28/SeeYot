@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, Linking } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
-import { LinearGradient } from "expo-linear-gradient";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
@@ -110,67 +110,65 @@ export default function VerifyOtpScreen({ navigation, route }) {
 
   return (
     <Screen style={styles.container}>
-      <LinearGradient
-        colors={["#1c1d1f", "#1d1f24", "#6b6863"]}
-        style={styles.gradient}
-      >
-        <LoadingIndicator visible={isLoading} />
-        <InfoAlert
-          leftPress={handleCloseInfoAlert}
-          description={infoAlert.infoAlertMessage}
-          visible={infoAlert.showInfoAlert}
+      <LoadingIndicator visible={isLoading} />
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
+      />
+      <MaterialCommunityIcons
+        color={defaultStyles.colors.secondary}
+        name="cellphone-text"
+        size={scale(80)}
+        style={{ marginBottom: scale(30) }}
+      />
+      <View style={styles.inputContainer}>
+        <View style={styles.otpInputContainer}>
+          <CodeField
+            ref={ref}
+            {...props}
+            value={value}
+            onChangeText={setValue}
+            cellCount={6}
+            rootStyle={styles.codeFieldRoot}
+            keyboardType="number-pad"
+            textContentType="oneTimeCode"
+            renderCell={({ index, symbol, isFocused }) => (
+              <Text
+                key={index}
+                style={[
+                  styles.cell,
+                  isFocused && styles.focusCell,
+                  { fontFamily: "Comic-Bold" },
+                ]}
+                onLayout={getCellOnLayoutHandler(index)}
+              >
+                {symbol || (isFocused ? <Cursor /> : null)}
+              </Text>
+            )}
+          />
+        </View>
+        <AppButton
+          disabled={!value || value.length < 6 ? true : false}
+          onPress={handleSubmit}
+          style={styles.button}
+          subStyle={{
+            color: defaultStyles.colors.primary,
+            letterSpacing: scale(2),
+          }}
+          title="Next"
         />
-        <View style={styles.header}>
-          <AppText style={styles.verifyInfo}>Verify OTP.</AppText>
-        </View>
-        <View style={styles.inputContainer}>
-          <View style={styles.otpInputContainer}>
-            <CodeField
-              ref={ref}
-              {...props}
-              value={value}
-              onChangeText={setValue}
-              cellCount={6}
-              rootStyle={styles.codeFieldRoot}
-              keyboardType="number-pad"
-              textContentType="oneTimeCode"
-              renderCell={({ index, symbol, isFocused }) => (
-                <Text
-                  key={index}
-                  style={[
-                    styles.cell,
-                    isFocused && styles.focusCell,
-                    { fontFamily: "Comic-Bold" },
-                  ]}
-                  onLayout={getCellOnLayoutHandler(index)}
-                >
-                  {symbol || (isFocused ? <Cursor /> : null)}
-                </Text>
-              )}
-            />
-          </View>
-          <AppButton
-            disabled={!value || value.length < 6 ? true : false}
-            onPress={handleSubmit}
-            style={styles.button}
-            subStyle={{
-              color: defaultStyles.colors.primary,
-              letterSpacing: scale(2),
-            }}
-            title="Next"
-          />
-          <AppButton
-            disabled={disabled}
-            title="Send Otp again"
-            style={styles.sendOtpAgain}
-            subStyle={{ fontSize: scale(10) }}
-            onPress={handleSendOtpAgainPress}
-          />
-        </View>
-        <AppText onPress={openPrivacyPage} style={styles.infoText}>
-          By continuing you agree to the Terms and Privacy policy.
-        </AppText>
-      </LinearGradient>
+        <AppButton
+          disabled={disabled}
+          title="Send Otp again"
+          style={styles.sendOtpAgain}
+          subStyle={{ fontSize: scale(10) }}
+          onPress={handleSendOtpAgainPress}
+        />
+      </View>
+      <AppText onPress={openPrivacyPage} style={styles.infoText}>
+        By continuing you agree to the Terms and Privacy policy.
+      </AppText>
     </Screen>
   );
 }
@@ -179,6 +177,7 @@ const styles = ScaledSheet.create({
   button: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "5@s",
+    elevation: 2,
     height: "35@s",
     marginVertical: "10@s",
     width: "80%",
@@ -187,6 +186,7 @@ const styles = ScaledSheet.create({
   cell: {
     backgroundColor: defaultStyles.colors.white,
     borderRadius: "5@s",
+    elevation: 2,
     fontSize: "15@s",
     height: "35@s",
     lineHeight: "38@s",
@@ -197,29 +197,14 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
-    backgroundColor: "#1c1d1f",
+    backgroundColor: defaultStyles.colors.light,
+    flex: 1,
+    paddingTop: "120@s",
+    width: "100%",
   },
   focusCell: {
-    borderColor: "#000",
+    borderColor: defaultStyles.colors.dark_Variant,
   },
-  gradient: {
-    alignItems: "center",
-    width: "100%",
-    flex: 1,
-    paddingTop: "230@s",
-  },
-  header: {
-    alignItems: "center",
-    backgroundColor: "rgba(255, 80, 80, 0.7)",
-    borderBottomLeftRadius: "80@s",
-    borderBottomRightRadius: "80@s",
-    height: "75@s",
-    justifyContent: "center",
-    position: "absolute",
-    top: "-35@s",
-    width: "100%",
-  },
-
   inputContainer: {
     alignItems: "center",
     bottom: "20@s",
@@ -227,7 +212,7 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   infoText: {
-    color: defaultStyles.colors.white,
+    color: defaultStyles.colors.dark_Variant,
     fontSize: "13.5@s",
     lineHeight: "15@s",
     textAlign: "center",

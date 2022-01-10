@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
+import * as SystemUI from "expo-system-ui";
 
 import getDetails from "./app/utilities/getDetails";
 import storeDetails from "./app/utilities/storeDetails";
@@ -18,6 +19,8 @@ import OfflineNotice from "./app/components/OfflineNotice";
 
 import AuthContext from "./app/auth/context";
 import authStorage from "./app/auth/storage";
+
+import defaultStyles from "./app/config/styles";
 
 import OnboardingContext from "./app/utilities/onboardingContext";
 
@@ -74,6 +77,7 @@ export default function App() {
   };
 
   const setUp = async () => {
+    await SystemUI.setBackgroundColorAsync(defaultStyles.colors.primary);
     if (!state.fontLoaded) {
       await loadFont();
     }

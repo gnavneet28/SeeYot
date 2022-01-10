@@ -2,7 +2,8 @@ package com.seeyot;
 
 import android.app.Application;
 import android.content.Context;
-import android.net.Uri;
+import android.content.res.Configuration;
+import androidx.annotation.NonNull;
 
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
@@ -14,28 +15,22 @@ import com.facebook.soloader.SoLoader;
 // added for async storage
 import com.facebook.react.modules.storage.ReactDatabaseSupplier;
 
-import com.seeyot.generated.BasePackageList;
-import org.unimodules.adapters.react.ReactAdapterPackage;
-import org.unimodules.adapters.react.ModuleRegistryAdapter;
-import org.unimodules.adapters.react.ReactModuleRegistryProvider;
-import org.unimodules.core.interfaces.Package;
-import org.unimodules.core.interfaces.SingletonModule;
-import expo.modules.updates.UpdatesController;
+import expo.modules.ApplicationLifecycleDispatcher;
+import expo.modules.ReactNativeHostWrapper;
 
 import com.facebook.react.bridge.JSIModulePackage;
 import com.swmansion.reanimated.ReanimatedJSIModulePackage;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.List;
-import javax.annotation.Nullable;
+
 
 public class MainApplication extends Application implements ReactApplication {
-  private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(
-    new BasePackageList().getPackageList()
-  );
+ 
 
-  private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
+   private final ReactNativeHost mReactNativeHost = new ReactNativeHostWrapper(
+     this,
+    new ReactNativeHost(this) {
     @Override
     public boolean getUseDeveloperSupport() {
       return BuildConfig.DEBUG;
@@ -43,8 +38,10 @@ public class MainApplication extends Application implements ReactApplication {
 
     @Override
     protected List<ReactPackage> getPackages() {
+      @SuppressWarnings("UnnecessaryLocalVariable")
       List<ReactPackage> packages = new PackageList(this).getPackages();
-      packages.add(new ModuleRegistryAdapter(mModuleRegistryProvider));
+         // Packages that cannot be autolinked yet can be added manually here, for example:
+   // packages.add(new MyReactNativePackage());
       return packages;
     }
 
@@ -58,24 +55,8 @@ public class MainApplication extends Application implements ReactApplication {
       return new ReanimatedJSIModulePackage();
     }
 
-    @Override
-    protected @Nullable String getJSBundleFile() {
-      if (BuildConfig.DEBUG) {
-        return super.getJSBundleFile();
-      } else {
-        return UpdatesController.getInstance().getLaunchAssetFile();
-      }
-    }
-
-    @Override
-    protected @Nullable String getBundleAssetName() {
-      if (BuildConfig.DEBUG) {
-        return super.getBundleAssetName();
-      } else {
-        return UpdatesController.getInstance().getBundleAssetName();
-      }
-    }
-  };
+ 
+  });
 
   @Override
   public ReactNativeHost getReactNativeHost() {
@@ -89,11 +70,15 @@ public class MainApplication extends Application implements ReactApplication {
     long size = 50L * 1024L * 1024L; // 50 MB
     com.facebook.react.modules.storage.ReactDatabaseSupplier.getInstance(getApplicationContext()).setMaximumSize(size);
 
-    if (!BuildConfig.DEBUG) {
-      UpdatesController.initialize(this);
-    }
 
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+    ApplicationLifecycleDispatcher.onApplicationCreate(this);
+  }
+
+   @Override
+ public void onConfigurationChanged(@NonNull Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    ApplicationLifecycleDispatcher.onConfigurationChanged(this, newConfig);
   }
 
   /**

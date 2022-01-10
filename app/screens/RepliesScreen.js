@@ -84,11 +84,13 @@ function RepliesScreen({ navigation }) {
     let { ok, data, problem } = await messagesApi.getAllRepliedMessages();
     if (ok) {
       if (!isReady || mounted) {
+        setIsReady(true);
         return setReplies(data.allReplies);
       }
       return;
     }
     if (!isReady || mounted) {
+      setIsReady(true);
       tackleProblem(problem, data, setInfoAlert);
     }
   };
@@ -121,9 +123,6 @@ function RepliesScreen({ navigation }) {
     if (isFocused) {
       if (!isReady || mounted) {
         allReplies();
-      }
-      if (!isReady || mounted) {
-        setIsReady(true);
       }
     }
   }, [isFocused, mounted, isReady]);

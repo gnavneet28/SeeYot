@@ -6,6 +6,8 @@ import OnboardingItem from "./OnboardingItem";
 import Paginator from "../components/Paginator";
 import NextButton from "./NextButton";
 
+import defaultStyles from "../config/styles";
+
 import Data from "../config/data";
 
 import cache from "../utilities/cache";
@@ -67,6 +69,7 @@ function Onboarding(props) {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
+    backgroundColor: defaultStyles.colors.light,
     flex: 1,
     justifyContent: "center",
   },

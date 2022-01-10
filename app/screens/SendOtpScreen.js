@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { View } from "react-native";
-import { ScaledSheet } from "react-native-size-matters";
-import { LinearGradient } from "expo-linear-gradient";
+import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
@@ -103,57 +103,54 @@ function SendOtpScreen({ navigation }) {
 
   return (
     <Screen style={styles.container}>
-      <LinearGradient
-        colors={["#1c1d1f", "#1d1f24", "#6b6863"]}
-        style={styles.gradient}
-      >
-        <View style={styles.header}>
-          <AppText style={styles.verifyInfo}>Verify your Phone Number.</AppText>
-        </View>
-        <LoadingIndicator visible={isLoading} />
-        <InfoAlert
-          description={infoAlert.infoAlertMessage}
-          leftPress={handleCloseInfoAlert}
-          visible={infoAlert.showInfoAlert}
-        />
-        <CountryPicker
-          onPress={handleSetCode}
-          setVisible={setVisible}
-          visible={visible}
-        />
-        {visible ? <View style={styles.modalFallback} /> : null}
-        <View style={styles.inputContainer}>
-          <View style={styles.phoneInputContainer}>
-            <AppText onPress={handleOpenCodePress} style={styles.code}>
-              {code}
-            </AppText>
-            <AppTextInput
-              autoCorrect={false}
-              keyboardType="phone-pad"
-              maxLength={10}
-              onChangeText={(number) => setNumber(number)}
-              placeholder="Enter phone number"
-              style={styles.number}
-              subStyle={styles.numberSub}
-              textContentType="telephoneNumber"
-              value={number}
-            />
-          </View>
-          <AppButton
-            disabled={
-              number && number.length == 10 && !verificationId ? false : true
-            }
-            onPress={handleSubmit}
-            style={styles.button}
-            subStyle={styles.submitButtonSub}
-            title="Send Otp"
+      <LoadingIndicator visible={isLoading} />
+      <InfoAlert
+        description={infoAlert.infoAlertMessage}
+        leftPress={handleCloseInfoAlert}
+        visible={infoAlert.showInfoAlert}
+      />
+      <CountryPicker
+        onPress={handleSetCode}
+        setVisible={setVisible}
+        visible={visible}
+      />
+      <FontAwesome5
+        color={defaultStyles.colors.secondary}
+        name="mobile-alt"
+        size={scale(80)}
+        style={{ marginBottom: scale(30) }}
+      />
+      <View style={styles.inputContainer}>
+        <View style={styles.phoneInputContainer}>
+          <AppText onPress={handleOpenCodePress} style={styles.code}>
+            {code}
+          </AppText>
+          <AppTextInput
+            autoCorrect={false}
+            keyboardType="phone-pad"
+            maxLength={10}
+            onChangeText={(number) => setNumber(number)}
+            placeholder="Enter phone number"
+            style={styles.number}
+            subStyle={styles.numberSub}
+            textContentType="telephoneNumber"
+            value={number}
           />
         </View>
-        <AppText style={styles.infoText}>
-          by continuing you confirm that you are authorized to use this phone
-          number and agree to receive text messages.
-        </AppText>
-      </LinearGradient>
+        <AppButton
+          disabled={
+            number && number.length == 10 && !verificationId ? false : true
+          }
+          onPress={handleSubmit}
+          style={styles.button}
+          subStyle={styles.submitButtonSub}
+          title="Send Otp"
+        />
+      </View>
+      <AppText style={styles.infoText}>
+        by continuing you confirm that you are authorized to use this phone
+        number and agree to receive text messages.
+      </AppText>
     </Screen>
   );
 }
@@ -162,7 +159,8 @@ const styles = ScaledSheet.create({
   button: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "5@s",
-    height: "40@s",
+    elevation: 2,
+    height: "35@s",
     width: "80%",
   },
   code: {
@@ -171,23 +169,9 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
-    backgroundColor: "#1c1d1f",
-  },
-  gradient: {
-    alignItems: "center",
-    width: "100%",
+    backgroundColor: defaultStyles.colors.light,
     flex: 1,
-    paddingTop: "230@s",
-  },
-  header: {
-    alignItems: "center",
-    backgroundColor: "rgba(255, 80, 80, 0.7)",
-    borderBottomLeftRadius: "80@s",
-    borderBottomRightRadius: "80@s",
-    height: "75@s",
-    justifyContent: "center",
-    position: "absolute",
-    top: "-35@s",
+    paddingTop: "120@s",
     width: "100%",
   },
   inputContainer: {
@@ -203,7 +187,7 @@ const styles = ScaledSheet.create({
     width: "95%",
   },
   infoText: {
-    color: defaultStyles.colors.white,
+    color: defaultStyles.colors.dark_Variant,
     fontSize: "12@s",
     lineHeight: "15@s",
     paddingHorizontal: "10@s",
@@ -234,6 +218,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderRadius: 5,
+    elevation: 2,
     flexDirection: "row",
     height: "40@s",
     justifyContent: "space-between",

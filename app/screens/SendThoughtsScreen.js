@@ -64,7 +64,7 @@ const filterActiveMessages = (messages = [], recipient, creator) => {
 function SendThoughtsScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
   const { recipient, from } = route.params;
-  const { activeFor, setActiveFor } = useContext(ActiveForContext);
+  const { activeFor } = useContext(ActiveForContext);
   const { setSuccess } = useContext(SuccessMessageContext);
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
@@ -91,7 +91,6 @@ function SendThoughtsScreen({ navigation, route }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
-
   const [showAlert, setShowAlert] = useState(false);
 
   // ALERT ACTION
@@ -118,15 +117,25 @@ function SendThoughtsScreen({ navigation, route }) {
   // SETTING ACTIVECHATMESSAGES, ACTIVE CHAT TO NULL AND REMOVING THE ACTIVECHAT FOR USER
   useEffect(() => {
     if (mounted) {
-      setActiveMessages([]);
-      setActiveChat(false);
+      if (activeMessages.length) {
+        setActiveMessages([]);
+      }
+
+      if (activeChat) {
+        setActiveChat(false);
+      }
     }
 
     if (!isFocused || appStateVisible !== "active") {
       if (mounted) {
         handleSetChatInActive();
-        setActiveMessages([]);
-        setActiveChat(false);
+        if (activeMessages.length) {
+          setActiveMessages([]);
+        }
+
+        if (activeChat === true) {
+          setActiveChat(false);
+        }
       }
     }
   }, [isFocused, appStateVisible, mounted]);
@@ -461,7 +470,7 @@ function SendThoughtsScreen({ navigation, route }) {
 
   // CHANGING THE CHAT ACTIVE STATUS
 
-  const handleSetChatActive = async () => {
+  const handleSetChatActive = useCallback(async () => {
     setActiveChat(true);
     if (!isRecipientActive && mounted) {
       setShowAlert(true);
@@ -473,7 +482,7 @@ function SendThoughtsScreen({ navigation, route }) {
 
     if (ok) return;
     return;
-  };
+  }, [activeChat, recipient._id, mounted]);
 
   const handleSetChatInActive = async () => {
     setActiveChat(false);

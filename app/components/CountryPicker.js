@@ -6,6 +6,17 @@ import { ScaledSheet } from "react-native-size-matters";
 import CountrySelectionCard from "./CountrySelectionCard";
 
 import defaultStyles from "../config/styles";
+import AppText from "./AppText";
+
+const ListHeaderComponent = () => {
+  return (
+    <View style={styles.listHeaderComponentContainer}>
+      <AppText style={styles.listHeaderComponentContainerTitle}>
+        Select your Country Code
+      </AppText>
+    </View>
+  );
+};
 
 function CountryPicker({ visible, setVisible, onPress }) {
   const keyExtractor = (item) => item.name.toString();
@@ -22,6 +33,7 @@ function CountryPicker({ visible, setVisible, onPress }) {
     >
       <View style={styles.mainContainer}>
         <View style={styles.container}>
+          <ListHeaderComponent />
           <FlatList
             data={countryCodes.sort((a, b) => a.name > b.name)}
             keyExtractor={keyExtractor}
@@ -34,21 +46,36 @@ function CountryPicker({ visible, setVisible, onPress }) {
   );
 }
 const styles = ScaledSheet.create({
+  container: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "20@s",
+    borderWidth: "2@s",
+    elevation: 15,
+    height: "70%",
+    justifyContent: "center",
+    overflow: "hidden",
+    width: "82%",
+  },
+  listHeaderComponentContainer: {
+    backgroundColor: defaultStyles.colors.secondary,
+    height: "40@s",
+    width: "100%",
+  },
+  listHeaderComponentContainerTitle: {
+    color: defaultStyles.colors.yellow_Variant,
+    height: "38@s",
+    textAlign: "center",
+    textAlignVertical: "center",
+    width: "100%",
+  },
   mainContainer: {
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0)",
     flex: 1,
     justifyContent: "center",
     width: "100%",
-  },
-  container: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderRadius: "10@s",
-    height: "70%",
-    justifyContent: "center",
-    overflow: "hidden",
-    width: "80%",
   },
 });
 

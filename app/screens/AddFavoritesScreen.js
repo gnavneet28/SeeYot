@@ -189,8 +189,8 @@ function AddFavoritesScreen({ navigation }) {
 
         if (ok) {
           setMessage({
-            mood: "",
-            textMessage: "Happy",
+            mood: "Happy",
+            textMessage: "",
           });
           setOptionalAnswer([]);
           setProcessing(false);
