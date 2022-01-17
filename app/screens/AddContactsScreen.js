@@ -23,6 +23,7 @@ import debounce from "../utilities/debounce";
 import ApiContext from "../utilities/apiContext";
 import apiActivity from "../utilities/apiActivity";
 import authorizeUpdates from "../utilities/authorizeUpdates";
+import createShortInviteLink from "../utilities/createDynamicLinks";
 
 function AddContactsScreen({ navigation }) {
   const { user, setUser } = useAuth();
@@ -207,36 +208,51 @@ function AddContactsScreen({ navigation }) {
   }, []);
 
   //INVITE ACTIONS
-  const handleUserInvite = useCallback(async (userToInvite) => {
-    let number = userToInvite.phoneNumber.toString();
-    const { result } = await SMS.sendSMSAsync(
-      [number],
-      "Hi there please join this platform"
-    );
+  const handleUserInvite = useCallback(
+    debounce(
+      async (userToInvite) => {
+        let link = await createShortInviteLink();
+        let number = userToInvite.phoneNumber.toString();
+        const { result } = await SMS.sendSMSAsync(
+          [number],
+          `Let's connect in a more interesting way than ever before. ${link}`
+        );
 
-    console.log(result);
-  }, []);
+        if (result === "unknown") console.log("Unknown");
+      },
+      5000,
+      true
+    ),
+    []
+  );
 
-  const handleInvitePress = useCallback(async () => {
-    try {
-      const result = await Share.share({
-        message:
-          "Join this awesome place and not hold anything back. Just say it",
-      });
+  const handleInvitePress = useCallback(
+    debounce(
+      async () => {
+        try {
+          let link = await createShortInviteLink();
+          const result = await Share.share({
+            message: `Let's connect in a more interesting way than ever before. ${link}`,
+          });
 
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          // shared with activity type of result.activityType
-        } else {
-          // shared
+          if (result.action === Share.sharedAction) {
+            if (result.activityType) {
+              // shared with activity type of result.activityType
+            } else {
+              // shared
+            }
+          } else if (result.action === Share.dismissedAction) {
+            // dismissed
+          }
+        } catch (error) {
+          alert(error.message);
         }
-      } else if (result.action === Share.dismissedAction) {
-        // dismissed
-      }
-    } catch (error) {
-      alert(error.message);
-    }
-  }, []);
+      },
+      5000,
+      true
+    ),
+    []
+  );
 
   return (
     <Screen style={styles.container}>

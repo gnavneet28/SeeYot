@@ -5,6 +5,8 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 
 import Svg, { G, Circle } from "react-native-svg";
 
+import defaultStyles from "../config/styles";
+
 function NextButton({ percentage, scrollTo }) {
   const size = 110;
   const strokeWidth = 2;
@@ -55,7 +57,7 @@ function NextButton({ percentage, scrollTo }) {
             cx={center}
             cy={center}
             r={radius}
-            stroke="#e6e7e8"
+            stroke={defaultStyles.colors.yellow_Variant}
             strokeWidth={strokeWidth}
           />
           <Circle
@@ -63,7 +65,7 @@ function NextButton({ percentage, scrollTo }) {
             cy={center}
             r={radius}
             ref={progressRef}
-            stroke="#f4338f"
+            stroke={defaultStyles.colors.secondary}
             strokeDasharray={circumference}
             strokeWidth={strokeWidth}
           />
@@ -74,7 +76,11 @@ function NextButton({ percentage, scrollTo }) {
         style={styles.button}
         activeOpacity={0.6}
       >
-        <AntDesign name="arrowright" size={scale(28)} color="#fff" />
+        <AntDesign
+          name="arrowright"
+          size={scale(28)}
+          color={defaultStyles.colors.secondary}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -86,7 +92,7 @@ const styles = ScaledSheet.create({
     justifyContent: "center",
   },
   button: {
-    backgroundColor: "#f4338f",
+    backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "100@s",
     padding: "14@s",
     position: "absolute",

@@ -22,7 +22,6 @@ import defaultStyles from "../config/styles";
 
 import useAuth from "../auth/useAuth";
 import messagesApi from "../api/messages";
-import myApi from "../api/my";
 import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
@@ -30,12 +29,10 @@ import useConnection from "../hooks/useConnection";
 
 import Constants from "../navigation/NavigationConstants";
 
-import storeDetails from "../utilities/storeDetails";
 import SuccessMessageContext from "../utilities/successMessageContext";
 import debounce from "../utilities/debounce";
 import ApiContext from "../utilities/apiContext";
 import apiActivity from "../utilities/apiActivity";
-import authorizeUpdates from "../utilities/authorizeUpdates";
 
 const defaultRecipient = {
   name: "",
@@ -67,7 +64,6 @@ function AddFavoritesScreen({ navigation }) {
   const [recipient, setRecipient] = useState(defaultRecipient);
   const [isReady, setIsReady] = useState(false);
   const [users, setUsers] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [optionalAnswer, setOptionalAnswer] = useState([]);
   const [showAddoption, setShowAddOption] = useState(false);
@@ -99,26 +95,6 @@ function AddFavoritesScreen({ navigation }) {
     }
   };
 
-  const updateMyFavoritesList = async () => {
-    let canUpdate = await authorizeUpdates.authorizeFavoritesUpdate();
-    if (!canUpdate) return;
-    const { ok, data, problem } = await myApi.updateMyFavorites();
-    if (ok) {
-      await storeDetails(data.user);
-      setUser(data.user);
-      await authorizeUpdates.updateFavoritesUpdate();
-      if (!isReady || mounted) {
-        return setUsersList();
-      }
-    }
-
-    if (problem) return;
-  };
-
-  useEffect(() => {
-    updateMyFavoritesList();
-  }, []);
-
   useEffect(() => {
     if (isFocused) {
       setUsersList();
@@ -140,6 +116,7 @@ function AddFavoritesScreen({ navigation }) {
   // ADD OPTION MODAL ACTION
 
   const handleCloseAddOption = useCallback(() => {
+    setOptionalMessage("");
     setShowAddOption(false);
   }, []);
 
@@ -147,7 +124,9 @@ function AddFavoritesScreen({ navigation }) {
     setShowAddOption(true);
   }, []);
 
+  // TODO:
   const handleAddOptionalReplyPress = () => {
+    // check if there is already a option with the given option to add and then add
     if (optionalAnswer.length < 4) {
       let newList = [...optionalAnswer];
       newList.push(optionalMessage);
@@ -192,6 +171,7 @@ function AddFavoritesScreen({ navigation }) {
             mood: "Happy",
             textMessage: "",
           });
+          setOptionalMessage("");
           setOptionalAnswer([]);
           setProcessing(false);
           setIsVisible(false);
@@ -221,16 +201,6 @@ function AddFavoritesScreen({ navigation }) {
     () => setInfoAlert({ ...infoAlert, showInfoAlert: false }),
     []
   );
-
-  // REFRESH ACTION
-  const handleRefresh = useCallback(async () => {
-    if (!isReady || mounted) {
-      setRefreshing(true);
-      setUsersList();
-      await updateMyFavoritesList();
-      setRefreshing(false);
-    }
-  }, [isReady, mounted]);
 
   // HEADER ACTIONS
   const handleBack = useCallback(
@@ -316,8 +286,6 @@ function AddFavoritesScreen({ navigation }) {
           <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
             <AddFavoriteList
               onAllRepliesPress={handleOnAllRepliesPress}
-              onRefresh={handleRefresh}
-              refreshing={refreshing}
               onMessagePress={handleMessagePress}
               users={users}
             />
@@ -387,13 +355,13 @@ function AddFavoritesScreen({ navigation }) {
                 </View>
               </View>
               <View style={styles.moodContainerMain}>
+                <AppText style={styles.selectMood}>Select your mood</AppText>
                 <ScrollView
                   keyboardShouldPersistTaps="always"
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.moodContainerSub}
                 >
-                  <AppText style={styles.selectMood}>Select your mood</AppText>
                   {moodData.map((d, index) => (
                     <Mood
                       key={d.mood + index.toString()}
@@ -481,9 +449,9 @@ function AddFavoritesScreen({ navigation }) {
           <View style={styles.addOptionContainer}>
             <AppText style={styles.addOptionTitle}>Add Option</AppText>
             <AppText style={styles.addOptionInfo}>
-              Add option you expect {recipient.name} to reply with. You can add
-              a minimum of 2 and a maximum of 4 options. Options help you to get
-              valid replies.
+              Add optional replies that you expect {recipient.name} would most
+              likely reply with. You can add a minimum of 2 and a maximum of 4
+              options. Options help you to get valid replies.
             </AppText>
             <TextInput
               maxLength={100}
@@ -541,12 +509,12 @@ const styles = ScaledSheet.create({
   addOptions: {
     backgroundColor: defaultStyles.colors.dark_Variant,
     borderRadius: "20@s",
-    height: "30@s",
+    height: "25@s",
     marginVertical: "10@s",
-    width: "85@s",
+    width: "80@s",
   },
   addOptionsSub: {
-    fontSize: "14@s",
+    fontSize: "12@s",
   },
   addOptionContainer: {
     alignItems: "center",
@@ -568,9 +536,9 @@ const styles = ScaledSheet.create({
   },
   addOptionInfo: {
     color: defaultStyles.colors.secondary,
-    fontSize: "13@s",
+    fontSize: "12.5@s",
     marginVertical: "5@s",
-    textAlign: "center",
+    textAlign: "left",
     width: "95%",
   },
   addOptionInput: {
@@ -578,7 +546,7 @@ const styles = ScaledSheet.create({
     borderRadius: "10@s",
     borderWidth: 1,
     fontFamily: "Comic-Bold",
-    fontSize: "15@s",
+    fontSize: "14@s",
     fontWeight: "normal",
     marginTop: "5@s",
     padding: "5@s",
@@ -669,7 +637,7 @@ const styles = ScaledSheet.create({
     borderRadius: "5@s",
     borderWidth: 1,
     fontFamily: "Comic-Bold",
-    fontSize: "14.5@s",
+    fontSize: "14@s",
     fontWeight: "normal",
     padding: "5@s",
     paddingHorizontal: "10@s",
@@ -677,6 +645,8 @@ const styles = ScaledSheet.create({
     width: "94%",
   },
   moodContainerMain: {
+    alignItems: "center",
+    flexDirection: "row",
     height: "50@s",
     marginVertical: "5@s",
     width: "100%",
@@ -705,7 +675,7 @@ const styles = ScaledSheet.create({
     color: defaultStyles.colors.secondary,
     fontSize: "12@s",
     height: "32@s",
-    marginLeft: "10@s",
+    marginHorizontal: "5@s",
     paddingHorizontal: "10@s",
     textAlign: "center",
     textAlignVertical: "center",
@@ -714,7 +684,7 @@ const styles = ScaledSheet.create({
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.light,
     borderRadius: "20@s",
-    fontSize: "14@s",
+    fontSize: "13@s",
     height: "32@s",
     marginBottom: "10@s",
     marginLeft: "10@s",

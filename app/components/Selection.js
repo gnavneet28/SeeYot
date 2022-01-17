@@ -50,7 +50,7 @@ function Selection({
       </TouchableOpacity>
       {value ? (
         <AppText
-          style={{ fontSize: scale(15), opacity: 0.8 }}
+          style={{ fontSize: scale(14), opacity: 0.8 }}
           onPress={isConnected ? onPress : null}
         >
           {value}

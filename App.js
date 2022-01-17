@@ -5,6 +5,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
 import * as SystemUI from "expo-system-ui";
+import Bugsnag from "@bugsnag/react-native";
 
 import getDetails from "./app/utilities/getDetails";
 import storeDetails from "./app/utilities/storeDetails";
@@ -85,7 +86,7 @@ export default function App() {
 
     let userOnboarded = await cache.get("onboarded");
     if (userOnboarded) return setOnboarded(true);
-    setOnboarded(false);
+    //setOnboarded(false);
   };
 
   if (!state.isReady || !state.fontLoaded)

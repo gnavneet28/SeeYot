@@ -25,6 +25,7 @@ import Constant from "../navigation/NavigationConstants";
 import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
+import createShortInviteLink from "../utilities/createDynamicLinks";
 
 import useAuth from "../auth/useAuth";
 
@@ -272,9 +273,11 @@ function ProfileScreen({ navigation }) {
     debounce(
       async () => {
         try {
+          setIsLoading(true);
+          let link = await createShortInviteLink();
+          setIsLoading(false);
           const result = await Share.share({
-            message:
-              "Join this awesome place and not hold anything back. Just say it",
+            message: `Let's connect in a more interesting way than ever before. ${link}`,
           });
           if (result.action === Share.sharedAction) {
             if (result.activityType) {
@@ -289,7 +292,7 @@ function ProfileScreen({ navigation }) {
           console.log(error.message);
         }
       },
-      2000,
+      5000,
       true
     ),
     []
@@ -338,7 +341,7 @@ function ProfileScreen({ navigation }) {
               editable={true}
               fw={true}
               iconName="user-o"
-              size={scale(20)}
+              size={scale(18)}
               style={styles.userDetailsName}
               title="Name"
               onEditIconPress={() => setOpenEditName(true)}
@@ -347,7 +350,7 @@ function ProfileScreen({ navigation }) {
               data={user.phoneNumber.toString().slice(-10)}
               fw={true}
               iconName="phone"
-              size={scale(20)}
+              size={scale(18)}
               title="Phone Number"
             />
             <View style={styles.echoBox}>
@@ -484,7 +487,7 @@ function ProfileScreen({ navigation }) {
         </View>
       </Modal>
       <Modal
-        onRequestClose={savingName ? null : () => setOpenEditName(false)}
+        onRequestClose={savingName ? () => null : () => setOpenEditName(false)}
         transparent={true}
         visible={openEditName}
       >
@@ -528,7 +531,8 @@ function ProfileScreen({ navigation }) {
                     name &&
                     name.replace(/\s/g, "").length >= 4 &&
                     isConnected &&
-                    !savingName
+                    !savingName &&
+                    name !== user.name
                       ? false
                       : true
                   }

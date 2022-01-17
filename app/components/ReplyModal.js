@@ -55,7 +55,11 @@ function ReplyModal({ message = defaultMessage, handleCloseModal }) {
                       selectedMessageId={
                         message.message.options.filter(
                           (m) => m.selected == true
-                        )[0]._id
+                        )[0]
+                          ? message.message.options.filter(
+                              (m) => m.selected == true
+                            )[0]._id
+                          : ""
                       }
                       option={d}
                     />

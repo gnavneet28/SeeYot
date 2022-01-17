@@ -37,7 +37,7 @@ function Onboarding(props) {
 
   return (
     <View style={styles.container}>
-      <View style={{ flex: 3 }}>
+      <View style={styles.listContainer}>
         <FlatList
           showsHorizontalScrollIndicator={false}
           horizontal
@@ -69,9 +69,13 @@ function Onboarding(props) {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.white,
     flex: 1,
     justifyContent: "center",
+  },
+  listContainer: {
+    backgroundColor: defaultStyles.colors.white,
+    flex: 3,
   },
 });
 

@@ -1,6 +1,7 @@
 export default {
   blue: "#1E90FF",
   bottomIcons: "#E80000",
+  chatBubble: "#d4fff7",
   danger: "#FF0000",
   dark_Variant: "#6b6863",
   dark: "#000000",

@@ -1,5 +1,7 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import React, { memo } from "react";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import Svg, { Path } from "react-native-svg";
 import { moderateScale, scale } from "react-native-size-matters";
@@ -7,44 +9,56 @@ import Autolink from "react-native-autolink";
 
 import defaultStyles from "../config/styles";
 
-function ChatBubble({ text = "", mine }) {
+let defaultThought = {
+  message: "",
+  createdAt: Date.now(),
+};
+
+function ChatBubble({
+  thought = defaultThought,
+  mine,
+  onLongPress,
+  activeChat,
+}) {
+  dayjs.extend(relativeTime);
   return (
-    <View style={[styles.message, !mine ? styles.mine : styles.not_mine]}>
+    <TouchableOpacity
+      activeOpacity={activeChat ? 1 : 0.9}
+      onLongPress={onLongPress}
+      style={[styles.message, !mine ? styles.mine : styles.not_mine]}
+    >
       <View
         style={[
           styles.cloud,
           {
             backgroundColor: !mine
-              ? defaultStyles.colors.secondary
-              : defaultStyles.colors.blue,
+              ? defaultStyles.colors.chatBubble
+              : defaultStyles.colors.white,
           },
         ]}
       >
         <Autolink
           showAlert={true}
-          text={text}
+          text={thought.message}
           linkProps={{
             suppressHighlighting: true,
             testID: "link",
           }}
           linkStyle={{
             ...styles.text,
-            color: defaultStyles.colors.yellow,
-            fontFamily: "Comic-Bold",
+            color: defaultStyles.colors.blue,
           }}
           textProps={{
             selectable: false,
-            style: {
-              ...styles.text,
-              color: defaultStyles.colors.white,
-              fontFamily: "Comic-Bold",
-            },
+            style: styles.text,
+            onLongPress,
           }}
           email={true}
-          hashtag="instagram"
           phone="sms"
-          mention="instagram"
         />
+        <Text style={styles.createdAt}>
+          {dayjs(thought.createdAt).fromNow()}
+        </Text>
         <View
           style={[
             styles.arrow_container,
@@ -66,8 +80,8 @@ function ChatBubble({ text = "", mine }) {
               }
               fill={
                 !mine
-                  ? defaultStyles.colors.secondary
-                  : defaultStyles.colors.blue
+                  ? defaultStyles.colors.chatBubble
+                  : defaultStyles.colors.white
               }
               x="0"
               y="0"
@@ -75,7 +89,7 @@ function ChatBubble({ text = "", mine }) {
           </Svg>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -110,6 +124,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(10, 2),
     paddingTop: moderateScale(5, 2),
   },
+  createdAt: {
+    color: defaultStyles.colors.dark_Variant,
+    fontSize: scale(8),
+    paddingTop: scale(2),
+    textAlign: "right",
+  },
   message: {
     flexDirection: "row",
     marginVertical: moderateScale(7, 2),
@@ -124,10 +144,11 @@ const styles = StyleSheet.create({
 
   text: {
     ...defaultStyles.text,
-    fontSize: scale(14),
+    color: defaultStyles.colors.dark,
+    fontSize: scale(13),
+    fontFamily: "Comic-Bold",
     lineHeight: scale(16),
-    paddingTop: 3,
   },
 });
 
-export default ChatBubble;
+export default memo(ChatBubble);

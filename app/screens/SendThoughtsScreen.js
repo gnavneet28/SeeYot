@@ -92,6 +92,11 @@ function SendThoughtsScreen({ navigation, route }) {
     showInfoAlert: false,
   });
   const [showAlert, setShowAlert] = useState(false);
+  const [deleteMessageOption, setDeleteMessageOption] = useState({
+    isVisible: false,
+    messageToDelete: null,
+    deletingMessage: false,
+  });
 
   // ALERT ACTION
 
@@ -221,7 +226,7 @@ function SendThoughtsScreen({ navigation, route }) {
   );
 
   // THOUGHTS LIST ACTION
-  const thoughts = useMemo(
+  let thoughts = useMemo(
     () => filterThoughts(user.thoughts, recipient, user),
     [isFocused, user.thoughts.length, recipient._id, user.thoughts]
   );
@@ -329,8 +334,47 @@ function SendThoughtsScreen({ navigation, route }) {
     }
   };
 
+  const handleThoughtLongPress = useCallback((thought) => {
+    setDeleteMessageOption({
+      isVisible: true,
+      messageToDelete: thought,
+      deletingMessage: false,
+    });
+  }, []);
+
+  const handleDeleteMessage = useCallback(async () => {
+    setDeleteMessageOption({
+      ...deleteMessageOption,
+      deletingMessage: true,
+    });
+
+    const { data, ok, problem } = await thoughtsApi.deleteThought(
+      deleteMessageOption.messageToDelete._id
+    );
+    if (ok) {
+      await storeDetails(data.user);
+      setUser(data.user);
+      return setDeleteMessageOption({
+        isVisible: false,
+        messageToDelete: null,
+        deletingMessage: false,
+      });
+    }
+
+    setDeleteMessageOption({
+      messageToDelete: null,
+      isVisible: false,
+      deletingMessage: false,
+    });
+    tackleProblem(problem, data, setInfoAlert);
+  }, [user, recipient._id, deleteMessageOption.messageToDelete]);
+
   // ON FOCUS PAGE ACTION
   const updateSearchHistory = async () => {
+    let inSearchHistory = user.searchHistory.filter(
+      (h) => h._id == recipient._id
+    ).length;
+    if (inSearchHistory) return;
     const { ok, data, problem } = await usersApi.addToSearchHistory(
       recipient._id
     );
@@ -468,6 +512,14 @@ function SendThoughtsScreen({ navigation, route }) {
     [user]
   );
 
+  const handleCloseDeleteMessageModal = useCallback(() => {
+    setDeleteMessageOption({
+      isVisible: false,
+      messageToDelete: "",
+      deletingMessage: false,
+    });
+  }, []);
+
   // CHANGING THE CHAT ACTIVE STATUS
 
   const handleSetChatActive = useCallback(async () => {
@@ -519,12 +571,25 @@ function SendThoughtsScreen({ navigation, route }) {
         <Alert
           visible={showAlert}
           title="Not Active"
-          description={`${recipient.name} is not active for you right now. Send a notification requesting to come online.`}
+          description={`${
+            recipient.savedName ? recipient.savedName : recipient.name
+          } is not active for you right now. Send a notification requesting to come online.`}
           onRequestClose={handleCloseAlert}
           leftOption="Cancel"
           rightOption="Yes"
           leftPress={handleCloseAlert}
           rightPress={handleSendNewMessageNotification}
+        />
+        <Alert
+          apiProcessing={deleteMessageOption.deletingMessage}
+          visible={deleteMessageOption.isVisible}
+          title="Delete"
+          description="Delete this thought. This action will only delete the thought from your side."
+          onRequestClose={handleCloseDeleteMessageModal}
+          leftOption="Cancel"
+          rightOption="Yes"
+          leftPress={handleCloseDeleteMessageModal}
+          rightPress={handleDeleteMessage}
         />
         <InfoAlert
           leftPress={handleCloseInfoAlert}
@@ -533,6 +598,7 @@ function SendThoughtsScreen({ navigation, route }) {
         />
 
         <ThoughtsList
+          onLongPress={activeChat ? () => null : handleThoughtLongPress}
           activeChat={activeChat}
           thoughts={activeChat ? activeMessagesList : thoughts}
           recipient={recipient}
@@ -553,11 +619,12 @@ function SendThoughtsScreen({ navigation, route }) {
         />
       </Screen>
       <Modal
+        animationType="none"
         onRequestClose={handleModalClose}
         transparent={true}
         visible={isVisible}
       >
-        <View style={styles.contactOptionMainContainer}>
+        <View style={styles.modalMainContainer}>
           <View style={styles.optionsContainer}>
             <Option
               title="Close"
@@ -598,7 +665,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.primary,
   },
-  contactOptionMainContainer: {
+  modalMainContainer: {
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.8)",
     flex: 1,

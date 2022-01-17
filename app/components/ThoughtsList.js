@@ -3,26 +3,30 @@ import { View, StyleSheet, FlatList } from "react-native";
 
 import ChatListHeader from "./ChatListHeader";
 import ItemSeperatorComponent from "./ItemSeperatorComponent";
-import ThoughtCard from "./ThoughtCard";
+import ChatBubble from "./ChatBubble";
 
 import useAuth from "../auth/useAuth";
 
-function ThoughtsList({ thoughts = [], recipient, activeChat }) {
+function ThoughtsList({
+  thoughts = [],
+  recipient,
+  activeChat,
+  onLongPress = () => null,
+}) {
   const { user } = useAuth();
 
-  const keyExtractor = useCallback(
-    (item, index) => item._id.toString(),
-    [thoughts]
-  );
+  const keyExtractor = useCallback((item) => item._id.toString(), []);
 
   const renderItem = useCallback(
     ({ item }) => (
-      <ThoughtCard
+      <ChatBubble
+        activeChat={activeChat}
+        onLongPress={() => onLongPress(item)}
         mine={item.createdBy == user._id ? true : false}
         thought={item}
       />
     ),
-    []
+    [activeChat]
   );
 
   const renderListHeader = useCallback(() => {
@@ -32,6 +36,7 @@ function ThoughtsList({ thoughts = [], recipient, activeChat }) {
   return (
     <View style={[styles.container]}>
       <FlatList
+        keyboardShouldPersistTaps="always"
         data={[...thoughts].reverse()}
         ItemSeperatorComponent={ItemSeperatorComponent}
         keyExtractor={keyExtractor}
@@ -39,6 +44,8 @@ function ThoughtsList({ thoughts = [], recipient, activeChat }) {
         inverted={-1}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={15}
       />
     </View>
   );

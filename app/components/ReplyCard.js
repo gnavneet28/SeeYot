@@ -83,13 +83,15 @@ function ReplyCard({
           >
             {message.message}
           </AppText>
-          <AppText onPress={onModalOpenPress} style={styles.repliesCount}>
-            {message.reply.length}{" "}
-            {message.reply.length <= 1 ? "reply" : "replies"}
-          </AppText>
-          <AppText style={styles.messageCreatedAt}>
-            {dayjs(message.createdAt).fromNow()}
-          </AppText>
+          <View style={styles.replyStatsContainer}>
+            <AppText onPress={onModalOpenPress} style={styles.repliesCount}>
+              {message.reply.length}{" "}
+              {message.reply.length <= 1 ? "reply" : "replies"}
+            </AppText>
+            <AppText style={styles.messageCreatedAt}>
+              {dayjs(message.createdAt).fromNow()}
+            </AppText>
+          </View>
         </View>
         <DeleteAction apiAction={false} onPress={onDeletePress} />
       </View>
@@ -147,24 +149,26 @@ const styles = ScaledSheet.create({
     width: "40@s",
   },
   messageCreatedAt: {
-    alignSelf: "flex-start",
     color: defaultStyles.colors.lightGrey,
     fontSize: "10@s",
+    paddingBottom: 0,
     paddingTop: 0,
+    textAlignVertical: "center",
   },
   recipientName: {
     alignSelf: "flex-start",
     borderRadius: "15@s",
     color: defaultStyles.colors.dark,
     fontSize: "14@s",
-    paddingBottom: 0,
+    paddingBottom: "2@s",
     textAlignVertical: "center",
   },
   repliesCount: {
-    alignSelf: "flex-start",
     borderRadius: "20@s",
     color: defaultStyles.colors.secondary,
     fontSize: "12@s",
+    paddingBottom: 0,
+    paddingTop: 0,
     textAlign: "left",
     textAlignVertical: "center",
   },
@@ -179,6 +183,12 @@ const styles = ScaledSheet.create({
     flex: 1,
     marginRight: "5@s",
     padding: "5@s",
+  },
+  replyStatsContainer: {
+    alignItems: "center",
+    flexDirection: "row",
+    marginTop: "3@s",
+    width: "100%",
   },
 });
 

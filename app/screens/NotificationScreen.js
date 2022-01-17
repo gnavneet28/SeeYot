@@ -4,7 +4,6 @@ import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
 
 import ApiProcessingContainer from "../components/ApiProcessingContainer";
-import AppActivityIndicator from "../components/ActivityIndicator";
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
 import InfoAlert from "../components/InfoAlert";
@@ -43,7 +42,6 @@ function NotificationScreen({ navigation }) {
   const [clearNotification, setClearNotification] = useState(false);
   const [visible, setVisible] = useState(false);
   const [thought, setThought] = useState("");
-  const [isReady, setIsReady] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
@@ -101,27 +99,22 @@ function NotificationScreen({ navigation }) {
     if (ok) {
       await storeDetails(data.user);
       setUser(data.user);
-      if (!isReady || mounted) {
-        return setIsReady(true);
-      }
       return;
     }
 
-    if (!isReady || mounted) {
-      setIsReady(true);
+    if (mounted) {
       tackleProblem(problem, data, setInfoAlert);
     }
-  }, [user, isReady, mounted]);
+  }, [user, mounted]);
 
   useEffect(() => {
     if (
-      (isFocused &&
-        user.notifications.filter((n) => n.seen === false).length) ||
-      !isReady
+      isFocused &&
+      user.notifications.filter((n) => n.seen === false).length
     ) {
       updateNotifications();
     }
-  }, [isFocused, user, isReady]);
+  }, [isFocused, user]);
 
   // HEADER ACTION
   const handleBack = useCallback(
@@ -205,40 +198,34 @@ function NotificationScreen({ navigation }) {
           description={infoAlert.infoAlertMessage}
           visible={infoAlert.showInfoAlert}
         />
-        {!isReady ? (
-          <AppActivityIndicator />
-        ) : (
-          <>
-            <VipAdCard onPress={handleVipCardPress} style={styles.adCard} />
-            {data && data.length >= 1 ? (
-              <ApiProcessingContainer
-                style={styles.apiProcessingContainer}
-                processing={clearNotification}
-              >
-                <AppText
-                  style={styles.clearAll}
-                  onPress={
-                    isConnected && !clearNotification
-                      ? handleClearAllPress
-                      : null
-                  }
-                >
-                  Clear all notifications
-                </AppText>
-              </ApiProcessingContainer>
-            ) : null}
-            <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
-              <NotificationListPro
-                onTapToSendMessage={handleSendMessage}
-                onTapToSeeMessage={handleOpenModal}
-                onTapToSeePress={handleTapToSeeThought}
-                notifications={data}
-                onRefresh={handleRefresh}
-                refreshing={refreshing}
-              />
-            </ApiContext.Provider>
-          </>
-        )}
+        <VipAdCard onPress={handleVipCardPress} style={styles.adCard} />
+        {data && data.length >= 1 ? (
+          <ApiProcessingContainer
+            style={styles.apiProcessingContainer}
+            processing={clearNotification}
+          >
+            <AppText
+              style={styles.clearAll}
+              onPress={
+                isConnected && !clearNotification
+                  ? handleClearAllPress
+                  : () => null
+              }
+            >
+              Clear all notifications
+            </AppText>
+          </ApiProcessingContainer>
+        ) : null}
+        <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
+          <NotificationListPro
+            onTapToSendMessage={handleSendMessage}
+            onTapToSeeMessage={handleOpenModal}
+            onTapToSeePress={handleTapToSeeThought}
+            notifications={data}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
+          />
+        </ApiContext.Provider>
       </Screen>
       {message.isVisible ? <View style={styles.modalFallback} /> : null}
       <ReplyModal message={message} handleCloseModal={handleCloseModal} />

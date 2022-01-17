@@ -24,14 +24,15 @@ function ChatListHeader({ user, activeChat }) {
       ) : null}
       {activeChat ? (
         <AppText style={styles.infoText}>
-          Send direct messages to {user.name} and have an active conversation.
-          These are temporary messages and are not stored anywhere, except your
-          device until you refresh this page, visit another chat or the app
-          becomes inactive.
+          Send direct messages to {user.savedName ? user.savedName : user.name}{" "}
+          and have an active conversation. These are temporary messages and are
+          not stored anywhere, except your device until you refresh this chat,
+          visit another chat, leave this screen or the app becomes inactive.
         </AppText>
       ) : (
         <AppText style={styles.infoText}>
-          Send your thoughts to {user.name} and within 10 minutes if {user.name}{" "}
+          Send your thoughts to {user.savedName ? user.savedName : user.name}{" "}
+          and within 10 minutes if {user.savedName ? user.savedName : user.name}{" "}
           does the same for you, your thoughts will match. You can see all your
           matched thoughts here.
         </AppText>
@@ -64,7 +65,7 @@ const styles = ScaledSheet.create({
     fontSize: "13@s",
     marginVertical: "5@s",
     textAlign: "center",
-    width: "80%",
+    width: "90%",
   },
   myNickName: {
     backgroundColor: defaultStyles.colors.yellow_Variant,

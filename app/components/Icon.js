@@ -1,7 +1,8 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
@@ -11,7 +12,7 @@ function Icon({
   color = defaultStyles.colors.dark,
   fw,
   name = "",
-  size = 30,
+  size = scale(30),
   style,
 }) {
   return (
@@ -24,12 +25,12 @@ function Icon({
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
-    height: 50,
+    height: "40@s",
     justifyContent: "center",
-    width: 50,
+    width: "40@s",
   },
 });
 

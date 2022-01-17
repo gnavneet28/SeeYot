@@ -29,12 +29,10 @@ import SuccessMessageContext from "../utilities/successMessageContext";
 
 import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
-import authorizeUpdates from "../utilities/authorizeUpdates";
 
 import useAuth from "../auth/useAuth";
 
 import echosApi from "../api/echos";
-import myApi from "../api/my";
 import usersApi from "../api/users";
 
 import defaultStyles from "../config/styles";
@@ -69,22 +67,6 @@ function AddEchoScreen({ navigation, route }) {
   );
 
   // ON PAGE FOCUS ACTION
-
-  const updateAllEchoMessages = useCallback(async () => {
-    let canUpdate = await authorizeUpdates.authorizeEchoMessagesUpdate();
-    if (!canUpdate) return;
-    const { ok, data, problem } = await myApi.updateMyEchoMessages();
-    if (ok) {
-      await storeDetails(data.user);
-      setUser(data.user);
-      return await authorizeUpdates.updateEchoMessagesUpdate();
-    }
-    if (problem) return;
-  }, [user]);
-
-  useEffect(() => {
-    updateAllEchoMessages();
-  }, []);
 
   const setEchoMessage = useCallback(() => {
     let echoMessages =

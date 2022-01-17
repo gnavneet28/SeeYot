@@ -86,8 +86,14 @@ project.ext.react = [
 
 apply from: new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), "../react.gradle")
 
+// bugsnag
+apply plugin: "com.bugsnag.android.gradle"
+
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 apply plugin: 'com.google.gms.google-services'
+
+
+// The following line must be inserted AFTER the React gradle plugin
 
 /**
  * Set this to true to create two separate APKs instead of one:

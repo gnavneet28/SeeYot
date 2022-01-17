@@ -5,6 +5,7 @@ import { ScaledSheet } from "react-native-size-matters";
 import defaultStyles from "../config/styles";
 import AppText from "./AppText";
 import AppButton from "./AppButton";
+import ApiProcessingContainer from "./ApiProcessingContainer";
 
 function Alert({
   description = "",
@@ -15,6 +16,7 @@ function Alert({
   rightPress = () => null,
   title = "",
   visible = false,
+  apiProcessing,
 }) {
   return (
     <Modal transparent visible={visible} onRequestClose={onRequestClose}>
@@ -29,12 +31,17 @@ function Alert({
               subStyle={{ color: defaultStyles.colors.dark }}
               title={leftOption}
             />
-            <AppButton
-              onPress={rightPress}
-              style={styles.rightButton}
-              subStyle={{ color: defaultStyles.colors.secondary }}
-              title={rightOption}
-            />
+            <ApiProcessingContainer
+              style={styles.rightButtonContainer}
+              processing={apiProcessing}
+            >
+              <AppButton
+                onPress={rightPress}
+                style={styles.rightButton}
+                subStyle={{ color: defaultStyles.colors.secondary }}
+                title={rightOption}
+              />
+            </ApiProcessingContainer>
           </View>
         </View>
       </View>
@@ -82,11 +89,17 @@ const styles = ScaledSheet.create({
     marginRight: "20@s",
     width: "70@s",
   },
-  rightButton: {
+  rightButtonContainer: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "20@s",
     height: "35@s",
     width: "70@s",
+  },
+  rightButton: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "20@s",
+    height: "35@s",
+    width: "100%",
   },
   title: {
     backgroundColor: defaultStyles.colors.dark_Variant,

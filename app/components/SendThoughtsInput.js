@@ -104,6 +104,7 @@ const styles = ScaledSheet.create({
     height: "40@s",
     justifyContent: "center",
     marginRight: "5@s",
+    overflow: "hidden",
     width: "40@s",
   },
   selectActive: {

@@ -18,7 +18,11 @@ function ThoughtCard({ thought = defaultThought, mine }) {
   dayjs.extend(relativeTime);
   return (
     <TouchableOpacity activeOpacity={1} style={styles.container}>
-      <ChatBubble mine={mine} text={thought.message} />
+      <ChatBubble
+        mine={mine}
+        text={thought.message}
+        createdAt={thought.createdAt}
+      />
       <AppText
         style={[
           styles.date,

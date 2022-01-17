@@ -1,5 +1,5 @@
 import React from "react";
-import { Dimensions, View, RefreshControl } from "react-native";
+import { Dimensions, View, TouchableHighlight } from "react-native";
 import {
   RecyclerListView,
   DataProvider,
@@ -10,9 +10,9 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
-import AppText from "./AppText";
 import AppTextInput from "./AppTextInput";
 import AddFavoriteCard from "./AddFavoriteCard";
+import Icon from "./Icon";
 
 const ViewTypes = {
   Full: 0,
@@ -140,24 +140,21 @@ class AddContactList extends React.Component {
               style={styles.inputBox}
             />
           </View>
-        </View>
-        <View style={styles.detailsContainer}>
-          <AppText style={styles.favoritePeople}>Favorite People</AppText>
-          <AppText
-            onPress={this.props.onAllRepliesPress}
+          <TouchableHighlight
+            underlayColor={defaultStyles.colors.yellow}
             style={styles.allReplies}
+            activeOpacity={0.8}
+            onPress={this.props.onAllRepliesPress}
           >
-            See All Replies
-          </AppText>
+            <Icon
+              name="reply"
+              size={scale(18)}
+              color={defaultStyles.colors.secondary}
+            />
+          </TouchableHighlight>
         </View>
         <View style={styles.listView}>
           <RecyclerListView
-            refreshControl={
-              <RefreshControl
-                onRefresh={this.props.onRefresh}
-                refreshing={this.props.refreshing}
-              />
-            }
             canChangeSize={true}
             dataProvider={this.state.dataProvider}
             extendedState={this.state}
@@ -172,47 +169,32 @@ class AddContactList extends React.Component {
 
 const styles = ScaledSheet.create({
   allReplies: {
-    alignSelf: "flex-end",
+    alignItems: "center",
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderBottomLeftRadius: "20@s",
-    borderTopLeftRadius: "20@s",
-    color: defaultStyles.colors.secondary,
-    fontSize: "14@s",
-    height: "30@s",
-    marginVertical: "5@s",
-    paddingHorizontal: "20@s",
-    textAlignVertical: "center",
+    borderBottomRightRadius: "20@s",
+    borderTopRightRadius: "20@s",
+    height: "32@s",
+    justifyContent: "center",
+    width: "17%",
   },
   container: {
     backgroundColor: defaultStyles.colors.light,
     borderColor: defaultStyles.colors.light,
     borderRadius: "25@s",
     borderWidth: 1,
+    flexDirection: "row",
     marginVertical: "8@s",
     overflow: "hidden",
     width: "90%",
-  },
-  detailsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  favoritePeople: {
-    color: defaultStyles.colors.blue,
-    fontSize: "14@s",
-    height: "30@s",
-    marginVertical: "5@s",
-    paddingHorizontal: "20@s",
-    textAlignVertical: "center",
   },
   inputBoxContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
     flexDirection: "row",
+    flexShrink: 1,
     height: "32@s",
     justifyContent: "space-between",
     paddingHorizontal: "10@s",
-    width: "100%",
   },
   inputBox: {
     backgroundColor: defaultStyles.colors.light,
@@ -225,7 +207,7 @@ const styles = ScaledSheet.create({
   },
   listView: {
     flex: 1,
-    marginTop: "10@s",
+    marginTop: "3@s",
     width: "100%",
   },
 });

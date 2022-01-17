@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo, useContext } from "react";
+import React, { useState, useCallback, memo, useContext, useRef } from "react";
 import { View, TouchableOpacity } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
 import { ScaledSheet, scale } from "react-native-size-matters";
@@ -36,14 +36,17 @@ function ContactCard({
     echoMessage: null,
   });
 
+  let modalVisibleFor = useRef("").current;
+
   const { user: currentUser } = useAuth();
 
   const { activeFor } = useContext(ActiveForContext);
 
   const handleImagePress = useCallback(async () => {
+    modalVisibleFor = user._id;
     setState({ visible: true, echoMessage: null });
     const { data, problem, ok } = await echosApi.getEcho(user._id);
-    if (ok) {
+    if (ok && modalVisibleFor == user._id) {
       if (currentUser._id != user._id) {
         usersApi.updatePhotoTapsCount(user._id);
       }
@@ -53,10 +56,10 @@ function ContactCard({
     if (problem) return;
   }, [user._id]);
 
-  const handleCloseModal = useCallback(
-    () => setState({ ...state, visible: false }),
-    []
-  );
+  const handleCloseModal = useCallback(() => {
+    modalVisibleFor = "";
+    setState({ ...state, visible: false });
+  }, []);
 
   const onSendThoughtPress = useCallback(
     () => onSendThoughtsPress(user),

@@ -28,6 +28,7 @@
    <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ALWAYS"/>
    <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
    <meta-data android:name="expo.modules.notifications.default_notification_icon" android:resource="@mipmap/ic_notification" />
+   <meta-data android:name="com.bugsnag.android.API_KEY" android:value="2c834e302661fd76cab7e7be6bca44dc"/>
 
     <activity
      android:name=".MainActivity"
@@ -40,6 +41,18 @@
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+
+      <intent-filter>
+       <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+       <data
+        android:host="seeyot.page.link"
+        android:scheme="https"/>
+       <data
+        android:host="seeyot.page.link"
+        android:scheme="http"/>
       </intent-filter>
     </activity>
 

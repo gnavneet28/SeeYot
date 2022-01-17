@@ -7,6 +7,7 @@
     "start": "react-native start"
   },
   "dependencies": {
+    "@bugsnag/react-native": "^7.14.2",
     "@react-native-async-storage/async-storage": "~1.15.0",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-community/netinfo": "6.0.2",
@@ -42,7 +43,6 @@
     "react-native": "0.64.3",
     "react-native-autolink": "^4.0.0",
     "react-native-confirmation-code-field": "6",
-    "react-native-exception-handler": "^2.10.10",
     "react-native-gesture-handler": "~1.10.2",
     "react-native-image-crop-picker": "^0.36.2",
     "react-native-reanimated": "~2.2.0",

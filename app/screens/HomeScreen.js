@@ -12,6 +12,7 @@ import {
   TextInput,
   TouchableOpacity,
   Linking,
+  BackHandler,
 } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -24,7 +25,7 @@ import AppImage from "../components/AppImage";
 import AppText from "../components/AppText";
 import ContactList from "../components/ContactList";
 import HomeAppHeader from "../components/HomeAppHeader";
-import HomeMessages from "../components/HomeMessages";
+import HomeMessagesList from "../components/HomeMessagesList";
 import Icon from "../components/Icon";
 import InfoAlert from "../components/InfoAlert";
 import ReplyOption from "../components/ReplyOption";
@@ -36,6 +37,7 @@ import useAuth from "../auth/useAuth";
 
 import myApi from "../api/my";
 import messagesApi from "../api/messages";
+import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
 import useConnection from "../hooks/useConnection";
@@ -91,30 +93,8 @@ function HomeScreen({ navigation }) {
     if (problem) return;
   };
 
-  const updateAllContacts = async () => {
-    let canUpdate = await authorizeUpdates.authorizeContactsUpdate();
-    if (!canUpdate) return;
-    const { ok, data, problem } = await myApi.updateMyContacts();
-    if (ok) {
-      setUser(data.user);
-      await storeDetails(data.user);
-      return await authorizeUpdates.updateContactsUpdate();
-    }
-    return;
-  };
-
-  const updateAllReadMessages = async () => {
-    let canUpdate = await authorizeUpdates.authorizeReadMessagesUpdate();
-    if (!canUpdate) return;
-    const { ok, problem } = await messagesApi.updateAllMessages();
-    if (ok) return await authorizeUpdates.updateReadMessagesUpdate();
-    if (problem) return;
-  };
-
   useEffect(() => {
     clearJunkData();
-    updateAllReadMessages();
-    updateAllContacts();
   }, []);
 
   useEffect(() => {
@@ -203,10 +183,10 @@ function HomeScreen({ navigation }) {
       async () => {
         setRefreshing(true);
 
-        const { data, ok, problem } = await myApi.updateMyContacts();
+        const { ok, data, problem } = await usersApi.getCurrentUser();
         if (ok) {
-          await storeDetails(data.user);
-          setUser(data.user);
+          setUser(data);
+          await storeDetails(data);
           return setRefreshing(false);
         }
         setRefreshing(false);
@@ -320,7 +300,7 @@ function HomeScreen({ navigation }) {
         {messagesList.filter(
           (m) => dayjs(new Date()).diff(dayjs(m.createdAt), "hours") <= 24
         ).length > 0 ? (
-          <HomeMessages
+          <HomeMessagesList
             messages={messagesList}
             onMessagePress={handleMessagePress}
           />

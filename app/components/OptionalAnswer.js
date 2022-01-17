@@ -25,6 +25,7 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.light,
     borderRadius: "10@s",
     color: defaultStyles.colors.blue,
+    fontSize: "13.5@s",
     marginLeft: "10@s",
     maxWidth: "85%",
     paddingHorizontal: "10@s",
