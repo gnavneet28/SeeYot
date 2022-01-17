@@ -1,6 +1,7 @@
 import io from "socket.io-client";
+import apiUrl from "../config/apiUrl";
 
-const socket = io("http://192.168.197.96:3000", {
+const socket = io(apiUrl.baseApiUrl, {
   transports: ["websocket", "polling"],
 });
 
