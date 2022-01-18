@@ -70,7 +70,7 @@ function SubscriptionScreen({ navigation, route }) {
             name="lock-open"
           />
           <DescriptionItem
-            description="You will be notified when someone add you to his/her Fovorite People list."
+            description="You will be notified when someone add you to his/her Fovorite People list.(Does not include the name of the person who added you.)"
             name="bell-circle"
           />
 

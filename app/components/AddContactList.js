@@ -132,19 +132,21 @@ class AddContactList extends React.Component {
   render() {
     return (
       <>
-        <View style={[styles.container, this.props.style]}>
-          <View style={styles.inputBoxContainer}>
-            <Ionicons
-              color={defaultStyles.colors.yellow_Variant}
-              name="search-sharp"
-              size={scale(22)}
-            />
-            <AppTextInput
-              maxLength={10}
-              onChangeText={(text) => this.handleChange(text)}
-              placeholder="Search in your contacts..."
-              style={styles.inputBox}
-            />
+        <View style={[styles.mainContainer, this.props.style]}>
+          <View style={styles.container}>
+            <View style={styles.inputBoxContainer}>
+              <Ionicons
+                color={defaultStyles.colors.yellow_Variant}
+                name="search-sharp"
+                size={scale(22)}
+              />
+              <AppTextInput
+                maxLength={10}
+                onChangeText={(text) => this.handleChange(text)}
+                placeholder="Search in your contacts..."
+                style={styles.inputBox}
+              />
+            </View>
           </View>
         </View>
         <View style={styles.listView}>
@@ -179,7 +181,7 @@ const styles = ScaledSheet.create({
   },
   inputBoxContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
     height: "32@s",
     justifyContent: "space-between",
@@ -187,7 +189,7 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   inputBox: {
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.white,
     borderRadius: "20@s",
     flexShrink: 1,
     height: "30@s",
@@ -197,6 +199,14 @@ const styles = ScaledSheet.create({
   },
   listView: {
     flex: 1,
+    width: "100%",
+  },
+  mainContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.light,
+    borderBottomColor: defaultStyles.colors.lightGrey,
+    borderBottomWidth: "1@s",
+    justifyContent: "center",
     width: "100%",
   },
 });

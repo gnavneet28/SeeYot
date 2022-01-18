@@ -10,32 +10,9 @@ import AppText from "./AppText";
 import DeleteAction from "./DeleteAction";
 
 import defaultStyles from "../config/styles";
+import defaultProps from "../utilities/defaultProps";
 
-const defaultMessage = {
-  _id: "",
-  message: "",
-  createdAt: "",
-  createdFor: {
-    _id: "",
-    name: "",
-    picture: "",
-  },
-  reply: [
-    {
-      _id: "",
-      message: "",
-      createdAt: "",
-      optionalAnswer: {
-        _id: "",
-        selected: true,
-        answer: "",
-      },
-    },
-  ],
-  seen: true,
-  mood: "",
-  options: [],
-};
+const defaultMessage = defaultProps.defaultMessage;
 
 function ReplyCard({
   index,
@@ -105,7 +82,8 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderBottomWidth: 1,
     borderColor: defaultStyles.colors.light,
-    height: "95@s",
+    height: "80@s",
+    justifyContent: "center",
     padding: "5@s",
     width: "95%",
   },
@@ -113,7 +91,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     alignSelf: "center",
     borderRadius: 5,
-    height: "145@s",
+    height: "80@s",
     justifyContent: "center",
     width: "95%",
   },
@@ -121,7 +99,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     alignSelf: "center",
     borderRadius: "5@s",
-    height: "60@s",
+    height: "50@s",
     justifyContent: "center",
     width: "95%",
   },

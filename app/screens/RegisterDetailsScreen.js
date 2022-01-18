@@ -22,6 +22,7 @@ import storeDetails from "../utilities/storeDetails";
 
 import defaultStyles from "../config/styles";
 import useKeyboard from "../hooks/useKeyboard";
+import apiActivity from "../utilities/apiActivity";
 
 function RegisterDetailsScreen({ route }) {
   const { logIn } = useAuth();
@@ -29,6 +30,7 @@ function RegisterDetailsScreen({ route }) {
   const isFocused = useIsFocused();
   const { number, verifiedId } = route.params;
   let keyboardShown = useKeyboard();
+  const { tackleProblem } = apiActivity;
 
   // STATES
   const [image, setImage] = useState("");
@@ -78,19 +80,7 @@ function RegisterDetailsScreen({ route }) {
       return logIn(data);
     }
     setIsLoading(false);
-
-    if (problem) {
-      if (data) {
-        return setInfoAlert({
-          infoAlertMessage: data.message,
-          showInfoAlert: true,
-        });
-      }
-      return setInfoAlert({
-        infoAlertMessage: problem,
-        showInfoAlert: true,
-      });
-    }
+    tackleProblem(problem, data, setInfoAlert);
   };
 
   return (

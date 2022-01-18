@@ -126,32 +126,34 @@ class AddContactList extends React.Component {
   render() {
     return (
       <>
-        <View style={[styles.container, this.props.style]}>
-          <View style={styles.inputBoxContainer}>
-            <Ionicons
-              color={defaultStyles.colors.yellow_Variant}
-              name="search-sharp"
-              size={scale(22)}
-            />
-            <AppTextInput
-              maxLength={10}
-              onChangeText={(text) => this.handleChange(text)}
-              placeholder="Search in your favorites..."
-              style={styles.inputBox}
-            />
+        <View style={[styles.mainContainer, this.props.style]}>
+          <View style={styles.container}>
+            <View style={styles.inputBoxContainer}>
+              <Ionicons
+                color={defaultStyles.colors.yellow_Variant}
+                name="search-sharp"
+                size={scale(22)}
+              />
+              <AppTextInput
+                maxLength={10}
+                onChangeText={(text) => this.handleChange(text)}
+                placeholder="Search in your favorites..."
+                style={styles.inputBox}
+              />
+            </View>
+            <TouchableHighlight
+              underlayColor={defaultStyles.colors.yellow}
+              style={styles.allReplies}
+              activeOpacity={0.8}
+              onPress={this.props.onAllRepliesPress}
+            >
+              <Icon
+                name="reply"
+                size={scale(18)}
+                color={defaultStyles.colors.secondary}
+              />
+            </TouchableHighlight>
           </View>
-          <TouchableHighlight
-            underlayColor={defaultStyles.colors.yellow}
-            style={styles.allReplies}
-            activeOpacity={0.8}
-            onPress={this.props.onAllRepliesPress}
-          >
-            <Icon
-              name="reply"
-              size={scale(18)}
-              color={defaultStyles.colors.secondary}
-            />
-          </TouchableHighlight>
         </View>
         <View style={styles.listView}>
           <RecyclerListView
@@ -189,7 +191,7 @@ const styles = ScaledSheet.create({
   },
   inputBoxContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
     flexShrink: 1,
     height: "32@s",
@@ -197,7 +199,7 @@ const styles = ScaledSheet.create({
     paddingHorizontal: "10@s",
   },
   inputBox: {
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.white,
     borderRadius: "20@s",
     flexShrink: 1,
     height: "30@s",
@@ -207,7 +209,14 @@ const styles = ScaledSheet.create({
   },
   listView: {
     flex: 1,
-    marginTop: "3@s",
+    width: "100%",
+  },
+  mainContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.light,
+    borderBottomColor: defaultStyles.colors.lightGrey,
+    borderBottomWidth: "1@s",
+    justifyContent: "center",
     width: "100%",
   },
 });

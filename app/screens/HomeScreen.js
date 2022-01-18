@@ -93,8 +93,18 @@ function HomeScreen({ navigation }) {
     if (problem) return;
   };
 
+  const updateCurrentUser = useCallback(async () => {
+    const { ok, data, problem } = await usersApi.getCurrentUser();
+    if (ok) {
+      setUser(data);
+      return await storeDetails(data);
+    }
+    if (problem) return;
+  }, []);
+
   useEffect(() => {
     clearJunkData();
+    updateCurrentUser();
   }, []);
 
   useEffect(() => {

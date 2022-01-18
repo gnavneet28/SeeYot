@@ -5,10 +5,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
 import * as SystemUI from "expo-system-ui";
-import Bugsnag from "@bugsnag/react-native";
+import JailMonkey from "jail-monkey";
 
 import getDetails from "./app/utilities/getDetails";
-import storeDetails from "./app/utilities/storeDetails";
 
 import cache from "./app/utilities/cache";
 
@@ -25,7 +24,6 @@ import defaultStyles from "./app/config/styles";
 
 import OnboardingContext from "./app/utilities/onboardingContext";
 
-import usersApi from "./app/api/users";
 import Onboarding from "./app/components/Onboarding";
 import SuccessMessage from "./app/components/SuccessMessage";
 import SuccessMessageContext from "./app/utilities/successMessageContext";
@@ -55,25 +53,10 @@ export default function App() {
   const restoreUser = async () => {
     const token = await authStorage.getUser();
     if (token) {
-      const { data, ok, problem } = await usersApi.getCurrentUser();
-      if (ok) {
-        await storeDetails(data);
-        return setUser(data);
-      }
-      if (problem) {
-        if (data) {
-          if (
-            data.message == "Invalid Token" ||
-            data.message == "Access denied! No token provided"
-          )
-            return setUser(null);
-        }
-
-        const cachedUser = await getDetails();
-        return setUser(cachedUser);
-      }
+      const cachedUser = await getDetails();
+      if (cachedUser) return setUser(cachedUser);
+      return setUser(null);
     }
-
     return setUser(null);
   };
 
@@ -86,9 +69,9 @@ export default function App() {
 
     let userOnboarded = await cache.get("onboarded");
     if (userOnboarded) return setOnboarded(true);
-    //setOnboarded(false);
   };
 
+  // use bugsnag instead of console.warn
   if (!state.isReady || !state.fontLoaded)
     return (
       <AppLoading

@@ -35,6 +35,5 @@ export default {
     _id: "",
     picture: "",
     name: "",
-    phoneNumber: parseInt(""),
   },
 };

@@ -22,19 +22,23 @@ function SearchBox({
     onChange(text);
   };
   return (
-    <View style={[styles.container, style]}>
-      <View style={styles.inputBoxContainer}>
-        <Ionicons
-          color={defaultStyles.colors.yellow_Variant}
-          name="search-sharp"
-          size={scale(22)}
-        />
-        <AppTextInput
-          maxLength={50}
-          onChangeText={(text) => handleChange(text)}
-          placeholder={placeholder}
-          style={styles.inputBox}
-        />
+    <>
+      <View style={[styles.mainContainer, style]}>
+        <View style={styles.container}>
+          <View style={styles.inputBoxContainer}>
+            <Ionicons
+              color={defaultStyles.colors.yellow_Variant}
+              name="search-sharp"
+              size={scale(22)}
+            />
+            <AppTextInput
+              maxLength={50}
+              onChangeText={(text) => handleChange(text)}
+              placeholder={placeholder}
+              style={styles.inputBox}
+            />
+          </View>
+        </View>
       </View>
       {list.length < 1 && searchTerm.length >= 3 && !loading ? (
         <View style={styles.emptyData}>
@@ -46,7 +50,7 @@ function SearchBox({
           />
         </View>
       ) : null}
-    </View>
+    </>
   );
 }
 const styles = ScaledSheet.create({
@@ -64,13 +68,13 @@ const styles = ScaledSheet.create({
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
     borderRadius: "5@s",
-    height: "70@s",
+    height: "50@s",
     justifyContent: "center",
     width: "95%",
   },
   inputBoxContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
     height: "32@s",
     justifyContent: "space-between",
@@ -78,12 +82,21 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   inputBox: {
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.white,
     borderRadius: "20@s",
     flexShrink: 1,
     height: "30@s",
     marginHorizontal: "5@s",
     paddingHorizontal: "10@s",
+    width: "100%",
+  },
+  mainContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.light,
+    borderBottomColor: defaultStyles.colors.lightGrey,
+    borderBottomWidth: "1@s",
+    justifyContent: "center",
+    marginBottom: "5@s",
     width: "100%",
   },
 });
