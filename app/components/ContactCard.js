@@ -59,7 +59,7 @@ function ContactCard({
   const handleCloseModal = useCallback(() => {
     modalVisibleFor = "";
     setState({ ...state, visible: false });
-  }, []);
+  }, [user._id]);
 
   const onSendThoughtPress = useCallback(
     () => onSendThoughtsPress(user),
