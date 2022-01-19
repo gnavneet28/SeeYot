@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "829673958507-0nerepqmkr5abbo0l9pe9qiii4kh62ll.apps.googleusercontent.com",
+          "client_id": "829673958507-d673j8pl0juqdottucf9pei8jba7qij2.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.seeyot",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+            "certificate_hash": "aae658bda380a8522b759ef8d6a0d42fea30829b"
           }
         },
         {

@@ -5,7 +5,14 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
 import * as SystemUI from "expo-system-ui";
-import JailMonkey from "jail-monkey";
+import { Image } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import AntDesign from "react-native-vector-icons/AntDesign";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import Feather from "react-native-vector-icons/Feather";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { Asset } from "expo-asset";
 
 import getDetails from "./app/utilities/getDetails";
 
@@ -28,6 +35,34 @@ import Onboarding from "./app/components/Onboarding";
 import SuccessMessage from "./app/components/SuccessMessage";
 import SuccessMessageContext from "./app/utilities/successMessageContext";
 
+const loadFont = async () => {
+  await Font.loadAsync({
+    "Comic-Bold": require("./app/assets/fonts/ComicNeue-Bold.ttf"),
+    "Comic-BoldItalic": require("./app/assets/fonts/ComicNeue-BoldItalic.ttf"),
+    "Comic-LightItalic": require("./app/assets/fonts/ComicNeue-LightItalic.ttf"),
+  });
+};
+
+const loadIcons = async () => {
+  await MaterialCommunityIcons.loadFont();
+  await FontAwesome.loadFont();
+  await Ionicons.loadFont();
+  await MaterialIcons.loadFont();
+  await FontAwesome.loadFont();
+  await Feather.loadFont();
+  await AntDesign.loadFont();
+};
+
+function cacheImages(images) {
+  return images.map((image) => {
+    if (typeof image === "string") {
+      return Image.prefetch(image);
+    } else {
+      return Asset.fromModule(image).downloadAsync();
+    }
+  });
+}
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [state, setState] = useState({
@@ -42,14 +77,6 @@ export default function App() {
 
   const [onboarded, setOnboarded] = useState(false);
 
-  const loadFont = useCallback(async () => {
-    await Font.loadAsync({
-      "Comic-Bold": require("./app/assets/fonts/ComicNeue-Bold.ttf"),
-      "Comic-BoldItalic": require("./app/assets/fonts/ComicNeue-BoldItalic.ttf"),
-      "Comic-LightItalic": require("./app/assets/fonts/ComicNeue-LightItalic.ttf"),
-    });
-  }, []);
-
   const restoreUser = async () => {
     const token = await authStorage.getUser();
     if (token) {
@@ -60,16 +87,26 @@ export default function App() {
     return setUser(null);
   };
 
-  const setUp = async () => {
+  const setUp = useCallback(async () => {
     await SystemUI.setBackgroundColorAsync(defaultStyles.colors.primary);
-    if (!state.fontLoaded) {
-      await loadFont();
-    }
+    await loadFont();
     await restoreUser();
+    await loadIcons();
+    await cacheImages([
+      require("./app/assets/activeChat.png"),
+      require("./app/assets/echoMessage.png"),
+      require("./app/assets/nickname.png"),
+      require("./app/assets/sendMessages.png"),
+      require("./app/assets/sendThoughts.png"),
+      require("./app/assets/splash.png"),
+      require("./app/assets/user.png"),
+      require("./app/assets/vipBanner.png"),
+      require("./app/assets/logo.png"),
+    ]);
 
     let userOnboarded = await cache.get("onboarded");
     if (userOnboarded) return setOnboarded(true);
-  };
+  }, []);
 
   // use bugsnag instead of console.warn
   if (!state.isReady || !state.fontLoaded)
