@@ -7,7 +7,7 @@ import AppText from "./AppText";
 
 import defaultStyles from "../config/styles";
 
-function PlanCard({ planName, planDuration, planRate, onProcess, style }) {
+function PlanCard({ _id, planName, planDuration, planRate, onProcess, style }) {
   return (
     <LinearGradient
       colors={["#FC5C7D", "#6A82FB"]}
@@ -22,7 +22,7 @@ function PlanCard({ planName, planDuration, planRate, onProcess, style }) {
         style={styles.button}
         subStyle={{ color: defaultStyles.colors.dark }}
         title="Select"
-        onPress={onProcess}
+        onPress={() => onProcess(_id)}
       />
     </LinearGradient>
   );

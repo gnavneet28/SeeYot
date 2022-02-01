@@ -2,7 +2,8 @@ import React, { useState, useCallback, useEffect } from "react";
 import { View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import FontAwesome5 from "../../node_modules/react-native-vector-icons/FontAwesome5";
+import OtpAutocomplete from "react-native-otp-autocomplete";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
@@ -20,12 +21,20 @@ import useMountedRef from "../hooks/useMountedRef";
 import verifyApi from "../api/verify";
 import Screen from "../components/Screen";
 
+// TODO: For google verification
+// import usersApi from "../api/users";
+// import useAuth from "../auth/useAuth";
+// import authStorage from "../auth/storage";
+// import storeDetails from "../utilities/storeDetails";
+
 function SendOtpScreen({ navigation }) {
+  // TODO: google verification
+  // const { logIn, setUser } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
   //STATES
   const [visible, setVisible] = useState(false);
-  const [code, setCode] = useState("+91");
+  // const [code, setCode] = useState("+91");
   const [number, setNumber] = useState(null);
   const [verificationId, setVerificationId] = useState();
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +42,22 @@ function SendOtpScreen({ navigation }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+
+  // useEffect( () => {
+
+  // })
+
+  // TODO: google verification
+
+  // const setAuthToken = async () => {
+  //   const authToken =
+  //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWVhYWI2NTNlZGU3NDA0YThhZDZkODAiLCJwaG9uZU51bWJlciI6MTIzNDU2Nzg5MCwiaWF0IjoxNjQyNzcwMDUyfQ.Uoy0c-fhWWyMGPToiR4wOitFnSXqpIdZm1RIX-hgv1g";
+  //   await authStorage.storeToken(authToken);
+  // };
+
+  // useEffect(() => {
+  //   setAuthToken();
+  // }, []);
 
   useEffect(() => {
     if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
@@ -61,18 +86,18 @@ function SendOtpScreen({ navigation }) {
     []
   );
 
-  const handleOpenCodePress = () => setVisible(true);
+  // const handleOpenCodePress = () => setVisible(true);
 
-  const handleSetCode = (country) => {
-    setCode(country.code);
-    setVisible(false);
-  };
+  // const handleSetCode = (country) => {
+  //   setCode(country.code);
+  //   setVisible(false);
+  // };
 
   // SUBMIT ACTION
   const handleSubmit = async () => {
     setIsLoading(true);
 
-    const phoneNumber = `${code}${number}`;
+    const phoneNumber = `+91${number}`;
     const { ok, data, problem } = await verifyApi.sendVerificationCode(
       phoneNumber
     );
@@ -101,6 +126,21 @@ function SendOtpScreen({ navigation }) {
     });
   };
 
+  // TODO: for google verification
+  // const handleSubmitForm = async () => {
+  //   setIsLoading(true);
+
+  //   const { ok, problem, data } = await usersApi.getCurrentUser();
+
+  //   if (ok) {
+  //     await storeDetails(data);
+  //     setIsLoading(false);
+  //     return setUser(data);
+  //   }
+  //   setIsLoading(false);
+  //   tackleProblem(problem, data, setInfoAlert);
+  // };
+
   return (
     <Screen style={styles.container}>
       <LoadingIndicator visible={isLoading} />
@@ -109,22 +149,21 @@ function SendOtpScreen({ navigation }) {
         leftPress={handleCloseInfoAlert}
         visible={infoAlert.showInfoAlert}
       />
-      <CountryPicker
+      {/* <CountryPicker
         onPress={handleSetCode}
         setVisible={setVisible}
         visible={visible}
-      />
-      <FontAwesome5
-        color={defaultStyles.colors.secondary}
-        name="mobile-alt"
-        size={scale(80)}
-        style={{ marginBottom: scale(30) }}
-      />
+      /> */}
+      <View style={styles.infoIconContainer}>
+        <FontAwesome5
+          color={defaultStyles.colors.white}
+          name="mobile-alt"
+          size={scale(40)}
+        />
+      </View>
       <View style={styles.inputContainer}>
         <View style={styles.phoneInputContainer}>
-          <AppText onPress={handleOpenCodePress} style={styles.code}>
-            {code}
-          </AppText>
+          <AppText style={styles.code}>+91</AppText>
           <AppTextInput
             autoCorrect={false}
             keyboardType="phone-pad"
@@ -169,7 +208,7 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.primary,
     flex: 1,
     paddingTop: "120@s",
     width: "100%",
@@ -177,7 +216,7 @@ const styles = ScaledSheet.create({
   inputContainer: {
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: "20@s",
+    marginBottom: "30@s",
     width: "100%",
   },
   inputBox: {
@@ -187,13 +226,23 @@ const styles = ScaledSheet.create({
     width: "95%",
   },
   infoText: {
-    color: defaultStyles.colors.dark_Variant,
-    fontSize: "12@s",
+    color: defaultStyles.colors.white,
+    fontSize: "13.5@s",
     lineHeight: "15@s",
     paddingHorizontal: "10@s",
     paddingVertical: "5@s",
     textAlign: "center",
-    width: "60%",
+    width: "70%",
+  },
+  infoIconContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.tomato,
+    borderRadius: "50@s",
+    height: "100@s",
+    justifyContent: "center",
+    marginBottom: "30@s",
+    padding: "20@s",
+    width: "100@s",
   },
   modalFallback: {
     backgroundColor: "rgba(0,0,0,0.7)",
@@ -222,18 +271,14 @@ const styles = ScaledSheet.create({
     flexDirection: "row",
     height: "40@s",
     justifyContent: "space-between",
-    marginBottom: "10@s",
+    marginBottom: "15@s",
     overflow: "hidden",
     width: "80%",
   },
   submitButtonSub: {
     color: defaultStyles.colors.primary,
     letterSpacing: "1@s",
-  },
-  verifyInfo: {
-    color: defaultStyles.colors.white,
-    fontSize: "17@s",
-    top: "10@s",
+    fontSize: "16@s",
   },
 });
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View } from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "../../node_modules/react-native-vector-icons/Ionicons";
 import LottieView from "lottie-react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
@@ -44,7 +44,7 @@ function SearchBox({
         <View style={styles.emptyData}>
           <LottieView
             autoPlay
-            loop
+            loop={false}
             source={require("../assets/animations/noresults.json")}
             style={{ flex: 1 }}
           />

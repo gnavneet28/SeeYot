@@ -1,5 +1,5 @@
 import React from "react";
-import { Dimensions, View, RefreshControl } from "react-native";
+import { Dimensions, View } from "react-native";
 import {
   RecyclerListView,
   DataProvider,
@@ -60,15 +60,15 @@ class ContactList extends React.Component {
     };
   }
 
-  _rowRenderer(type, data, index) {
+  _rowRenderer(type, data) {
     switch (type) {
       case ViewTypes.Full:
         return (
           <ContactCard
-            index={index}
             onAddFriendPress={this.props.onAddFriendPress}
             onAddEchoPress={this.props.onAddEchoPress}
             onSendThoughtsPress={this.props.onSendThoughtsPress}
+            onImagePress={() => this.props.onImagePress(data)}
             user={data}
           />
         );
@@ -106,13 +106,6 @@ class ContactList extends React.Component {
         ) : null}
         <View style={styles.listView}>
           <RecyclerListView
-            refreshControl={
-              <RefreshControl
-                onRefresh={this.props.onRefresh}
-                refreshing={this.props.refreshing}
-              />
-            }
-            canChangeSize={true}
             dataProvider={this.state.dataProvider}
             extendedState={this.state}
             layoutProvider={this._layoutProvider}

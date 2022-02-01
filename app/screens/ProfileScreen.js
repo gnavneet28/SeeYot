@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useContext } from "react";
 import { Modal, ScrollView, Share, View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 import { useIsFocused } from "@react-navigation/native";
 
 import AddPicture from "../components/AddPicture";
@@ -147,11 +147,8 @@ function ProfileScreen({ navigation }) {
   }, [problemDescription]);
 
   const handleLogOutPress = useCallback(async () => {
-    const { ok, data, problem } = await expoPushTokensApi.removeToken();
-    if (ok) {
-      return logOut();
-    }
-    tackleProblem(problem, data, setInfoAlert);
+    // await expoPushTokensApi.removeToken();
+    return await logOut();
   }, []);
 
   const handleHelpPress = useCallback(() => {

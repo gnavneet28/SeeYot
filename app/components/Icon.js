@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import FontAwesome from "../../node_modules/react-native-vector-icons/FontAwesome";
+import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";

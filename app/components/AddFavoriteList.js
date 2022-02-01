@@ -5,7 +5,7 @@ import {
   DataProvider,
   LayoutProvider,
 } from "recyclerlistview";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "../../node_modules/react-native-vector-icons/Ionicons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
@@ -91,6 +91,7 @@ class AddContactList extends React.Component {
     let newDataProvider = this.state.dataProvider;
     this.setState({
       ...this.state,
+      searchTerm: text,
       dataProvider: newList.length
         ? newDataProvider.cloneWithRows(newList)
         : newDataProvider.cloneWithRows(defaultListItemWhenEmpty),
@@ -111,10 +112,15 @@ class AddContactList extends React.Component {
         return null;
     }
   }
+
   componentDidUpdate(prevProps) {
-    if (prevProps.users != this.props.users) {
+    if (
+      prevProps.users != this.props.users ||
+      prevProps.isFocoused != this.props.isFocoused
+    ) {
       return this.setState({
         ...this.state,
+        searchTerm: "",
         defaultUsers: this.props.users,
         dataProvider: this.props.users.length
           ? this.state.dataProvider.cloneWithRows(this.props.users)
@@ -135,6 +141,7 @@ class AddContactList extends React.Component {
                 size={scale(22)}
               />
               <AppTextInput
+                value={this.state.searchTerm}
                 maxLength={10}
                 onChangeText={(text) => this.handleChange(text)}
                 placeholder="Search in your favorites..."
@@ -142,7 +149,7 @@ class AddContactList extends React.Component {
               />
             </View>
             <TouchableHighlight
-              underlayColor={defaultStyles.colors.yellow}
+              underlayColor={defaultStyles.colors.lightGrey}
               style={styles.allReplies}
               activeOpacity={0.8}
               onPress={this.props.onAllRepliesPress}
@@ -150,7 +157,7 @@ class AddContactList extends React.Component {
               <Icon
                 name="reply"
                 size={scale(18)}
-                color={defaultStyles.colors.secondary}
+                color={defaultStyles.colors.white}
               />
             </TouchableHighlight>
           </View>
@@ -172,7 +179,7 @@ class AddContactList extends React.Component {
 const styles = ScaledSheet.create({
   allReplies: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.yellow_Variant,
+    backgroundColor: defaultStyles.colors.dark_Variant,
     borderBottomRightRadius: "20@s",
     borderTopRightRadius: "20@s",
     height: "32@s",

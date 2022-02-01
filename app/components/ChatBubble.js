@@ -8,6 +8,7 @@ import { moderateScale, scale } from "react-native-size-matters";
 import Autolink from "react-native-autolink";
 
 import defaultStyles from "../config/styles";
+import AppImage from "./AppImage";
 
 let defaultThought = {
   message: "",
@@ -19,6 +20,7 @@ function ChatBubble({
   mine,
   onLongPress,
   activeChat,
+  recipient,
 }) {
   dayjs.extend(relativeTime);
   return (
@@ -27,6 +29,15 @@ function ChatBubble({
       onLongPress={onLongPress}
       style={[styles.message, !mine ? styles.mine : styles.not_mine]}
     >
+      {mine ? null : (
+        <AppImage
+          resizeMode="cover"
+          overlayColor={defaultStyles.colors.white}
+          imageUrl={recipient.picture}
+          style={styles.recipientPicture}
+          subStyle={styles.recipientPictureSub}
+        />
+      )}
       <View
         style={[
           styles.cloud,
@@ -118,16 +129,15 @@ const styles = StyleSheet.create({
     right: moderateScale(-6, 0.5),
   },
   cloud: {
-    borderRadius: 20,
+    borderRadius: scale(10),
     maxWidth: moderateScale(250, 2),
-    paddingBottom: moderateScale(7, 2),
-    paddingHorizontal: moderateScale(10, 2),
-    paddingTop: moderateScale(5, 2),
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
   },
   createdAt: {
     color: defaultStyles.colors.dark_Variant,
     fontSize: scale(8),
-    paddingTop: scale(2),
+    paddingTop: 0,
     textAlign: "right",
   },
   message: {
@@ -135,19 +145,32 @@ const styles = StyleSheet.create({
     marginVertical: moderateScale(7, 2),
   },
   mine: {
-    marginLeft: 20,
+    marginLeft: scale(10),
   },
   not_mine: {
     alignSelf: "flex-end",
-    marginRight: 20,
+    marginRight: scale(10),
+  },
+  recipientPicture: {
+    alignSelf: "flex-end",
+    borderColor: defaultStyles.colors.white,
+    borderWidth: 1,
+    height: scale(20),
+    marginRight: scale(10),
+    width: scale(20),
+  },
+  recipientPictureSub: {
+    height: scale(22),
+    width: scale(22),
   },
 
   text: {
     ...defaultStyles.text,
     color: defaultStyles.colors.dark,
+    fontFamily: "ComicNeue-Bold",
     fontSize: scale(13),
-    fontFamily: "Comic-Bold",
     lineHeight: scale(16),
+    paddingBottom: 0,
   },
 });
 

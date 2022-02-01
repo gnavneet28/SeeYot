@@ -2,14 +2,19 @@
   "expo": {
     "name": "seeyot",
     "slug": "seeyot",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
 
     "updates": {
       "fallbackToCacheTimeout": 0
     },
     "splash": {
-      "image": "./app/assets/splash.png",
+      "mdpi": "./app/assets/mdpi/splashscreen_image.png",
+      "hdpi": "./app/assets/hdpi/splashscreen_image.png",
+      "xhdpi": "./app/assets/xhdpi/splashscreen_image.png",
+      "xxhdpi": "./app/assets/xxhdpi/splashscreen_image.png",
+      "xxxhdpi": "./app/assets/xxxhdpi/splashscreen_image.png",
+      "image": "./app/assets/xxxhdpi/splashscreen_image.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -20,8 +25,12 @@
         "googleMobileAdsAppId": "ca-app-pub-3410683473491694~5850728603"
       }
     },
+    "androidStatusBar": {
+      "backgroundColor": "#1d1f24"
+    },
     "android": {
-      "icon": "./assets/logo.png",
+      "versionCode": 2,
+      "icon": "./app/assets/logo.png",
       "adaptiveIcon": {
         "foregroundImage": "./app/assets/logo.png",
         "backgroundColor": "#ffffff"
@@ -30,7 +39,11 @@
         "googleMobileAdsAppId": "ca-app-pub-3410683473491694~8016350220"
       }
     },
-    "assetBundlePatterns": ["**/*"]
+    "assetBundlePatterns": [
+      "./app/assets/*",
+      "./app/assets/fonts/*",
+      "./app/assets/animations/*"
+    ]
   },
   "name": "seeyot"
 }

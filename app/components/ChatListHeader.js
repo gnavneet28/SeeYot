@@ -17,11 +17,6 @@ function ChatListHeader({ user, activeChat }) {
         subStyle={styles.subImage}
       />
       <AppText style={styles.name}>{user.name}</AppText>
-      {user.myNickName ? (
-        <AppText style={styles.myNickName}>
-          {"calls you" + " - " + user.myNickName}
-        </AppText>
-      ) : null}
       {activeChat ? (
         <AppText style={styles.infoText}>
           Send direct messages to {user.savedName ? user.savedName : user.name}{" "}
@@ -63,26 +58,16 @@ const styles = ScaledSheet.create({
   infoText: {
     color: defaultStyles.colors.white,
     fontSize: "13@s",
-    marginVertical: "5@s",
+    marginBottom: "5@s",
     textAlign: "center",
     width: "90%",
   },
-  myNickName: {
+  name: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "20@s",
-    color: defaultStyles.colors.dark,
-    fontSize: "13@s",
-    paddingHorizontal: "10@s",
-    paddingVertical: "2@s",
-    textAlign: "center",
-  },
-  name: {
-    backgroundColor: defaultStyles.colors.blue,
-    borderRadius: "20@s",
-    color: defaultStyles.colors.white,
-    fontSize: "13@s",
+    color: defaultStyles.colors.secondary,
+    fontSize: "13.5@s",
     marginTop: "10@s",
-    marginBottom: "5@s",
     paddingHorizontal: "10@s",
     paddingVertical: "2@s",
     textAlign: "center",

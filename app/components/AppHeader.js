@@ -19,6 +19,10 @@ function AppHeader({
   rightImageUrl = "",
   rightIcon,
   title,
+  titleStyle,
+  leftIconColor = defaultStyles.colors.white,
+  rightIconColor = defaultStyles.colors.white,
+  underlayColor = defaultStyles.colors.primary,
 }) {
   return (
     <View style={[styles.container, style]}>
@@ -26,12 +30,12 @@ function AppHeader({
         activeOpacity={1}
         onPress={onPressLeft}
         style={styles.leftOption}
-        underlayColor={defaultStyles.colors.primary}
+        underlayColor={underlayColor}
       >
         <>
           {leftIcon ? (
             <Icon
-              color={defaultStyles.colors.white}
+              color={leftIconColor}
               fw={fwl}
               name={leftIcon}
               size={scale(23)}
@@ -48,19 +52,19 @@ function AppHeader({
           ) : null}
         </>
       </TouchableHighlight>
-      <AppText numberOfLines={1} style={styles.headerText}>
+      <AppText numberOfLines={1} style={[styles.headerText, titleStyle]}>
         {title}
       </AppText>
       <TouchableHighlight
         activeOpacity={1}
         onPress={onPressRight}
         style={styles.rightOption}
-        underlayColor={defaultStyles.colors.primary}
+        underlayColor={underlayColor}
       >
         <>
           {rightIcon ? (
             <Icon
-              color={defaultStyles.colors.white}
+              color={rightIconColor}
               fw={fwr}
               name={rightIcon}
               size={scale(23)}
@@ -92,7 +96,7 @@ const styles = ScaledSheet.create({
   },
   headerText: {
     color: defaultStyles.colors.white,
-    fontFamily: "Comic-Bold",
+    fontFamily: "ComicNeue-Bold",
     fontSize: "17@s",
     letterSpacing: "0.3@s",
     textAlign: "center",

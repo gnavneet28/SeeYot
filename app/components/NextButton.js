@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { View, TouchableOpacity, Animated } from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import Svg, { G, Circle } from "react-native-svg";
@@ -8,7 +8,7 @@ import Svg, { G, Circle } from "react-native-svg";
 import defaultStyles from "../config/styles";
 
 function NextButton({ percentage, scrollTo }) {
-  const size = 110;
+  const size = 100;
   const strokeWidth = 2;
   const center = size / 2;
   const radius = size / 2 - strokeWidth / 2;
@@ -78,7 +78,7 @@ function NextButton({ percentage, scrollTo }) {
       >
         <AntDesign
           name="arrowright"
-          size={scale(28)}
+          size={scale(20)}
           color={defaultStyles.colors.secondary}
         />
       </TouchableOpacity>

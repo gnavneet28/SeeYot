@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { View, Text, Linking } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, Linking, Keyboard } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
+import OtpAutocomplete from "react-native-otp-autocomplete";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
@@ -41,6 +42,23 @@ export default function VerifyOtpScreen({ navigation, route }) {
     setValue,
   });
 
+  // OTP AUTOCOMPLETE
+
+  const otpHandler = (message) => {
+    const otp = /(\d{6})/g.exec(message)[1];
+    setValue(otp);
+    OtpAutocomplete.removeListener();
+    Keyboard.dismiss();
+  };
+
+  useEffect(() => {
+    OtpAutocomplete.getOtp()
+      .then((p) => OtpAutocomplete.addListener(otpHandler))
+      .catch((p) => console.log(p));
+
+    return () => OtpAutocomplete.removeListener();
+  }, []);
+
   const openPrivacyPage = () => {
     Linking.openURL("https://seeyot-frontend.herokuapp.com/privacy_policy");
   };
@@ -55,7 +73,6 @@ export default function VerifyOtpScreen({ navigation, route }) {
     const { ok, data, problem } = await verifyApi.sendVerificationCode(number);
 
     if (ok) {
-      console.log(data.attemptCode);
       verifiedId = data.attemptCode;
       setIsLoading(false);
       return setInfoAlert({
@@ -116,12 +133,14 @@ export default function VerifyOtpScreen({ navigation, route }) {
         description={infoAlert.infoAlertMessage}
         visible={infoAlert.showInfoAlert}
       />
-      <MaterialCommunityIcons
-        color={defaultStyles.colors.secondary}
-        name="cellphone-text"
-        size={scale(80)}
-        style={{ marginBottom: scale(30) }}
-      />
+
+      <View style={styles.infoIconContainer}>
+        <MaterialCommunityIcons
+          color={defaultStyles.colors.white}
+          name="cellphone-text"
+          size={scale(40)}
+        />
+      </View>
       <View style={styles.inputContainer}>
         <View style={styles.otpInputContainer}>
           <CodeField
@@ -139,7 +158,7 @@ export default function VerifyOtpScreen({ navigation, route }) {
                 style={[
                   styles.cell,
                   isFocused && styles.focusCell,
-                  { fontFamily: "Comic-Bold" },
+                  { fontFamily: "ComicNeue-Bold" },
                 ]}
                 onLayout={getCellOnLayoutHandler(index)}
               >
@@ -155,6 +174,7 @@ export default function VerifyOtpScreen({ navigation, route }) {
           subStyle={{
             color: defaultStyles.colors.primary,
             letterSpacing: scale(2),
+            fontSize: scale(16),
           }}
           title="Next"
         />
@@ -162,7 +182,7 @@ export default function VerifyOtpScreen({ navigation, route }) {
           disabled={disabled}
           title="Send Otp again"
           style={styles.sendOtpAgain}
-          subStyle={{ fontSize: scale(10) }}
+          subStyle={{ fontSize: scale(14) }}
           onPress={handleSendOtpAgainPress}
         />
       </View>
@@ -180,6 +200,7 @@ const styles = ScaledSheet.create({
     elevation: 2,
     height: "35@s",
     marginVertical: "10@s",
+    marginBottom: "25@s",
     width: "80%",
   },
   codeFieldRoot: {},
@@ -197,7 +218,7 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.primary,
     flex: 1,
     paddingTop: "120@s",
     width: "100%",
@@ -212,11 +233,21 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   infoText: {
-    color: defaultStyles.colors.dark_Variant,
+    color: defaultStyles.colors.white,
     fontSize: "13.5@s",
     lineHeight: "15@s",
     textAlign: "center",
     width: "70%",
+  },
+  infoIconContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.tomato,
+    borderRadius: "50@s",
+    height: "100@s",
+    justifyContent: "center",
+    marginBottom: "40@s",
+    padding: "20@s",
+    width: "100@s",
   },
   otpInputContainer: {
     alignItems: "center",
@@ -228,19 +259,15 @@ const styles = ScaledSheet.create({
   },
   sendOtpAgain: {
     backgroundColor: defaultStyles.colors.blue,
-    height: "25@s",
+    borderRadius: "20@s",
+    height: "35@s",
     marginTop: "5@s",
-    width: "80@s",
+    width: "50%",
   },
   screen: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.primary,
     justifyContent: "center",
     paddingHorizontal: "20@s",
-  },
-  verifyInfo: {
-    color: defaultStyles.colors.white,
-    fontSize: "17@s",
-    top: "10@s",
   },
 });

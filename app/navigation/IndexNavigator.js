@@ -1,7 +1,9 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import Ionicons from "../../node_modules/react-native-vector-icons/Ionicons";
+import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
+import { scale } from "react-native-size-matters";
+import { useNavigation, TabActions } from "@react-navigation/native";
 
 import AddContactScreen from "../screens/AddContactsScreen";
 import HomeScreen from "../screens/HomeScreen";
@@ -23,6 +25,8 @@ function IndexNavigator(props) {
     ).length;
   }
 
+  const navigation = useNavigation();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -30,7 +34,7 @@ function IndexNavigator(props) {
         tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: defaultstyles.colors.primary,
-          height: 52,
+          height: scale(45),
           borderTopWidth: 0,
         },
         tabBarHideOnKeyboard: true,
@@ -38,7 +42,7 @@ function IndexNavigator(props) {
     >
       <Tab.Screen
         options={{
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ color, size }) => (
             <AntDesign name="home" size={size} color={color} />
           ),
           tabBarActiveTintColor: defaultstyles.colors.yellow_Variant,
@@ -49,7 +53,7 @@ function IndexNavigator(props) {
       />
       <Tab.Screen
         options={{
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ color, size }) => (
             <AntDesign name="adduser" size={size} color={color} />
           ),
           tabBarActiveTintColor: defaultstyles.colors.yellow_Variant,
@@ -60,7 +64,7 @@ function IndexNavigator(props) {
       />
       <Tab.Screen
         options={{
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ color, size }) => (
             <AntDesign name="staro" size={size} color={color} />
           ),
           tabBarActiveTintColor: defaultstyles.colors.yellow_Variant,
@@ -68,10 +72,11 @@ function IndexNavigator(props) {
         }}
         name={Constant.FAVORITES_NAVIGATOR}
         component={FavoritesNavigator}
+        // listeners={{ tabPress: () => navigation.popToTop() }}
       />
       <Tab.Screen
         options={{
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications-outline" size={size} color={color} />
           ),
           tabBarBadge: notificationsLength ? notificationsLength : "",

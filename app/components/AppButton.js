@@ -18,7 +18,7 @@ function AppButton({
       onPress={onPress}
       style={[styles.container, style]}
     >
-      <Text style={[styles.text, { fontFamily: "Comic-Bold" }, subStyle]}>
+      <Text style={[styles.text, { fontFamily: "ComicNeue-Bold" }, subStyle]}>
         {title}
       </Text>
     </TouchableOpacity>

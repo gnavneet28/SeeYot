@@ -132,7 +132,7 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.primary,
     flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: "10@s",
@@ -151,7 +151,7 @@ const styles = ScaledSheet.create({
     marginBottom: "5@s",
   },
   info: {
-    color: defaultStyles.colors.dark_Variant,
+    color: defaultStyles.colors.white,
     fontSize: "12@s",
     textAlign: "left",
     width: "100%",

@@ -158,9 +158,11 @@ function AddContactsScreen({ navigation }) {
         setIsReady(true);
       }
     }
-    let canUpdate = await authorizeUpdates.authorizePhoneContactsUpdate();
-    if (!canUpdate) return;
-    await authorizeUpdates.updatePhoneContactsUpdate();
+    // let canUpdate = await authorizeUpdates.authorizePhoneContactsUpdate();
+    // if (!canUpdate) {
+    //   return setIsReady(true);
+    // }
+    // await authorizeUpdates.updatePhoneContactsUpdate();
     return requestPermission();
   };
 
@@ -181,8 +183,18 @@ function AddContactsScreen({ navigation }) {
   const handleRefresh = useCallback(async () => {
     if (!isReady || mounted) {
       setRefreshing(true);
+      // let canUpdate = await authorizeUpdates.authorizePhoneContactsUpdate();
+      // if (!canUpdate) {
+      //   setRefreshing(false);
+      //   return setInfoAlert({
+      //     infoAlertMessage:
+      //       "You can update your contacts only once within 24 hours.",
+      //     showInfoAlert: true,
+      //   });
+      // }
+      // await authorizeUpdates.updatePhoneContactsUpdate();
       await requestPermission();
-      setRefreshing(false);
+      return setRefreshing(false);
     }
   }, [isReady, mounted]);
 
@@ -283,6 +295,7 @@ function AddContactsScreen({ navigation }) {
       ) : (
         <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
           <AddContactList
+            isFocused={isFocused}
             onRefresh={handleRefresh}
             refreshing={refreshing}
             onInvitePress={

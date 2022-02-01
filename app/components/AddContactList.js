@@ -5,7 +5,7 @@ import {
   DataProvider,
   LayoutProvider,
 } from "recyclerlistview";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "../../node_modules/react-native-vector-icons/Ionicons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
@@ -90,6 +90,7 @@ class AddContactList extends React.Component {
     let newDataProvider = this.state.dataProvider;
     this.setState({
       ...this.state,
+      searchTerm: text,
       dataProvider: newList.length
         ? newDataProvider.cloneWithRows(newList)
         : newDataProvider.cloneWithRows(defaultListItemWhenEmpty),
@@ -118,10 +119,12 @@ class AddContactList extends React.Component {
       prevProps.users.length != this.props.users.length ||
       this.registeredUsersLength(prevProps.users) !=
         this.registeredUsersLength(this.props.users) ||
-      prevProps.users != this.props.users
+      prevProps.users != this.props.users ||
+      prevProps.isFocused != this.props.isFocused
     ) {
       return this.setState({
         ...this.state,
+        searchTerm: "",
         dataProvider: this.props.users.length
           ? this.state.dataProvider.cloneWithRows(this.props.users)
           : this.state.dataProvider.cloneWithRows(defaultListItemWhenEmpty),
@@ -141,6 +144,7 @@ class AddContactList extends React.Component {
                 size={scale(22)}
               />
               <AppTextInput
+                value={this.state.searchTerm}
                 maxLength={10}
                 onChangeText={(text) => this.handleChange(text)}
                 placeholder="Search in your contacts..."
@@ -157,7 +161,6 @@ class AddContactList extends React.Component {
                 refreshing={this.props.refreshing}
               />
             }
-            canChangeSize={true}
             dataProvider={this.state.dataProvider}
             extendedState={this.state}
             layoutProvider={this._layoutProvider}

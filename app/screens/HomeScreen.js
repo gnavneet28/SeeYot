@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useEffect,
   useContext,
+  useRef,
 } from "react";
 import {
   Modal,
@@ -12,18 +13,18 @@ import {
   TextInput,
   TouchableOpacity,
   Linking,
-  BackHandler,
 } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet, scale } from "react-native-size-matters";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
 import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppImage from "../components/AppImage";
 import AppText from "../components/AppText";
 import ContactList from "../components/ContactList";
+import EchoMessageModal from "../components/EchoMessageModal";
 import HomeAppHeader from "../components/HomeAppHeader";
 import HomeMessagesList from "../components/HomeMessagesList";
 import Icon from "../components/Icon";
@@ -38,6 +39,7 @@ import useAuth from "../auth/useAuth";
 import myApi from "../api/my";
 import messagesApi from "../api/messages";
 import usersApi from "../api/users";
+import echosApi from "../api/echos";
 
 import useMountedRef from "../hooks/useMountedRef";
 import useConnection from "../hooks/useConnection";
@@ -50,14 +52,7 @@ import SuccessMessageContext from "../utilities/successMessageContext";
 import apiActivity from "../utilities/apiActivity";
 import authorizeUpdates from "../utilities/authorizeUpdates";
 
-const defaultMessage = {
-  _id: "",
-  message: "",
-  createdAt: Date.now(),
-  mood: "",
-  seen: false,
-  options: [],
-};
+import defaultProps from "../utilities/defaultProps";
 
 function HomeScreen({ navigation }) {
   dayjs.extend(relativeTime);
@@ -73,9 +68,16 @@ function HomeScreen({ navigation }) {
     infoAlertMessage: "",
   });
   const [selectedMessageId, setSelectedMessageId] = useState("");
+  const [echoModal, setEchoModal] = useState({
+    recipient: defaultProps.defaultEchoMessageRecipient,
+    visible: false,
+    echoMessage: { message: "" },
+  });
 
   const [isVisible, setIsVisible] = useState(false);
-  const [message, setMessage] = useState(defaultMessage);
+  const [message, setMessage] = useState(
+    defaultProps.defaultMessageVisibleToCurrentUserWithoutReplying
+  );
   const [messageCreator, setMessageCreator] = useState({
     name: "************",
     picture: "",
@@ -83,7 +85,7 @@ function HomeScreen({ navigation }) {
   const [messagesList, setMessagesList] = useState([]);
   const [reply, setReply] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  // const [refreshing, setRefreshing] = useState(false);
 
   const clearJunkData = async () => {
     let canUpdate = await authorizeUpdates.authorizeExpiredUpdate();
@@ -142,6 +144,50 @@ function HomeScreen({ navigation }) {
     }
   }, [isFocused, mounted]);
 
+  useEffect(() => {
+    if (!isFocused && mounted && echoModal.visible === true) {
+      setEchoModal({ ...echoModal, visible: false });
+    }
+  }, [isFocused, mounted]);
+
+  // ECHO MODAL ACTIONS
+
+  let modalVisibleFor = useRef("").current;
+
+  const handleImagePress = useCallback(
+    async (echoMessageFrom) => {
+      modalVisibleFor = echoMessageFrom._id;
+      setEchoModal({
+        recipient: echoMessageFrom,
+        visible: true,
+        echoMessage: { message: "" },
+      });
+      const { data, problem, ok } = await echosApi.getEcho(echoMessageFrom._id);
+      if (ok && modalVisibleFor == echoMessageFrom._id) {
+        if (user._id != echoMessageFrom._id) {
+          usersApi.updatePhotoTapsCount(echoMessageFrom._id);
+        }
+        return setEchoModal({
+          recipient: echoMessageFrom,
+          visible: true,
+          echoMessage: data,
+        });
+      }
+
+      if (problem) return;
+    },
+    [modalVisibleFor]
+  );
+
+  const handleCloseModal = useCallback(() => {
+    modalVisibleFor = "";
+    setEchoModal({
+      recipient: defaultProps.defaultEchoMessageRecipient,
+      visible: false,
+      echoMessage: { message: "" },
+    });
+  }, []);
+
   // MESSAGES ACTION
 
   const handleMessagePress = useCallback(
@@ -187,59 +233,32 @@ function HomeScreen({ navigation }) {
     []
   );
 
-  // REFRESH ACTION
-  const handleRefresh = useCallback(
-    debounce(
-      async () => {
-        setRefreshing(true);
-
-        const { ok, data, problem } = await usersApi.getCurrentUser();
-        if (ok) {
-          setUser(data);
-          await storeDetails(data);
-          return setRefreshing(false);
-        }
-        setRefreshing(false);
-        tackleProblem(problem, data, setInfoAlert);
-      },
-      5000,
-      true
-    ),
-    [user]
-  );
-
   // CONTACT CARD OPTIONS
-  const handleOnSendThoughtButtonPress = useCallback(
-    (user) => {
-      if (user) {
-        return navigation.navigate(Constant.SEND_THOUGHT_SCREEN, {
-          recipient: user,
-          from: Constant.HOME_SCREEN,
-        });
-      }
-      setInfoAlert({
-        infoAlertMessage: "Something went wrong! Please try again.",
-        showInfoAlert: true,
+  const handleOnSendThoughtButtonPress = useCallback((user) => {
+    if (user) {
+      return navigation.navigate(Constant.SEND_THOUGHT_SCREEN, {
+        recipient: user,
+        from: Constant.HOME_SCREEN,
       });
-    },
-    [infoAlert.infoAlertMessage, infoAlert.showInfoAlert]
-  );
+    }
+    setInfoAlert({
+      infoAlertMessage: "Something went wrong! Please try again.",
+      showInfoAlert: true,
+    });
+  }, []);
 
-  const handleAddEchoButtonPress = useCallback(
-    (user) => {
-      if (user) {
-        return navigation.navigate(Constant.ADD_ECHO_SCREEN, {
-          recipient: user,
-          from: Constant.HOME_SCREEN,
-        });
-      }
-      setInfoAlert({
-        infoAlertMessage: "Something went wrong! Please try again.",
-        showInfoAlert: true,
+  const handleAddEchoButtonPress = useCallback((user) => {
+    if (user) {
+      return navigation.navigate(Constant.ADD_ECHO_SCREEN, {
+        recipient: user,
+        from: Constant.HOME_SCREEN,
       });
-    },
-    [infoAlert.infoAlertMessage, infoAlert.showInfoAlert]
-  );
+    }
+    setInfoAlert({
+      infoAlertMessage: "Something went wrong! Please try again.",
+      showInfoAlert: true,
+    });
+  }, []);
 
   const data = useMemo(
     () =>
@@ -249,11 +268,19 @@ function HomeScreen({ navigation }) {
     [user, user.contacts]
   );
 
+  const shouldShowMessagesList = useMemo(() => {
+    return (
+      messagesList.filter(
+        (m) => dayjs(new Date()).diff(dayjs(m.createdAt), "hours") <= 24
+      ).length > 0
+    );
+  }, [messagesList]);
+
   //MESSAGE MODAL ACTION
 
   const handleCloseMessage = useCallback(() => {
     setMessageCreator({ name: "**********", picture: "" });
-    setMessage(defaultMessage);
+    setMessage(defaultProps.defaultMessageVisibleToCurrentUserWithoutReplying);
     setSelectedMessageId("");
     setIsVisible(false);
   }, []);
@@ -307,9 +334,7 @@ function HomeScreen({ navigation }) {
             typeof user.picture !== "undefined" ? user.picture : ""
           }
         />
-        {messagesList.filter(
-          (m) => dayjs(new Date()).diff(dayjs(m.createdAt), "hours") <= 24
-        ).length > 0 ? (
+        {shouldShowMessagesList ? (
           <HomeMessagesList
             messages={messagesList}
             onMessagePress={handleMessagePress}
@@ -323,9 +348,8 @@ function HomeScreen({ navigation }) {
         <ContactList
           onAddEchoPress={handleAddEchoButtonPress}
           onAddFriendPress={handleAddFriendPress}
-          onRefresh={handleRefresh}
+          onImagePress={handleImagePress}
           onSendThoughtsPress={handleOnSendThoughtButtonPress}
-          refreshing={refreshing}
           users={data}
         />
       </Screen>
@@ -401,7 +425,7 @@ function HomeScreen({ navigation }) {
                   placeholder="Reply to know who sent this message..."
                   style={[
                     styles.inputBox,
-                    { fontFamily: "Comic-Bold", fontWeight: "normal" },
+                    { fontFamily: "ComicNeue-Bold", fontWeight: "normal" },
                   ]}
                   value={reply}
                 />
@@ -435,6 +459,7 @@ function HomeScreen({ navigation }) {
           </ScrollView>
         </View>
       </Modal>
+      <EchoMessageModal handleCloseModal={handleCloseModal} state={echoModal} />
     </>
   );
 }

@@ -63,9 +63,9 @@ class VipSearchResultList extends React.Component {
       case ViewTypes.Full:
         return (
           <ContactCard
-            index={index}
             onAddEchoPress={this.props.onAddEchoPress}
             onSendThoughtsPress={this.props.onSendThoughtsPress}
+            onImagePress={() => this.props.onImagePress(data)}
             user={data}
           />
         );

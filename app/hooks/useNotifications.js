@@ -3,6 +3,7 @@ import * as Notifications from "expo-notifications";
 import expoPushTokensApi from "../api/expoPushTokens";
 import useAuth from "../auth/useAuth";
 import storeDetails from "../utilities/storeDetails";
+import Bugsnag from "@bugsnag/react-native";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -39,7 +40,7 @@ export default useNotifications = (notificationListener) => {
       }
       if (problem) return;
     } catch (error) {
-      console.log("Error receiving the token", error);
+      Bugsnag.notify(error);
     }
   };
 };

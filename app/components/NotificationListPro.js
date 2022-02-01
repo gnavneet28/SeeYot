@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Dimensions, View, RefreshControl } from "react-native";
+import { Dimensions, View, RefreshControl } from "react-native";
 import {
   RecyclerListView,
   DataProvider,
@@ -8,6 +8,7 @@ import {
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import NotificationCard from "./NotificationCard";
+import defaultStyles from "../config/styles";
 
 const ViewTypes = {
   Full: 0,
@@ -108,9 +109,10 @@ class NotificationListPro extends React.Component {
 
 const styles = ScaledSheet.create({
   listView: {
+    borderTopColor: defaultStyles.colors.light,
+    borderTopWidth: 1,
     flex: 1,
     width: "100%",
-    marginTop: "15@s",
   },
 });
 

@@ -124,6 +124,9 @@ const updateReceivedThoughtsCount = (id) =>
 const updateReceivedMessagesCount = (id) =>
   apiClient.put(endPoint + "/stats/messagesReceived/update/" + id, {});
 
+const setTyping = (id) => apiClient.put(endPoint + "/setTyping/" + id, {});
+const stopTyping = (id) => apiClient.put(endPoint + "/stopTyping/" + id, {});
+
 export default {
   addContact,
   addFavorite,
@@ -144,6 +147,8 @@ export default {
   sendNewActiveMessage,
   setPrivacyMessage,
   setPrivacySearch,
+  setTyping,
+  stopTyping,
   syncContacts,
   unBlockContact,
   updateCurrentUserName,

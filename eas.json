@@ -4,6 +4,7 @@
   },
   "build": {
     "development": {
+      "releaseChannel": "staging",
       "extends": "production",
       "distribution": "internal",
       "android": {
@@ -14,16 +15,19 @@
       }
     },
     "preview": {
+      "android": {
+        "buildType": "apk"
+      },
       "extends": "production",
-      "distribution": "internal"
+      "distribution": "internal",
+      "releaseChannel": "staging"
     },
     "production": {
-      "node": "16.13.1"
+      "node": "16.13.1",
+      "releaseChannel": "production"
     }
   },
   "submit": {
-    "production": {
-      "node": "16.13.1"
-    }
+    "production": {}
   }
 }

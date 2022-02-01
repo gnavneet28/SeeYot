@@ -1,7 +1,6 @@
 import React, { useState, useRef, useContext } from "react";
 import { View, StyleSheet, FlatList, Animated } from "react-native";
 
-import AppText from "./AppText";
 import OnboardingItem from "./OnboardingItem";
 import Paginator from "../components/Paginator";
 import NextButton from "./NextButton";
@@ -22,8 +21,11 @@ function Onboarding(props) {
   const slidesRef = useRef(null);
 
   const viewableItemsChanged = useRef(({ viewableItems }) => {
-    setCurrentIndex(viewableItems[0].index);
+    if (viewableItems[0]) {
+      setCurrentIndex(viewableItems[0].index);
+    }
   }).current;
+
   const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
   const scrollTo = async () => {

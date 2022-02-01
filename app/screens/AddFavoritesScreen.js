@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Modal, View, ScrollView, TextInput } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet, scale } from "react-native-size-matters";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
 import AddFavoriteList from "../components/AddFavoriteList";
 import ApiProcessingContainer from "../components/ApiProcessingContainer";
@@ -54,7 +54,6 @@ function AddFavoritesScreen({ navigation }) {
   const isConnected = useConnection();
   const { setSuccess } = useContext(SuccessMessageContext);
   const { tackleProblem, showSucessMessage } = apiActivity;
-
   // STATES
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState({
@@ -285,6 +284,7 @@ function AddFavoritesScreen({ navigation }) {
         ) : (
           <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
             <AddFavoriteList
+              isFocused={isFocused}
               onAllRepliesPress={handleOnAllRepliesPress}
               onMessagePress={handleMessagePress}
               users={users}
@@ -545,7 +545,7 @@ const styles = ScaledSheet.create({
     borderColor: defaultStyles.colors.lightGrey,
     borderRadius: "10@s",
     borderWidth: 1,
-    fontFamily: "Comic-Bold",
+    fontFamily: "ComicNeue-Bold",
     fontSize: "14@s",
     fontWeight: "normal",
     marginTop: "5@s",
@@ -636,7 +636,7 @@ const styles = ScaledSheet.create({
     borderColor: defaultStyles.colors.light,
     borderRadius: "5@s",
     borderWidth: 1,
-    fontFamily: "Comic-Bold",
+    fontFamily: "ComicNeue-Bold",
     fontSize: "14@s",
     fontWeight: "normal",
     padding: "5@s",

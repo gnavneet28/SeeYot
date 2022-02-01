@@ -14,7 +14,7 @@ function VipAdCard({ style, onPress }) {
       underlayColor={defaultStyles.colors.white}
     >
       <Image
-        source={require("../assets/vipBanner.png")}
+        source={{ uri: "vipbanner" }}
         style={{
           height: "100%",
           width: "100%",

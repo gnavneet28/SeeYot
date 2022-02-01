@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
 import defaultStyles from "../config/styles";
 import AppText from "./AppText";

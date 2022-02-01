@@ -49,9 +49,7 @@ const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "20@s",
-    borderWidth: "2@s",
     elevation: 15,
     height: "70%",
     justifyContent: "center",
@@ -59,12 +57,12 @@ const styles = ScaledSheet.create({
     width: "82%",
   },
   listHeaderComponentContainer: {
-    backgroundColor: defaultStyles.colors.secondary,
+    backgroundColor: defaultStyles.colors.primary,
     height: "40@s",
     width: "100%",
   },
   listHeaderComponentContainerTitle: {
-    color: defaultStyles.colors.yellow_Variant,
+    color: defaultStyles.colors.white,
     height: "38@s",
     textAlign: "center",
     textAlignVertical: "center",

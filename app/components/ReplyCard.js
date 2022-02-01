@@ -15,7 +15,6 @@ import defaultProps from "../utilities/defaultProps";
 const defaultMessage = defaultProps.defaultMessage;
 
 function ReplyCard({
-  index,
   message = defaultMessage,
   onDeletePress,
   onModalOpenPress,
@@ -28,7 +27,7 @@ function ReplyCard({
         <View style={styles.emptyData}>
           <LottieView
             autoPlay
-            loop
+            loop={false}
             source={require("../assets/animations/noresults.json")}
             style={{ flex: 1 }}
           />
@@ -137,14 +136,15 @@ const styles = ScaledSheet.create({
     alignSelf: "flex-start",
     borderRadius: "15@s",
     color: defaultStyles.colors.dark,
-    fontSize: "14@s",
-    paddingBottom: "2@s",
+    fontSize: "14.5@s",
+    paddingBottom: 0,
     textAlignVertical: "center",
   },
   repliesCount: {
     borderRadius: "20@s",
     color: defaultStyles.colors.secondary,
     fontSize: "12@s",
+    marginRight: "10@s",
     paddingBottom: 0,
     paddingTop: 0,
     textAlign: "left",
@@ -165,7 +165,7 @@ const styles = ScaledSheet.create({
   replyStatsContainer: {
     alignItems: "center",
     flexDirection: "row",
-    marginTop: "3@s",
+    marginTop: "8@s",
     width: "100%",
   },
 });

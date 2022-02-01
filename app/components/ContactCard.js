@@ -1,9 +1,8 @@
-import React, { useState, useCallback, memo, useContext, useRef } from "react";
+import React, { useCallback, memo, useContext } from "react";
 import { View, TouchableOpacity } from "react-native";
-import Feather from "react-native-vector-icons/Feather";
+import Feather from "../../node_modules/react-native-vector-icons/Feather";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
-import AppButton from "./AppButton";
 import AppImage from "./AppImage";
 import AppText from "./AppText";
 
@@ -11,55 +10,16 @@ import ActiveForContext from "../utilities/activeForContext";
 
 import defaultStyles from "../config/styles";
 
-import EchoMessageModal from "./EchoMessageModal";
-
-import echosApi from "../api/echos";
-import usersApi from "../api/users";
-import useAuth from "../auth/useAuth";
-
-let defaultUser = {
-  _id: "",
-  picture: "",
-  name: "",
-  phoneNumber: parseInt(""),
-};
+import defaultProps from "../utilities/defaultProps";
 
 function ContactCard({
+  onImagePress = () => null,
   onAddEchoPress = () => null,
   onSendThoughtsPress = () => null,
   style,
-  user = defaultUser,
-  index,
+  user = defaultProps.defaultUser,
 }) {
-  const [state, setState] = useState({
-    visible: false,
-    echoMessage: null,
-  });
-
-  let modalVisibleFor = useRef("").current;
-
-  const { user: currentUser } = useAuth();
-
   const { activeFor } = useContext(ActiveForContext);
-
-  const handleImagePress = useCallback(async () => {
-    modalVisibleFor = user._id;
-    setState({ visible: true, echoMessage: null });
-    const { data, problem, ok } = await echosApi.getEcho(user._id);
-    if (ok && modalVisibleFor == user._id) {
-      if (currentUser._id != user._id) {
-        usersApi.updatePhotoTapsCount(user._id);
-      }
-      return setState({ visible: true, echoMessage: data });
-    }
-
-    if (problem) return;
-  }, [user._id]);
-
-  const handleCloseModal = useCallback(() => {
-    modalVisibleFor = "";
-    setState({ ...state, visible: false });
-  }, [user._id]);
 
   const onSendThoughtPress = useCallback(
     () => onSendThoughtsPress(user),
@@ -73,67 +33,70 @@ function ContactCard({
   let isRecipientActive = activeFor.filter((u) => u == user._id)[0];
 
   return (
-    <>
-      <View style={[styles.container, style]}>
-        <AppImage
-          imageUrl={user.picture}
-          onPress={handleImagePress}
-          style={styles.image}
-          subStyle={styles.imageSub}
-        />
-        <View style={styles.userDetailsContainer}>
-          <AppText numberOfLines={1} style={[styles.infoNameText]}>
-            {user.name ? user.name : user.phoneNumber}
-          </AppText>
-
-          <AppButton
-            onPress={onAddEchoButtonPress}
-            style={styles.addEchoButton}
-            subStyle={styles.subAddEchoButton}
-            title="Add Echo"
-          />
-        </View>
-        <TouchableOpacity
-          onPress={onSendThoughtPress}
-          style={[
-            styles.sendThoughtIconContainer,
-            {
-              backgroundColor: !isRecipientActive
-                ? defaultStyles.colors.yellow_Variant
-                : "green",
-            },
-          ]}
-        >
-          <Feather
-            onPress={onSendThoughtPress}
-            color={
-              !isRecipientActive
-                ? defaultStyles.colors.secondary
-                : defaultStyles.colors.white
-            }
-            name="send"
-            size={scale(18)}
-            style={styles.sendThoughtIcon}
-          />
-        </TouchableOpacity>
-      </View>
-      <EchoMessageModal
-        user={user}
-        handleCloseModal={handleCloseModal}
-        state={state}
+    <View style={[styles.container, style]}>
+      <AppImage
+        imageUrl={user.picture}
+        onPress={onImagePress}
+        style={styles.image}
+        subStyle={styles.imageSub}
       />
-    </>
+      <View style={styles.userDetailsContainer}>
+        <AppText numberOfLines={1} style={[styles.infoNameText]}>
+          {user.name ? user.name : user.phoneNumber}
+        </AppText>
+
+        <AppText numberOfLines={2} style={styles.myNickName}>
+          {user.myNickName
+            ? `calls you ${user.myNickName}`
+            : "Nickname not available."}
+        </AppText>
+      </View>
+      <TouchableOpacity
+        onPress={onAddEchoButtonPress}
+        style={[styles.contactsActionConatiner, styles.addEchoIconContainer]}
+      >
+        <Feather
+          onPress={onAddEchoButtonPress}
+          color={defaultStyles.colors.primary}
+          name="plus"
+          size={scale(16)}
+          style={styles.actionIcon}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={onSendThoughtPress}
+        style={[
+          styles.contactsActionConatiner,
+          {
+            backgroundColor: !isRecipientActive
+              ? defaultStyles.colors.yellow_Variant
+              : "green",
+          },
+        ]}
+      >
+        <Feather
+          onPress={onSendThoughtPress}
+          color={
+            !isRecipientActive
+              ? defaultStyles.colors.secondary
+              : defaultStyles.colors.white
+          }
+          name="send"
+          size={scale(16)}
+          style={styles.actionIcon}
+        />
+      </TouchableOpacity>
+    </View>
   );
 }
 const styles = ScaledSheet.create({
-  addEchoButton: {
-    backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: "15@s",
-    borderWidth: "0.5@s",
-    height: "26@s",
-    marginLeft: "5@s",
-    width: "40%",
+  actionIcon: {
+    opacity: 0.8,
+  },
+  addEchoIconContainer: {
+    backgroundColor: defaultStyles.colors.light,
+    borderColor: defaultStyles.colors.lightGrey,
+    marginRight: "15@s",
   },
   container: {
     alignItems: "center",
@@ -145,50 +108,49 @@ const styles = ScaledSheet.create({
     paddingVertical: "2@s",
     width: "100%",
   },
-  emptyContacts: {
-    height: "80@s",
-    width: "100%",
-  },
-  image: {
-    borderColor: defaultStyles.colors.light,
-    borderRadius: "22.5@s",
-    borderWidth: 1,
-    height: "45@s",
-    marginRight: "2@s",
-    marginLeft: "5@s",
-    width: "45@s",
-  },
-  imageSub: {
-    borderRadius: "22@s",
-    height: "44@s",
-    width: "44@s",
-  },
-  infoNameText: {
-    color: defaultStyles.colors.dark,
-    fontSize: "14.5@s",
-    marginBottom: "5@s",
-    marginLeft: "5@s",
-    opacity: 0.9,
-    paddingBottom: 0,
-  },
-  sendThoughtIconContainer: {
+  contactsActionConatiner: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderColor: defaultStyles.colors.yellow,
     borderRadius: "10@s",
     borderWidth: 1,
-    elevation: 2,
-    height: "35@s",
+    height: "32@s",
     justifyContent: "center",
     marginRight: "8@s",
-    width: "35@s",
+    width: "32@s",
   },
-  sendThoughtIcon: {
-    opacity: 0.8,
+  emptyContacts: {
+    height: "80@s",
+    width: "100%",
   },
-  subAddEchoButton: {
-    color: defaultStyles.colors.secondary,
-    fontSize: "14@s",
+  image: {
+    borderRadius: "22.5@s",
+    elevation: 1,
+    height: "42@s",
+    marginRight: "2@s",
+    marginLeft: "5@s",
+    width: "42@s",
+    elevation: 1,
+  },
+  imageSub: {
+    borderRadius: "22@s",
+    height: "41@s",
+    width: "41@s",
+  },
+  infoNameText: {
+    color: defaultStyles.colors.dark,
+    fontSize: "14.5@s",
+    marginLeft: "5@s",
+    opacity: 0.9,
+    paddingBottom: 0,
+  },
+  myNickName: {
+    backgroundColor: defaultStyles.colors.white,
+    color: defaultStyles.colors.dark_Variant,
+    marginLeft: "5@s",
+    paddingTop: 0,
+    textAlign: "left",
+    textAlignVertical: "center",
   },
   userDetailsContainer: {
     flex: 1,

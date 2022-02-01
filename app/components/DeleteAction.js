@@ -1,6 +1,6 @@
 import React from "react";
 import { View, ActivityIndicator } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";

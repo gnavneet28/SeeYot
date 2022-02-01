@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState, useContext } from "react";
 import { View, ScrollView, Modal } from "react-native";
 import { AdMobRewarded } from "expo-ads-admob";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcon from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
 import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppButton from "../components/AppButton";

@@ -21,13 +21,18 @@ import useAuth from "../auth/useAuth";
 import FavoritesNavigator from "./FavoritesNavigator";
 import ActiveForContext from "../utilities/activeForContext";
 import ActiveMessagesContext from "../utilities/activeMessagesContext";
+import TypingContext from "../utilities/typingContext";
 
 const Tab = createBottomTabNavigator();
+
+let timeOut;
+let TIMER_LENGTH = 2000;
 
 function AppNavigator(props) {
   const { user, setUser } = useAuth();
   const [activeFor, setActiveFor] = useState([]);
   const [activeMessages, setActiveMessages] = useState([]);
+  const [typing, setTyping] = useState(false);
 
   useEffect(() => {
     const subscription1 = socket.on(`newNotification${user._id}`, (data) => {
@@ -57,7 +62,8 @@ function AppNavigator(props) {
     });
 
     const subscription5 = socket.on(`newActiveMessage${user._id}`, (data) => {
-      return setActiveMessages([...activeMessages, data.newMessage]);
+      activeMessages.push(data.newMessage);
+      return setActiveMessages([...activeMessages]);
     });
 
     const subscription6 = socket.on(`setActiveFor${user._id}`, (data) => {
@@ -70,6 +76,27 @@ function AppNavigator(props) {
       setActiveFor(newList);
     });
 
+    const subscription8 = socket.on(`typing${user._id}`, (data) => {
+      if (!typing) {
+        setTyping(true);
+      } else {
+        clearTimeout(timeOut);
+      }
+      let lastTypingTime = new Date().getTime();
+      timeOut = setTimeout(() => {
+        let typingTimer = new Date().getTime();
+        let timeDiff = typingTimer - lastTypingTime;
+
+        if (timeDiff >= TIMER_LENGTH && typing) {
+          setTyping(false);
+        }
+      }, TIMER_LENGTH);
+    });
+
+    const subscription9 = socket.on(`stopTyping${user._id}`, (data) => {
+      if (typing) setTyping(false);
+    });
+
     return () => {
       subscription1.off();
       subscription2.off();
@@ -78,8 +105,10 @@ function AppNavigator(props) {
       subscription5.off();
       subscription6.off();
       subscription7.off();
+      subscription8.off();
+      subscription9.off();
     };
-  }, [user, activeMessages, activeFor]);
+  }, [user, activeMessages, activeFor, typing]);
 
   useNotifications((data) => {
     //console.log(data.notification.request.content.data.message);
@@ -100,34 +129,39 @@ function AppNavigator(props) {
       <ActiveMessagesContext.Provider
         value={{ activeMessages, setActiveMessages }}
       >
-        <Tab.Navigator
-          screenOptions={{
-            headerShown: false,
-            tabBarStyle: { display: "none" },
-          }}
-        >
-          <Tab.Screen
-            name={Constant.INDEX_NAVIGATOR}
-            component={IndexNavigator}
-          />
-          <Tab.Screen name={Constant.VIP_NAVIGATOR} component={VipNavigator} />
-          <Tab.Screen
-            name={Constant.PROFILE_NAVIGATOR}
-            component={ProfileNavigator}
-          />
-          <Tab.Screen
-            name={Constant.SEND_THOUGHT_SCREEN}
-            component={SendThoughtsScreen}
-          />
-          <Tab.Screen
-            name={Constant.ADD_ECHO_SCREEN}
-            component={AddEchoScreen}
-          />
-          <Tab.Screen
-            name={Constant.FAVORITES_NAVIGATOR}
-            component={FavoritesNavigator}
-          />
-        </Tab.Navigator>
+        <TypingContext.Provider value={{ typing, setTyping }}>
+          <Tab.Navigator
+            screenOptions={{
+              headerShown: false,
+              tabBarStyle: { display: "none" },
+            }}
+          >
+            <Tab.Screen
+              name={Constant.INDEX_NAVIGATOR}
+              component={IndexNavigator}
+            />
+            <Tab.Screen
+              name={Constant.VIP_NAVIGATOR}
+              component={VipNavigator}
+            />
+            <Tab.Screen
+              name={Constant.PROFILE_NAVIGATOR}
+              component={ProfileNavigator}
+            />
+            <Tab.Screen
+              name={Constant.SEND_THOUGHT_SCREEN}
+              component={SendThoughtsScreen}
+            />
+            <Tab.Screen
+              name={Constant.ADD_ECHO_SCREEN}
+              component={AddEchoScreen}
+            />
+            <Tab.Screen
+              name={Constant.FAVORITES_NAVIGATOR}
+              component={FavoritesNavigator}
+            />
+          </Tab.Navigator>
+        </TypingContext.Provider>
       </ActiveMessagesContext.Provider>
     </ActiveForContext.Provider>
   );

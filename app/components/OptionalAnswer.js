@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "../../node_modules/react-native-vector-icons/Ionicons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";

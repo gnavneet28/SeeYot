@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { View } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { ScaledSheet, scale } from "react-native-size-matters";

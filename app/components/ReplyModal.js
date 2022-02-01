@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Modal, ScrollView } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
 import ReplyCardSub from "../components/ReplyCardSub";
 import ReplyOption from "../components/ReplyOption";

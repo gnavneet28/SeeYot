@@ -36,7 +36,7 @@ function Message({ mood = "Happy", onPress, seen = false }) {
       <>
         <LottieView
           autoPlay
-          loop
+          loop={false}
           source={emoji}
           style={{ width: scale(30), height: scale(30) }}
         />

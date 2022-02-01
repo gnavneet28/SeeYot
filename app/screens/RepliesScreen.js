@@ -81,6 +81,7 @@ function RepliesScreen({ navigation }) {
   };
 
   const allReplies = async () => {
+    if (isReady) return;
     let { ok, data, problem } = await messagesApi.getAllRepliedMessages();
     if (ok) {
       if (!isReady || mounted) {
@@ -120,12 +121,10 @@ function RepliesScreen({ navigation }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (isFocused) {
-      if (!isReady || mounted) {
-        allReplies();
-      }
+    if (isFocused && mounted) {
+      allReplies();
     }
-  }, [isFocused, mounted, isReady]);
+  }, [isFocused, mounted]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);

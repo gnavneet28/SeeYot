@@ -1,5 +1,6 @@
 import React from "react";
-import { StyleSheet, Image, TouchableHighlight } from "react-native";
+import { StyleSheet, TouchableHighlight, Image } from "react-native";
+import FastImage from "react-native-fast-image";
 
 import defaultStyles from "../config/styles";
 
@@ -10,9 +11,11 @@ function AppImage({
   onPress = () => null,
   style,
   subStyle,
+  onLongPress = () => null,
 }) {
   return (
     <TouchableHighlight
+      onLongPress={onLongPress}
       underlayColor={defaultStyles.colors.white}
       activeOpacity={activeOpacity}
       onPress={onPress}
@@ -25,7 +28,7 @@ function AppImage({
             ? { uri: imageUrl }
             : customImage
             ? customImage
-            : require("../assets/user.png")
+            : { uri: "user" }
         }
       />
     </TouchableHighlight>

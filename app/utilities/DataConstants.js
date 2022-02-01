@@ -10,6 +10,7 @@ export default DataConstants = {
   EXPIRED_UPDATE: "expiredUpdate",
   FAVORITES_UPDATE: "favoritesUpdate",
   FAVORITES: "userFavorites",
+  LOCAL_SAVED_THOUGHTS: "localSavedThoughts",
   MESSAGES_UPDATE: "messagesUpdate",
   MESSAGES: "userMessages",
   NOTIFICATIONS: "userNotifications",

@@ -1,7 +1,7 @@
 export default [
   {
     _id: "echoMessages",
-    imageUri: require("../assets/echoMessage.png"),
+    imageUri: { uri: "echomessage" },
     title: "Add Echo",
     description: "Add a quick flash message for a specific contact.",
     subDescription:
@@ -9,7 +9,7 @@ export default [
   },
   {
     _id: "sendThoughts",
-    imageUri: require("../assets/sendThoughts.png"),
+    imageUri: { uri: "sendthoughts" },
     title: "Send Thoughts",
     description: "No more guessing when you get hiccups!",
     subDescription:
@@ -17,15 +17,15 @@ export default [
   },
   {
     _id: "contactsNickname",
-    imageUri: require("../assets/nickname.png"),
+    imageUri: { uri: "nickname" },
     title: "Contact's Nickname",
     description: "Know how your contacts have named you.",
     subDescription:
-      "Ever wondered how people have saved your name? SeeYot lets you know that!",
+      "SeeYot lets you see how your contacts have named you in their contacts list if you and you contact are on each others friends list",
   },
   {
     _id: "sendMessages",
-    imageUri: require("../assets/sendMessages.png"),
+    imageUri: { uri: "sendmessages" },
     title: "Add Favorite People",
     description: "Do not hesitate to interact with people. EVER!",
     subDescription:
@@ -33,7 +33,7 @@ export default [
   },
   {
     _id: "activeChat",
-    imageUri: require("../assets/activeChat.png"),
+    imageUri: { uri: "activechat" },
     title: "Active Conversation",
     description: `Have a Quick chat with "ACTIVE FOR YOU" people.`,
     subDescription:

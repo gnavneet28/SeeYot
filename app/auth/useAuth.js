@@ -7,8 +7,8 @@ export default useAuth = () => {
   const { user, setUser } = useContext(AuthContext);
 
   const logOut = () => {
-    setUser(null);
     authStorage.removeToken();
+    setUser(null);
   };
 
   const logIn = (user) => {

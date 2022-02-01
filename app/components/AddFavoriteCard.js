@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useContext } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import LottieView from "lottie-react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
 import AppText from "./AppText";
-import InfoAlert from "../components/InfoAlert";
+import InfoAlert from "./InfoAlert";
+import ApiProcessingContainer from "./ApiProcessingContainer";
 
 import storeDetails from "../utilities/storeDetails";
 
@@ -116,7 +117,7 @@ function AddContactCard({
       <View style={styles.emptyData}>
         <LottieView
           autoPlay
-          loop
+          loop={false}
           source={require("../assets/animations/noresults.json")}
           style={{ flex: 1 }}
         />
@@ -136,40 +137,36 @@ function AddContactCard({
           {favoriteUser.name}
         </AppText>
       </View>
-      <View style={styles.buttonContainer}>
-        {processing ? (
-          <ActivityIndicator
-            size={scale(16)}
-            color={
-              inFavourites
+      <ApiProcessingContainer
+        processing={processing}
+        style={styles.buttonContainer}
+      >
+        <AppButton
+          disabled={apiProcessing || !isConnected ? true : false}
+          title={inFavourites ? "Remove" : "Add"}
+          style={styles.addButton}
+          subStyle={[
+            styles.addButtonSub,
+            {
+              color: inFavourites
                 ? defaultStyles.colors.tomato
-                : defaultStyles.colors.blue
-            }
-          />
-        ) : (
-          <AppButton
-            disabled={apiProcessing || !isConnected ? true : false}
-            title={inFavourites ? "Remove" : "Add"}
-            style={styles.addButton}
-            subStyle={[
-              styles.addButtonSub,
-              {
-                color: inFavourites
-                  ? defaultStyles.colors.tomato
-                  : defaultStyles.colors.blue,
-              },
-            ]}
-            onPress={!inFavourites ? handleAddPress : handleRemovePress}
-          />
-        )}
-      </View>
-      <AntDesign
-        color={defaultStyles.colors.dark_Variant}
-        name="message1"
+                : defaultStyles.colors.blue,
+            },
+          ]}
+          onPress={!inFavourites ? handleAddPress : handleRemovePress}
+        />
+      </ApiProcessingContainer>
+      <TouchableOpacity
         onPress={onMessagePress}
-        size={scale(22)}
-        style={{ marginHorizontal: scale(10) }}
-      />
+        style={styles.favoriteMessageIconContainer}
+      >
+        <AntDesign
+          color={defaultStyles.colors.secondary}
+          name="message1"
+          onPress={onMessagePress}
+          size={scale(16)}
+        />
+      </TouchableOpacity>
       <InfoAlert
         description={infoAlert.infoAlertMessage}
         leftPress={handleCloseInfoAlert}
@@ -178,21 +175,22 @@ function AddContactCard({
     </View>
   );
 }
+
 const styles = ScaledSheet.create({
   buttonContainer: {
     alignItems: "center",
     borderColor: defaultStyles.colors.light,
-    borderRadius: "10@s",
+    borderRadius: "8@s",
     borderWidth: 1,
     height: "32@s",
     justifyContent: "center",
-    marginRight: "4@s",
+    marginRight: "6@s",
     overflow: "hidden",
     width: "60@s",
   },
   addButton: {
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: "10@s",
+    borderRadius: "8@s",
     height: "32@s",
     width: "60@s",
   },
@@ -222,8 +220,20 @@ const styles = ScaledSheet.create({
     justifyContent: "center",
     width: "95%",
   },
+  favoriteMessageIconContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderColor: defaultStyles.colors.yellow,
+    borderRadius: "10@s",
+    borderWidth: 1,
+    height: "32@s",
+    justifyContent: "center",
+    marginLeft: "8@s",
+    width: "32@s",
+  },
   image: {
     borderRadius: "19@s",
+    elevation: 2,
     height: "38@s",
     marginHorizontal: "5@s",
     width: "38@s",

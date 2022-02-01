@@ -76,7 +76,7 @@ function AddContactCard({ contact, onInvitePress, style }) {
       <View style={styles.emptyData}>
         <LottieView
           autoPlay
-          loop
+          loop={false}
           source={require("../assets/animations/noresults.json")}
           style={{ flex: 1 }}
         />
@@ -111,14 +111,17 @@ function AddContactCard({ contact, onInvitePress, style }) {
                 styles.addButtonSub,
                 {
                   color: inContacts
-                    ? defaultStyles.colors.tomato
+                    ? defaultStyles.colors.dark_Variant
                     : defaultStyles.colors.green,
                 },
               ]}
               onPress={handleAddPress}
             />
           ) : (
-            <ActivityIndicator size={18} color={defaultStyles.colors.tomato} />
+            <ActivityIndicator
+              size={scale(18)}
+              color={defaultStyles.colors.tomato}
+            />
           )}
         </View>
       ) : (
@@ -145,7 +148,7 @@ const styles = ScaledSheet.create({
   buttonContainer: {
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: "10@s",
+    borderRadius: "8@s",
     height: "32@s",
     marginRight: "4@s",
     width: "60@s",
@@ -155,7 +158,7 @@ const styles = ScaledSheet.create({
   },
   addButton: {
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: "10@s",
+    borderRadius: "8@s",
     height: "32@s",
     width: "60@s",
   },
@@ -187,6 +190,7 @@ const styles = ScaledSheet.create({
   },
   image: {
     borderRadius: "19@s",
+    elevation: 1,
     height: "38@s",
     marginHorizontal: "5@s",
     width: "38@s",

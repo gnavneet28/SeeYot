@@ -1,18 +1,14 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AppLoading from "expo-app-loading";
-import * as Font from "expo-font";
 import * as SystemUI from "expo-system-ui";
 import { Image } from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import AntDesign from "react-native-vector-icons/AntDesign";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import Feather from "react-native-vector-icons/Feather";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { Asset } from "expo-asset";
+import Bugsnag from "@bugsnag/react-native";
+import AccessDeniedScreen from "./app/screens/AccessDeniedScreen";
+import * as IAP from "expo-in-app-purchases";
 
 import getDetails from "./app/utilities/getDetails";
 
@@ -30,28 +26,11 @@ import authStorage from "./app/auth/storage";
 import defaultStyles from "./app/config/styles";
 
 import OnboardingContext from "./app/utilities/onboardingContext";
+import useJailBreak from "./app/hooks/useJailBreak";
 
 import Onboarding from "./app/components/Onboarding";
 import SuccessMessage from "./app/components/SuccessMessage";
 import SuccessMessageContext from "./app/utilities/successMessageContext";
-
-const loadFont = async () => {
-  await Font.loadAsync({
-    "Comic-Bold": require("./app/assets/fonts/ComicNeue-Bold.ttf"),
-    "Comic-BoldItalic": require("./app/assets/fonts/ComicNeue-BoldItalic.ttf"),
-    "Comic-LightItalic": require("./app/assets/fonts/ComicNeue-LightItalic.ttf"),
-  });
-};
-
-const loadIcons = async () => {
-  await MaterialCommunityIcons.loadFont();
-  await FontAwesome.loadFont();
-  await Ionicons.loadFont();
-  await MaterialIcons.loadFont();
-  await FontAwesome.loadFont();
-  await Feather.loadFont();
-  await AntDesign.loadFont();
-};
 
 function cacheImages(images) {
   return images.map((image) => {
@@ -69,13 +48,34 @@ export default function App() {
     fontLoaded: false,
     isReady: false,
   });
-
+  const jailBroken = useJailBreak();
   const [success, setSuccess] = useState({
     message: "",
     show: false,
   });
-
   const [onboarded, setOnboarded] = useState(false);
+
+  const checkOnBoard = async () => {
+    let userOnboarded = await cache.get("onboarded");
+    if (userOnboarded) return setOnboarded(true);
+  };
+
+  useEffect(() => {
+    const subscription = IAP.setPurchaseListener(
+      ({ responseCode, errorCode, results }) => {
+        console.log(errorCode, responseCode, results);
+      }
+    );
+
+    return () => {
+      try {
+        subscription.remove();
+      } catch (error) {}
+      try {
+        IAP.disconnectAsync();
+      } catch (error) {}
+    };
+  }, []);
 
   const restoreUser = async () => {
     const token = await authStorage.getUser();
@@ -87,57 +87,58 @@ export default function App() {
     return setUser(null);
   };
 
-  const setUp = useCallback(async () => {
-    await SystemUI.setBackgroundColorAsync(defaultStyles.colors.primary);
-    await loadFont();
-    await restoreUser();
-    await loadIcons();
-    await cacheImages([
-      require("./app/assets/activeChat.png"),
-      require("./app/assets/echoMessage.png"),
-      require("./app/assets/nickname.png"),
-      require("./app/assets/sendMessages.png"),
-      require("./app/assets/sendThoughts.png"),
-      require("./app/assets/splash.png"),
-      require("./app/assets/user.png"),
-      require("./app/assets/vipBanner.png"),
-      require("./app/assets/logo.png"),
+  const setUp = async () => {
+    await Promise.all([
+      SystemUI.setBackgroundColorAsync(defaultStyles.colors.primary),
+      checkOnBoard(),
+      restoreUser(),
+      // cacheImages([
+      //   require("./app/assets/activeChat.png"),
+      //   require("./app/assets/echoMessage.png"),
+      //   require("./app/assets/nickname.png"),
+      //   require("./app/assets/sendMessages.png"),
+      //   require("./app/assets/sendThoughts.png"),
+      //   require("./app/assets/user.png"),
+      //   require("./app/assets/vipBanner.png"),
+      //   require("./app/assets/logo.png"),
+      // ]),
     ]);
+  };
 
-    let userOnboarded = await cache.get("onboarded");
-    if (userOnboarded) return setOnboarded(true);
-  }, []);
-
-  // use bugsnag instead of console.warn
-  if (!state.isReady || !state.fontLoaded)
+  if (!state.isReady) {
     return (
       <AppLoading
         startAsync={setUp}
-        onFinish={() => {
-          setState({ isReady: true, fontLoaded: true });
-        }}
+        onFinish={() => setState({ ...state, isReady: true })}
         onError={console.warn}
       />
     );
+  }
 
   return (
     <SafeAreaProvider>
-      <AuthContext.Provider value={{ user, setUser }}>
-        <OnboardingContext.Provider value={{ onboarded, setOnboarded }}>
-          <SuccessMessageContext.Provider value={{ success, setSuccess }}>
-            <OfflineNotice />
-            {success.show ? <SuccessMessage message={success.message} /> : null}
-            {onboarded ? (
-              <NavigationContainer ref={navigationRef}>
-                {user ? <AppNavigator /> : <AuthNavigator />}
-              </NavigationContainer>
-            ) : (
-              <Onboarding />
-            )}
-            <StatusBar style="light" />
-          </SuccessMessageContext.Provider>
-        </OnboardingContext.Provider>
-      </AuthContext.Provider>
+      {jailBroken ? (
+        <AccessDeniedScreen />
+      ) : (
+        <AuthContext.Provider value={{ user, setUser }}>
+          <OnboardingContext.Provider value={{ onboarded, setOnboarded }}>
+            <SuccessMessageContext.Provider value={{ success, setSuccess }}>
+              <OfflineNotice />
+              {success.show ? (
+                <SuccessMessage message={success.message} />
+              ) : null}
+              {onboarded ? (
+                <NavigationContainer ref={navigationRef}>
+                  {user ? <AppNavigator /> : <AuthNavigator />}
+                </NavigationContainer>
+              ) : (
+                <Onboarding />
+              )}
+              <StatusBar style="light" />
+            </SuccessMessageContext.Provider>
+          </OnboardingContext.Provider>
+        </AuthContext.Provider>
+      )}
     </SafeAreaProvider>
   );
 }

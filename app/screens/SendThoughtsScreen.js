@@ -18,9 +18,11 @@ import SendingThoughtActivity from "../components/SendingThoughtActivity";
 import SendThoughtsInput from "../components/SendThoughtsInput";
 import ThoughtsList from "../components/ThoughtsList";
 import ThoughtTimer from "../components/ThoughtTimer";
+import socket from "../api/socketClient";
 
 import Constant from "../navigation/NavigationConstants";
 import storeDetails from "../utilities/storeDetails";
+import localThoughts from "../utilities/localThoughts";
 
 import defaultStyles from "../config/styles";
 
@@ -43,12 +45,8 @@ const filterThoughts = (thoughts = [], recipient, creator) => {
   return thoughts
     .filter(
       (t) =>
-        (t.messageFor == recipient._id &&
-          t.createdBy == creator._id &&
-          t.matched == true) ||
-        (t.messageFor == creator._id &&
-          t.createdBy == recipient._id &&
-          t.matched == true)
+        (t.messageFor == recipient._id && t.createdBy == creator._id) ||
+        (t.messageFor == creator._id && t.createdBy == recipient._id)
     )
     .sort((a, b) => a.createdAt > b.createdAt);
 };
@@ -83,6 +81,8 @@ function SendThoughtsScreen({ navigation, route }) {
     success: false,
     echoMessage: null,
   });
+  const [latestThought, setLatestThought] = useState(null);
+  // const [typing, setTyping] = useState(false);
   const [activeChat, setActiveChat] = useState(false);
   const { activeMessages, setActiveMessages } = useContext(
     ActiveMessagesContext
@@ -228,25 +228,25 @@ function SendThoughtsScreen({ navigation, route }) {
   // THOUGHTS LIST ACTION
   let thoughts = useMemo(
     () => filterThoughts(user.thoughts, recipient, user),
-    [isFocused, user.thoughts.length, recipient._id, user.thoughts]
+    [isFocused, user, recipient._id, user]
   );
 
   const activeMessagesList = useMemo(
     () => filterActiveMessages(activeMessages, recipient, user),
-    [isFocused, activeMessages.length, recipient._id, activeMessages]
+    [activeMessages.length, activeMessages]
   );
 
-  const latestThought = useMemo(
-    () =>
-      user.thoughts.filter(
-        (t) => t.messageFor == recipient._id && t.matched !== true
-      )[
-        user.thoughts.filter(
-          (t) => t.messageFor == recipient._id && t.matched !== true
-        ).length - 1
-      ],
-    [isFocused, user.thoughts, recipient._id]
-  );
+  // const latestThought = useMemo(s
+  //   () =>s
+  //     user.thoughts.filter(
+  //       (t) => t.messageFor == recipient._id && t.matched !== true
+  //     )[
+  //       user.thoughts.filter(
+  //         (t) => t.messageFor == recipient._id && t.matched !== true
+  //       ).length - 1
+  //     ],
+  //   [isFocused, user.thoughts, recipient._id]
+  // );
 
   // SENDING THOUGHTS ACTION
   const handleSendThought = useCallback(
@@ -272,8 +272,10 @@ function SendThoughtsScreen({ navigation, route }) {
             usersApi.updateReceivedThoughtsCount(recipient._id);
           }
           if (!data.matched) {
-            await storeDetails(data.user);
-            setUser(data.user);
+            await localThoughts.storeLoacalThoughts(
+              data.thoughtData.thought,
+              recipient
+            );
           }
           return setMessageActivity({
             message: data.matched
@@ -306,33 +308,38 @@ function SendThoughtsScreen({ navigation, route }) {
       1000,
       true
     ),
-    [recipient._id, user.thoughts]
+    [recipient._id, user]
   );
 
-  const handleSendActiveMessage = async (textMessage) => {
-    if (!isRecipientActive && mounted) {
-      return setShowAlert(true);
-    }
-    let newMessage = {
-      _id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-      message: textMessage,
-      createdAt: new Date(),
-      createdBy: user._id,
-      createdFor: recipient._id,
-    };
-    const { ok, data, problem } = await usersApi.sendNewActiveMessage(
-      newMessage
-    );
-    if (ok) {
-      if (mounted) {
-        return setActiveMessages([...activeMessages, newMessage]);
+  const handleSendActiveMessage = useCallback(
+    async (textMessage) => {
+      await usersApi.stopTyping(recipient._id);
+      if (!isRecipientActive && mounted) {
+        return setShowAlert(true);
       }
-    }
+      let newMessage = {
+        _id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+        message: textMessage,
+        createdAt: new Date(),
+        createdBy: user._id,
+        createdFor: recipient._id,
+      };
+      const { ok, data, problem } = await usersApi.sendNewActiveMessage(
+        newMessage
+      );
+      if (ok) {
+        if (mounted) {
+          activeMessages.push(newMessage);
+          return setActiveMessages([...activeMessages]);
+        }
+      }
 
-    if (mounted) {
-      tackleProblem(problem, data, setInfoAlert);
-    }
-  };
+      if (mounted) {
+        tackleProblem(problem, data, setInfoAlert);
+      }
+    },
+    [recipient._id, activeMessages, mounted, isRecipientActive]
+  );
 
   const handleThoughtLongPress = useCallback((thought) => {
     setDeleteMessageOption({
@@ -389,8 +396,11 @@ function SendThoughtsScreen({ navigation, route }) {
       if (from == Constant.VIP_SEARCH_SCREEN) {
         updateSearchHistory();
       }
+      if (from == Constant.NOTIFICATION_SCREEN) {
+        handleSetChatActive();
+      }
     }
-  }, [isFocused]);
+  }, [isFocused, mounted]);
 
   // OPTIONS MODAL ACTIONS
   const handleModalClose = useCallback(() => setIsVisible(false), []);
@@ -548,6 +558,14 @@ function SendThoughtsScreen({ navigation, route }) {
     return;
   };
 
+  const handleSetTyping = useCallback(async () => {
+    if (!isRecipientActive) return;
+
+    const { ok, problem } = await usersApi.setTyping(recipient._id);
+    if (ok) return;
+    if (problem) return;
+  }, [recipient._id, isFocused, isRecipientActive]);
+
   return (
     <>
       <Screen style={styles.container}>
@@ -556,7 +574,7 @@ function SendThoughtsScreen({ navigation, route }) {
           onPressLeft={handleBack}
           onPressRight={handleOptionsPress}
           rightIcon="more-vert"
-          title="Thoughts"
+          title={activeChat ? "Active Chat" : "Thoughts"}
         />
         {latestThought ? <ThoughtTimer thought={latestThought} /> : null}
         <SendingThoughtActivity
@@ -605,6 +623,8 @@ function SendThoughtsScreen({ navigation, route }) {
         />
         <View style={styles.sendThoughtsInputPlaceholder} />
         <SendThoughtsInput
+          isFocused={isFocused}
+          setTyping={handleSetTyping}
           processing={messageActivity.processing}
           placeholder={
             activeChat ? "Send direct messages..." : "Send your thoughts..."
@@ -698,6 +718,13 @@ const styles = ScaledSheet.create({
   },
   sendThoughtsInputPlaceholder: {
     height: "54@s",
+    width: "100%",
+  },
+  selectActive: {
+    alignItems: "center",
+    elevation: 2,
+    height: "35@s",
+    justifyContent: "center",
     width: "100%",
   },
 });

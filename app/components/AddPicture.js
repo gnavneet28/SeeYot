@@ -1,9 +1,9 @@
 import React, { useState, memo, useCallback } from "react";
 import { Image, Modal, TouchableHighlight, View } from "react-native";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import ImagePicker from "react-native-image-crop-picker";
 import { ScaledSheet, scale } from "react-native-size-matters";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
 import defaultStyles from "../config/styles";
 
@@ -30,7 +30,7 @@ function AddPicture({
       height: 700,
       cropping: true,
       mediaType: "photo",
-      compressImageQuality: 1,
+      compressImageQuality: 0.7,
     })
       .then((image) => {
         onChangeImage(image.path);
@@ -80,7 +80,7 @@ function AddPicture({
             width={scale(108)}
             height={scale(108)}
             style={styles.image}
-            source={image ? { uri: image } : require("../assets/user.png")}
+            source={image ? { uri: image } : { uri: "user" }}
           />
         </TouchableHighlight>
         <TouchableHighlight

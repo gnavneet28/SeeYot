@@ -27,8 +27,8 @@ function HomeMessagesList({ messages = [], onMessagePress, style }) {
 
   const getItemLayout = useCallback(
     (data, index) => ({
-      length: scale(50),
-      offset: scale(50) * index,
+      length: scale(60),
+      offset: scale(60) * index,
       index,
     }),
     []

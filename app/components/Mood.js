@@ -39,7 +39,7 @@ function Mood({ mood, onPress, isSelected = false }) {
       <>
         <LottieView
           autoPlay
-          loop
+          loop={false}
           source={emoji}
           style={{ width: scale(25), height: scale(25), marginRight: scale(2) }}
         />

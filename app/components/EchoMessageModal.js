@@ -1,6 +1,6 @@
-import React from "react";
-import { View, Modal, Image } from "react-native";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import React, { memo } from "react";
+import { View, Modal, Image, ImageBackground } from "react-native";
+import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import {
   PinchGestureHandler,
@@ -16,15 +16,22 @@ import Animated, {
 import AppText from "./AppText";
 
 import defaultStyles from "../config/styles";
+import defaultProps from "../utilities/defaultProps";
 
 const height = defaultStyles.height;
 const width = defaultStyles.width;
 
+const GAP = 30;
+
 function EchoMessageModal({
-  user,
   handleCloseModal,
-  state = { echoMessage: { message: "" }, visible: false },
+  state = {
+    visible: false,
+    recipient: defaultProps.defaultEchoMessageRecipient,
+    echoMessage: { message },
+  },
 }) {
+  let imageUri = state.recipient.picture;
   // PinchGesture Image Zoom
 
   const AnimatedImage = Animated.createAnimatedComponent(Image);
@@ -66,7 +73,11 @@ function EchoMessageModal({
       visible={state.visible}
       animationType="fade"
     >
-      <View style={styles.largeImageModalFallback}>
+      <ImageBackground
+        blurRadius={4}
+        source={imageUri ? { uri: imageUri } : { uri: "user" }}
+        style={styles.largeImageModalFallback}
+      >
         <View style={styles.contentContainer}>
           <View style={styles.inlargedHeader}>
             <MaterialIcons
@@ -78,7 +89,7 @@ function EchoMessageModal({
             />
 
             <AppText style={{ zIndex: 222, fontSize: scale(15) }}>
-              {user.name}
+              {state.recipient.name}
             </AppText>
           </View>
           <GestureHandlerRootView>
@@ -86,9 +97,9 @@ function EchoMessageModal({
               <AnimatedImage
                 activeOpacity={1}
                 source={
-                  user.picture
-                    ? { uri: user.picture }
-                    : require("../assets/user.png")
+                  state.recipient.picture
+                    ? { uri: state.recipient.picture }
+                    : { uri: "user" }
                 }
                 style={[styles.inlargedImage, rStyle]}
               />
@@ -100,7 +111,7 @@ function EchoMessageModal({
             </AppText>
           ) : null}
         </View>
-      </View>
+      </ImageBackground>
     </Modal>
   );
 }
@@ -113,11 +124,10 @@ const styles = ScaledSheet.create({
   contentContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "10@s",
-    borderWidth: 1,
-    elevation: 10,
+    borderRadius: "15@s",
+    elevation: 5,
     overflow: "hidden",
-    width: "100%",
+    width: width < height ? width - GAP : height - GAP,
   },
   echoMessage: {
     alignSelf: "center",
@@ -127,9 +137,8 @@ const styles = ScaledSheet.create({
     width: "95%",
   },
   inlargedImage: {
-    borderRadius: 0,
-    height: width < height ? width : height,
-    width: width < height ? width : height,
+    height: width < height ? width - GAP : height - GAP,
+    width: width < height ? width - GAP : height - GAP,
   },
   inlargedHeader: {
     alignItems: "center",
@@ -140,11 +149,10 @@ const styles = ScaledSheet.create({
   },
   largeImageModalFallback: {
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.9)",
     flex: 1,
     justifyContent: "center",
     width: "100%",
   },
 });
 
-export default EchoMessageModal;
+export default memo(EchoMessageModal);

@@ -3,9 +3,10 @@ import { View } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
 
-import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppHeader from "../components/AppHeader";
-import AppText from "../components/AppText";
+import AppModal from "../components/AppModal";
+import Option from "../components/Option";
+import ApiOption from "../components/ApiOption";
 import InfoAlert from "../components/InfoAlert";
 import NotificationListPro from "../components/NotificationListPro";
 import ReplyModal from "../components/ReplyModal";
@@ -48,6 +49,7 @@ function NotificationScreen({ navigation }) {
     showInfoAlert: false,
   });
   const [apiProcessing, setApiProcessing] = useState(false);
+  const [showClearAllModal, setShowClearAllModal] = useState(false);
 
   const [message, setMessage] = useState({
     isVisible: false,
@@ -75,6 +77,12 @@ function NotificationScreen({ navigation }) {
   useEffect(() => {
     if (!isFocused && mounted && visible === true) {
       setVisible(false);
+    }
+  }, [isFocused, mounted]);
+
+  useEffect(() => {
+    if (!isFocused && mounted && showClearAllModal === true) {
+      setShowClearAllModal(false);
     }
   }, [isFocused, mounted]);
 
@@ -128,14 +136,24 @@ function NotificationScreen({ navigation }) {
     []
   );
 
+  const handleRightHeaderPress = useCallback(() => {
+    setShowClearAllModal(true);
+  }, []);
+
+  const handleCloseClearAllModal = useCallback(() => {
+    setShowClearAllModal(false);
+  }, []);
+
   // NOTIFICATION ACTION
   const handleClearAllPress = useCallback(async () => {
+    if (!user.notifications.length) return setShowClearAllModal(false);
     setClearNotification(true);
 
     const { ok, data, problem } = await myApi.deleteAllNotifications();
     if (ok) {
       await storeDetails(data.user);
       setUser(data.user);
+      setShowClearAllModal(false);
       return setClearNotification(false);
     }
     setClearNotification(false);
@@ -186,6 +204,8 @@ function NotificationScreen({ navigation }) {
         <AppHeader
           leftIcon="arrow-back"
           onPressLeft={handleBack}
+          onPressRight={handleRightHeaderPress}
+          rightIcon="more-vert"
           title="Notifications"
         />
         <SeeThought
@@ -198,24 +218,9 @@ function NotificationScreen({ navigation }) {
           description={infoAlert.infoAlertMessage}
           visible={infoAlert.showInfoAlert}
         />
-        <VipAdCard onPress={handleVipCardPress} style={styles.adCard} />
-        {data && data.length >= 1 ? (
-          <ApiProcessingContainer
-            style={styles.apiProcessingContainer}
-            processing={clearNotification}
-          >
-            <AppText
-              style={styles.clearAll}
-              onPress={
-                isConnected && !clearNotification
-                  ? handleClearAllPress
-                  : () => null
-              }
-            >
-              Clear all notifications
-            </AppText>
-          </ApiProcessingContainer>
-        ) : null}
+        {user.vip.subscription || (
+          <VipAdCard onPress={handleVipCardPress} style={styles.adCard} />
+        )}
         <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
           <NotificationListPro
             onTapToSendMessage={handleSendMessage}
@@ -229,33 +234,46 @@ function NotificationScreen({ navigation }) {
       </Screen>
       {message.isVisible ? <View style={styles.modalFallback} /> : null}
       <ReplyModal message={message} handleCloseModal={handleCloseModal} />
+      <AppModal
+        visible={showClearAllModal}
+        onRequestClose={handleCloseClearAllModal}
+      >
+        <View style={styles.clearAllActionContainer}>
+          <Option
+            title="Close"
+            titleStyle={styles.closeOption}
+            onPress={handleCloseClearAllModal}
+          />
+          <ApiOption
+            title="Clear all notifications"
+            onPress={isConnected ? handleClearAllPress : () => null}
+            processing={clearNotification}
+          />
+        </View>
+      </AppModal>
     </>
   );
 }
 const styles = ScaledSheet.create({
   adCard: {
-    marginVertical: "5@s",
-  },
-  apiProcessingContainer: {
-    alignSelf: "flex-end",
-    height: "30@s",
-    padding: 0,
-    width: "100%",
+    marginTop: "5@s",
   },
   container: {
     alignItems: "center",
   },
-  clearAll: {
-    alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderBottomLeftRadius: "20@s",
-    borderTopLeftRadius: "20@s",
-    color: defaultStyles.colors.secondary,
-    fontSize: "14@s",
-    height: "30@s",
-    paddingHorizontal: "10@s",
-    textAlign: "right",
-    textAlignVertical: "center",
+  clearAllActionContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderColor: defaultStyles.colors.dark_Variant,
+    borderRadius: "20@s",
+    borderWidth: 1,
+    overflow: "hidden",
+    width: "60%",
+  },
+  closeOption: {
+    backgroundColor: defaultStyles.colors.dark_Variant,
+    color: defaultStyles.colors.white,
+    opacity: 1,
   },
   modalFallback: {
     backgroundColor: "rgba(0,0,0,0.7)",

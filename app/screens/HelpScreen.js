@@ -63,13 +63,13 @@ function HelpScreen({ navigation }) {
           size={scale(20)}
           title="Email"
         />
-        <UserDetailsCard
+        {/* <UserDetailsCard
           data="+91 9944603844"
           editable={false}
           iconName="phone"
           size={scale(20)}
           title="Contact Number"
-        />
+        /> */}
       </View>
       <Heading
         iconName="article"

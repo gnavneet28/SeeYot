@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import AppText from "./AppText";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
@@ -13,7 +13,7 @@ function DescriptionItem({ name = "", style, description = "" }) {
         color={defaultStyles.colors.tomato}
         name={name}
         size={scale(18)}
-        style={{ marginHorizontal: scale(8) }}
+        style={styles.icon}
       />
       <AppText style={styles.description}>{description}</AppText>
     </View>
@@ -23,7 +23,7 @@ const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: "10@s",
+    borderRadius: "7@s",
     flexDirection: "row",
     marginVertical: "4@s",
     minHeight: "40@s",
@@ -36,6 +36,9 @@ const styles = ScaledSheet.create({
     letterSpacing: "0.3@s",
     paddingVertical: 0,
     textAlignVertical: "center",
+  },
+  icon: {
+    marginHorizontal: "8@s",
   },
 });
 

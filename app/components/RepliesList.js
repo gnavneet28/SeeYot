@@ -5,7 +5,7 @@ import {
   DataProvider,
   LayoutProvider,
 } from "recyclerlistview";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "../../node_modules/react-native-vector-icons/Ionicons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";

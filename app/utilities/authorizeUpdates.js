@@ -44,8 +44,9 @@ const authorizePhoneContactsUpdate = async () => {
     phoneContactsUpdate.filter(
       (c) => dayjs(currentDate).diff(c, "hours") < TIME_LIMIT
     ).length
-  )
+  ) {
     return false;
+  }
 
   return true;
 };

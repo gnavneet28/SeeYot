@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TextInput } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
@@ -35,7 +35,7 @@ function AppTextInput({
         style={[
           {
             ...defaultStyles.text,
-            fontFamily: "Comic-Bold",
+            fontFamily: "ComicNeue-Bold",
             fontSize: scale(15),
             flex: 1,
             fontWeight: "normal",

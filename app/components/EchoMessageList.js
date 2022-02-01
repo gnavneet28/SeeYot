@@ -18,8 +18,8 @@ function EchoMessageList({ echoMessages = [], onEchoMessagePress, style }) {
 
   const getItemLayout = useCallback(
     (data, index) => ({
-      length: scale(70),
-      offset: scale(70) * index,
+      length: scale(80),
+      offset: scale(80) * index,
       index,
     }),
     []

@@ -9,23 +9,16 @@ import AppText from "./AppText";
 import defaultStyles from "../config/styles";
 
 function AppHeader({
-  customImage,
   style,
   onPressRight = () => null,
   onPressLeft = () => null,
-  leftImageUrl = "",
   rightImageUrl = "",
 }) {
   return (
     <View style={[styles.container, style]}>
-      <TouchableHighlight onPress={onPressLeft} style={styles.leftOption}>
-        <LottieView
-          autoPlay
-          loop
-          source={require("../assets/animations/seet.json")}
-        />
-      </TouchableHighlight>
-      <AppText style={styles.title}>SeeYot</AppText>
+      <AppText onPress={onPressLeft} style={styles.title}>
+        SeeYot
+      </AppText>
       <TouchableHighlight onPress={onPressRight} style={styles.rightOption}>
         <AppImage
           imageUrl={rightImageUrl}
@@ -43,21 +36,19 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.primary,
     flexDirection: "row",
     height: "50@s",
-    justifyContent: "center",
+    justifyContent: "space-between",
     padding: "2@s",
     width: "100%",
   },
   image: {
     borderRadius: "20@s",
-    borderWidth: 1,
-    borderColor: defaultStyles.colors.lightGrey,
-    height: "38@s",
-    width: "38@s",
+    height: "35@s",
+    width: "35@s",
   },
   imageSub: {
     borderRadius: "19@s",
-    height: "37@s",
-    width: "37@s",
+    height: "35@s",
+    width: "35@s",
   },
   leftOption: {
     alignItems: "center",
@@ -74,17 +65,17 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     justifyContent: "center",
     height: "50@s",
-    position: "absolute",
-    right: "10@s",
     width: "50@s",
   },
   title: {
     color: defaultStyles.colors.white,
-    fontFamily: "Comic-Bold",
-    fontSize: "20@s",
+    flexShrink: 1,
+    fontFamily: "ComicNeue-Bold",
+    fontSize: "22@s",
     letterSpacing: "0.3@s",
-    textAlign: "center",
-    width: "60%",
+    paddingHorizontal: "20@s",
+    textAlign: "left",
+    width: "100%",
   },
 });
 

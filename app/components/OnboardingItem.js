@@ -16,7 +16,6 @@ function OnboardingItem({ item }) {
       />
       <View style={{ flex: 0.4 }}>
         <AppText style={styles.title}>{item.title}</AppText>
-        {/* <AppText style={styles.description}>{item.description}</AppText> */}
         <AppText style={styles.subDescription}>{item.subDescription}</AppText>
       </View>
     </View>
@@ -33,7 +32,7 @@ const styles = ScaledSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontFamily: "Comic-Bold",
+    fontFamily: "ComicNeue-Bold",
     fontSize: "20@s",
     marginBottom: "5@s",
     textAlign: "center",

@@ -73,7 +73,7 @@ const styles = ScaledSheet.create({
   },
   data: {
     color: defaultStyles.colors.dark_Variant,
-    fontFamily: "Comic-Bold",
+    fontFamily: "ComicNeue-Bold",
     fontSize: "14@s",
     paddingTop: 0,
   },

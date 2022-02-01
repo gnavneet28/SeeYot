@@ -1,5 +1,5 @@
-import React, { useCallback } from "react";
-import { ScrollView, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { ScrollView, View, Platform } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 
 import AppButton from "../components/AppButton";
@@ -14,9 +14,27 @@ import Constant from "../navigation/NavigationConstants";
 
 import defaultStyles from "../config/styles";
 
+import defaultProps from "../utilities/defaultProps";
+
 import debounce from "../utilities/debounce";
 
+import * as IAP from "expo-in-app-purchases";
+
+const items = Platform.select({
+  ios: [],
+  android: [
+    "seeyotvip_250_1m",
+    "seeyotvip_450_2m",
+    "seeyotvip_700_3m",
+    "seeyotvip_1250_6m",
+  ],
+});
+
+const plans = defaultProps.plans;
+
 function SubscriptionScreen({ navigation, route }) {
+  const [products, setProducts] = useState([]);
+  const [purchased, setPurchased] = useState(false);
   // HEADER ACTION
   const hanldeHeaderLeftPress = useCallback(
     debounce(
@@ -36,6 +54,23 @@ function SubscriptionScreen({ navigation, route }) {
   const handleCollectButtonPress = useCallback(() => {
     navigation.navigate(Constant.POINTS_SCREEN);
   }, []);
+
+  useEffect(() => {
+    IAP.connectAsync()
+      .catch((err) => {
+        console.log("Error connecting", err);
+      })
+      .then(() => {
+        IAP.getProductsAsync(items).then(({ responseCode, results }) =>
+          console.log(results)
+        );
+      })
+      .catch((err) => console.log("Error getting products", err));
+  }, []);
+
+  const handlePayment = async (id) => {
+    await IAP.purchaseItemAsync(id);
+  };
 
   return (
     <Screen>
@@ -84,22 +119,16 @@ function SubscriptionScreen({ navigation, route }) {
             horizontal
             showsHorizontalScrollIndicator={false}
           >
-            <PlanCard planName="Plan A" planRate={250} planDuration="1 Month" />
-            <PlanCard
-              planDuration="2 Months"
-              planName="Plan B"
-              planRate={450}
-            />
-            <PlanCard
-              planDuration="3 Months"
-              planName="Plan C"
-              planRate={700}
-            />
-            <PlanCard
-              planDuration="6 Months"
-              planName="Plan D"
-              planRate={1250}
-            />
+            {plans.map((p) => (
+              <PlanCard
+                key={p._id}
+                _id={p._id}
+                planName={p.planName}
+                planDuration={p.planDuration}
+                planRate={p.planRate}
+                onProcess={handlePayment}
+              />
+            ))}
           </ScrollView>
           <AppButton
             onPress={handleCollectButtonPress}

@@ -34,7 +34,7 @@ function SendingThoughtActivity({
             {processing ? (
               <LottieView
                 autoPlay
-                loop
+                loop={false}
                 source={sendingThought}
                 style={{ flex: 1 }}
               />
@@ -42,13 +42,13 @@ function SendingThoughtActivity({
               <>
                 <LottieView
                   autoPlay
-                  loop
+                  loop={false}
                   source={messageSent}
                   style={{ flex: 1, opacity: success ? 1 : 0 }}
                 />
                 <LottieView
                   autoPlay
-                  loop
+                  loop={false}
                   source={failed}
                   style={{ flex: 1, opacity: success ? 0 : 1 }}
                 />

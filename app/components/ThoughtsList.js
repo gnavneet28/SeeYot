@@ -1,9 +1,10 @@
 import React, { useCallback, memo } from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import { View, FlatList } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import ChatListHeader from "./ChatListHeader";
-import ItemSeperatorComponent from "./ItemSeperatorComponent";
 import ChatBubble from "./ChatBubble";
+import defaultStyles from "../config/styles";
 
 import useAuth from "../auth/useAuth";
 
@@ -20,16 +21,17 @@ function ThoughtsList({
   const renderItem = useCallback(
     ({ item }) => (
       <ChatBubble
+        recipient={recipient}
         activeChat={activeChat}
         onLongPress={() => onLongPress(item)}
         mine={item.createdBy == user._id ? true : false}
         thought={item}
       />
     ),
-    [activeChat]
+    [activeChat, recipient._id]
   );
 
-  const renderListHeader = useCallback(() => {
+  const renderListFooter = useCallback(() => {
     return <ChatListHeader activeChat={activeChat} user={recipient} />;
   }, [recipient, user.contacts, activeChat]);
 
@@ -38,22 +40,27 @@ function ThoughtsList({
       <FlatList
         keyboardShouldPersistTaps="always"
         data={[...thoughts].reverse()}
-        ItemSeperatorComponent={ItemSeperatorComponent}
         keyExtractor={keyExtractor}
-        ListFooterComponent={renderListHeader}
+        ListFooterComponent={renderListFooter}
         inverted={-1}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={true}
         maxToRenderPerBatch={15}
+        windowSize={10}
       />
     </View>
   );
 }
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     flexShrink: 1,
     width: "100%",
+  },
+  typing: {
+    backgroundColor: defaultStyles.colors.primary,
+    paddingHorizontal: "10@s",
+    paddingVertical: "5@s",
   },
 });
 

@@ -20,8 +20,8 @@ function VipThoughtCardList({
 
   const getItemLayout = useCallback(
     (data, index) => ({
-      length: scale(70),
-      offset: scale(70) * index,
+      length: scale(78),
+      offset: scale(78) * index,
       index,
     }),
     []

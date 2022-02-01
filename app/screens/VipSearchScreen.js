@@ -1,10 +1,17 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 
 import AppHeader from "../components/AppHeader";
 import ApiOption from "../components/ApiOption";
+import EchoMessageModal from "../components/EchoMessageModal";
 import InfoAlert from "../components/InfoAlert";
 import Option from "../components/Option";
 import Screen from "../components/Screen";
@@ -18,12 +25,14 @@ import Constant from "../navigation/NavigationConstants";
 import defaultStyles from "../config/styles";
 
 import usersApi from "../api/users";
+import echosApi from "../api/echos";
 
 import useMountedRef from "../hooks/useMountedRef";
 
 import debounce from "../utilities/debounce";
 import storeDetails from "../utilities/storeDetails";
 import apiActivity from "../utilities/apiActivity";
+import defaultProps from "../utilities/defaultProps";
 
 import useAuth from "../auth/useAuth";
 
@@ -34,6 +43,8 @@ function VipSearchScreen({ navigation }) {
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
+  let modalVisibleFor = useRef("").current;
+  let listRef = useRef(null).current;
 
   // STATES
   const [apiProcessing, setApiProcessing] = useState(false);
@@ -44,6 +55,11 @@ function VipSearchScreen({ navigation }) {
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
+  });
+  const [echoModal, setEchoModal] = useState({
+    recipient: defaultProps.defaultEchoMessageRecipient,
+    visible: false,
+    echoMessage: { message: "" },
   });
   const [showHelp, setShowHelp] = useState(false);
 
@@ -62,11 +78,28 @@ function VipSearchScreen({ navigation }) {
     }
   }, [isFocused, mounted]);
 
+  useEffect(() => {
+    if (!isFocused && mounted && echoModal.visible === true) {
+      setEchoModal({ ...echoModal, visible: false });
+    }
+  }, [isFocused, mounted]);
+
   // DATA NEEDED
   const searchHistory = useMemo(
     () => (user.searchHistory ? user.searchHistory : defaultSearchHistory),
     [user.searchHistory]
   );
+
+  // ECHO MESSAGE MODAL ACTION
+
+  const handleCloseModal = useCallback(() => {
+    modalVisibleFor = "";
+    setEchoModal({
+      recipient: defaultProps.defaultEchoMessageRecipient,
+      visible: false,
+      echoMessage: { message: "" },
+    });
+  }, []);
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
@@ -146,6 +179,31 @@ function VipSearchScreen({ navigation }) {
       showInfoAlert: true,
     });
   }, []);
+
+  const handleImagePress = useCallback(
+    async (echoMessageFrom) => {
+      modalVisibleFor = echoMessageFrom._id;
+      setEchoModal({
+        recipient: echoMessageFrom,
+        visible: true,
+        echoMessage: { message: "" },
+      });
+      const { data, problem, ok } = await echosApi.getEcho(echoMessageFrom._id);
+      if (ok && modalVisibleFor == echoMessageFrom._id) {
+        if (user._id != echoMessageFrom._id) {
+          usersApi.updatePhotoTapsCount(echoMessageFrom._id);
+        }
+        return setEchoModal({
+          recipient: echoMessageFrom,
+          visible: true,
+          echoMessage: data,
+        });
+      }
+
+      if (problem) return;
+    },
+    [modalVisibleFor]
+  );
 
   // SEARCH HISTORY OPTION AND ACTION
 
@@ -236,6 +294,7 @@ function VipSearchScreen({ navigation }) {
         <VipSearchResultList
           isLoading={isLoading}
           onAddEchoPress={handleAddEchoButtonPress}
+          onImagePress={handleImagePress}
           onSendThoughtsPress={handleOnSendThoughtButtonPress}
           users={searchResult}
         />
@@ -273,6 +332,7 @@ function VipSearchScreen({ navigation }) {
           </View>
         </View>
       </Modal>
+      <EchoMessageModal handleCloseModal={handleCloseModal} state={echoModal} />
     </>
   );
 }

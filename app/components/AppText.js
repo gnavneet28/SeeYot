@@ -11,9 +11,7 @@ function AppText({ children, style, onPress, ...otherProps }) {
       style={[
         styles.text,
         {
-          fontFamily: "Comic-Bold"
-            ? "Comic-Bold"
-            : defaultStyles.text.fontFamily,
+          fontFamily: "ComicNeue-Bold",
         },
         style,
       ]}

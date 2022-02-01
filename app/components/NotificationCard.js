@@ -40,6 +40,7 @@ function NotificationCard({
   tapToSendMessage,
 }) {
   dayjs.extend(relativeTime);
+  let currentDate = new Date();
   let customImage;
 
   const { user, setUser } = useAuth();
@@ -60,11 +61,11 @@ function NotificationCard({
   }, [notification._id]);
 
   if (notification.type && notification.type == "Unmatched")
-    customImage = require("../assets/logo.png");
+    customImage = { uri: "logo" };
   else if (notification.type && notification.type == "Vip")
-    customImage = require("../assets/logo.png");
+    customImage = { uri: "logo" };
   else if (notification.type && notification.type == "Official")
-    customImage = require("../assets/logo.png");
+    customImage = { uri: "logo" };
 
   // INFO ALERT ACTIONS
   const handleCloseInfoAlert = useCallback(async () => {
@@ -148,7 +149,7 @@ function NotificationCard({
             ? notification.createdBy.picture
             : ""
         }
-        customImage={customImage ? customImage : require("../assets/user.png")}
+        customImage={customImage ? customImage : { uri: "logo.png" }}
       />
       <TouchableHighlight
         underlayColor={defaultStyles.colors.white}
@@ -170,11 +171,15 @@ function NotificationCard({
           </Text>
         </>
       </TouchableHighlight>
-      <DeleteAction
-        apiAction={true}
-        processing={processing}
-        onPress={apiProcessing || !isConnected ? () => null : handleDeletePress}
-      />
+      {dayjs(currentDate).diff(notification.createdAt, "minutes") < 2 ? null : (
+        <DeleteAction
+          apiAction={true}
+          processing={processing}
+          onPress={
+            apiProcessing || !isConnected ? () => null : handleDeletePress
+          }
+        />
+      )}
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
@@ -194,7 +199,7 @@ const styles = ScaledSheet.create({
   date: {
     ...defaultStyles.text,
     color: defaultStyles.colors.placeholder,
-    fontFamily: "Comic-Bold",
+    fontFamily: "ComicNeue-Bold",
     fontSize: "10@s",
     opacity: 0.8,
   },
@@ -212,8 +217,7 @@ const styles = ScaledSheet.create({
   image: {
     backgroundColor: defaultStyles.colors.white,
     borderRadius: "17.5@s",
-    borderWidth: 1,
-    borderColor: defaultStyles.colors.light,
+    elevation: 1,
     height: "35@s",
     marginLeft: "10@s",
     marginRight: "2@s",
@@ -233,7 +237,7 @@ const styles = ScaledSheet.create({
   },
   notificationMessage: {
     ...defaultStyles.text,
-    fontFamily: "Comic-Bold",
+    fontFamily: "ComicNeue-Bold",
     fontSize: "14@s",
   },
   text: {

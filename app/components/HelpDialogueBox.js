@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Modal } from "react-native";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppText from "./AppText";
