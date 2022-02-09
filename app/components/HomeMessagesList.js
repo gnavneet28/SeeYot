@@ -1,4 +1,4 @@
-import React, { useCallback, memo } from "react";
+import React, { useCallback, memo, useMemo } from "react";
 import { View, FlatList } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import dayjs from "dayjs";
@@ -34,15 +34,18 @@ function HomeMessagesList({ messages = [], onMessagePress, style }) {
     []
   );
 
+  const data = useMemo(() => {
+    return messages
+      .sort((a, b) => a.createdAt > b.createdAt)
+      .sort((a, b) => a.seen > b.seen)
+      .filter((m) => dayjs(new Date()).diff(dayjs(m.createdAt), "hours") <= 24);
+  }, [messages]);
+
   return (
     <View style={[styles.container, style]}>
       <FlatList
         contentContainerStyle={styles.contentContainerStyle}
-        data={messages
-          .sort((a, b) => a.createdAt < b.createdAt)
-          .filter(
-            (m) => dayjs(new Date()).diff(dayjs(m.createdAt), "hours") <= 24
-          )}
+        data={data}
         getItemLayout={getItemLayout}
         horizontal={true}
         keyExtractor={keyExtractor}

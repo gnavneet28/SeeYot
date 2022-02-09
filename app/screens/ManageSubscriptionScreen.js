@@ -13,6 +13,7 @@ import defaultStyles from "../config/styles";
 
 import formatDate from "../utilities/formatDate";
 import debounce from "../utilities/debounce";
+import ScreenSub from "../components/ScreenSub";
 
 function ManageSubscriptionScreen({ navigation }) {
   const { user } = useAuth();
@@ -48,33 +49,35 @@ function ManageSubscriptionScreen({ navigation }) {
         title="Current Subscription"
         onPressLeft={handleBack}
       />
-      <ScrollView
-        keyboardShouldPersistTaps="always"
-        contentContainerStyle={styles.container}
-      >
-        {subscription == "Inactive" ? (
-          <AppText style={styles.noActiveSubsInfo}>
-            There are no active subscriptions.
-          </AppText>
-        ) : (
-          <>
-            <Details
-              style={{ marginTop: scale(20) }}
-              title="Subscription:"
-              value={subscription}
-            />
-            <Details title="Subscription Mode:" value={subscriptionType} />
-            <Details
-              title="Subscription Start Date:"
-              value={subscriptionStartDate}
-            />
-            <Details
-              title="Subscription End Date:"
-              value={subscriptionEndDate}
-            />
-          </>
-        )}
-      </ScrollView>
+      <ScreenSub>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.container}
+        >
+          {subscription == "Inactive" ? (
+            <AppText style={styles.noActiveSubsInfo}>
+              There are no active subscriptions.
+            </AppText>
+          ) : (
+            <>
+              <Details
+                style={{ marginTop: scale(20) }}
+                title="Subscription:"
+                value={subscription}
+              />
+              <Details title="Subscription Mode:" value={subscriptionType} />
+              <Details
+                title="Subscription Start Date:"
+                value={subscriptionStartDate}
+              />
+              <Details
+                title="Subscription End Date:"
+                value={subscriptionEndDate}
+              />
+            </>
+          )}
+        </ScrollView>
+      </ScreenSub>
     </Screen>
   );
 }

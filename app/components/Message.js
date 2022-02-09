@@ -4,11 +4,11 @@ import LottieView from "lottie-react-native";
 import defaultStyles from "../config/styles";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
-const Confused = require("../assets/animations/confused.json");
-const Furious = require("../assets/animations/angry.json");
-const Happy = require("../assets/animations/happy.json");
-const Sad = require("../assets/animations/sad.json");
-const Love = require("../assets/animations/love.json");
+const Love = "love.json";
+const Sad = "sad.json";
+const Happy = "happy.json";
+const Furious = "angry.json";
+const Confused = "confused.json";
 
 function Message({ mood = "Happy", onPress, seen = false }) {
   let emoji;

@@ -5,10 +5,10 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
-function DeleteAction({ onPress, apiAction, processing }) {
+function DeleteAction({ onPress, apiAction, processing, style }) {
   if (!apiAction)
     return (
-      <View style={styles.deleteIconContainer}>
+      <View style={[styles.deleteIconContainer, style]}>
         <MaterialCommunityIcons
           name="delete-circle-outline"
           size={scale(17)}
@@ -19,7 +19,7 @@ function DeleteAction({ onPress, apiAction, processing }) {
     );
 
   return (
-    <View style={styles.deleteIconContainer}>
+    <View style={[styles.deleteIconContainer, style]}>
       {!processing ? (
         <MaterialCommunityIcons
           name="delete-circle-outline"

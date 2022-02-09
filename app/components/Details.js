@@ -19,7 +19,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
     borderRadius: "5@s",
-    elevation: 2,
+    // elevation: 2,
     flexDirection: "row",
     height: "30@s",
     justifyContent: "space-between",

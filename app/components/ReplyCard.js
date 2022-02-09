@@ -28,7 +28,7 @@ function ReplyCard({
           <LottieView
             autoPlay
             loop={false}
-            source={require("../assets/animations/noresults.json")}
+            source={"noresults.json"}
             style={{ flex: 1 }}
           />
         </View>
@@ -57,7 +57,7 @@ function ReplyCard({
             numberOfLines={1}
             style={styles.message}
           >
-            {message.message}
+            {message.message.trim()}
           </AppText>
           <View style={styles.replyStatsContainer}>
             <AppText onPress={onModalOpenPress} style={styles.repliesCount}>

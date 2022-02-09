@@ -22,6 +22,7 @@ import {
 import defaultStyles from "../config/styles";
 
 import verifyApi from "../api/verify";
+import Bugsnag from "@bugsnag/react-native";
 
 export default function VerifyOtpScreen({ navigation, route }) {
   const { phoneNumber, verificationId } = route.params;
@@ -44,17 +45,26 @@ export default function VerifyOtpScreen({ navigation, route }) {
 
   // OTP AUTOCOMPLETE
 
+  // When Otp auto read then go to next screen
   const otpHandler = (message) => {
-    const otp = /(\d{6})/g.exec(message)[1];
-    setValue(otp);
-    OtpAutocomplete.removeListener();
-    Keyboard.dismiss();
+    if (message) {
+      const otp = /(\d{6})/g.exec(message)[1];
+      setValue(otp);
+      Keyboard.dismiss();
+      OtpAutocomplete.removeListener();
+    }
   };
+
+  useEffect(() => {
+    if (value.length == 6) {
+      handleSubmit();
+    }
+  }, [value]);
 
   useEffect(() => {
     OtpAutocomplete.getOtp()
       .then((p) => OtpAutocomplete.addListener(otpHandler))
-      .catch((p) => console.log(p));
+      .catch((p) => Bugsnag.notify(p));
 
     return () => OtpAutocomplete.removeListener();
   }, []);

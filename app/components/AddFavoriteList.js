@@ -70,6 +70,7 @@ class AddContactList extends React.Component {
       );
       return this.setState({
         ...this.state,
+        searchTerm: "",
         dataProvider: newData.getSize()
           ? newData
           : this.state.dataProvider.cloneWithRows(defaultListItemWhenEmpty),
@@ -103,6 +104,7 @@ class AddContactList extends React.Component {
       case ViewTypes.Full:
         return (
           <AddFavoriteCard
+            isConnected={this.props.isConnected}
             favoriteUser={data}
             name={data.name}
             onMessagePress={() => this.props.onMessagePress(data)}
@@ -149,7 +151,7 @@ class AddContactList extends React.Component {
               />
             </View>
             <TouchableHighlight
-              underlayColor={defaultStyles.colors.lightGrey}
+              underlayColor={defaultStyles.colors.blue}
               style={styles.allReplies}
               activeOpacity={0.8}
               onPress={this.props.onAllRepliesPress}
@@ -164,6 +166,7 @@ class AddContactList extends React.Component {
         </View>
         <View style={styles.listView}>
           <RecyclerListView
+            scrollViewProps={{ keyboardShouldPersistTaps: "handled" }}
             canChangeSize={true}
             dataProvider={this.state.dataProvider}
             extendedState={this.state}
@@ -179,7 +182,7 @@ class AddContactList extends React.Component {
 const styles = ScaledSheet.create({
   allReplies: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.dark_Variant,
+    backgroundColor: defaultStyles.colors.blue,
     borderBottomRightRadius: "20@s",
     borderTopRightRadius: "20@s",
     height: "32@s",

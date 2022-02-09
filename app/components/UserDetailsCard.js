@@ -33,7 +33,7 @@ function UserDetailsCard({
           <AppText
             numberOfLines={1}
             style={{
-              fontSize: scale(15),
+              fontSize: scale(15.5),
               paddingBottom: 0,
               opacity: 0.9,
             }}
@@ -74,7 +74,7 @@ const styles = ScaledSheet.create({
   data: {
     color: defaultStyles.colors.dark_Variant,
     fontFamily: "ComicNeue-Bold",
-    fontSize: "14@s",
+    fontSize: "15@s",
     paddingTop: 0,
   },
   userDetail: {

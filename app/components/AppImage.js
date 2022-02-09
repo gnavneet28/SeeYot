@@ -1,6 +1,5 @@
 import React from "react";
 import { StyleSheet, TouchableHighlight, Image } from "react-native";
-import FastImage from "react-native-fast-image";
 
 import defaultStyles from "../config/styles";
 
@@ -37,7 +36,7 @@ function AppImage({
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    borderColor: defaultStyles.colors.primary,
+    backgroundColor: defaultStyles.colors.light,
     borderRadius: 30,
     height: 60,
     justifyContent: "center",

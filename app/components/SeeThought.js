@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
@@ -69,14 +69,12 @@ const styles = ScaledSheet.create({
     width: "80%",
   },
   title: {
-    borderBottomColor: defaultStyles.colors.light,
+    borderBottomColor: defaultStyles.colors.lightGrey,
     borderBottomWidth: 1,
-    color: defaultStyles.colors.blue,
-    fontSize: "16@s",
     marginBottom: "10@s",
     textAlign: "center",
-    width: "50%",
+    width: "100%",
   },
 });
 
-export default SeeThought;
+export default memo(SeeThought);

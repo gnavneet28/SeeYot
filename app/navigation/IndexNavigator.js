@@ -2,14 +2,17 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "../../node_modules/react-native-vector-icons/Ionicons";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
+import MaterialCommunityIcons from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
 import { scale } from "react-native-size-matters";
 import { useNavigation, TabActions } from "@react-navigation/native";
 
 import AddContactScreen from "../screens/AddContactsScreen";
 import HomeScreen from "../screens/HomeScreen";
 import NotificationNavigator from "./NotificationNavigator";
+import VipNavigator from "./VipNavigator";
 import Constant from "./NavigationConstants";
 import FavoritesNavigator from "./FavoritesNavigator";
+import HomeNavigator from "./HomeNavigator";
 
 import defaultstyles from "../config/styles";
 
@@ -25,8 +28,6 @@ function IndexNavigator(props) {
     ).length;
   }
 
-  const navigation = useNavigation();
-
   return (
     <Tab.Navigator
       screenOptions={{
@@ -37,7 +38,7 @@ function IndexNavigator(props) {
           height: scale(45),
           borderTopWidth: 0,
         },
-        tabBarHideOnKeyboard: true,
+        //tabBarHideOnKeyboard: true,
       }}
     >
       <Tab.Screen
@@ -47,9 +48,10 @@ function IndexNavigator(props) {
           ),
           tabBarActiveTintColor: defaultstyles.colors.yellow_Variant,
           tabBarInactiveTintColor: defaultstyles.colors.white,
+          tabBarHideOnKeyboard: true,
         }}
-        name={Constant.HOME_SCREEN}
-        component={HomeScreen}
+        name={Constant.HOME_NAVIGATOR}
+        component={HomeNavigator}
       />
       <Tab.Screen
         options={{
@@ -58,6 +60,7 @@ function IndexNavigator(props) {
           ),
           tabBarActiveTintColor: defaultstyles.colors.yellow_Variant,
           tabBarInactiveTintColor: defaultstyles.colors.white,
+          tabBarHideOnKeyboard: true,
         }}
         name={Constant.ADD_CONTACTS_SCREEN}
         component={AddContactScreen}
@@ -69,10 +72,26 @@ function IndexNavigator(props) {
           ),
           tabBarActiveTintColor: defaultstyles.colors.yellow_Variant,
           tabBarInactiveTintColor: defaultstyles.colors.white,
+          tabBarHideOnKeyboard: true,
         }}
         name={Constant.FAVORITES_NAVIGATOR}
         component={FavoritesNavigator}
-        // listeners={{ tabPress: () => navigation.popToTop() }}
+      />
+      <Tab.Screen
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="crown-outline"
+              size={size}
+              color={color}
+            />
+          ),
+          tabBarActiveTintColor: defaultstyles.colors.yellow_Variant,
+          tabBarInactiveTintColor: defaultstyles.colors.white,
+          tabBarStyle: { display: "none" },
+        }}
+        name={Constant.VIP_NAVIGATOR}
+        component={VipNavigator}
       />
       <Tab.Screen
         options={{
@@ -91,6 +110,7 @@ function IndexNavigator(props) {
           },
           tabBarActiveTintColor: defaultstyles.colors.yellow_Variant,
           tabBarInactiveTintColor: defaultstyles.colors.white,
+          tabBarHideOnKeyboard: true,
         }}
         name={Constant.NOTIFICATION_NAVIGATOR}
         component={NotificationNavigator}

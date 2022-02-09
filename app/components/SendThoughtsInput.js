@@ -1,4 +1,10 @@
-import React, { useState, useContext, useCallback, useEffect } from "react";
+import React, {
+  useState,
+  useContext,
+  useCallback,
+  useEffect,
+  memo,
+} from "react";
 import {
   View,
   TouchableOpacity,
@@ -8,24 +14,30 @@ import {
 import { ScaledSheet, scale } from "react-native-size-matters";
 import IonicIcons from "../../node_modules/react-native-vector-icons/Ionicons";
 import LottieView from "lottie-react-native";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
+import AppActivityIndicator from "./ActivityIndicator";
+import AppHeader from "./AppHeader";
 import AppModal from "./AppModal";
 import AppText from "./AppText";
-import AppActivityIndicator from "./ActivityIndicator";
 import Icon from "./Icon";
+import LocalThoughtsList from "./LocalThoughtsList";
 import Selection from "./Selection";
 
-import defaultStyles from "../config/styles";
 import debounce from "../utilities/debounce";
-import useConnection from "../hooks/useConnection";
 import TypingContext from "../utilities/typingContext";
 import localThoughts from "../utilities/localThoughts";
-import LocalThoughtsList from "./LocalThoughtsList";
-import AppHeader from "./AppHeader";
+
+import thoughtsApi from "../api/thoughts";
 
 import useMountedRef from "../hooks/useMountedRef";
+import useConnection from "../hooks/useConnection";
+import useAuth from "../auth/useAuth";
 
-const typingIndicator = require("../assets/animations/typing.json");
+import defaultStyles from "../config/styles";
+
+const typingIndicator = "typing.json";
 
 function SendThoughtsInput({
   isRecipientActive,
@@ -40,6 +52,11 @@ function SendThoughtsInput({
   setTyping = () => null,
   isFocused,
 }) {
+  dayjs.extend(relativeTime);
+  let currentDate = new Date();
+
+  const { user } = useAuth();
+
   const [message, setMessage] = useState("");
   const isConnected = useConnection();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -77,44 +94,70 @@ function SendThoughtsInput({
     setIsModalVisible(false);
   }, []);
 
-  const handleOpenModal = useCallback(() => {
+  const handleOpenModal = useCallback(async () => {
+    await localThoughts.deleteMatchedThoughts(user.thoughts);
     getPreviousThoughts();
     setIsModalVisible(true);
-  }, []);
+  }, [user.thoughts]);
 
-  const handleOnChangeText = (text) => {
-    setTyping(text);
-    setMessage(text);
-  };
+  const handleOnChangeText = useCallback(
+    (text) => {
+      if (activeChat) {
+        setTyping(text);
+      }
+      setMessage(text);
+    },
+    [setTyping, activeChat]
+  );
 
-  const handleOnSelectPreviousThought = (text) => {
+  const handleOnSelectPreviousThought = useCallback((text) => {
     setIsModalVisible(false);
     setMessage(text);
-  };
+  }, []);
 
-  const handleDeletePress = async (thought) => {
-    await localThoughts.deleteThought(thought);
-    let newThoughts = await localThoughts.getLocalThoughts();
-    setPreviousThoughts(newThoughts);
-  };
+  const handleDeletePress = useCallback(
+    async (thought) => {
+      await localThoughts.deleteThought(thought);
+      let newThoughts = await localThoughts.getLocalThoughts();
+      setPreviousThoughts(newThoughts);
+      if (dayjs(currentDate).diff(thought.createdAt, "minutes") < 10) {
+        await thoughtsApi.deleteTemporaryThought(thought.key);
+      }
+    },
+    [currentDate]
+  );
 
   return (
     <>
-      <View style={[{ flexDirection: "row", width: "98%" }, style]}>
+      <View style={[styles.contentContainer, style]}>
+        {!activeChat ? (
+          <TouchableOpacity
+            disabled={!activeChat ? false : true}
+            onPress={handleOpenModal}
+            style={styles.previousMessages}
+          >
+            <IonicIcons
+              color={defaultStyles.colors.white}
+              name="list-circle-outline"
+              size={scale(22)}
+            />
+          </TouchableOpacity>
+        ) : null}
         <View style={[styles.container]}>
           <TouchableHighlight
+            disabled={typing ? true : false}
             underlayColor={defaultStyles.colors.light}
             activeOpacity={0.8}
             onPress={onActiveChatSelection}
             style={styles.selectionContainer}
           >
             <>
-              {typing ? (
+              {typing && activeChat ? (
                 <LottieView
                   autoPlay
                   loop
                   source={typingIndicator}
-                  style={{ width: scale(25), height: scale(25) }}
+                  style={{ width: scale(30), height: scale(30) }}
                 />
               ) : (
                 <Selection
@@ -131,10 +174,10 @@ function SendThoughtsInput({
             </>
           </TouchableHighlight>
           <TextInput
+            multiline={true}
             maxLength={250}
             onBlur={onBlur}
             onChangeText={handleOnChangeText}
-            onFocus={onFocus}
             placeholder={placeholder}
             style={[
               styles.inputBox,
@@ -174,19 +217,6 @@ function SendThoughtsInput({
             />
           </TouchableOpacity>
         </View>
-        {!activeChat ? (
-          <TouchableOpacity
-            disabled={!activeChat ? false : true}
-            onPress={handleOpenModal}
-            style={styles.previousMessages}
-          >
-            <IonicIcons
-              color={defaultStyles.colors.white}
-              name="list-circle-outline"
-              size={scale(25)}
-            />
-          </TouchableOpacity>
-        ) : null}
       </View>
       <AppModal
         animationType="slide"
@@ -204,11 +234,12 @@ function SendThoughtsInput({
             leftIconColor={defaultStyles.colors.primary}
           />
           <AppText style={styles.previousThoughtInfo}>
-            All the thoughts that you have sent and did not match, appear here
-            for future reference, so that you don't have to type the same
-            Thought again. These Thoughts are saved locally on your device.
+            All the thoughts that you have sent and did not match when sent,
+            appear here for future reference, so that you don't have to type the
+            same Thought again. These Thoughts are saved locally on your device.
             Press on any of these Thoughts to edit and send or directly send
-            them.
+            them. If you would like to delete the Thought before getting matched
+            then delete it within 10 minutes while the delete icon is yellow.
           </AppText>
           {isReady ? (
             <LocalThoughtsList
@@ -229,15 +260,24 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.light,
     borderRadius: "30@s",
-    borderWidth: 1,
-    elevation: 1,
     flexDirection: "row",
-    height: "38@s",
-    justifyContent: "space-between",
-    width: "100%",
     flexShrink: 1,
+    justifyContent: "space-between",
+    minHeight: "38@s",
+    width: "100%",
+  },
+  contentContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderTopColor: defaultStyles.colors.light,
+    borderTopWidth: 1,
+    elevation: 10,
+    flexDirection: "row",
+    overflow: "hidden",
+    paddingHorizontal: "10@s",
+    paddingVertical: "5@s",
+    width: "100%",
   },
   inputBox: {
     borderRadius: "30@s",
@@ -245,8 +285,8 @@ const styles = ScaledSheet.create({
     fontSize: "14@s",
     height: "100%",
     marginRight: "5@s",
-    paddingHorizontal: "10@s",
-    width: "86%",
+    paddingHorizontal: "5@s",
+    width: "100%",
   },
   mainContainer: {
     alignItems: "center",
@@ -257,7 +297,7 @@ const styles = ScaledSheet.create({
     overflow: "hidden",
     width: "100%",
   },
-  send: {
+  sendIconProcessingContainer: {
     alignItems: "center",
     borderRadius: "20@s",
     height: "40@s",
@@ -266,16 +306,24 @@ const styles = ScaledSheet.create({
     overflow: "hidden",
     width: "40@s",
   },
-  previousMessages: {
+  send: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.blue,
     borderRadius: "20@s",
     height: "40@s",
     justifyContent: "center",
-    marginLeft: "5@s",
+    overflow: "hidden",
+    width: "40@s",
+  },
+  previousMessages: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.blue,
+    borderRadius: "18@s",
+    height: "36@s",
+    justifyContent: "center",
+    marginRight: "5@s",
     overflow: "hidden",
     paddingLeft: "2@s",
-    width: "40@s",
+    width: "36@s",
   },
   previousThoughtInfo: {
     backgroundColor: defaultStyles.colors.white,
@@ -283,7 +331,7 @@ const styles = ScaledSheet.create({
     borderColor: defaultStyles.colors.lightGrey,
     borderTopWidth: 1,
     color: defaultStyles.colors.dark_Variant,
-    fontSize: "13@s",
+    fontSize: "12@s",
     paddingHorizontal: "20@s",
     paddingTop: "10@s",
     textAlign: "center",
@@ -300,11 +348,11 @@ const styles = ScaledSheet.create({
   selectionContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: "50@s",
-    elevation: 3,
+    borderRadius: "18@s",
+    elevation: 1,
     justifyContent: "center",
     height: "36@s",
-    width: "55@s",
+    width: "36@s",
   },
   title: {
     color: defaultStyles.colors.primary,
@@ -315,4 +363,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default SendThoughtsInput;
+export default memo(SendThoughtsInput);

@@ -34,11 +34,11 @@ function AddContactCard({
   onMessagePress = () => null,
   favoriteUser = defaulFavoriteUser,
   style,
+  isConnected,
 }) {
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
   const { user, setUser } = useAuth();
   const { tackleProblem } = apiActivity;
-  const isConnected = useConnection();
 
   const [processing, setProcessing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
@@ -118,7 +118,7 @@ function AddContactCard({
         <LottieView
           autoPlay
           loop={false}
-          source={require("../assets/animations/noresults.json")}
+          source={"noresults.json"}
           style={{ flex: 1 }}
         />
       </View>
@@ -144,19 +144,27 @@ function AddContactCard({
         <AppButton
           disabled={apiProcessing || !isConnected ? true : false}
           title={inFavourites ? "Remove" : "Add"}
-          style={styles.addButton}
+          style={[
+            styles.addButton,
+            {
+              backgroundColor: inFavourites
+                ? defaultStyles.colors.light
+                : defaultStyles.colors.yellow_Variant,
+            },
+          ]}
           subStyle={[
             styles.addButtonSub,
             {
               color: inFavourites
                 ? defaultStyles.colors.tomato
-                : defaultStyles.colors.blue,
+                : defaultStyles.colors.secondary,
             },
           ]}
           onPress={!inFavourites ? handleAddPress : handleRemovePress}
         />
       </ApiProcessingContainer>
       <TouchableOpacity
+        activeOpacity={0.9}
         onPress={onMessagePress}
         style={styles.favoriteMessageIconContainer}
       >

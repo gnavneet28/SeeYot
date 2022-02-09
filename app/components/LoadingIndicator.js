@@ -10,12 +10,7 @@ function LoadingIndicator({ visible = false, cancelable = false }) {
     <Modal animationType="fade" transparent visible={visible}>
       <View style={styles.container}>
         <View style={styles.loaderContainer}>
-          <LottieView
-            autoPlay
-            loop
-            source={require("../assets/animations/load.json")}
-            style={{ flex: 1 }}
-          />
+          <LottieView autoPlay loop source={"load.json"} style={{ flex: 1 }} />
         </View>
       </View>
     </Modal>

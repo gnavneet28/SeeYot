@@ -21,9 +21,13 @@ const getAllRepliedMessages = () => apiClient.get(endPoint + "/allReplied");
 const updateAllMessages = () =>
   apiClient.put(endPoint + "/update/allReadMessages", {});
 
+const getMessageCreator = (id) =>
+  apiClient.get(endPoint + "/creator/" + id, {});
+
 export default {
   deleteMessage,
   getAllRepliedMessages,
+  getMessageCreator,
   markRead,
   reply,
   sendMessage,

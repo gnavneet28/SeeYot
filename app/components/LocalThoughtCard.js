@@ -1,12 +1,19 @@
 import React, { memo } from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import AppText from "./AppText";
 import DeleteAction from "./DeleteAction";
 import defaultStyles from "../config/styles";
 
 function LocalThoughtCard({ thought, onPress, onDeletePress }) {
+  dayjs.extend(relativeTime);
+  let currentDate = new Date();
+
+  let canBeDeleted = dayjs(currentDate).diff(thought.createdAt, "minutes") < 10;
+
   return (
     <View style={styles.container}>
       <View style={styles.thoughtContainer}>
@@ -16,7 +23,7 @@ function LocalThoughtCard({ thought, onPress, onDeletePress }) {
               onPress={() => onPress(thought.message)}
               style={styles.thoughtRecipientTitle}
             >
-              Sent To
+              Sent To :
             </AppText>{" "}
             {thought.sentTo}
           </AppText>
@@ -25,11 +32,18 @@ function LocalThoughtCard({ thought, onPress, onDeletePress }) {
           onPress={() => onPress(thought.message)}
           style={styles.message}
         >
-          <AppText style={styles.thoughtMessageTitle}>Thought</AppText>{" "}
+          <AppText style={styles.thoughtMessageTitle}>Thought :</AppText>{" "}
           {thought.message}
         </AppText>
       </View>
-      <DeleteAction onPress={() => onDeletePress(thought)} />
+      <DeleteAction
+        style={{
+          backgroundColor: canBeDeleted
+            ? defaultStyles.colors.yellow_Variant
+            : defaultStyles.colors.light,
+        }}
+        onPress={() => onDeletePress(thought)}
+      />
     </View>
   );
 }
@@ -56,11 +70,11 @@ const styles = ScaledSheet.create({
   },
 
   thoughtRecipientTitle: {
-    color: defaultStyles.colors.secondary,
+    color: defaultStyles.colors.dark_Variant,
     fontWeight: "normal",
   },
   thoughtMessageTitle: {
-    color: defaultStyles.colors.blue,
+    color: defaultStyles.colors.dark_Variant,
     fontWeight: "normal",
   },
   thoughtContainer: {

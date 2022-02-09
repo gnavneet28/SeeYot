@@ -1,31 +1,20 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-  useRef,
-} from "react";
-import { View, Modal } from "react-native";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
+import { View } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 
 import AppHeader from "../components/AppHeader";
-import ApiOption from "../components/ApiOption";
-import EchoMessageModal from "../components/EchoMessageModal";
 import InfoAlert from "../components/InfoAlert";
-import Option from "../components/Option";
 import Screen from "../components/Screen";
 import SearchBox from "../components/SearchBox";
 import VipSearchResultList from "../components/VipSearchResultList";
 import VipThoughtCardList from "../components/VipThoughtCardList";
 import HelpDialogueBox from "../components/HelpDialogueBox";
+import VipScreenOptions from "../components/VipScreenOptions";
 
 import Constant from "../navigation/NavigationConstants";
 
-import defaultStyles from "../config/styles";
-
 import usersApi from "../api/users";
-import echosApi from "../api/echos";
 
 import useMountedRef from "../hooks/useMountedRef";
 
@@ -35,6 +24,7 @@ import apiActivity from "../utilities/apiActivity";
 import defaultProps from "../utilities/defaultProps";
 
 import useAuth from "../auth/useAuth";
+import ScreenSub from "../components/ScreenSub";
 
 let defaultSearchHistory = [];
 
@@ -43,8 +33,6 @@ function VipSearchScreen({ navigation }) {
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
-  let modalVisibleFor = useRef("").current;
-  let listRef = useRef(null).current;
 
   // STATES
   const [apiProcessing, setApiProcessing] = useState(false);
@@ -87,19 +75,8 @@ function VipSearchScreen({ navigation }) {
   // DATA NEEDED
   const searchHistory = useMemo(
     () => (user.searchHistory ? user.searchHistory : defaultSearchHistory),
-    [user.searchHistory]
+    [user]
   );
-
-  // ECHO MESSAGE MODAL ACTION
-
-  const handleCloseModal = useCallback(() => {
-    modalVisibleFor = "";
-    setEchoModal({
-      recipient: defaultProps.defaultEchoMessageRecipient,
-      visible: false,
-      echoMessage: { message: "" },
-    });
-  }, []);
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
@@ -135,75 +112,87 @@ function VipSearchScreen({ navigation }) {
 
   // SEARCH ACTION
   const handleSearchQuery = useCallback(
-    async (searchQuery) => {
-      if (searchQuery && searchQuery.length >= 3) {
-        setIsLoading(true);
-        const { data, problem, ok } = await usersApi.searchUser(searchQuery);
-        if (ok) {
+    debounce(
+      async (searchQuery) => {
+        if (searchQuery && searchQuery.length >= 3) {
+          setIsLoading(true);
+          const { data, problem, ok } = await usersApi.searchUser(searchQuery);
+          if (ok) {
+            setIsLoading(false);
+            return setSearchResult(data);
+          }
           setIsLoading(false);
-          return setSearchResult(data);
+          tackleProblem(problem, data, setInfoAlert);
         }
-        setIsLoading(false);
-        tackleProblem(problem, data, setInfoAlert);
-      }
-      setSearchResult([]);
-    },
+        setSearchResult([]);
+      },
+      1000,
+      true
+    ),
     [searchResult]
   );
 
+  const updateSearchHistory = async (recipient) => {
+    const { ok, data, problem } = await usersApi.addToSearchHistory(
+      recipient._id
+    );
+    if (ok) {
+      setUser(data.user);
+      return storeDetails(data.user);
+    } else return;
+  };
+
   // SEARCH RESULT ACTION
-  const handleOnSendThoughtButtonPress = useCallback(async (userToAdd) => {
-    if (userToAdd) {
-      return navigation.navigate(Constant.VIP_SENDTHOUGHT_SCREEN, {
-        recipient: userToAdd,
-        from: Constant.VIP_SEARCH_SCREEN,
-      });
-    }
-
-    setInfoAlert({
-      ...infoAlert,
-      infoAlertMessage: "Something went wrong! Please try again.",
-      showInfoAlert: true,
-    });
-  }, []);
-
-  const handleAddEchoButtonPress = useCallback(async (userToAdd) => {
-    if (userToAdd) {
-      return navigation.navigate(Constant.VIP_ADDECHO_SCREEN, {
-        recipient: userToAdd,
-        from: Constant.VIP_SEARCH_SCREEN,
-      });
-    }
-    setInfoAlert({
-      infoAlertMessage: "Something went wrong! Please try again.",
-      showInfoAlert: true,
-    });
-  }, []);
-
-  const handleImagePress = useCallback(
-    async (echoMessageFrom) => {
-      modalVisibleFor = echoMessageFrom._id;
-      setEchoModal({
-        recipient: echoMessageFrom,
-        visible: true,
-        echoMessage: { message: "" },
-      });
-      const { data, problem, ok } = await echosApi.getEcho(echoMessageFrom._id);
-      if (ok && modalVisibleFor == echoMessageFrom._id) {
-        if (user._id != echoMessageFrom._id) {
-          usersApi.updatePhotoTapsCount(echoMessageFrom._id);
+  const handleOnSendThoughtButtonPress = useCallback(
+    async (userToAdd) => {
+      if (userToAdd) {
+        let inSearchHistory = user.searchHistory.filter(
+          (h) => h._id == userToAdd._id
+        ).length;
+        if (!inSearchHistory) {
+          updateSearchHistory(userToAdd);
         }
-        return setEchoModal({
-          recipient: echoMessageFrom,
-          visible: true,
-          echoMessage: data,
+        return navigation.navigate(Constant.VIP_SENDTHOUGHT_SCREEN, {
+          recipient: userToAdd,
+          from: Constant.VIP_SEARCH_SCREEN,
         });
       }
-
-      if (problem) return;
+      setInfoAlert({
+        ...infoAlert,
+        infoAlertMessage: "Something went wrong! Please try again.",
+        showInfoAlert: true,
+      });
     },
-    [modalVisibleFor]
+    [user]
   );
+
+  const handleAddEchoButtonPress = useCallback(
+    async (userToAdd) => {
+      if (userToAdd) {
+        let inSearchHistory = user.searchHistory.filter(
+          (h) => h._id == userToAdd._id
+        ).length;
+        if (!inSearchHistory) {
+          updateSearchHistory(userToAdd);
+        }
+        return navigation.navigate(Constant.VIP_ADDECHO_SCREEN, {
+          recipient: userToAdd,
+          from: Constant.VIP_SEARCH_SCREEN,
+        });
+      }
+      setInfoAlert({
+        infoAlertMessage: "Something went wrong! Please try again.",
+        showInfoAlert: true,
+      });
+    },
+    [user]
+  );
+
+  const handleImagePress = useCallback((recipient) => {
+    navigation.push(Constant.ECHO_MODAL_SCREEN, {
+      recipient,
+    });
+  }, []);
 
   // SEARCH HISTORY OPTION AND ACTION
 
@@ -261,6 +250,10 @@ function VipSearchScreen({ navigation }) {
     [interestedUser, user]
   );
 
+  const handleCloseOptionModal = useCallback(() => {
+    setIsVisible(false);
+  }, []);
+
   return (
     <>
       <Screen style={styles.container}>
@@ -276,28 +269,30 @@ function VipSearchScreen({ navigation }) {
           leftPress={handleCloseInfoAlert}
           visible={infoAlert.showInfoAlert}
         />
-        <SearchBox
-          invite={false}
-          list={searchResult}
-          loading={isLoading}
-          onChange={handleSearchQuery}
-          placeholder="Search people on SeeYot..."
-        />
-        {user.searchHistory.length > 0 ? (
-          <View style={styles.matchedThoughtsContainer}>
-            <VipThoughtCardList
-              onThoughtCardPress={handleThougthCardPress}
-              users={searchHistory}
-            />
-          </View>
-        ) : null}
-        <VipSearchResultList
-          isLoading={isLoading}
-          onAddEchoPress={handleAddEchoButtonPress}
-          onImagePress={handleImagePress}
-          onSendThoughtsPress={handleOnSendThoughtButtonPress}
-          users={searchResult}
-        />
+        <ScreenSub>
+          <SearchBox
+            invite={false}
+            list={searchResult}
+            loading={isLoading}
+            onChange={handleSearchQuery}
+            placeholder="Search people on SeeYot..."
+          />
+          {user.searchHistory.length > 0 ? (
+            <View style={styles.matchedThoughtsContainer}>
+              <VipThoughtCardList
+                onThoughtCardPress={handleThougthCardPress}
+                users={searchHistory}
+              />
+            </View>
+          ) : null}
+          <VipSearchResultList
+            isLoading={isLoading}
+            onAddEchoPress={handleAddEchoButtonPress}
+            onImagePress={handleImagePress}
+            onSendThoughtsPress={handleOnSendThoughtButtonPress}
+            users={searchResult}
+          />
+        </ScreenSub>
       </Screen>
       <HelpDialogueBox
         information="Only SeeYot Vip members can search people outside their contacts and interact with them."
@@ -305,34 +300,16 @@ function VipSearchScreen({ navigation }) {
         setVisible={setShowHelp}
         visible={showHelp}
       />
-      <Modal
-        animationType="fade"
-        onRequestClose={() => setIsVisible(false)}
-        transparent={true}
-        visible={isVisible}
-      >
-        <View style={styles.searchHistoryMainContainer}>
-          <View style={styles.optionsContainer}>
-            <Option
-              onPress={() => setIsVisible(false)}
-              title="Close"
-              titleStyle={styles.optionClose}
-            />
-            <ApiOption
-              processing={apiProcessing}
-              title="Remove"
-              onPress={hanldeRemoveFromSearchHistory}
-            />
-
-            <Option title="Add Echo" onPress={handlePopUpAddEchoButtonPress} />
-            <Option
-              title="Send Thoughts"
-              onPress={handlePopUpOnSendThoughtButtonPress}
-            />
-          </View>
-        </View>
-      </Modal>
-      <EchoMessageModal handleCloseModal={handleCloseModal} state={echoModal} />
+      <VipScreenOptions
+        apiProcessing={apiProcessing}
+        isVisible={isVisible}
+        handleCloseOptionModal={handleCloseOptionModal}
+        handlePopUpAddEchoButtonPress={handlePopUpAddEchoButtonPress}
+        handlePopUpOnSendThoughtButtonPress={
+          handlePopUpOnSendThoughtButtonPress
+        }
+        hanldeRemoveFromSearchHistory={hanldeRemoveFromSearchHistory}
+      />
     </>
   );
 }
@@ -346,31 +323,10 @@ const styles = ScaledSheet.create({
     paddingHorizontal: "10@s",
     width: "100%",
   },
-  optionsContainer: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: "20@s",
-    borderWidth: 1,
-    overflow: "hidden",
-    width: "60%",
-  },
-  optionClose: {
-    backgroundColor: defaultStyles.colors.dark_Variant,
-    color: defaultStyles.colors.white,
-    opacity: 1,
-  },
   removeFromSearchHstoryButtonContainer: {
     alignItems: "center",
     justifyContent: "center",
     minHeight: "40@s",
-    width: "100%",
-  },
-  searchHistoryMainContainer: {
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.8)",
-    flex: 1,
-    justifyContent: "center",
     width: "100%",
   },
 });

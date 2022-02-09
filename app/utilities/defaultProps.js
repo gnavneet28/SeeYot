@@ -82,4 +82,11 @@ export default {
       planRate: 1250,
     },
   ],
+  defaultEchoMessageOption: {
+    _id: "",
+    message: "",
+    messageFor: "",
+    name: "",
+    picture: "",
+  },
 };

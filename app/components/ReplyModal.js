@@ -26,7 +26,7 @@ function ReplyModal({ message = defaultMessage, handleCloseModal }) {
     >
       <View style={styles.messageBackground}>
         <ScrollView
-          keyboardShouldPersistTaps="always"
+          keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             flexGrow: 1,
             justifyContent: "flex-end",
@@ -41,14 +41,14 @@ function ReplyModal({ message = defaultMessage, handleCloseModal }) {
             />
           </View>
           <View style={styles.messageMainContainer}>
+            <AppText style={styles.replyModalTitle}>Replies</AppText>
             <AppText style={styles.modalMessage}>
               {message.message.message}
             </AppText>
-            <AppText style={styles.repliesHeading}>Replies</AppText>
 
             {message.message.options.length >= 1 ? (
               <View style={styles.optionContainerMain}>
-                <ScrollView keyboardShouldPersistTaps="always">
+                <ScrollView keyboardShouldPersistTaps="handled">
                   {message.message.options.map((d, index) => (
                     <ReplyOption
                       key={d._id + index.toString()}
@@ -100,7 +100,7 @@ const styles = ScaledSheet.create({
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
     overflow: "hidden",
-    paddingTop: "32@s",
+    paddingTop: "25@s",
     width: "100%",
   },
   modalMessage: {
@@ -108,7 +108,7 @@ const styles = ScaledSheet.create({
     borderLeftWidth: 2,
     color: defaultStyles.colors.blue,
     fontSize: "14@s",
-    marginBottom: "10@s",
+    marginBottom: "20@s",
     maxWidth: "80%",
     paddingHorizontal: "10@s",
     textAlign: "left",
@@ -117,19 +117,12 @@ const styles = ScaledSheet.create({
     marginVertical: "5@s",
     width: "100%",
   },
-  repliesHeading: {
-    alignSelf: "center",
-    borderBottomColor: defaultStyles.colors.light,
+  replyModalTitle: {
+    borderBottomColor: defaultStyles.colors.lightGrey,
     borderBottomWidth: 1,
-    color: defaultStyles.colors.dark_Variant,
-    fontSize: "14@s",
-    height: "35@s",
     marginBottom: "10@s",
-    marginLeft: "10@s",
-    paddingHorizontal: "20@s",
     textAlign: "center",
-    textAlignVertical: "center",
-    width: "70%",
+    width: "100%",
   },
 });
 

@@ -9,6 +9,7 @@ import InfoAlert from "../components/InfoAlert";
 import RepliesList from "../components/RepliesList";
 import ReplyModal from "../components/ReplyModal";
 import Screen from "../components/Screen";
+import ScreenSub from "../components/ScreenSub";
 
 import debounce from "../utilities/debounce";
 
@@ -146,17 +147,19 @@ function RepliesScreen({ navigation }) {
           leftIcon="arrow-back"
           onPressLeft={handleBackPress}
         />
-        {!isReady ? (
-          <AppActivityIndicator />
-        ) : (
-          <RepliesList
-            onModalOpenPress={handleOpenModal}
-            replies={replies.sort((a, b) => a.createdAt < b.createdAt)}
-            onDeletePress={handleSetMessageToDelete}
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-          />
-        )}
+        <ScreenSub>
+          {!isReady ? (
+            <AppActivityIndicator />
+          ) : (
+            <RepliesList
+              onModalOpenPress={handleOpenModal}
+              replies={replies.sort((a, b) => a.createdAt < b.createdAt)}
+              onDeletePress={handleSetMessageToDelete}
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+            />
+          )}
+        </ScreenSub>
       </Screen>
       <InfoAlert
         leftPress={handleCloseInfoAlert}
@@ -182,7 +185,7 @@ function RepliesScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
+    //backgroundColor: defaultStyles.colors.white,
   },
   modalFallback: {
     backgroundColor: "rgba(0,0,0,0.7)",

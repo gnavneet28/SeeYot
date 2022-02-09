@@ -23,7 +23,7 @@ const ReplyCardSub = ({ message, reply }) => {
         <AppText style={styles.recipientName}>
           {message.createdFor.name}
         </AppText>
-        <AppText style={styles.repliedMessage}>{reply.message}</AppText>
+        <AppText style={styles.repliedMessage}>{reply.message.trim()}</AppText>
         <AppText style={styles.replyCreatedAt}>
           {dayjs(reply.createdAt).fromNow()}
         </AppText>

@@ -14,7 +14,11 @@ function OfflineNotice(props) {
   if (!isConnected)
     return (
       <View style={styles.container}>
-        <AppText style={styles.text}>No internet connection available!</AppText>
+        <AppText style={styles.text}>
+          Internet connection is either not available or not reachable! Try
+          switching on and off your internet connection if you think you have
+          active internet connection.
+        </AppText>
       </View>
     );
 
@@ -25,9 +29,11 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: colors.danger,
+    borderBottomLeftRadius: "20@s",
+    borderBottomRightRadius: "20@s",
     elevation: Platform.OS === "android" ? 1 : 0,
-    height: "25@s",
     justifyContent: "center",
+    paddingVertical: "3@s",
     position: "absolute",
     top: Constants.statusBarHeight,
     width: "100%",
@@ -36,6 +42,7 @@ const styles = ScaledSheet.create({
   text: {
     color: colors.white,
     fontSize: "13@s",
+    textAlign: "center",
   },
 });
 

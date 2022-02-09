@@ -13,7 +13,7 @@ import AppText from "../components/AppText";
 import AppTextInput from "../components/AppTextInput";
 import Details from "../components/Details";
 import InfoAlert from "../components/InfoAlert";
-import InfoText from "../components/InfoText";
+import Information from "../components/Information";
 import LoadingIndicator from "../components/LoadingIndicator";
 import Screen from "../components/Screen";
 
@@ -38,6 +38,7 @@ import useConnection from "../hooks/useConnection";
 
 import usersApi from "../api/users";
 import ModalFallback from "../components/ModalFallback";
+import ScreenSub from "../components/ScreenSub";
 
 const Points = {
   totalPoints: 0,
@@ -235,132 +236,143 @@ function PointsScreen({ navigation }) {
         title="Points"
         onPressLeft={handleBack}
       />
-      <InfoAlert
-        description={infoAlert.infoAlertMessage}
-        visible={infoAlert.showInfoAlert}
-        leftPress={handleCloseInfoAlert}
-      />
-      <LoadingIndicator visible={isLoading} />
-      <ScrollView
-        keyboardShouldPersistTaps="always"
-        contentContainerStyle={styles.container}
-      >
-        <AppText style={styles.infoText}>
-          Collect points to avail Subscription to SeeYot Vip.
-        </AppText>
-
-        <Details title="Total Points:" value={user.points.totalPoints} />
-        <Details
-          style={{ marginBottom: scale(20) }}
-          title="Redeemable Points:"
-          value={calculateTotalRedeemablePoints(user.points.totalPoints)}
+      <ScreenSub>
+        <InfoAlert
+          description={infoAlert.infoAlertMessage}
+          visible={infoAlert.showInfoAlert}
+          leftPress={handleCloseInfoAlert}
         />
-
-        <View style={styles.redeemConatainer}>
-          <AppText style={styles.redeemInfo}>
-            For every 20 points, you can avail SeeYot Vip Subscription for 24
-            hours. You can collect Points by watching ads.
-          </AppText>
-
-          <View style={styles.actionConatiner}>
-            <AppTextInput
-              editable={!redeeming}
-              keyboardType="numeric"
-              onChangeText={setPointsToRedeem}
-              subStyle={styles.inputSub}
-              style={styles.input}
-              placeholder="Enter no. of points to redeem"
-              value={pointsToRedeem.toString()}
-            />
-            <ApiProcessingContainer
-              style={styles.apiProcessingContainer}
-              processing={redeeming}
-            >
-              <AppButton
-                disabled={
-                  pointsToRedeem.toString().replace(/\s/g, "").length >= 2 &&
-                  isConnected
-                    ? false
-                    : true
-                }
-                onPress={handleRedeemPoints}
-                title="Redeem"
-                style={styles.redeemButton}
-                subStyle={styles.redeemButtonSub}
-              />
-            </ApiProcessingContainer>
-          </View>
-        </View>
-        <ApiProcessingContainer
-          style={styles.collectPointsApiProcessingContainer}
-          processing={collectingPoints}
+        <LoadingIndicator visible={isLoading} />
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.container}
         >
-          <AppButton
-            disabled={!isConnected}
-            onPress={handleShowAd}
-            style={styles.collectPointsButton}
-            subStyle={styles.collectPointsButtonSub}
-            title="Collect Points"
-          />
-        </ApiProcessingContainer>
-        <View style={styles.collectPointsInfoContainer}>
-          <MaterialCommunityIcon
-            name="google-ads"
-            size={scale(14)}
-            color={defaultStyles.colors.yellow_Variant}
-            style={{ alignSelf: "flex-start" }}
-          />
-          <AppText style={styles.collectPointsInfo}>
-            Clicking on this button will show you an Ad. For each Ad you see,
-            you will be awarded 5 points.
+          <AppText style={styles.infoText}>
+            Collect points to avail Subscription to SeeYot Vip.
           </AppText>
-        </View>
-        <AppText onPress={() => setShowAdsInfo(true)}>
-          Terms and Condition.
-        </AppText>
-      </ScrollView>
-      {showAdsInfo ? <ModalFallback /> : null}
-      <Modal
-        visible={showAdsInfo}
-        onRequestClose={() => setShowAdsInfo(false)}
-        transparent={true}
-        animationType="slide"
-      >
-        <View style={styles.adsInfoContainerBackground}>
-          <View style={styles.closeAdsInfoIconContainer}>
-            <AntDesign
-              onPress={() => setShowAdsInfo(false)}
-              name="downcircle"
-              color={defaultStyles.colors.tomato}
-              size={scale(28)}
-            />
-          </View>
-          <View style={styles.adsInfoContainer}>
-            <AppText style={styles.adsTermAndConditionInfo}>
-              Terms to use Ads to avail SeeYot Vip membership.
-            </AppText>
-            <InfoText information="a. You account should be minimum 15 days old." />
-            <InfoText information="b. You can watch only 8 ads within 24 hours. (successful watch)" />
-            <InfoText
-              style={{ marginBottom: scale(10) }}
-              information="c. You can watch only 1 ad within 5 minutes. (successful watch)"
-            />
 
-            <Details
-              title="Account Life (Days): "
-              value={currentAdsStats.accountLife}
-            />
-            <Details
-              title="Ads seen in last 5 minutes: "
-              value={currentAdsStats.seenInLastTenMinutes}
-            />
-            <Details
-              title="Ads seen in last 24 hours: "
-              value={currentAdsStats.seenInLastTwentyFourHours}
-            />
+          <Details
+            style={{ elevation: 0 }}
+            title="Total Points:"
+            value={user.points.totalPoints}
+          />
+          <Details
+            style={{ marginBottom: scale(20), elevation: 0 }}
+            title="Redeemable Points:"
+            value={calculateTotalRedeemablePoints(user.points.totalPoints)}
+          />
+
+          <View style={styles.redeemConatainer}>
+            <AppText style={styles.redeemInfo}>
+              For every 20 points, you can avail SeeYot Vip Subscription for 24
+              hours. You can collect Points by watching ads.
+            </AppText>
+
+            <View style={styles.actionConatiner}>
+              <AppTextInput
+                editable={!redeeming}
+                keyboardType="numeric"
+                onChangeText={setPointsToRedeem}
+                subStyle={styles.inputSub}
+                style={styles.input}
+                placeholder="Enter no. of points to redeem"
+                value={pointsToRedeem.toString()}
+              />
+              <ApiProcessingContainer
+                style={styles.apiProcessingContainer}
+                processing={redeeming}
+              >
+                <AppButton
+                  disabled={
+                    pointsToRedeem.toString().replace(/\s/g, "").length >= 2 &&
+                    isConnected
+                      ? false
+                      : true
+                  }
+                  onPress={handleRedeemPoints}
+                  title="Redeem"
+                  style={styles.redeemButton}
+                  subStyle={styles.redeemButtonSub}
+                />
+              </ApiProcessingContainer>
+            </View>
           </View>
-        </View>
-      </Modal>
+          <ApiProcessingContainer
+            style={styles.collectPointsApiProcessingContainer}
+            processing={collectingPoints}
+          >
+            <AppButton
+              disabled={!isConnected}
+              onPress={handleShowAd}
+              style={styles.collectPointsButton}
+              subStyle={styles.collectPointsButtonSub}
+              title="Collect Points"
+            />
+          </ApiProcessingContainer>
+          <View style={styles.collectPointsInfoContainer}>
+            <MaterialCommunityIcon
+              name="google-ads"
+              size={scale(14)}
+              color={defaultStyles.colors.yellow_Variant}
+              style={{ alignSelf: "flex-start" }}
+            />
+            <AppText style={styles.collectPointsInfo}>
+              Clicking on this button will show you an Ad. For each Ad you see,
+              you will be awarded 5 points.
+            </AppText>
+          </View>
+          <AppText onPress={() => setShowAdsInfo(true)}>
+            Terms and Condition.
+          </AppText>
+        </ScrollView>
+        {showAdsInfo ? <ModalFallback /> : null}
+        <Modal
+          visible={showAdsInfo}
+          onRequestClose={() => setShowAdsInfo(false)}
+          transparent={true}
+          animationType="slide"
+        >
+          <View style={styles.adsInfoContainerBackground}>
+            <View style={styles.closeAdsInfoIconContainer}>
+              <AntDesign
+                onPress={() => setShowAdsInfo(false)}
+                name="downcircle"
+                color={defaultStyles.colors.tomato}
+                size={scale(28)}
+              />
+            </View>
+            <View style={styles.adsInfoContainer}>
+              <AppText style={styles.adsTermAndConditionInfo}>
+                Terms to use Ads to avail SeeYot Vip membership.
+              </AppText>
+              <Information
+                IconCategory={MaterialCommunityIcon}
+                iconName="account"
+                iconSize={scale(25)}
+                data={currentAdsStats.accountLife}
+                information="Account Life (Days)"
+                infoDetails="You account should be minimum 15 days old."
+              />
+              <Information
+                IconCategory={MaterialCommunityIcon}
+                iconName="google-ads"
+                iconSize={scale(25)}
+                data={currentAdsStats.seenInLastTenMinutes}
+                information="Ads seen in last 5 minutes"
+                infoDetails="You can watch only 1 ad within 5 minutes. (successful watch)"
+              />
+              <Information
+                IconCategory={MaterialCommunityIcon}
+                iconName="google-ads"
+                iconSize={scale(25)}
+                data={currentAdsStats.seenInLastTwentyFourHours}
+                information="Ads seen in last 24 hours"
+                infoDetails="You can watch only 8 ads within 24 hours. (successful watch)"
+              />
+            </View>
+          </View>
+        </Modal>
+      </ScreenSub>
     </Screen>
   );
 }
@@ -390,9 +402,9 @@ const styles = ScaledSheet.create({
     borderTopRightRadius: "10@s",
     borderTopWidth: 1,
     bottom: 0,
-    height: "270@s",
     overflow: "hidden",
     paddingTop: "20@s",
+    paddingBottom: "10@s",
     width: "100%",
   },
   adsTermAndConditionInfo: {
@@ -426,22 +438,25 @@ const styles = ScaledSheet.create({
   },
   collectPointsApiProcessingContainer: {
     borderColor: defaultStyles.colors.tomato,
-    borderRadius: "20@s",
+    borderRadius: "15@s",
     borderWidth: "1@s",
-    height: "35@s",
+    height: "30@s",
     marginBottom: "10@s",
     marginTop: "100@s",
-    width: "110@s",
+    width: "120@s",
   },
   collectPointsButton: {
     backgroundColor: defaultStyles.colors.tomato,
-    borderRadius: "20@s",
-    height: "35@s",
-    width: "110@s",
+    borderRadius: "15@s",
+    height: "30@s",
+    paddingHorizontal: "10@s",
+    width: "119@s",
   },
   collectPointsButtonSub: {
     color: defaultStyles.colors.white,
     fontSize: "15@s",
+    textAlign: "center",
+    width: "100%",
   },
   collectPointsInfoContainer: {
     alignItems: "center",
@@ -469,7 +484,7 @@ const styles = ScaledSheet.create({
     borderBottomWidth: 1,
     borderColor: defaultStyles.colors.yellow_Variant,
     color: defaultStyles.colors.blue,
-    fontSize: "15@s",
+    fontSize: "14@s",
     marginVertical: "10@s",
     paddingHorizontal: "10@s",
     textAlign: "center",
@@ -488,7 +503,6 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
     borderRadius: "5@s",
-    elevation: 2,
     padding: "10@s",
     width: "90%",
   },

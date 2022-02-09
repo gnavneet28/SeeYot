@@ -35,7 +35,7 @@ function AddPicture({
       .then((image) => {
         onChangeImage(image.path);
       })
-      .catch((err) => console.log(err));
+      .catch();
   };
 
   const handleEditPress = () => {
@@ -54,25 +54,47 @@ function AddPicture({
     selectImage();
   }, []);
 
+  const handleShowAlert = () => {
+    setShowAlert(true);
+  };
+
+  const handleHideAlert = () => {
+    setShowAlert(false);
+  };
+
+  const handleAlertRightOptionPress = () => {
+    onChangeImage(null);
+    setShowAlert(false);
+  };
+
+  const handleShowInlargedImage = () => {
+    setVisible(true);
+  };
+
+  const handleHideInlargedImage = () => {
+    setVisible(false);
+  };
+
+  const handleHideImageEditOptions = () => {
+    setShowImageEdit(false);
+  };
+
   return (
     <>
       <View style={[styles.container, style]}>
         <Alert
-          onRequestClose={() => setShowAlert(false)}
+          onRequestClose={handleHideAlert}
           description="Are you sure you want to remove this picture?"
-          leftPress={() => setShowAlert(false)}
+          leftPress={handleHideAlert}
           leftOption="Cancel"
           rightOption="Ok"
-          rightPress={() => {
-            onChangeImage(null);
-            setShowAlert(false);
-          }}
+          rightPress={handleAlertRightOptionPress}
           setVisible={setShowAlert}
           title="Remove"
           visible={showAlert}
         />
         <TouchableHighlight
-          onPress={imageView ? () => setVisible(true) : () => null}
+          onPress={imageView ? handleShowInlargedImage : () => null}
           style={styles.imageContainer}
           underlayColor={defaultStyles.colors.white}
         >
@@ -80,6 +102,7 @@ function AddPicture({
             width={scale(108)}
             height={scale(108)}
             style={styles.image}
+            subStyle={styles.imageSub}
             source={image ? { uri: image } : { uri: "user" }}
           />
         </TouchableHighlight>
@@ -97,13 +120,13 @@ function AddPicture({
       </View>
       <Modal
         animationType="fade"
-        onRequestClose={() => setVisible(false)}
+        onRequestClose={handleHideInlargedImage}
         transparent={true}
         visible={visible}
       >
         <View style={styles.contentContainer}>
           <MaterialIcons
-            onPress={() => setVisible(false)}
+            onPress={handleHideInlargedImage}
             name="arrow-back"
             size={scale(23)}
             color={defaultStyles.colors.white}
@@ -121,14 +144,14 @@ function AddPicture({
       </Modal>
       <Modal
         animationType="slide"
-        onRequestClose={() => setShowImageEdit(false)}
+        onRequestClose={handleHideImageEditOptions}
         transparent={true}
         visible={showImageEdit}
       >
         <View style={styles.imageEditContainer}>
           <View style={styles.closeMessageIconContainer}>
             <AntDesign
-              onPress={() => setShowImageEdit(false)}
+              onPress={handleHideImageEditOptions}
               name="downcircle"
               color={defaultStyles.colors.tomato}
               size={scale(28)}
@@ -160,7 +183,7 @@ const styles = ScaledSheet.create({
     left: "19@s",
   },
   contentContainer: {
-    backgroundColor: "rgba(0,0,0,1)",
+    backgroundColor: defaultStyles.colors.primary,
     flex: 1,
     justifyContent: "center",
     width: "100%",
@@ -252,6 +275,11 @@ const styles = ScaledSheet.create({
     height: "108@s",
     resizeMode: "cover",
     width: "108@s",
+  },
+  imageSub: {
+    height: "106@s",
+    width: "106@s",
+    borderRadius: "53@s",
   },
   inlargedImage: {
     borderRadius: 0,

@@ -4,32 +4,17 @@ import React, {
   useMemo,
   useEffect,
   useContext,
-  useRef,
 } from "react";
-import {
-  Modal,
-  View,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Linking,
-} from "react-native";
+import { View, Linking } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useIsFocused } from "@react-navigation/native";
-import { ScaledSheet, scale } from "react-native-size-matters";
-import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
+import { ScaledSheet } from "react-native-size-matters";
 
-import ApiProcessingContainer from "../components/ApiProcessingContainer";
-import AppImage from "../components/AppImage";
-import AppText from "../components/AppText";
 import ContactList from "../components/ContactList";
-import EchoMessageModal from "../components/EchoMessageModal";
 import HomeAppHeader from "../components/HomeAppHeader";
 import HomeMessagesList from "../components/HomeMessagesList";
-import Icon from "../components/Icon";
 import InfoAlert from "../components/InfoAlert";
-import ReplyOption from "../components/ReplyOption";
 import Screen from "../components/Screen";
 
 import Constant from "../navigation/NavigationConstants";
@@ -39,12 +24,9 @@ import useAuth from "../auth/useAuth";
 import myApi from "../api/my";
 import messagesApi from "../api/messages";
 import usersApi from "../api/users";
-import echosApi from "../api/echos";
 
 import useMountedRef from "../hooks/useMountedRef";
 import useConnection from "../hooks/useConnection";
-
-import defaultStyles from "../config/styles";
 
 import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
@@ -53,6 +35,11 @@ import apiActivity from "../utilities/apiActivity";
 import authorizeUpdates from "../utilities/authorizeUpdates";
 
 import defaultProps from "../utilities/defaultProps";
+import NavigationConstants from "../navigation/NavigationConstants";
+import FavoriteMessageReplyModal from "../components/FavoriteMessageReplyModal";
+
+import defaultStyles from "../config/styles";
+import ScreenSub from "../components/ScreenSub";
 
 function HomeScreen({ navigation }) {
   dayjs.extend(relativeTime);
@@ -85,7 +72,6 @@ function HomeScreen({ navigation }) {
   const [messagesList, setMessagesList] = useState([]);
   const [reply, setReply] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
-  // const [refreshing, setRefreshing] = useState(false);
 
   const clearJunkData = async () => {
     let canUpdate = await authorizeUpdates.authorizeExpiredUpdate();
@@ -150,51 +136,35 @@ function HomeScreen({ navigation }) {
     }
   }, [isFocused, mounted]);
 
-  // ECHO MODAL ACTIONS
-
-  let modalVisibleFor = useRef("").current;
-
-  const handleImagePress = useCallback(
-    async (echoMessageFrom) => {
-      modalVisibleFor = echoMessageFrom._id;
-      setEchoModal({
-        recipient: echoMessageFrom,
-        visible: true,
-        echoMessage: { message: "" },
-      });
-      const { data, problem, ok } = await echosApi.getEcho(echoMessageFrom._id);
-      if (ok && modalVisibleFor == echoMessageFrom._id) {
-        if (user._id != echoMessageFrom._id) {
-          usersApi.updatePhotoTapsCount(echoMessageFrom._id);
-        }
-        return setEchoModal({
-          recipient: echoMessageFrom,
-          visible: true,
-          echoMessage: data,
-        });
-      }
-
-      if (problem) return;
-    },
-    [modalVisibleFor]
-  );
-
-  const handleCloseModal = useCallback(() => {
-    modalVisibleFor = "";
-    setEchoModal({
-      recipient: defaultProps.defaultEchoMessageRecipient,
-      visible: false,
-      echoMessage: { message: "" },
+  const handleImagePress = useCallback((recipient) => {
+    navigation.push(NavigationConstants.ECHO_MODAL_SCREEN, {
+      recipient,
     });
   }, []);
 
   // MESSAGES ACTION
+
+  const handleGetMessageCreator = async (message) => {
+    if (!message.replied) return;
+    const { data, ok, problem } = await messagesApi.getMessageCreator(
+      message._id
+    );
+    if (ok) {
+      return setMessageCreator({
+        name: data.name,
+        picture: data.picture,
+      });
+    }
+
+    tackleProblem(problem, data, setInfoAlert);
+  };
 
   const handleMessagePress = useCallback(
     debounce(
       async (message) => {
         setMessage(message);
         setIsVisible(true);
+        await handleGetMessageCreator(message);
         if (message.seen === false) {
           const { ok, data, problem } = await messagesApi.markRead(message._id);
           if (ok) {
@@ -285,14 +255,32 @@ function HomeScreen({ navigation }) {
     setIsVisible(false);
   }, []);
 
-  const handleMessageReply = debounce(
-    async () => {
-      setSendingReply(true);
-      if (selectedMessageId) {
+  const handleMessageReply = useCallback(
+    debounce(
+      async () => {
+        setSendingReply(true);
+        if (selectedMessageId) {
+          const { data, ok, problem } = await messagesApi.reply(
+            message._id,
+            reply.trim(),
+            selectedMessageId
+          );
+          if (ok) {
+            setSendingReply(false);
+            setReply("");
+            setMessageCreator({
+              name: data.name,
+              picture: data.picture,
+            });
+            return showSucessMessage(setSuccess, "Reply Sent!");
+          }
+          setSendingReply(false);
+          tackleProblem(problem, data, setInfoAlert);
+        }
+
         const { data, ok, problem } = await messagesApi.reply(
           message._id,
-          reply,
-          selectedMessageId
+          reply
         );
         if (ok) {
           setSendingReply(false);
@@ -305,23 +293,11 @@ function HomeScreen({ navigation }) {
         }
         setSendingReply(false);
         tackleProblem(problem, data, setInfoAlert);
-      }
-
-      const { data, ok, problem } = await messagesApi.reply(message._id, reply);
-      if (ok) {
-        setSendingReply(false);
-        setReply("");
-        setMessageCreator({
-          name: data.name,
-          picture: data.picture,
-        });
-        return showSucessMessage(setSuccess, "Reply Sent!");
-      }
-      setSendingReply(false);
-      tackleProblem(problem, data, setInfoAlert);
-    },
-    1000,
-    true
+      },
+      1000,
+      true
+    ),
+    [message._id, reply]
   );
 
   return (
@@ -334,210 +310,51 @@ function HomeScreen({ navigation }) {
             typeof user.picture !== "undefined" ? user.picture : ""
           }
         />
-        {shouldShowMessagesList ? (
-          <HomeMessagesList
-            messages={messagesList}
-            onMessagePress={handleMessagePress}
+        <ScreenSub>
+          {shouldShowMessagesList ? (
+            <HomeMessagesList
+              messages={messagesList}
+              onMessagePress={handleMessagePress}
+            />
+          ) : null}
+          <InfoAlert
+            description={infoAlert.infoAlertMessage}
+            leftPress={handleCloseInfoAlert}
+            visible={infoAlert.showInfoAlert}
           />
-        ) : null}
-        <InfoAlert
-          description={infoAlert.infoAlertMessage}
-          leftPress={handleCloseInfoAlert}
-          visible={infoAlert.showInfoAlert}
-        />
-        <ContactList
-          onAddEchoPress={handleAddEchoButtonPress}
-          onAddFriendPress={handleAddFriendPress}
-          onImagePress={handleImagePress}
-          onSendThoughtsPress={handleOnSendThoughtButtonPress}
-          users={data}
-        />
+          <ContactList
+            onAddEchoPress={handleAddEchoButtonPress}
+            onAddFriendPress={handleAddFriendPress}
+            onImagePress={handleImagePress}
+            onSendThoughtsPress={handleOnSendThoughtButtonPress}
+            users={data}
+          />
+        </ScreenSub>
       </Screen>
       {isVisible ? <View style={styles.modalFallback} /> : null}
-      <Modal
-        visible={isVisible}
-        onRequestClose={sendingReply ? null : handleCloseMessage}
-        transparent
-        animationType="slide"
-      >
-        <View style={styles.messageBackground}>
-          <ScrollView
-            keyboardShouldPersistTaps="always"
-            contentContainerStyle={{
-              flexGrow: 1,
-              justifyContent: "flex-end",
-            }}
-          >
-            <View style={styles.closeMessageIconContainer}>
-              <AntDesign
-                onPress={sendingReply ? null : handleCloseMessage}
-                name="downcircle"
-                color={defaultStyles.colors.tomato}
-                size={scale(28)}
-              />
-            </View>
-            <View style={styles.messageMainContainer}>
-              <View style={styles.messageCreatorDetails}>
-                <AppImage
-                  activeOpacity={1}
-                  style={styles.image}
-                  subStyle={styles.imageSub}
-                  imageUrl={messageCreator.picture}
-                />
-                <View style={styles.messageDetailsContainer}>
-                  <AppText style={styles.creatorName}>
-                    {messageCreator.name}
-                  </AppText>
-                  <AppText style={styles.message}>{message.message}</AppText>
-                  <AppText style={styles.createdAt}>
-                    {dayjs(message.createdAt).fromNow()}
-                  </AppText>
-                </View>
-              </View>
-
-              {message.options.length >= 1 ? (
-                <View style={styles.optionContainerMain}>
-                  <ScrollView keyboardShouldPersistTaps="always">
-                    <AppText style={styles.selectOption}>
-                      Select a Reply
-                    </AppText>
-                    {message.options.map((d, index) => (
-                      <ReplyOption
-                        key={d._id + index.toString()}
-                        selectedMessageId={selectedMessageId}
-                        option={d}
-                        onPress={
-                          sendingReply
-                            ? null
-                            : () => setSelectedMessageId(d._id)
-                        }
-                      />
-                    ))}
-                  </ScrollView>
-                </View>
-              ) : null}
-
-              <View style={styles.inputContainer}>
-                <TextInput
-                  editable={!sendingReply}
-                  maxLength={250}
-                  onChangeText={setReply}
-                  placeholder="Reply to know who sent this message..."
-                  style={[
-                    styles.inputBox,
-                    { fontFamily: "ComicNeue-Bold", fontWeight: "normal" },
-                  ]}
-                  value={reply}
-                />
-                <TouchableOpacity
-                  disabled={
-                    reply.replace(/\s/g, "").length >= 1 && isConnected
-                      ? false
-                      : true
-                  }
-                  onPress={
-                    sendingReply || !isConnected ? null : handleMessageReply
-                  }
-                  style={styles.send}
-                >
-                  <ApiProcessingContainer processing={sendingReply}>
-                    <Icon
-                      color={
-                        reply.replace(/\s/g, "").length >= 1 &&
-                        !sendingReply &&
-                        isConnected
-                          ? defaultStyles.colors.secondary
-                          : defaultStyles.colors.lightGrey
-                      }
-                      name="send"
-                      size={scale(28)}
-                    />
-                  </ApiProcessingContainer>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </ScrollView>
-        </View>
-      </Modal>
-      <EchoMessageModal handleCloseModal={handleCloseModal} state={echoModal} />
+      <FavoriteMessageReplyModal
+        handleCloseMessage={handleCloseMessage}
+        handleMessageReply={handleMessageReply}
+        isConnected={isConnected}
+        isVisible={isVisible}
+        message={message}
+        messageCreator={messageCreator}
+        reply={reply}
+        selectedMessageId={selectedMessageId}
+        sendingReply={sendingReply}
+        setReply={setReply}
+        setSelectedMessageId={setSelectedMessageId}
+      />
     </>
   );
 }
 const styles = ScaledSheet.create({
-  closeMessageIconContainer: {
-    alignItems: "center",
-    alignSelf: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderRadius: "25@s",
-    bottom: "-25@s",
-    height: "40@s",
-    justifyContent: "center",
-    padding: "5@s",
-    width: "40@s",
-    zIndex: 222,
-  },
   contactList: {
     marginTop: "2@s",
   },
   container: {
     alignItems: "center",
-  },
-  createdAt: {
-    color: defaultStyles.colors.lightGrey,
-    fontSize: "10@s",
-  },
-  creatorName: {
-    color: defaultStyles.colors.primary,
-    fontSize: "15@s",
-  },
-  inputContainer: {
-    alignItems: "center",
-    alignSelf: "center",
-    backgroundColor: defaultStyles.colors.light,
-    borderRadius: "30@s",
-    flexDirection: "row",
-    height: "38@s",
-    justifyContent: "space-between",
-    marginVertical: "15@s",
-    width: "90%",
-  },
-  inputBox: {
-    borderRadius: "30@s",
-    flex: 1,
-    fontSize: "14@s",
-    height: "100%",
-    marginRight: "5@s",
-    paddingHorizontal: "10@s",
-    width: "86%",
-  },
-  messageBackground: {
-    flex: 1,
-    justifyContent: "flex-end",
-    width: "100%",
-  },
-  messageMainContainer: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderTopLeftRadius: "10@s",
-    borderTopRightRadius: "10@s",
-    overflow: "hidden",
-    paddingTop: "20@s",
-    width: "100%",
-  },
-  messageCreatorDetails: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderBottomColor: defaultStyles.colors.light,
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    marginVertical: "5@s",
-    minHeight: "70@s",
-    paddingHorizontal: "5@s",
-    width: "95%",
-  },
-  messageDetailsContainer: {
-    flex: 1,
-    padding: "5@s",
+    backgroundColor: defaultStyles.colors.primary,
   },
   modalFallback: {
     backgroundColor: "rgba(0,0,0,0.7)",
@@ -545,50 +362,6 @@ const styles = ScaledSheet.create({
     position: "absolute",
     width: "100%",
     zIndex: 22,
-  },
-  image: {
-    borderColor: defaultStyles.colors.light,
-    borderRadius: "22.5@s",
-    borderWidth: 1,
-    height: "45@s",
-    marginRight: "8@s",
-    width: "45@s",
-  },
-  imageSub: {
-    borderRadius: "22@s",
-    height: "44@s",
-    width: "44@s",
-  },
-  message: {
-    borderColor: defaultStyles.colors.yellow_Variant,
-    borderLeftWidth: 2,
-    color: defaultStyles.colors.secondary,
-    fontSize: "14@s",
-    opacity: 0.8,
-    paddingHorizontal: "10@s",
-    textAlign: "left",
-  },
-  optionContainerMain: {
-    marginVertical: "5@s",
-    width: "100%",
-  },
-  selectOption: {
-    alignSelf: "center",
-    backgroundColor: defaultStyles.colors.light,
-    borderRadius: "20@s",
-    fontSize: "13@s",
-    marginBottom: "10@s",
-    marginLeft: "10@s",
-    paddingHorizontal: "10@s",
-    textAlign: "center",
-    textAlignVertical: "center",
-  },
-  send: {
-    alignItems: "center",
-    height: "40@s",
-    justifyContent: "center",
-    marginRight: "5@s",
-    width: "40@s",
   },
 });
 

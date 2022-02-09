@@ -45,7 +45,7 @@ function SearchBox({
           <LottieView
             autoPlay
             loop={false}
-            source={require("../assets/animations/noresults.json")}
+            source={"noresults.json"}
             style={{ flex: 1 }}
           />
         </View>

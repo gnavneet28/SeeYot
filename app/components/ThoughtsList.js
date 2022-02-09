@@ -5,6 +5,7 @@ import { ScaledSheet } from "react-native-size-matters";
 import ChatListHeader from "./ChatListHeader";
 import ChatBubble from "./ChatBubble";
 import defaultStyles from "../config/styles";
+import ActiveChatBubble from "./ActiveChatBubble";
 
 import useAuth from "../auth/useAuth";
 
@@ -20,7 +21,7 @@ function ThoughtsList({
 
   const renderItem = useCallback(
     ({ item }) => (
-      <ChatBubble
+      <ActiveChatBubble
         recipient={recipient}
         activeChat={activeChat}
         onLongPress={() => onLongPress(item)}
@@ -38,7 +39,8 @@ function ThoughtsList({
   return (
     <View style={[styles.container]}>
       <FlatList
-        keyboardShouldPersistTaps="always"
+        bounces={false}
+        keyboardShouldPersistTaps="handled"
         data={[...thoughts].reverse()}
         keyExtractor={keyExtractor}
         ListFooterComponent={renderListFooter}

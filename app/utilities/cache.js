@@ -1,3 +1,4 @@
+import Bugsnag from "@bugsnag/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const prefix = "cache";
@@ -17,7 +18,7 @@ const store = async (key, value) => {
   try {
     await AsyncStorage.setItem(prefix + key, JSON.stringify(item));
   } catch (error) {
-    console.log(error);
+    Bugsnag.notify(error);
   }
 };
 
@@ -35,7 +36,7 @@ const get = async (key) => {
 
     return item.value;
   } catch (error) {
-    console.log(error);
+    Bugsnag.notify(error);
   }
 };
 

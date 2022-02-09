@@ -9,6 +9,7 @@ import UserDetailsCard from "../components/UserDetailsCard";
 
 import debounce from "../utilities/debounce";
 import defaultStyles from "../config/styles";
+import ScreenSub from "../components/ScreenSub";
 
 function HelpScreen({ navigation }) {
   // HEADER ACTION
@@ -48,47 +49,42 @@ function HelpScreen({ navigation }) {
         onPressLeft={handleBackPress}
         title="Help"
       />
-      <View style={styles.contactUs}>
+      <ScreenSub>
+        <View style={styles.contactUs}>
+          <Heading
+            iconName="contact-mail"
+            title="Contact Us"
+            style={{ marginTop: scale(5), marginBottom: 0 }}
+          />
+          <UserDetailsCard
+            data="help@seeyot.com"
+            dataStyle={{ color: defaultStyles.colors.blue }}
+            editable={false}
+            iconName="email"
+            onDataPress={handleOpenMail}
+            size={scale(20)}
+            title="Email"
+          />
+        </View>
         <Heading
-          iconName="contact-mail"
-          title="Contact Us"
+          iconName="article"
+          onPress={openPrivacyPage}
           style={{ marginTop: scale(5), marginBottom: 0 }}
+          title="Privacy Policy"
         />
-        <UserDetailsCard
-          data="help@seeyot.com"
-          dataStyle={{ color: defaultStyles.colors.blue }}
-          editable={false}
-          iconName="email"
-          onDataPress={handleOpenMail}
-          size={scale(20)}
-          title="Email"
+        <Heading
+          iconName="article"
+          onPress={openTermsPage}
+          style={{ marginVertical: 0 }}
+          title="Terms of Service"
         />
-        {/* <UserDetailsCard
-          data="+91 9944603844"
-          editable={false}
-          iconName="phone"
-          size={scale(20)}
-          title="Contact Number"
-        /> */}
-      </View>
-      <Heading
-        iconName="article"
-        onPress={openPrivacyPage}
-        style={{ marginTop: scale(5), marginBottom: 0 }}
-        title="Privacy Policy"
-      />
-      <Heading
-        iconName="article"
-        onPress={openTermsPage}
-        style={{ marginVertical: 0 }}
-        title="Terms of Service"
-      />
-      <Heading
-        iconName="article"
-        onPress={openHowItWorksPage}
-        style={{ marginTop: 0 }}
-        title="How it Works"
-      />
+        <Heading
+          iconName="article"
+          onPress={openHowItWorksPage}
+          style={{ marginTop: 0 }}
+          title="How it Works"
+        />
+      </ScreenSub>
     </Screen>
   );
 }
@@ -99,7 +95,7 @@ const styles = ScaledSheet.create({
   contactUs: {
     justifyContent: "center",
     marginBottom: "15@s",
-    width: "100%",
+    width: "90%",
   },
 });
 

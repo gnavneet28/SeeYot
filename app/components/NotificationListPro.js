@@ -57,16 +57,18 @@ class NotificationListPro extends React.Component {
     };
   }
 
-  _rowRenderer(type, data) {
+  _rowRenderer(type, data, index) {
     switch (type) {
       case ViewTypes.Full:
         return (
           <NotificationCard
-            tapToSeeMessage={() => this.props.onTapToSeeMessage(data)}
-            onTapToSeePress={() => this.props.onTapToSeePress(data)}
+            isConnected={this.props.isConnected}
+            index={index}
+            tapToSeeMessage={this.props.onTapToSeeMessage}
+            onTapToSeePress={this.props.onTapToSeePress}
             notification={data}
-            onDeleteIconPress={() => this.props.onDeleteIconPress(data)}
-            tapToSendMessage={() => this.props.onTapToSendMessage(data)}
+            tapToSendMessage={this.props.onTapToSendMessage}
+            tapToSeeMatchedThought={this.props.onTapToSeeMatchedThought}
           />
         );
       default:

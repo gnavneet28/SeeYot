@@ -70,7 +70,7 @@ function ChatBubble({
         <Text style={styles.createdAt}>
           {dayjs(thought.createdAt).fromNow()}
         </Text>
-        <View
+        {/* <View
           style={[
             styles.arrow_container,
             !mine ? styles.arrow_left_container : styles.arrow_right_container,
@@ -98,7 +98,7 @@ function ChatBubble({
               y="0"
             />
           </Svg>
-        </View>
+        </View> */}
       </View>
     </TouchableOpacity>
   );

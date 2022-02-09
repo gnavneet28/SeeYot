@@ -16,13 +16,10 @@ import debounce from "../utilities/debounce";
 import storeDetails from "../utilities/storeDetails";
 import ApiContext from "../utilities/apiContext";
 
-import useConnection from "../hooks/useConnection";
-
 import defaultStyles from "../config/styles";
 
-function AddContactCard({ contact, onInvitePress, style }) {
+function AddContactCard({ contact, onInvitePress, style, isConnected }) {
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
-  const isConnected = useConnection();
   const { user, setUser } = useAuth();
   const [processing, setProcessing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
@@ -77,7 +74,7 @@ function AddContactCard({ contact, onInvitePress, style }) {
         <LottieView
           autoPlay
           loop={false}
-          source={require("../assets/animations/noresults.json")}
+          source={"noresults.json"}
           style={{ flex: 1 }}
         />
       </View>
@@ -106,13 +103,20 @@ function AddContactCard({ contact, onInvitePress, style }) {
               disabled={
                 inContacts || apiProcessing || !isConnected ? true : false
               }
-              style={styles.addButton}
+              style={[
+                styles.addButton,
+                {
+                  backgroundColor: inContacts
+                    ? defaultStyles.colors.light
+                    : defaultStyles.colors.yellow_Variant,
+                },
+              ]}
               subStyle={[
                 styles.addButtonSub,
                 {
                   color: inContacts
                     ? defaultStyles.colors.dark_Variant
-                    : defaultStyles.colors.green,
+                    : defaultStyles.colors.secondary,
                 },
               ]}
               onPress={handleAddPress}

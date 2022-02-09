@@ -9,7 +9,7 @@ import defaultStyles from "../config/styles";
 
 function ProfileOption({
   icon = "",
-  iconColor = defaultStyles.colors.yellow_Variant,
+  iconColor = defaultStyles.colors.tomato,
   onPress,
   style,
   title = "",
@@ -43,6 +43,7 @@ const styles = ScaledSheet.create({
   },
   title: {
     flex: 1,
+    fontSize: "14.5@s",
     marginLeft: "8@s",
     opacity: 0.8,
   },

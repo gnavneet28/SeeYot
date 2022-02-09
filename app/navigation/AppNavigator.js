@@ -120,7 +120,7 @@ function AppNavigator(props) {
     }
 
     navigation.navigate(Constant.INDEX_NAVIGATOR, {
-      screen: Constant.HOME_SCREEN,
+      screen: Constant.HOME_NAVIGATOR,
     });
   });
 

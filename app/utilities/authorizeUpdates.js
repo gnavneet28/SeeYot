@@ -3,6 +3,29 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import asyncStorage from "./cache";
 import DataConstants from "./DataConstants";
 
+const authorizNotificationsUpdate = async () => {
+  let currentDate = Date.now();
+  dayjs.extend(relativeTime);
+
+  const TIME_LIMIT = 1;
+
+  let notificationsUpdate = await asyncStorage.get(
+    DataConstants.NOTIFICATIONS_UPDATE
+  );
+
+  if (!notificationsUpdate) {
+    await asyncStorage.store(DataConstants.NOTIFICATIONS_UPDATE, []);
+    return true;
+  }
+
+  if (
+    notificationsUpdate.filter(
+      (c) => dayjs(currentDate).diff(c, "hours") < TIME_LIMIT
+    ).length
+  )
+    return false;
+  return true;
+};
 const authorizeExpiredUpdate = async () => {
   let currentDate = Date.now();
   dayjs.extend(relativeTime);
@@ -29,7 +52,7 @@ const authorizePhoneContactsUpdate = async () => {
   let currentDate = Date.now();
   dayjs.extend(relativeTime);
 
-  const TIME_LIMIT = 24;
+  const TIME_LIMIT = 12;
 
   let phoneContactsUpdate = await asyncStorage.get(
     DataConstants.PHONE_CONTACTS_UPDATE
@@ -60,6 +83,15 @@ const updateExpiredUpdate = async () => {
     newExpiredUpdate
   );
 };
+const updateNotificationsUpdate = async () => {
+  let newNotificationsUpdate = [];
+  newNotificationsUpdate.push(new Date());
+
+  return await asyncStorage.store(
+    DataConstants.NOTIFICATIONS_UPDATE,
+    newNotificationsUpdate
+  );
+};
 
 const updatePhoneContactsUpdate = async () => {
   let newPhoneContactsUpdate = [];
@@ -74,6 +106,8 @@ const updatePhoneContactsUpdate = async () => {
 export default {
   authorizeExpiredUpdate,
   authorizePhoneContactsUpdate,
+  authorizNotificationsUpdate,
   updateExpiredUpdate,
+  updateNotificationsUpdate,
   updatePhoneContactsUpdate,
 };

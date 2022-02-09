@@ -1,16 +1,17 @@
-import React from "react";
+import React, { memo } from "react";
 import { View, Modal } from "react-native";
 import LottieView from "lottie-react-native";
 import { ScaledSheet } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppText from "./AppText";
+import EchoMessage from "./EchoMessage";
 
 import defaultStyles from "../config/styles";
 
-const sendingThought = require("../assets/animations/sendingThought.json");
-const messageSent = require("../assets/animations/messagesent.json");
-const failed = require("../assets/animations/failed.json");
+const sendingThought = "sendingThought.json";
+const messageSent = "messagesent.json";
+const failed = "failed.json";
 
 function SendingThoughtActivity({
   echoMessage,
@@ -34,7 +35,7 @@ function SendingThoughtActivity({
             {processing ? (
               <LottieView
                 autoPlay
-                loop={false}
+                loop
                 source={sendingThought}
                 style={{ flex: 1 }}
               />
@@ -57,7 +58,10 @@ function SendingThoughtActivity({
           </View>
           <AppText style={styles.message}>{message}</AppText>
           {echoMessage ? (
-            <AppText style={styles.echoMessage}>{echoMessage.message}</AppText>
+            <EchoMessage
+              echoMessage={echoMessage.message}
+              style={styles.echoMessageContainer}
+            />
           ) : null}
           {!processing ? (
             <AppButton
@@ -88,7 +92,7 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
     borderRadius: "20@s",
-    borderWidth: "2@s",
+    borderWidth: 1,
     justifyContent: "center",
     overflow: "hidden",
     padding: "5@s",
@@ -101,17 +105,13 @@ const styles = ScaledSheet.create({
     marginVertical: "5@s",
     width: "50@s",
   },
-  echoMessage: {
-    backgroundColor: defaultStyles.colors.dark_Variant,
+  echoMessageContainer: {
+    backgroundColor: defaultStyles.colors.light,
+    borderColor: defaultStyles.colors.lightGrey,
     borderRadius: "10@s",
-    color: defaultStyles.colors.white,
-    fontSize: "13@s",
-    marginBottom: "5@s",
-    marginHorizontal: "5@s",
+    borderWidth: 1,
     paddingHorizontal: "10@s",
-    paddingVertical: "5@s",
-    textAlign: "center",
-    textAlignVertical: "center",
+    width: "90%",
   },
   loaderContainer: {
     alignItems: "center",
@@ -131,4 +131,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default SendingThoughtActivity;
+export default memo(SendingThoughtActivity);

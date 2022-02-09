@@ -69,6 +69,7 @@ class AddContactList extends React.Component {
       );
       return this.setState({
         ...this.state,
+        searchTerm: "",
         dataProvider: newData.getSize()
           ? newData
           : this.state.dataProvider.cloneWithRows(defaultListItemWhenEmpty),
@@ -106,6 +107,7 @@ class AddContactList extends React.Component {
       case ViewTypes.Full:
         return (
           <AddContactCard
+            isConnected={this.props.isConnected}
             contact={data}
             onInvitePress={() => this.props.onInvitePress(data)}
           />

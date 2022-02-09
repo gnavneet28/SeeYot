@@ -37,7 +37,7 @@ function LocalThoughtsList({
     <View style={[styles.container]}>
       <FlatList
         ListEmptyComponent={ListEmptyComponent}
-        keyboardShouldPersistTaps="always"
+        keyboardShouldPersistTaps="handled"
         data={[...thoughts].reverse()}
         keyExtractor={keyExtractor}
         renderItem={renderItem}

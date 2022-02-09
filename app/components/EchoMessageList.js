@@ -18,8 +18,8 @@ function EchoMessageList({ echoMessages = [], onEchoMessagePress, style }) {
 
   const getItemLayout = useCallback(
     (data, index) => ({
-      length: scale(80),
-      offset: scale(80) * index,
+      length: scale(60),
+      offset: scale(60) * index,
       index,
     }),
     []
@@ -33,19 +33,22 @@ function EchoMessageList({ echoMessages = [], onEchoMessagePress, style }) {
     <View style={[styles.container, style]}>
       <FlatList
         data={getData()}
-        horizontal={true}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
-        showsHorizontalScrollIndicator={false}
         removeClippedSubviews={true}
         getItemLayout={getItemLayout}
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={15}
+        windowSize={10}
       />
     </View>
   );
 }
 const styles = ScaledSheet.create({
   container: {
-    height: "80@s",
+    flex: 1,
+    marginBottom: "5@s",
     justifyContent: "center",
   },
 });

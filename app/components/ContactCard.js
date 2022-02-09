@@ -2,9 +2,11 @@ import React, { useCallback, memo, useContext } from "react";
 import { View, TouchableOpacity } from "react-native";
 import Feather from "../../node_modules/react-native-vector-icons/Feather";
 import { ScaledSheet, scale } from "react-native-size-matters";
+import { SharedElement } from "react-navigation-shared-element";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
+import EchoIcon from "./EchoIcon";
 
 import ActiveForContext from "../utilities/activeForContext";
 
@@ -34,12 +36,14 @@ function ContactCard({
 
   return (
     <View style={[styles.container, style]}>
-      <AppImage
-        imageUrl={user.picture}
-        onPress={onImagePress}
-        style={styles.image}
-        subStyle={styles.imageSub}
-      />
+      <SharedElement id={user._id}>
+        <AppImage
+          imageUrl={user.picture}
+          onPress={onImagePress}
+          style={styles.image}
+          subStyle={styles.imageSub}
+        />
+      </SharedElement>
       <View style={styles.userDetailsContainer}>
         <AppText numberOfLines={1} style={[styles.infoNameText]}>
           {user.name ? user.name : user.phoneNumber}
@@ -51,18 +55,12 @@ function ContactCard({
             : "Nickname not available."}
         </AppText>
       </View>
-      <TouchableOpacity
-        onPress={onAddEchoButtonPress}
-        style={[styles.contactsActionConatiner, styles.addEchoIconContainer]}
-      >
-        <Feather
+      <SharedElement id={`echoIcon${user._id}`}>
+        <EchoIcon
+          containerStyle={styles.addEchoIconContainer}
           onPress={onAddEchoButtonPress}
-          color={defaultStyles.colors.primary}
-          name="plus"
-          size={scale(16)}
-          style={styles.actionIcon}
         />
-      </TouchableOpacity>
+      </SharedElement>
       <TouchableOpacity
         onPress={onSendThoughtPress}
         style={[
@@ -70,7 +68,7 @@ function ContactCard({
           {
             backgroundColor: !isRecipientActive
               ? defaultStyles.colors.yellow_Variant
-              : "green",
+              : defaultStyles.colors.green,
           },
         ]}
       >
@@ -94,8 +92,7 @@ const styles = ScaledSheet.create({
     opacity: 0.8,
   },
   addEchoIconContainer: {
-    backgroundColor: defaultStyles.colors.light,
-    borderColor: defaultStyles.colors.lightGrey,
+    backgroundColor: defaultStyles.colors.secondary,
     marginRight: "15@s",
   },
   container: {
@@ -111,12 +108,12 @@ const styles = ScaledSheet.create({
   contactsActionConatiner: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderColor: defaultStyles.colors.yellow,
-    borderRadius: "10@s",
-    borderWidth: 1,
+    borderRadius: "8@s",
+    elevation: 1,
     height: "32@s",
     justifyContent: "center",
     marginRight: "8@s",
+    overflow: "hidden",
     width: "32@s",
   },
   emptyContacts: {
@@ -124,18 +121,17 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   image: {
-    borderRadius: "22.5@s",
+    borderRadius: "21@s",
     elevation: 1,
     height: "42@s",
     marginRight: "2@s",
     marginLeft: "5@s",
     width: "42@s",
-    elevation: 1,
   },
   imageSub: {
-    borderRadius: "22@s",
-    height: "41@s",
-    width: "41@s",
+    borderRadius: "21@s",
+    height: "42@s",
+    width: "42@s",
   },
   infoNameText: {
     color: defaultStyles.colors.dark,

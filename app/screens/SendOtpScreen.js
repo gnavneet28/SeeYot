@@ -4,6 +4,7 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 import FontAwesome5 from "../../node_modules/react-native-vector-icons/FontAwesome5";
 import OtpAutocomplete from "react-native-otp-autocomplete";
+import Bugsnag from "@bugsnag/react-native";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
@@ -42,10 +43,15 @@ function SendOtpScreen({ navigation }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+  const [appHash, setAppHash] = useState("");
 
-  // useEffect( () => {
-
-  // })
+  useEffect(() => {
+    if (mounted) {
+      OtpAutocomplete.getHash()
+        .then((hash) => setAppHash(hash))
+        .catch((err) => Bugsnag.notify(err));
+    }
+  }, [mounted]);
 
   // TODO: google verification
 
@@ -99,7 +105,8 @@ function SendOtpScreen({ navigation }) {
 
     const phoneNumber = `+91${number}`;
     const { ok, data, problem } = await verifyApi.sendVerificationCode(
-      phoneNumber
+      phoneNumber,
+      appHash
     );
 
     if (ok) {

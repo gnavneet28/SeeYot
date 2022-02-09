@@ -113,7 +113,7 @@ function RegisterDetailsScreen({ route }) {
         onPress={handleSubmitForm}
         style={[styles.button, { display: keyboardShown ? "none" : "flex" }]}
         subStyle={styles.submitButtonSub}
-        title="Register"
+        title="Next"
       />
     </Screen>
   );

@@ -22,6 +22,7 @@ import debounce from "../utilities/debounce";
 import defaultProps from "../utilities/defaultProps";
 import ApiContext from "../utilities/apiContext";
 import apiActivity from "../utilities/apiActivity";
+import authorizeUpdates from "../utilities/authorizeUpdates";
 
 import defaultStyles from "../config/styles";
 
@@ -31,6 +32,7 @@ import useConnection from "../hooks/useConnection";
 import myApi from "../api/my";
 
 import useAuth from "../auth/useAuth";
+import ScreenSub from "../components/ScreenSub";
 
 function NotificationScreen({ navigation }) {
   const { user, setUser } = useAuth();
@@ -122,7 +124,7 @@ function NotificationScreen({ navigation }) {
     ) {
       updateNotifications();
     }
-  }, [isFocused, user]);
+  }, [isFocused, user.notifications.length]);
 
   // HEADER ACTION
   const handleBack = useCallback(
@@ -151,8 +153,8 @@ function NotificationScreen({ navigation }) {
 
     const { ok, data, problem } = await myApi.deleteAllNotifications();
     if (ok) {
-      await storeDetails(data.user);
       setUser(data.user);
+      await storeDetails(data.user);
       setShowClearAllModal(false);
       return setClearNotification(false);
     }
@@ -168,21 +170,38 @@ function NotificationScreen({ navigation }) {
   };
 
   const handleTapToSeeThought = useCallback((thought) => {
-    setThought(thought.message);
+    setThought(thought.data.message);
     setVisible(true);
   }, []);
 
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
+  const handleTapToSeeMatchedThought = useCallback((notification) => {
+    return navigation.navigate(Constant.SEND_THOUGHT_SCREEN, {
+      recipient: notification.createdBy,
+      from: "",
+    });
+  }, []);
 
-    const { ok, data, problem } = await myApi.setNotificationSeen();
-    setRefreshing(false);
-    if (ok) {
-      await storeDetails(data.user);
-      return setUser(data.user);
-    }
-    tackleProblem(problem, data, setInfoAlert);
-  }, [user]);
+  const handleRefresh = useCallback(
+    debounce(
+      async () => {
+        setRefreshing(true);
+        const canUpdate = await authorizeUpdates.authorizNotificationsUpdate();
+        if (!canUpdate) return setRefreshing(false);
+
+        const { ok, data, problem } = await myApi.setNotificationSeen();
+        setRefreshing(false);
+        if (ok) {
+          await authorizeUpdates.updateNotificationsUpdate();
+          await storeDetails(data.user);
+          return setUser(data.user);
+        }
+        tackleProblem(problem, data, setInfoAlert);
+      },
+      5000,
+      true
+    ),
+    [user]
+  );
 
   // VIP CARD ACTION
   const handleVipCardPress = useCallback(() => {
@@ -208,29 +227,33 @@ function NotificationScreen({ navigation }) {
           rightIcon="more-vert"
           title="Notifications"
         />
-        <SeeThought
-          visible={visible}
-          setVisible={setVisible}
-          message={thought}
-        />
-        <InfoAlert
-          leftPress={handleCloseInfoAlert}
-          description={infoAlert.infoAlertMessage}
-          visible={infoAlert.showInfoAlert}
-        />
-        {user.vip.subscription || (
-          <VipAdCard onPress={handleVipCardPress} style={styles.adCard} />
-        )}
-        <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
-          <NotificationListPro
-            onTapToSendMessage={handleSendMessage}
-            onTapToSeeMessage={handleOpenModal}
-            onTapToSeePress={handleTapToSeeThought}
-            notifications={data}
-            onRefresh={handleRefresh}
-            refreshing={refreshing}
+        <ScreenSub>
+          <SeeThought
+            visible={visible}
+            setVisible={setVisible}
+            message={thought}
           />
-        </ApiContext.Provider>
+          <InfoAlert
+            leftPress={handleCloseInfoAlert}
+            description={infoAlert.infoAlertMessage}
+            visible={infoAlert.showInfoAlert}
+          />
+          {user.vip.subscription || (
+            <VipAdCard onPress={handleVipCardPress} style={styles.adCard} />
+          )}
+          <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
+            <NotificationListPro
+              isConnected={isConnected}
+              onTapToSendMessage={handleSendMessage}
+              onTapToSeeMessage={handleOpenModal}
+              onTapToSeePress={handleTapToSeeThought}
+              onTapToSeeMatchedThought={handleTapToSeeMatchedThought}
+              notifications={data}
+              onRefresh={handleRefresh}
+              refreshing={refreshing}
+            />
+          </ApiContext.Provider>
+        </ScreenSub>
       </Screen>
       {message.isVisible ? <View style={styles.modalFallback} /> : null}
       <ReplyModal message={message} handleCloseModal={handleCloseModal} />

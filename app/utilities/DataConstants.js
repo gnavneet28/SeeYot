@@ -13,6 +13,7 @@ export default DataConstants = {
   LOCAL_SAVED_THOUGHTS: "localSavedThoughts",
   MESSAGES_UPDATE: "messagesUpdate",
   MESSAGES: "userMessages",
+  NOTIFICATIONS_UPDATE: "notificationUpdate",
   NOTIFICATIONS: "userNotifications",
   PHONE_CONTACTS_UPDATE: "phoneContactsUpdate",
   PHONE_CONTACTS: "userPhoneContacts",

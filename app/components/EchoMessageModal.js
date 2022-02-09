@@ -14,6 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import AppText from "./AppText";
+import EchoMessage from "./EchoMessage";
 
 import defaultStyles from "../config/styles";
 import defaultProps from "../utilities/defaultProps";
@@ -106,9 +107,7 @@ function EchoMessageModal({
             </PinchGestureHandler>
           </GestureHandlerRootView>
           {state.echoMessage ? (
-            <AppText style={styles.echoMessage}>
-              {state.echoMessage.message}
-            </AppText>
+            <EchoMessage echoMessage={state.echoMessage.message} />
           ) : null}
         </View>
       </ImageBackground>
@@ -128,13 +127,6 @@ const styles = ScaledSheet.create({
     elevation: 5,
     overflow: "hidden",
     width: width < height ? width - GAP : height - GAP,
-  },
-  echoMessage: {
-    alignSelf: "center",
-    marginVertical: "10@s",
-    textAlign: "center",
-    textAlignVertical: "center",
-    width: "95%",
   },
   inlargedImage: {
     height: width < height ? width - GAP : height - GAP,

@@ -17,12 +17,14 @@ function SuccessMessage({ message = "This is a success message." }) {
 }
 const styles = ScaledSheet.create({
   container: {
+    paddingTop: Constants.statusBarHeight,
     alignItems: "center",
     backgroundColor: defaultStyles.colors.green,
+    borderBottomLeftRadius: "20@s",
+    borderBottomRightRadius: "20@s",
     elevation: Platform.OS === "android" ? 1 : 0,
     justifyContent: "center",
     paddingHorizontal: "10@s",
-    paddingTop: Constants.statusBarHeight,
     paddingVertical: "5@s",
     position: "absolute",
     top: 0,
@@ -33,7 +35,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.green,
     justifyContent: "center",
-    minHeight: "50@s",
+    height: "35@s",
     width: "100%",
   },
   message: {

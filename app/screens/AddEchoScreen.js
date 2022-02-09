@@ -5,21 +5,21 @@ import React, {
   useMemo,
   useContext,
 } from "react";
-import { View, Modal, ScrollView, Keyboard } from "react-native";
+import { View, Keyboard } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import { ScaledSheet } from "react-native-size-matters";
 
-import ApiOption from "../components/ApiOption";
 import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppActivityIndicator from "../components/ActivityIndicator";
 import AppButton from "../components/AppButton";
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
 import AppTextInput from "../components/AppTextInput";
+import EchoIcon from "../components/EchoIcon";
 import EchoMessageList from "../components/EchoMessageList";
+import EchoScreenOptions from "../components/EchoScreenOptions";
 import HelpDialogueBox from "../components/HelpDialogueBox";
 import InfoAlert from "../components/InfoAlert";
-import Option from "../components/Option";
 import Screen from "../components/Screen";
 
 import useMountedRef from "../hooks/useMountedRef";
@@ -36,6 +36,8 @@ import echosApi from "../api/echos";
 import usersApi from "../api/users";
 
 import defaultStyles from "../config/styles";
+import defaultProps from "../utilities/defaultProps";
+import ScreenSub from "../components/ScreenSub";
 
 function AddEchoScreen({ navigation, route }) {
   const { recipient, from } = route.params;
@@ -51,9 +53,11 @@ function AddEchoScreen({ navigation, route }) {
   const [removingEcho, setRemovingEcho] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [initialMessage, setInitialMessage] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState("".trim());
   const [isVisible, setIsVisible] = useState(false);
-  const [echoMessageOption, setEchoMessageOption] = useState(null);
+  const [echoMessageOption, setEchoMessageOption] = useState(
+    defaultProps.defaultEchoMessageOption
+  );
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
@@ -129,7 +133,7 @@ function AddEchoScreen({ navigation, route }) {
 
         const { ok, data, problem } = await usersApi.updateEcho(
           recipient._id,
-          message
+          message.trim()
         );
         if (ok) {
           Keyboard.dismiss();
@@ -167,10 +171,8 @@ function AddEchoScreen({ navigation, route }) {
   }, []);
 
   // ECHO_MESSAGE MODAL ACTIONS
-  const handleModalClose = useCallback(() => setIsVisible(false), []);
-
   const handleCloseModal = useCallback(() => {
-    setEchoMessageOption(null);
+    setEchoMessageOption(defaultProps.defaultEchoMessageOption);
     setIsVisible(false);
   }, []);
 
@@ -193,12 +195,12 @@ function AddEchoScreen({ navigation, route }) {
           setUser(data.user);
           setRemovingEcho(false);
           setIsVisible(false);
-          return setEchoMessageOption(null);
+          return setEchoMessageOption(defaultProps.defaultEchoMessageOption);
         }
 
         setRemovingEcho(false);
         setIsVisible(false);
-        setEchoMessageOption(null);
+        setEchoMessageOption(defaultProps.defaultEchoMessageOption);
         tackleProblem(problem, data, setInfoAlert);
       },
       1000,
@@ -211,53 +213,39 @@ function AddEchoScreen({ navigation, route }) {
     <>
       <Screen style={styles.container}>
         <AppHeader
-          title="Add Echo"
+          title="Echo"
           leftIcon="arrow-back"
           onPressLeft={handleBack}
           rightIcon="help-outline"
           onPressRight={handleHelpPress}
         />
-        <HelpDialogueBox
-          information="Echo messages are flash messages and will only be displayed when a person interacts with you by either tapping on your profile picture or by sending you thoughts. You can set the type of interaction from your profile."
-          onPress={handleCloseHelp}
-          setVisible={setShowHelp}
-          visible={showHelp}
-        />
-        <InfoAlert
-          leftPress={handleCloseInfoAlert}
-          description={infoAlert.infoAlertMessage}
-          visible={infoAlert.showInfoAlert}
-        />
-        <ScrollView
-          keyboardShouldPersistTaps="always"
-          contentContainerStyle={{ flex: 1 }}
-        >
-          <View
-            style={{
-              flexGrow: 1,
-              alignItems: "center",
-            }}
-          >
+        <ScreenSub>
+          <HelpDialogueBox
+            information="Echo messages are flash messages and will only be displayed when a person interacts with you by either tapping on your profile picture or by sending you thoughts. You can set the type of interaction from your profile."
+            onPress={handleCloseHelp}
+            setVisible={setShowHelp}
+            visible={showHelp}
+          />
+          <InfoAlert
+            leftPress={handleCloseInfoAlert}
+            description={infoAlert.infoAlertMessage}
+            visible={infoAlert.showInfoAlert}
+          />
+          <View style={styles.mainContainer}>
             {!isReady ? (
               <AppActivityIndicator />
             ) : (
               <>
-                <View style={styles.echoMessageListContainer}>
-                  <AppText style={styles.allEchoMessagesText}>
-                    All Echo Messages
-                  </AppText>
-                  {data.length ? (
-                    <EchoMessageList
-                      onEchoMessagePress={handleOnEchoMessagePress}
-                      echoMessages={data}
-                    />
-                  ) : null}
-                </View>
+                <AppText style={styles.heading}>Create Echo</AppText>
                 <View style={styles.inputBoxContainer}>
-                  <AppText style={styles.saveEchoInfo}>
-                    What would you like to say when {recipient.name} taps on
-                    your Display Picture or sends you thoughts.
-                  </AppText>
+                  <View style={styles.echoInfoContainer}>
+                    <EchoIcon forInfo={true} style={styles.echoIcon} />
+
+                    <AppText style={styles.saveEchoInfo}>
+                      What would you like to say when {recipient.name} taps on
+                      your Display Picture or sends you thoughts.
+                    </AppText>
+                  </View>
                   <AppTextInput
                     editable={!savingEcho}
                     maxLength={100}
@@ -269,11 +257,10 @@ function AddEchoScreen({ navigation, route }) {
                     subStyle={styles.textInputSub}
                     value={message}
                   />
-                  <AppText style={{ textAlign: "right", fontSize: scale(10) }}>
+                  <AppText style={styles.echoMessageLength}>
                     {message.length}/100
                   </AppText>
                 </View>
-
                 <ApiProcessingContainer
                   style={styles.apiProcessingContainer}
                   processing={savingEcho}
@@ -292,33 +279,31 @@ function AddEchoScreen({ navigation, route }) {
                     title="Save"
                   />
                 </ApiProcessingContainer>
+                <View style={styles.echoMessageListContainer}>
+                  <AppText style={styles.allEchoMessagesText}>
+                    All Echo Messages
+                  </AppText>
+                  {data.length ? (
+                    <EchoMessageList
+                      onEchoMessagePress={handleOnEchoMessagePress}
+                      echoMessages={data}
+                    />
+                  ) : null}
+                </View>
               </>
             )}
           </View>
-        </ScrollView>
+        </ScreenSub>
       </Screen>
-      <Modal
-        onRequestClose={handleModalClose}
-        transparent={true}
-        visible={isVisible}
-      >
-        <View style={styles.echoOptionMainContainer}>
-          <View style={styles.optionsContainer}>
-            <Option
-              title="Close"
-              titleStyle={styles.optionClose}
-              onPress={handleCloseModal}
-            />
-
-            <ApiOption
-              title="Delete"
-              onPress={handleDeleteEchoPress}
-              processing={removingEcho}
-            />
-            <Option title="Use this echo" onPress={handleUseThisEchoPress} />
-          </View>
-        </View>
-      </Modal>
+      <EchoScreenOptions
+        echoMessageOption={echoMessageOption}
+        handleCloseModal={handleCloseModal}
+        handleDeleteEchoPress={handleDeleteEchoPress}
+        handleUseThisEchoPress={handleUseThisEchoPress}
+        isVisible={isVisible}
+        recipient={recipient}
+        removingEcho={removingEcho}
+      />
     </>
   );
 }
@@ -330,7 +315,8 @@ const styles = ScaledSheet.create({
     fontSize: "14@s",
     marginVertical: "5@s",
     paddingHorizontal: "10@s",
-    textAlign: "center",
+    textAlign: "left",
+    width: "100%",
   },
   apiProcessingContainer: {
     height: "38@s",
@@ -347,27 +333,36 @@ const styles = ScaledSheet.create({
     width: "90%",
   },
   container: {
-    backgroundColor: defaultStyles.colors.white,
+    // backgroundColor: defaultStyles.colors.white,
+  },
+  echoIcon: {
+    borderRadius: "5@s",
+    width: "30@s",
+  },
+  echoInfoContainer: {
+    flexDirection: "row",
   },
   echoMessageListContainer: {
+    flex: 1,
     marginTop: "2@s",
-    marginBottom: "15@s",
     paddingLeft: "5@s",
     width: "100%",
   },
-  echoOptionMainContainer: {
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.8)",
-    flex: 1,
-    justifyContent: "center",
-    width: "100%",
+  echoMessageLength: {
+    textAlign: "right",
+    fontSize: "10@s",
+  },
+  heading: {
+    fontSize: "15@s",
+    marginTop: "10@s",
+    textAlign: "center",
   },
   inputBoxContainer: {
     backgroundColor: defaultStyles.colors.white,
+    borderBottomWidth: 1,
     borderColor: defaultStyles.colors.light,
-    borderRadius: "5@s",
-    borderWidth: 1,
-    marginBottom: "5@s",
+    borderRadius: "8@s",
+    marginBottom: "20@s",
     marginTop: "10@s",
     overflow: "hidden",
     width: "90%",
@@ -377,27 +372,21 @@ const styles = ScaledSheet.create({
     height: "70@s",
     marginBottom: "5@s",
     paddingHorizontal: "5@s",
+    paddingTop: "10@s",
     width: "100%",
   },
-  optionsContainer: {
+  mainContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: "20@s",
-    borderWidth: 1,
-    overflow: "hidden",
-    width: "60%",
-  },
-  optionClose: {
-    backgroundColor: defaultStyles.colors.dark_Variant,
-    color: defaultStyles.colors.white,
-    opacity: 1,
+    flexGrow: 1,
   },
   saveEchoInfo: {
     backgroundColor: defaultStyles.colors.light,
+    borderRadius: "8@s",
     color: defaultStyles.colors.secondary,
-    fontSize: "10@s",
+    flexShrink: 1,
+    fontSize: "11.5@s",
     letterSpacing: "0.3@s",
+    marginLeft: "5@s",
     paddingHorizontal: "10@s",
     width: "100%",
   },

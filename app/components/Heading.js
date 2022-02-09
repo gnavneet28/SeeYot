@@ -11,7 +11,7 @@ function Heading({ iconName, title, onPress, style }) {
   return (
     <View style={[styles.container, style]}>
       <Icon
-        color={defaultStyles.colors.tomato}
+        color={defaultStyles.colors.secondary}
         name={iconName}
         onPress={onPress}
         size={scale(22)}

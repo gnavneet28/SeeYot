@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   container: {
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: defaultStyles.colors.primary,
     flex: 1,
     width: "100%",
   },

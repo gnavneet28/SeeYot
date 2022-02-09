@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, View, Platform } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import Bugsnag from "@bugsnag/react-native";
 
 import AppButton from "../components/AppButton";
 import AppHeader from "../components/AppHeader";
@@ -19,6 +20,7 @@ import defaultProps from "../utilities/defaultProps";
 import debounce from "../utilities/debounce";
 
 import * as IAP from "expo-in-app-purchases";
+import ScreenSub from "../components/ScreenSub";
 
 const items = Platform.select({
   ios: [],
@@ -58,14 +60,14 @@ function SubscriptionScreen({ navigation, route }) {
   useEffect(() => {
     IAP.connectAsync()
       .catch((err) => {
-        console.log("Error connecting", err);
+        Bugsnag.notify(err);
       })
       .then(() => {
         IAP.getProductsAsync(items).then(({ responseCode, results }) =>
           console.log(results)
         );
       })
-      .catch((err) => console.log("Error getting products", err));
+      .catch((err) => Bugsnag.notify(err));
   }, []);
 
   const handlePayment = async (id) => {
@@ -79,64 +81,61 @@ function SubscriptionScreen({ navigation, route }) {
         onPressLeft={hanldeHeaderLeftPress}
         title="Subscription"
       />
-      <VipAdCard style={styles.vipAdCard} />
-      <AppText
-        onPress={handleManageSubscriptionPress}
-        style={styles.manageSubscription}
-      >
-        Current Subscriptions
-      </AppText>
-      <ScrollView keyboardShouldPersistTaps="always">
-        <View style={styles.scrollView}>
-          <DescriptionItem
-            description="You can only be blocked by other vip members."
-            name="block-helper"
-          />
-          <DescriptionItem
-            description="You can search people outside your contacts."
-            name="account-search"
-          />
-          <DescriptionItem
-            description="You can send your thoughts to anyone outside your contacts."
-            name="thought-bubble"
-          />
-          <DescriptionItem
-            description="You can see the actual thoughts sent by anyone, without your thoughts being matched."
-            name="lock-open"
-          />
-          <DescriptionItem
-            description="You will be notified when someone add you to his/her Fovorite People list.(Does not include the name of the person who added you.)"
-            name="bell-circle"
-          />
-
-          <DescriptionItem
-            description="Get insights on the number of people who tapped on your Display Picture, sent you Thoughts and Messages."
-            name="information-outline"
-          />
-          <AppText style={styles.selectPlanText}>Select a Plan</AppText>
-          <ScrollView
-            keyboardShouldPersistTaps="always"
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          >
-            {plans.map((p) => (
-              <PlanCard
-                key={p._id}
-                _id={p._id}
-                planName={p.planName}
-                planDuration={p.planDuration}
-                planRate={p.planRate}
-                onProcess={handlePayment}
-              />
-            ))}
-          </ScrollView>
-          <AppButton
-            onPress={handleCollectButtonPress}
-            style={styles.collectPoints}
-            title="Or Collect Points"
-          />
-        </View>
-      </ScrollView>
+      <ScreenSub>
+        <VipAdCard style={styles.vipAdCard} />
+        <AppText
+          onPress={handleManageSubscriptionPress}
+          style={styles.manageSubscription}
+        >
+          Current Subscriptions
+        </AppText>
+        <ScrollView keyboardShouldPersistTaps="handled">
+          <View style={styles.scrollView}>
+            <DescriptionItem
+              description="You can only be blocked by other vip members."
+              name="block-helper"
+            />
+            <DescriptionItem
+              description="You can search people outside your contacts."
+              name="account-search"
+            />
+            <DescriptionItem
+              description="You can send your thoughts to anyone outside your contacts."
+              name="thought-bubble"
+            />
+            <DescriptionItem
+              description="You can see the actual thoughts sent by anyone, without your thoughts being matched."
+              name="lock-open"
+            />
+            <DescriptionItem
+              description="Get insights on the number of people who tapped on your Display Picture, sent you Thoughts and Messages."
+              name="information-outline"
+            />
+            <AppText style={styles.selectPlanText}>Select a Plan</AppText>
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              horizontal
+              showsHorizontalScrollIndicator={false}
+            >
+              {plans.map((p) => (
+                <PlanCard
+                  key={p._id}
+                  _id={p._id}
+                  planName={p.planName}
+                  planDuration={p.planDuration}
+                  planRate={p.planRate}
+                  onProcess={handlePayment}
+                />
+              ))}
+            </ScrollView>
+            <AppButton
+              onPress={handleCollectButtonPress}
+              style={styles.collectPoints}
+              title="Or Collect Points"
+            />
+          </View>
+        </ScrollView>
+      </ScreenSub>
     </Screen>
   );
 }

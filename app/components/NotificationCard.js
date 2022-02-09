@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useContext,
+  useMemo,
 } from "react";
 import { View, Text, TouchableHighlight } from "react-native";
 import dayjs from "dayjs";
@@ -38,13 +39,16 @@ function NotificationCard({
   notification = defaultNotification,
   tapToSeeMessage,
   tapToSendMessage,
+  tapToSeeMatchedThought,
+  onLongPress,
+  index,
+  isConnected,
 }) {
   dayjs.extend(relativeTime);
   let currentDate = new Date();
-  let customImage;
+  // let customImage;
 
   const { user, setUser } = useAuth();
-  const isConnected = useConnection();
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
   const { tackleProblem } = apiActivity;
 
@@ -60,17 +64,20 @@ function NotificationCard({
     return () => setProcessing(false);
   }, [notification._id]);
 
-  if (notification.type && notification.type == "Unmatched")
-    customImage = { uri: "logo" };
-  else if (notification.type && notification.type == "Vip")
-    customImage = { uri: "logo" };
-  else if (notification.type && notification.type == "Official")
-    customImage = { uri: "logo" };
-
   // INFO ALERT ACTIONS
   const handleCloseInfoAlert = useCallback(async () => {
     setInfoAlert({ showInfoAlert: false });
   }, []);
+
+  const imageUrl = useMemo(() => {
+    return notification.type == "Matched" ||
+      notification.type == "Replied" ||
+      notification.type == "ActiveChat"
+      ? notification.createdBy.picture
+        ? notification.createdBy.picture
+        : "user"
+      : "";
+  }, [notification.type, notification]);
 
   const handleDeletePress = useCallback(
     debounce(
@@ -109,50 +116,60 @@ function NotificationCard({
     );
 
   const doWhenTappedWithType = () => {
-    if (notification.type == "Vip") return onTapToSeePress;
+    if (notification.type == "Vip") return () => onTapToSeePress(notification);
 
     if (notification.type == "Replied") {
-      return tapToSeeMessage;
+      return () => tapToSeeMessage(notification);
     }
 
     if (notification.type == "ActiveChat") {
-      return tapToSendMessage;
+      return () => tapToSendMessage(notification);
     }
 
-    return null;
+    if (notification.type == "Matched") {
+      return () => tapToSeeMatchedThought(notification);
+    }
+
+    return () => null;
   };
 
   const opacity = () => {
-    if (notification.type == "Vip") return 0.9;
-
-    if (notification.type == "Replied") {
+    if (
+      notification.type == "Vip" ||
+      notification.type == "Replied" ||
+      notification.type == "ActiveChat" ||
+      notification.type == "Matched"
+    )
       return 0.9;
-    }
-
-    if (notification.type == "ActiveChat") {
-      return 0.9;
-    }
-
     return 0.7;
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor:
+            index % 2 === 0
+              ? defaultStyles.colors.light
+              : defaultStyles.colors.white,
+        },
+      ]}
+    >
       <AppImage
         activeOpacity={1}
         style={styles.image}
         subStyle={styles.imageSub}
-        imageUrl={
-          (notification.type && notification.type == "Matched") ||
-          (notification.type && notification.type == "Replied") ||
-          (notification.type && notification.type == "ActiveChat")
-            ? notification.createdBy.picture
-            : ""
-        }
-        customImage={customImage ? customImage : { uri: "logo.png" }}
+        imageUrl={imageUrl}
+        customImage={{ uri: "logo" }}
       />
       <TouchableHighlight
-        underlayColor={defaultStyles.colors.white}
+        onLongPress={onLongPress}
+        underlayColor={
+          index % 2 == 0
+            ? defaultStyles.colors.light
+            : defaultStyles.colors.white
+        }
         onPress={doWhenTappedWithType()}
         style={styles.notificationInfo}
       >
@@ -162,17 +179,22 @@ function NotificationCard({
             onPress={doWhenTappedWithType()}
             style={[styles.notificationMessage, { opacity: opacity() }]}
           >
-            {notification.type != "Vip"
-              ? notification.message
-              : "Someone is thinking of you! Tap to see the message."}
+            {notification.message}
           </Text>
           <Text style={styles.date}>
             {dayjs(notification.createdAt).fromNow()}
           </Text>
         </>
       </TouchableHighlight>
-      {dayjs(currentDate).diff(notification.createdAt, "minutes") < 2 ? null : (
+      {dayjs(currentDate).diff(notification.createdAt, "minutes") <
+      10 ? null : (
         <DeleteAction
+          style={{
+            backgroundColor:
+              index % 2 !== 0
+                ? defaultStyles.colors.light
+                : defaultStyles.colors.white,
+          }}
           apiAction={true}
           processing={processing}
           onPress={

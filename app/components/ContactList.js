@@ -126,6 +126,7 @@ const styles = ScaledSheet.create({
   },
   addButtonSub: {
     color: defaultStyles.colors.secondary,
+    fontSize: "15@s",
   },
   addFriendInfoContainer: {
     alignItems: "center",
@@ -134,7 +135,7 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   emptyContacts: {
-    fontSize: "15@s",
+    fontSize: "14@s",
     marginBottom: "20@s",
     textAlign: "center",
     width: "80%",

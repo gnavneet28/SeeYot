@@ -23,7 +23,7 @@ function AppTextInput({
           color={iconColor}
           name={iconName}
           size={iconSize}
-          style={{ marginHorizontal: scale(5) }}
+          style={styles.icon}
         />
       ) : null}
       <TextInput
@@ -32,16 +32,7 @@ function AppTextInput({
         multiline={multiline}
         numberOfLines={numberOfLines}
         placeholderTextColor="grey"
-        style={[
-          {
-            ...defaultStyles.text,
-            fontFamily: "ComicNeue-Bold",
-            fontSize: scale(15),
-            flex: 1,
-            fontWeight: "normal",
-          },
-          subStyle,
-        ]}
+        style={[styles.input, subStyle]}
       />
     </View>
   );
@@ -56,6 +47,14 @@ const styles = ScaledSheet.create({
     width: "100%",
     overflow: "hidden",
     padding: "5@s",
+  },
+  icon: { marginHorizontal: "5@s" },
+  input: {
+    ...defaultStyles.text,
+    fontFamily: "ComicNeue-Bold",
+    fontSize: "15@s",
+    flex: 1,
+    fontWeight: "normal",
   },
 });
 

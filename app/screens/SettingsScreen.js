@@ -17,6 +17,7 @@ import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
 import useConnection from "../hooks/useConnection";
+import ScreenSub from "../components/ScreenSub";
 
 function SettingsScreen({ navigation }) {
   const { setUser } = useAuth();
@@ -83,8 +84,6 @@ function SettingsScreen({ navigation }) {
     []
   );
 
-  // const handleDeleteContacts = () => console.log("Contacts deleted!");
-
   const handleOpenContactsAlert = useCallback(() => {
     setContactAlert(true);
   }, []);
@@ -97,19 +96,21 @@ function SettingsScreen({ navigation }) {
           onPressLeft={handleBack}
           title="Settings"
         />
-        <SettingsAction
-          processing={removingContact}
-          title="Remove my Contacts from the server."
-          info="We store your contacts available on your device to let you discover people who are on SeeYot, if you give access to your contacts. You can opt to remove your contacts from our server anytime you want. We recommend you disabling the contacts access from your device first before removing the contacts from the server."
-          buttonTitle="Remove my Contacts"
-          onPress={handleOpenContactsAlert}
-        />
-        {/* <SettingsAction
+        <ScreenSub style={{ alignItems: "center" }}>
+          <SettingsAction
+            processing={removingContact}
+            title="Remove my Contacts from the server."
+            info="We store your contacts available on your device to let you discover people who are on SeeYot, if you give access to your contacts. You can opt to remove your contacts from our server anytime you want. We recommend you disabling the contacts access from your device first before removing the contacts from the server."
+            buttonTitle="Remove my Contacts"
+            onPress={handleOpenContactsAlert}
+          />
+          {/* <SettingsAction
           title="Delete my Account."
           info="If you want to delete your account, you can do it here. This action is irreversible and cannot be undone. You will lose every data that are stored against you like your matched thoughts, echoMessages etc."
           buttonTitle="Delete my Account"
           onPress={handleDeleteContacts}
         /> */}
+        </ScreenSub>
       </Screen>
       <InfoAlert
         leftPress={handleCloseInfoAlert}
