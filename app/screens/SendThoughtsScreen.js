@@ -1,25 +1,37 @@
 import React, {
-  useState,
-  useEffect,
   useCallback,
-  useMemo,
   useContext,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
-import { View, Keyboard, TouchableWithoutFeedback } from "react-native";
+import { Keyboard, TouchableWithoutFeedback } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
+import { showMessage } from "react-native-flash-message";
 
 import Alert from "../components/Alert";
-import AppHeader from "../components/AppHeader";
+import AppText from "../components/AppText";
 import Screen from "../components/Screen";
 import SendingThoughtActivity from "../components/SendingThoughtActivity";
 import SendThoughtsInput from "../components/SendThoughtsInput";
 import SendThoughtsOptionsModal from "../components/SendThoughtsOptionsModal";
+import ThoughtsScreenHeader from "../components/ThoughtsScreenHeader";
 import ThoughtsList from "../components/ThoughtsList";
+import InfoAlert from "../components/InfoAlert";
+import ScreenSub from "../components/ScreenSub";
 
 import Constant from "../navigation/NavigationConstants";
-import storeDetails from "../utilities/storeDetails";
+
+import ActiveForContext from "../utilities/activeForContext";
+import ActiveMessagesContext from "../utilities/activeMessagesContext";
+import apiActivity from "../utilities/apiActivity";
+import ApiContext from "../utilities/apiContext";
+import debounce from "../utilities/debounce";
+import defaultProps from "../utilities/defaultProps";
 import localThoughts from "../utilities/localThoughts";
+import storeDetails from "../utilities/storeDetails";
+import filterMessages from "../utilities/filterThoughts";
 
 import defaultStyles from "../config/styles";
 
@@ -28,46 +40,20 @@ import useAuth from "../auth/useAuth";
 import thoughtsApi from "../api/thoughts";
 import usersApi from "../api/users";
 
-import debounce from "../utilities/debounce";
-import ActiveForContext from "../utilities/activeForContext";
-import InfoAlert from "../components/InfoAlert";
-import ActiveMessagesContext from "../utilities/activeMessagesContext";
-import apiActivity from "../utilities/apiActivity";
-import SuccessMessageContext from "../utilities/successMessageContext";
-
 import useMountedRef from "../hooks/useMountedRef";
 import useAppState from "../hooks/useAppState";
-import ScreenSub from "../components/ScreenSub";
-
-const filterThoughts = (thoughts = [], recipient, creator) => {
-  return thoughts
-    .filter(
-      (t) =>
-        (t.messageFor == recipient._id && t.createdBy == creator._id) ||
-        (t.messageFor == creator._id && t.createdBy == recipient._id)
-    )
-    .sort((a, b) => a.createdAt > b.createdAt);
-};
-
-const filterActiveMessages = (messages = [], recipient, creator) => {
-  return messages.filter(
-    (m) =>
-      (m.createdFor == recipient._id && m.createdBy == creator._id) ||
-      (m.createdFor == creator._id && m.createdBy == recipient._id)
-  );
-};
 
 function SendThoughtsScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
   const { recipient, from } = route.params;
-  const { activeFor } = useContext(ActiveForContext);
-  const { setSuccess } = useContext(SuccessMessageContext);
+  const { activeFor, setActiveFor } = useContext(ActiveForContext);
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
-  const { tackleProblem, showSucessMessage } = apiActivity;
+  const { tackleProblem } = apiActivity;
   const appStateVisible = useAppState();
 
   // STATES
+  const [sendingMedia, setSendingMedia] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [unfriendProcessing, setUnfriendProcessing] = useState(false);
   const [favoriteProcessing, setFavoriteProcessing] = useState(false);
@@ -93,7 +79,6 @@ function SendThoughtsScreen({ navigation, route }) {
     messageToDelete: null,
     deletingMessage: false,
   });
-
   // ALERT ACTION
 
   const handleCloseAlert = useCallback(() => setShowAlert(false), []);
@@ -105,7 +90,11 @@ function SendThoughtsScreen({ navigation, route }) {
         recipient._id
       );
       if (ok) {
-        return showSucessMessage(setSuccess, "Request sent!", 3000);
+        return showMessage({
+          ...defaultProps.alertMessageConfig,
+          message: "Request Sent!",
+          type: "success",
+        });
       }
 
       setShowAlert(false);
@@ -118,6 +107,18 @@ function SendThoughtsScreen({ navigation, route }) {
   const stopCurrentUserTyping = useCallback(async () => {
     await usersApi.stopTyping(recipient._id);
   }, [recipient._id, isFocused]);
+
+  // ON FOCUS CHECK ADD RECIPIENT TO ACTIVE USERSLIST IF RECIPIENT ACTIVE FOR CURRENT USER AND USER HAS COME FROM NOTIFICATION
+
+  const addRecipientToActiveList = async () => {
+    const { ok, data, problem } = await usersApi.getUserActiveForMe(
+      recipient._id
+    );
+    if (ok && !isRecipientActive) {
+      return setActiveFor([...activeFor, recipient._id]);
+    }
+    if (problem) return;
+  };
 
   // SETTING ACTIVECHATMESSAGES, ACTIVE CHAT TO NULL AND REMOVING THE ACTIVECHAT FOR USER
   useEffect(() => {
@@ -179,6 +180,11 @@ function SendThoughtsScreen({ navigation, route }) {
     }
   }, [isFocused, mounted]);
 
+  useEffect(() => {
+    if (mounted && showAlert === true && isRecipientActive) {
+      setShowAlert(false);
+    }
+  }, [isRecipientActive, showAlert, mounted, isFocused]);
   // HEADER ACTIONS
   const handleBack = useCallback(
     debounce(
@@ -228,13 +234,13 @@ function SendThoughtsScreen({ navigation, route }) {
 
   // THOUGHTS LIST ACTION
   let thoughts = useMemo(
-    () => filterThoughts(user.thoughts, recipient, user),
+    () => filterMessages.filterThoughts(user.thoughts, recipient, user),
     [isFocused, user, recipient._id, user]
   );
 
   const activeMessagesList = useMemo(
-    () => filterActiveMessages(activeMessages, recipient, user),
-    [activeMessages.length, activeMessages]
+    () => filterMessages.filterActiveMessages(activeMessages, recipient, user),
+    [activeMessages.length, activeMessages, recipient._id]
   );
 
   // SENDING THOUGHTS ACTION
@@ -304,18 +310,29 @@ function SendThoughtsScreen({ navigation, route }) {
   );
 
   const handleSendActiveMessage = useCallback(
-    async (textMessage) => {
+    async (textMessage, media) => {
+      // listRef.current.scrollToEnd({ animated: false });
       stopCurrentUserTyping();
       if (!isRecipientActive && mounted) {
         return setShowAlert(true);
       }
-      let newMessage = {
-        _id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-        message: textMessage.trim(),
-        createdAt: new Date(),
-        createdBy: user._id,
-        createdFor: recipient._id,
-      };
+      let newMessage = media
+        ? {
+            _id:
+              Date.now().toString(36) + Math.random().toString(36).substring(2),
+            createdAt: new Date(),
+            createdBy: user._id,
+            createdFor: recipient._id,
+            media: media,
+          }
+        : {
+            _id:
+              Date.now().toString(36) + Math.random().toString(36).substring(2),
+            message: textMessage.trim(),
+            createdAt: new Date(),
+            createdBy: user._id,
+            createdFor: recipient._id,
+          };
       if (mounted) {
         activeMessages.push(newMessage);
         setActiveMessages([...activeMessages]);
@@ -324,7 +341,10 @@ function SendThoughtsScreen({ navigation, route }) {
         newMessage
       );
       if (ok) {
-        return;
+        if (!data.isRecipientActive) {
+          let newActiveList = activeFor.filter((u) => u != recipient._id);
+          return setActiveFor(newActiveList);
+        }
       }
       if (mounted) {
         tackleProblem(problem, data, setInfoAlert);
@@ -371,15 +391,11 @@ function SendThoughtsScreen({ navigation, route }) {
   //ON FOCUS PAGE ACTION
 
   useEffect(() => {
-    if (mounted && isRecipientActive && showAlert) {
-      setShowAlert(false);
-    }
-  }, [isFocused, isRecipientActive]);
-
-  useEffect(() => {
     if (isFocused) {
-      if (from == Constant.NOTIFICATION_SCREEN && !isRecipientActive) {
-        handleSetChatActive();
+      if (from == Constant.NOTIFICATION_SCREEN && isRecipientActive) {
+        return handleSetChatActive();
+      } else if (from == Constant.NOTIFICATION_SCREEN) {
+        addRecipientToActiveList();
       }
     }
   }, [isFocused, mounted, isRecipientActive]);
@@ -515,6 +531,7 @@ function SendThoughtsScreen({ navigation, route }) {
   // CHANGING THE CHAT ACTIVE STATUS
 
   const handleSetChatActive = useCallback(async () => {
+    if (activeChat && isRecipientActive) return;
     setActiveChat(true);
     if (!isRecipientActive && mounted) {
       setShowAlert(true);
@@ -526,9 +543,10 @@ function SendThoughtsScreen({ navigation, route }) {
 
     if (ok) return;
     return;
-  }, [activeChat, recipient._id, mounted]);
+  }, [activeChat, recipient._id, mounted, isFocused]);
 
   const handleSetChatInActive = async () => {
+    if (!activeChat) return;
     setActiveChat(false);
 
     const { ok } = await usersApi.makeCurrentUserInActiveFor(
@@ -549,99 +567,139 @@ function SendThoughtsScreen({ navigation, route }) {
   }, [recipient._id, isFocused, isRecipientActive]);
 
   const placeholder = useMemo(() => {
-    return activeChat
-      ? `Send direct messages to ${recipient.name}...`
-      : `Send your thoughts to ${recipient.name}...`;
+    return activeChat ? `Send direct messages...` : `Send your thoughts...`;
   }, [activeChat, recipient._id]);
 
   const doNullFunction = useCallback(() => {
     return null;
   }, []);
 
+  // MEDIA SEND ACTIVE CHAT
+
+  const handleSendSelectedMedia = async (uri) => {
+    setSendingMedia(true);
+
+    const { ok, data, problem } = await usersApi.getUploadedPhoto(uri);
+    if (ok) {
+      handleSendActiveMessage("", data);
+      return setSendingMedia(false);
+    }
+    setSendingMedia(false);
+    if (problem) tackleProblem(problem, data, setInfoAlert);
+  };
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <>
         <Screen style={styles.container}>
-          <AppHeader
-            leftIcon="arrow-back"
-            onPressLeft={handleBack}
-            onPressRight={handleOptionsPress}
-            rightIcon="more-vert"
-            title={activeChat ? "Active Chat" : "Thoughts"}
+          <ThoughtsScreenHeader
+            activeChat={activeChat}
+            imageUrl={recipient.picture}
+            isRecipientActive={isRecipientActive}
+            name={recipient.name}
+            onActiveChatModePress={handleSetChatActive}
+            onOptionPress={handleOptionsPress}
+            onPress={handleBack}
+            onThoughtsModePress={handleSetChatInActive}
           />
-          <ScreenSub>
-            <SendingThoughtActivity
-              echoMessage={messageActivity.echoMessage}
-              message={messageActivity.message}
-              onDoneButtonPress={handleSendingActivityClose}
-              onRequestClose={handleSendingActivityClose}
-              processing={messageActivity.processing}
-              success={messageActivity.success}
-              visible={messageActivity.visible}
-            />
-            <Alert
-              visible={showAlert}
-              title="Not Active"
-              description={`${
-                recipient.savedName ? recipient.savedName : recipient.name
-              } is not active for you right now. Send a notification requesting to come online.`}
-              onRequestClose={handleCloseAlert}
-              leftOption="Cancel"
-              rightOption="Yes"
-              leftPress={handleCloseAlert}
-              rightPress={handleSendNewMessageNotification}
-            />
-            <Alert
-              apiProcessing={deleteMessageOption.deletingMessage}
-              visible={deleteMessageOption.isVisible}
-              title="Delete"
-              description="Delete this thought. This action will only delete the thought from your side."
-              onRequestClose={handleCloseDeleteMessageModal}
-              leftOption="Cancel"
-              rightOption="Yes"
-              leftPress={handleCloseDeleteMessageModal}
-              rightPress={handleDeleteMessage}
-            />
-            <InfoAlert
-              leftPress={handleCloseInfoAlert}
-              description={infoAlert.infoAlertMessage}
-              visible={infoAlert.showInfoAlert}
-            />
-
+          <ScreenSub style={styles.screenSub}>
             <ThoughtsList
               onLongPress={activeChat ? doNullFunction : handleThoughtLongPress}
               activeChat={activeChat}
               thoughts={activeChat ? activeMessagesList : thoughts}
               recipient={recipient}
             />
-            <View style={styles.sendThoughtsInputPlaceholder} />
-            <SendThoughtsInput
-              isFocused={isFocused}
-              setTyping={handleSetTyping}
-              placeholder={placeholder}
-              activeChat={activeChat}
-              isRecipientActive={isRecipientActive}
-              onActiveChatSelection={
-                activeChat ? handleSetChatInActive : handleSetChatActive
-              }
-              style={[styles.inputBox]}
-              submit={activeChat ? handleSendActiveMessage : handleSendThought}
-            />
+            {activeChat && !activeMessagesList.length ? (
+              <AppText style={styles.activeChatInfoText}>
+                Send direct messages to{" "}
+                {recipient.savedName ? recipient.savedName : recipient.name} and
+                have an active conversation. These are temporary messages and
+                are not stored anywhere, except your device until you refresh
+                this chat, visit another one, leave this screen or the app
+                becomes inactive.
+              </AppText>
+            ) : null}
+            {!activeChat && !thoughts.length ? (
+              <AppText style={styles.activeChatInfoText}>
+                Send your thoughts to{" "}
+                {recipient.savedName ? recipient.savedName : recipient.name},
+                and within 10 minutes if{" "}
+                {recipient.savedName ? recipient.savedName : recipient.name}{" "}
+                does the same for you, your thoughts will match. You can see all
+                your matched thoughts here. You can send only one Thought within
+                10 minutes to a single person.
+              </AppText>
+            ) : null}
+            <ApiContext.Provider value={{ sendingMedia, setSendingMedia }}>
+              <SendThoughtsInput
+                onSendSelectedMedia={handleSendSelectedMedia}
+                isFocused={isFocused}
+                setTyping={handleSetTyping}
+                placeholder={placeholder}
+                activeChat={activeChat}
+                isRecipientActive={isRecipientActive}
+                onActiveChatSelection={
+                  activeChat ? handleSetChatInActive : handleSetChatActive
+                }
+                style={[styles.inputBox]}
+                submit={
+                  activeChat ? handleSendActiveMessage : handleSendThought
+                }
+              />
+            </ApiContext.Provider>
           </ScreenSub>
         </Screen>
+        <SendingThoughtActivity
+          echoMessage={messageActivity.echoMessage}
+          message={messageActivity.message}
+          onDoneButtonPress={handleSendingActivityClose}
+          onRequestClose={handleSendingActivityClose}
+          processing={messageActivity.processing}
+          success={messageActivity.success}
+          visible={messageActivity.visible}
+        />
+        <Alert
+          visible={showAlert}
+          title="Not Active"
+          description={`${
+            recipient.savedName ? recipient.savedName : recipient.name
+          } is not active for you right now. Send a notification requesting to come online.`}
+          onRequestClose={handleCloseAlert}
+          leftOption="Cancel"
+          rightOption="Yes"
+          leftPress={handleCloseAlert}
+          rightPress={handleSendNewMessageNotification}
+        />
+        <Alert
+          apiProcessing={deleteMessageOption.deletingMessage}
+          description="Delete this thought. This action will delete the thought only from your side."
+          leftOption="Cancel"
+          leftPress={handleCloseDeleteMessageModal}
+          onRequestClose={handleCloseDeleteMessageModal}
+          rightOption="Yes"
+          rightPress={handleDeleteMessage}
+          title="Delete"
+          visible={deleteMessageOption.isVisible}
+        />
+
+        <InfoAlert
+          description={infoAlert.infoAlertMessage}
+          leftPress={handleCloseInfoAlert}
+          visible={infoAlert.showInfoAlert}
+        />
         <SendThoughtsOptionsModal
-          isVisible={isVisible}
-          isBlocked={isBlocked}
-          inContacts={inContacts}
-          inFavorites={inFavorites}
-          handleModalClose={handleModalClose}
+          blockProcessing={blockProcessing}
+          favoriteProcessing={favoriteProcessing}
           handleAddFavoritePress={handleAddFavoritePress}
+          handleBlockPress={handleBlockPress}
+          handleModalClose={handleModalClose}
           handleRemoveFavoritePress={handleRemoveFavoritePress}
           handleUnblockPress={handleUnblockPress}
-          handleBlockPress={handleBlockPress}
           handleUnfriendPress={handleUnfriendPress}
-          favoriteProcessing={favoriteProcessing}
-          blockProcessing={blockProcessing}
+          inContacts={inContacts}
+          inFavorites={inFavorites}
+          isBlocked={isBlocked}
+          isVisible={isVisible}
           unfriendProcessing={unfriendProcessing}
         />
       </>
@@ -649,9 +707,15 @@ function SendThoughtsScreen({ navigation, route }) {
   );
 }
 const styles = ScaledSheet.create({
+  activeChatInfoText: {
+    alignSelf: "center",
+    fontSize: "13@s",
+    marginTop: "20@s",
+    textAlign: "center",
+    width: "80%",
+  },
   container: {
     alignItems: "center",
-    //backgroundColor: defaultStyles.colors.white,
   },
   modalMainContainer: {
     alignItems: "center",
@@ -667,8 +731,7 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   inputBox: {
-    bottom: 0,
-    position: "absolute",
+    marginVertical: "5@s",
   },
   optionsContainer: {
     alignItems: "center",
@@ -684,16 +747,15 @@ const styles = ScaledSheet.create({
     color: defaultStyles.colors.white,
     opacity: 1,
   },
-  sendThoughtsInputPlaceholder: {
-    height: "50@s",
-    width: "100%",
-  },
   selectActive: {
     alignItems: "center",
     elevation: 2,
     height: "35@s",
     justifyContent: "center",
     width: "100%",
+  },
+  screenSub: {
+    borderTopRightRadius: 0,
   },
 });
 

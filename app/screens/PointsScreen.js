@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useState, useContext } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, ScrollView, Modal } from "react-native";
 import { AdMobRewarded } from "expo-ads-admob";
 import MaterialCommunityIcon from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
+import { showMessage } from "react-native-flash-message";
 
 import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppButton from "../components/AppButton";
@@ -21,7 +22,6 @@ import useAuth from "../auth/useAuth";
 
 import defaultStyles from "../config/styles";
 
-import SuccessMessageContext from "../utilities/successMessageContext";
 import debounce from "../utilities/debounce";
 import storeDetails from "../utilities/storeDetails";
 import apiActivity from "../utilities/apiActivity";
@@ -39,6 +39,7 @@ import useConnection from "../hooks/useConnection";
 import usersApi from "../api/users";
 import ModalFallback from "../components/ModalFallback";
 import ScreenSub from "../components/ScreenSub";
+import defaultProps from "../utilities/defaultProps";
 
 const Points = {
   totalPoints: 0,
@@ -49,8 +50,7 @@ function PointsScreen({ navigation }) {
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
   const isConnected = useConnection();
-  const { setSuccess } = useContext(SuccessMessageContext);
-  const { tackleProblem, showSucessMessage } = apiActivity;
+  const { tackleProblem } = apiActivity;
 
   // STATES
   const [currentAdsStats, setCurrentAdsStats] = useState({
@@ -132,7 +132,11 @@ function PointsScreen({ navigation }) {
       await storeDetails(data.user);
       setCollectingPoints(false);
       setUser(data.user);
-      return showSucessMessage(setSuccess, "Congrats you earned 5 points.");
+      return showMessage({
+        ...defaultProps.alertMessageConfig,
+        type: "success",
+        message: "Congrats you earned 5 points.",
+      });
     }
     setCollectingPoints(false);
     tackleProblem(problem, data, setInfoAlert);
@@ -215,11 +219,13 @@ function PointsScreen({ navigation }) {
         await storeDetails(data.user);
         setUser(data.user);
         setRedeeming(false);
-        return showSucessMessage(
-          setSuccess,
-          "Congrats! You have now become a SeeYot Vip member. Enjoy connecting with more people without hesitation.",
-          6000
-        );
+        return showMessage({
+          ...defaultProps.alertMessageConfig,
+          type: "success",
+          message:
+            "Congrats! You have now become a SeeYot Vip member. Enjoy connecting with more people without hesitation.",
+          duration: 6000,
+        });
       }
       setPointsToRedeem(0);
       setRedeeming(false);
@@ -230,150 +236,152 @@ function PointsScreen({ navigation }) {
   );
 
   return (
-    <Screen>
-      <AppHeader
-        leftIcon="arrow-back"
-        title="Points"
-        onPressLeft={handleBack}
-      />
-      <ScreenSub>
-        <InfoAlert
-          description={infoAlert.infoAlertMessage}
-          visible={infoAlert.showInfoAlert}
-          leftPress={handleCloseInfoAlert}
+    <>
+      <Screen>
+        <AppHeader
+          leftIcon="arrow-back"
+          title="Points"
+          onPressLeft={handleBack}
         />
-        <LoadingIndicator visible={isLoading} />
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.container}
-        >
-          <AppText style={styles.infoText}>
-            Collect points to avail Subscription to SeeYot Vip.
-          </AppText>
-
-          <Details
-            style={{ elevation: 0 }}
-            title="Total Points:"
-            value={user.points.totalPoints}
-          />
-          <Details
-            style={{ marginBottom: scale(20), elevation: 0 }}
-            title="Redeemable Points:"
-            value={calculateTotalRedeemablePoints(user.points.totalPoints)}
-          />
-
-          <View style={styles.redeemConatainer}>
-            <AppText style={styles.redeemInfo}>
-              For every 20 points, you can avail SeeYot Vip Subscription for 24
-              hours. You can collect Points by watching ads.
-            </AppText>
-
-            <View style={styles.actionConatiner}>
-              <AppTextInput
-                editable={!redeeming}
-                keyboardType="numeric"
-                onChangeText={setPointsToRedeem}
-                subStyle={styles.inputSub}
-                style={styles.input}
-                placeholder="Enter no. of points to redeem"
-                value={pointsToRedeem.toString()}
-              />
-              <ApiProcessingContainer
-                style={styles.apiProcessingContainer}
-                processing={redeeming}
-              >
-                <AppButton
-                  disabled={
-                    pointsToRedeem.toString().replace(/\s/g, "").length >= 2 &&
-                    isConnected
-                      ? false
-                      : true
-                  }
-                  onPress={handleRedeemPoints}
-                  title="Redeem"
-                  style={styles.redeemButton}
-                  subStyle={styles.redeemButtonSub}
-                />
-              </ApiProcessingContainer>
-            </View>
-          </View>
-          <ApiProcessingContainer
-            style={styles.collectPointsApiProcessingContainer}
-            processing={collectingPoints}
+        <ScreenSub>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.container}
           >
-            <AppButton
-              disabled={!isConnected}
-              onPress={handleShowAd}
-              style={styles.collectPointsButton}
-              subStyle={styles.collectPointsButtonSub}
-              title="Collect Points"
-            />
-          </ApiProcessingContainer>
-          <View style={styles.collectPointsInfoContainer}>
-            <MaterialCommunityIcon
-              name="google-ads"
-              size={scale(14)}
-              color={defaultStyles.colors.yellow_Variant}
-              style={{ alignSelf: "flex-start" }}
-            />
-            <AppText style={styles.collectPointsInfo}>
-              Clicking on this button will show you an Ad. For each Ad you see,
-              you will be awarded 5 points.
+            <AppText style={styles.infoText}>
+              Collect points to avail Subscription to SeeYot Vip.
             </AppText>
-          </View>
-          <AppText onPress={() => setShowAdsInfo(true)}>
-            Terms and Condition.
-          </AppText>
-        </ScrollView>
-        {showAdsInfo ? <ModalFallback /> : null}
-        <Modal
-          visible={showAdsInfo}
-          onRequestClose={() => setShowAdsInfo(false)}
-          transparent={true}
-          animationType="slide"
-        >
-          <View style={styles.adsInfoContainerBackground}>
-            <View style={styles.closeAdsInfoIconContainer}>
-              <AntDesign
-                onPress={() => setShowAdsInfo(false)}
-                name="downcircle"
-                color={defaultStyles.colors.tomato}
-                size={scale(28)}
-              />
-            </View>
-            <View style={styles.adsInfoContainer}>
-              <AppText style={styles.adsTermAndConditionInfo}>
-                Terms to use Ads to avail SeeYot Vip membership.
+
+            <Details
+              style={{ elevation: 0 }}
+              title="Total Points:"
+              value={user.points.totalPoints}
+            />
+            <Details
+              style={{ marginBottom: scale(20), elevation: 0 }}
+              title="Redeemable Points:"
+              value={calculateTotalRedeemablePoints(user.points.totalPoints)}
+            />
+
+            <View style={styles.redeemConatainer}>
+              <AppText style={styles.redeemInfo}>
+                For every 20 points, you can avail SeeYot Vip Subscription for
+                24 hours. You can collect Points by watching ads.
               </AppText>
-              <Information
-                IconCategory={MaterialCommunityIcon}
-                iconName="account"
-                iconSize={scale(25)}
-                data={currentAdsStats.accountLife}
-                information="Account Life (Days)"
-                infoDetails="You account should be minimum 15 days old."
-              />
-              <Information
-                IconCategory={MaterialCommunityIcon}
-                iconName="google-ads"
-                iconSize={scale(25)}
-                data={currentAdsStats.seenInLastTenMinutes}
-                information="Ads seen in last 5 minutes"
-                infoDetails="You can watch only 1 ad within 5 minutes. (successful watch)"
-              />
-              <Information
-                IconCategory={MaterialCommunityIcon}
-                iconName="google-ads"
-                iconSize={scale(25)}
-                data={currentAdsStats.seenInLastTwentyFourHours}
-                information="Ads seen in last 24 hours"
-                infoDetails="You can watch only 8 ads within 24 hours. (successful watch)"
-              />
+
+              <View style={styles.actionConatiner}>
+                <AppTextInput
+                  editable={!redeeming}
+                  keyboardType="numeric"
+                  onChangeText={setPointsToRedeem}
+                  subStyle={styles.inputSub}
+                  style={styles.input}
+                  placeholder="Enter no. of points to redeem"
+                  value={pointsToRedeem.toString()}
+                />
+                <ApiProcessingContainer
+                  style={styles.apiProcessingContainer}
+                  processing={redeeming}
+                >
+                  <AppButton
+                    disabled={
+                      pointsToRedeem.toString().replace(/\s/g, "").length >=
+                        2 && isConnected
+                        ? false
+                        : true
+                    }
+                    onPress={handleRedeemPoints}
+                    title="Redeem"
+                    style={styles.redeemButton}
+                    subStyle={styles.redeemButtonSub}
+                  />
+                </ApiProcessingContainer>
+              </View>
             </View>
-          </View>
-        </Modal>
-      </ScreenSub>
-    </Screen>
+            <ApiProcessingContainer
+              style={styles.collectPointsApiProcessingContainer}
+              processing={collectingPoints}
+            >
+              <AppButton
+                disabled={!isConnected}
+                onPress={handleShowAd}
+                style={styles.collectPointsButton}
+                subStyle={styles.collectPointsButtonSub}
+                title="Collect Points"
+              />
+            </ApiProcessingContainer>
+            <View style={styles.collectPointsInfoContainer}>
+              <MaterialCommunityIcon
+                name="google-ads"
+                size={scale(14)}
+                color={defaultStyles.colors.yellow_Variant}
+                style={{ alignSelf: "flex-start" }}
+              />
+              <AppText style={styles.collectPointsInfo}>
+                Clicking on this button will show you an Ad. For each successful
+                Ad watch, you will get 5 points.
+              </AppText>
+            </View>
+            <AppText onPress={() => setShowAdsInfo(true)}>
+              Terms and Condition.
+            </AppText>
+          </ScrollView>
+          {showAdsInfo ? <ModalFallback /> : null}
+          <Modal
+            visible={showAdsInfo}
+            onRequestClose={() => setShowAdsInfo(false)}
+            transparent={true}
+            animationType="slide"
+          >
+            <View style={styles.adsInfoContainerBackground}>
+              <View style={styles.closeAdsInfoIconContainer}>
+                <AntDesign
+                  onPress={() => setShowAdsInfo(false)}
+                  name="downcircle"
+                  color={defaultStyles.colors.tomato}
+                  size={scale(28)}
+                />
+              </View>
+              <View style={styles.adsInfoContainer}>
+                <AppText style={styles.adsTermAndConditionInfo}>
+                  Terms to use Ads to avail SeeYot Vip membership.
+                </AppText>
+                <Information
+                  IconCategory={MaterialCommunityIcon}
+                  iconName="account"
+                  iconSize={scale(25)}
+                  data={currentAdsStats.accountLife}
+                  information="Account Life (Days)"
+                  infoDetails="You account should be minimum 15 days old."
+                />
+                <Information
+                  IconCategory={MaterialCommunityIcon}
+                  iconName="google-ads"
+                  iconSize={scale(25)}
+                  data={currentAdsStats.seenInLastTenMinutes}
+                  information="Ads seen in last 5 minutes"
+                  infoDetails="You can watch only 1 ad within 5 minutes. (successful watch)"
+                />
+                <Information
+                  IconCategory={MaterialCommunityIcon}
+                  iconName="google-ads"
+                  iconSize={scale(25)}
+                  data={currentAdsStats.seenInLastTwentyFourHours}
+                  information="Ads seen in last 24 hours"
+                  infoDetails="You can watch only 8 ads within 24 hours. (successful watch)"
+                />
+              </View>
+            </View>
+          </Modal>
+        </ScreenSub>
+      </Screen>
+      <InfoAlert
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
+        leftPress={handleCloseInfoAlert}
+      />
+      <LoadingIndicator visible={isLoading} />
+    </>
   );
 }
 const styles = ScaledSheet.create({

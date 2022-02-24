@@ -97,6 +97,7 @@ class NotificationListPro extends React.Component {
                 refreshing={this.props.refreshing}
               />
             }
+            scrollViewProps={{ showsVerticalScrollIndicator: false }}
             canChangeSize={true}
             dataProvider={this.state.dataProvider}
             extendedState={this.state}

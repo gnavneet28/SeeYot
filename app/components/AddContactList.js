@@ -163,6 +163,7 @@ class AddContactList extends React.Component {
                 refreshing={this.props.refreshing}
               />
             }
+            scrollViewProps={{ showsVerticalScrollIndicator: false }}
             dataProvider={this.state.dataProvider}
             extendedState={this.state}
             layoutProvider={this._layoutProvider}

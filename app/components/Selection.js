@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import { View, TouchableOpacity } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
+import Feather from "../../node_modules/react-native-vector-icons/Feather";
 
 import AppText from "./AppText";
 
@@ -8,45 +9,22 @@ import useConnection from "../hooks/useConnection";
 
 import defaultStyles from "../config/styles";
 
-function Selection({
-  style,
-  onPress,
-  opted,
-  dotStyle,
-  containerStyle,
-  value = "",
-}) {
+function Selection({ style, onPress, opted, containerStyle, value = "" }) {
   const isConnected = useConnection();
   return (
     <View style={[styles.container, style]}>
       <TouchableOpacity
         disabled={!isConnected}
         onPress={onPress}
-        style={[
-          [
-            styles.checkBox,
-            {
-              width: opted ? scale(18) : scale(14),
-              height: opted ? scale(18) : scale(14),
-              borderRadius: opted ? scale(9) : scale(7),
-            },
-            containerStyle,
-          ],
-        ]}
+        style={[[styles.checkBox, containerStyle]]}
       >
-        <View
-          style={[
-            {
-              width: scale(8),
-              height: scale(8),
-              borderRadius: scale(4),
-              backgroundColor: opted
-                ? defaultStyles.colors.tomato
-                : defaultStyles.colors.light,
-            },
-            dotStyle,
-          ]}
-        />
+        {opted ? (
+          <Feather
+            size={scale(14)}
+            color={defaultStyles.colors.secondary_Variant}
+            name="check"
+          />
+        ) : null}
       </TouchableOpacity>
       {value ? (
         <AppText
@@ -64,17 +42,21 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     flexDirection: "row",
-    height: "40@s",
+    minHeight: "40@s",
     padding: "5@s",
     width: "95%",
   },
   checkBox: {
-    borderColor: defaultStyles.colors.yellow_Variant,
-    borderWidth: 2,
-    marginHorizontal: "5@s",
-    justifyContent: "center",
     alignItems: "center",
+    backgroundColor: defaultStyles.colors.light,
+    borderColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "8@s",
+    borderWidth: 2,
+    height: "28@s",
+    justifyContent: "center",
+    marginHorizontal: "5@s",
     padding: "5@s",
+    width: "28@s",
   },
 });
 

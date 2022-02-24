@@ -65,7 +65,7 @@ const styles = ScaledSheet.create({
   repliedMessage: {
     backgroundColor: defaultStyles.colors.light,
     borderRadius: "15@s",
-    color: defaultStyles.colors.secondary,
+    color: defaultStyles.colors.dark,
     fontSize: "13.5@s",
     paddingHorizontal: "10@s",
     paddingVertical: "5@s",

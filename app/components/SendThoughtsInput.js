@@ -1,32 +1,33 @@
 import React, {
   useState,
-  useContext,
   useCallback,
   useEffect,
   memo,
+  useContext,
 } from "react";
 import {
   View,
   TouchableOpacity,
   TextInput,
-  TouchableHighlight,
+  PermissionsAndroid,
+  Linking,
 } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import IonicIcons from "../../node_modules/react-native-vector-icons/Ionicons";
-import LottieView from "lottie-react-native";
+import MaterialCommunityIcons from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import CameraRoll from "@react-native-community/cameraroll";
 
 import AppActivityIndicator from "./ActivityIndicator";
+import Alert from "./Alert";
 import AppHeader from "./AppHeader";
 import AppModal from "./AppModal";
 import AppText from "./AppText";
 import Icon from "./Icon";
 import LocalThoughtsList from "./LocalThoughtsList";
-import Selection from "./Selection";
 
 import debounce from "../utilities/debounce";
-import TypingContext from "../utilities/typingContext";
 import localThoughts from "../utilities/localThoughts";
 
 import thoughtsApi from "../api/thoughts";
@@ -36,34 +37,44 @@ import useConnection from "../hooks/useConnection";
 import useAuth from "../auth/useAuth";
 
 import defaultStyles from "../config/styles";
-
-const typingIndicator = "typing.json";
+import MediaGalleryModal from "./MediaGalleryModal";
+import ApiContext from "../utilities/apiContext";
+import ApiProcessingContainer from "./ApiProcessingContainer";
 
 function SendThoughtsInput({
-  isRecipientActive,
   activeChat,
-  onActiveChatSelection,
-  onBlur,
-  onFocus,
+  isFocused,
+  isRecipientActive,
+  onSendSelectedMedia,
   placeholder = "Send your thoughts...",
-  processing,
+  setTyping = () => null,
   style,
   submit,
-  setTyping = () => null,
-  isFocused,
 }) {
   dayjs.extend(relativeTime);
   let currentDate = new Date();
-
   const { user } = useAuth();
+
+  const { sendingMedia } = useContext(ApiContext);
 
   const [message, setMessage] = useState("");
   const isConnected = useConnection();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { typing } = useContext(TypingContext);
   const [previousThoughts, setPreviousThoughts] = useState([]);
   const [isReady, setIsReady] = useState(false);
+  const [focused, setFocused] = useState(false);
   const mounted = useMountedRef();
+
+  // MEDIA ACTIVE CHAT
+
+  const [activeMediaPermissionAlert, setActiveMediaPermissionAlert] =
+    useState(false);
+  const [mediaImagesModal, setMediaImagesModal] = useState({
+    data: [],
+    isVisible: false,
+    albumName: "",
+    totalAlbum: [],
+  });
 
   const getPreviousThoughts = async () => {
     let thoughts = await localThoughts.getLocalThoughts();
@@ -77,12 +88,100 @@ function SendThoughtsInput({
 
   const handlePress = debounce(
     () => {
-      submit(message);
+      activeChat ? submit(message, "") : submit(message);
       setMessage("");
     },
     1000,
     true
   );
+
+  // PERMISSION FOR EXTERNAL STORAGE
+  async function hasAndroidPermission() {
+    const permission = PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+
+    const hasPermission = await PermissionsAndroid.check(permission);
+    if (hasPermission) {
+      return true;
+    }
+  }
+
+  const handleSendSelectedImage = (uri) => {
+    onSendSelectedMedia(uri);
+  };
+
+  const setUpMediaModal = async () => {
+    const albums = await CameraRoll.getAlbums({
+      assetType: "Photos",
+    });
+
+    let firstAlbumData = albums[0];
+
+    let totalImages = [];
+    CameraRoll.getPhotos({
+      first: firstAlbumData.count,
+      groupTypes: "Album",
+      groupName: firstAlbumData.title,
+      assetType: "Photos",
+    })
+      .then(async (r) => {
+        r.edges.forEach((e) => {
+          if (typeof e.node.image.uri !== "undefined") {
+            totalImages.push(e.node.image.uri);
+          }
+        });
+        setMediaImagesModal({
+          albumName: firstAlbumData.title,
+          totalAlbum: albums,
+          data: totalImages,
+          isVisible: true,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        //Error Loading Images
+      });
+  };
+
+  const handleAlbumChange = (data) => {
+    let totalImages = [];
+    CameraRoll.getPhotos({
+      first: data.count,
+      groupTypes: "Album",
+      groupName: data.title,
+      assetType: "Photos",
+    })
+      .then(async (r) => {
+        r.edges.forEach((e) => {
+          if (typeof e.node.image.uri !== "undefined") {
+            totalImages.push(e.node.image.uri);
+          }
+        });
+        setMediaImagesModal({
+          ...mediaImagesModal,
+          albumName: data.title,
+          data: totalImages,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        //Error Loading Images
+      });
+  };
+
+  const closeMediaPermissionAlert = useCallback(() => {
+    setActiveMediaPermissionAlert(false);
+  }, []);
+
+  const openMediaPermissionSetting = useCallback(async () => {
+    setActiveMediaPermissionAlert(false);
+    await Linking.openSettings();
+  }, []);
+
+  const openMediaModal = async () => {
+    if (!(await hasAndroidPermission()))
+      return setActiveMediaPermissionAlert(true);
+    setUpMediaModal();
+  };
 
   useEffect(() => {
     if (!isFocused && mounted && isModalVisible) {
@@ -142,41 +241,35 @@ function SendThoughtsInput({
               size={scale(22)}
             />
           </TouchableOpacity>
-        ) : null}
-        <View style={[styles.container]}>
-          <TouchableHighlight
-            disabled={typing ? true : false}
-            underlayColor={defaultStyles.colors.light}
-            activeOpacity={0.8}
-            onPress={onActiveChatSelection}
-            style={styles.selectionContainer}
+        ) : (
+          <TouchableOpacity
+            disabled={activeChat ? false : true}
+            onPress={openMediaModal}
+            style={styles.addMedia}
           >
-            <>
-              {typing && activeChat ? (
-                <LottieView
-                  autoPlay
-                  loop
-                  source={typingIndicator}
-                  style={{ width: scale(30), height: scale(30) }}
-                />
-              ) : (
-                <Selection
-                  onPress={onActiveChatSelection}
-                  opted={activeChat}
-                  style={styles.selectActive}
-                  containerStyle={{
-                    borderColor: isRecipientActive
-                      ? defaultStyles.colors.darkGreen
-                      : defaultStyles.colors.yellow_Variant,
-                  }}
-                />
-              )}
-            </>
-          </TouchableHighlight>
+            <ApiProcessingContainer
+              color={defaultStyles.colors.white}
+              processing={sendingMedia}
+            >
+              <MaterialCommunityIcons
+                color={defaultStyles.colors.white}
+                name="image"
+                size={scale(20)}
+              />
+            </ApiProcessingContainer>
+          </TouchableOpacity>
+        )}
+        <View style={[styles.container]}>
           <TextInput
+            onImageChange={
+              focused && activeChat
+                ? (event) => submit("", event.nativeEvent.linkUri)
+                : () => null
+            }
             multiline={true}
             maxLength={250}
-            onBlur={onBlur}
+            onBlur={() => setFocused(false)}
+            onFocus={() => setFocused(true)}
             onChangeText={handleOnChangeText}
             placeholder={placeholder}
             style={[
@@ -218,6 +311,16 @@ function SendThoughtsInput({
           </TouchableOpacity>
         </View>
       </View>
+      <Alert
+        visible={activeMediaPermissionAlert}
+        title="Permission"
+        description="Please give gallery access to send photos while active chatting. Go to settings and enable permissions."
+        onRequestClose={closeMediaPermissionAlert}
+        leftOption="Cancel"
+        rightOption="Yes"
+        leftPress={closeMediaPermissionAlert}
+        rightPress={openMediaPermissionSetting}
+      />
       <AppModal
         animationType="slide"
         visible={isModalVisible}
@@ -252,32 +355,54 @@ function SendThoughtsInput({
           )}
         </View>
       </AppModal>
+      <MediaGalleryModal
+        onRequestClose={() =>
+          setMediaImagesModal({ ...mediaImagesModal, isVisible: false })
+        }
+        visible={mediaImagesModal.isVisible}
+        images={mediaImagesModal.data}
+        albums={mediaImagesModal.totalAlbum}
+        handleAlbumChange={handleAlbumChange}
+        albumName={mediaImagesModal.albumName}
+        onSelectImageFromGallery={handleSendSelectedImage}
+      />
     </>
   );
 }
+
 const styles = ScaledSheet.create({
+  addMedia: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.blue,
+    borderRadius: "18@s",
+    height: "30@s",
+    justifyContent: "center",
+    marginRight: "5@s",
+    overflow: "hidden",
+    width: "30@s",
+  },
   container: {
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderRadius: "30@s",
+    backgroundColor: defaultStyles.colors.light,
     flexDirection: "row",
     flexShrink: 1,
     justifyContent: "space-between",
-    minHeight: "38@s",
+    minHeight: "35@s",
+    overflow: "hidden",
     width: "100%",
   },
   contentContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderTopColor: defaultStyles.colors.light,
-    borderTopWidth: 1,
-    elevation: 10,
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.light,
+    borderColor: defaultStyles.colors.light,
+    borderRadius: "50@s",
+    borderWidth: 2,
     flexDirection: "row",
     overflow: "hidden",
-    paddingHorizontal: "10@s",
-    paddingVertical: "5@s",
-    width: "100%",
+    paddingHorizontal: "5@s",
+    width: "95%",
   },
   inputBox: {
     borderRadius: "30@s",
@@ -285,7 +410,7 @@ const styles = ScaledSheet.create({
     fontSize: "14@s",
     height: "100%",
     marginRight: "5@s",
-    paddingHorizontal: "5@s",
+    paddingHorizontal: "10@s",
     width: "100%",
   },
   mainContainer: {
@@ -297,15 +422,6 @@ const styles = ScaledSheet.create({
     overflow: "hidden",
     width: "100%",
   },
-  sendIconProcessingContainer: {
-    alignItems: "center",
-    borderRadius: "20@s",
-    height: "40@s",
-    justifyContent: "center",
-    marginRight: "5@s",
-    overflow: "hidden",
-    width: "40@s",
-  },
   send: {
     alignItems: "center",
     borderRadius: "20@s",
@@ -316,14 +432,14 @@ const styles = ScaledSheet.create({
   },
   previousMessages: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.blue,
+    backgroundColor: defaultStyles.colors.secondary_Variant,
     borderRadius: "18@s",
-    height: "36@s",
+    height: "30@s",
     justifyContent: "center",
     marginRight: "5@s",
     overflow: "hidden",
     paddingLeft: "2@s",
-    width: "36@s",
+    width: "30@s",
   },
   previousThoughtInfo: {
     backgroundColor: defaultStyles.colors.white,
@@ -334,30 +450,6 @@ const styles = ScaledSheet.create({
     fontSize: "12@s",
     paddingHorizontal: "20@s",
     paddingTop: "10@s",
-    textAlign: "center",
-    width: "100%",
-  },
-  selectActive: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
-    borderRadius: "18@s",
-    height: "35@s",
-    justifyContent: "center",
-    width: "35@s",
-  },
-  selectionContainer: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
-    borderRadius: "18@s",
-    elevation: 1,
-    justifyContent: "center",
-    height: "36@s",
-    width: "36@s",
-  },
-  title: {
-    color: defaultStyles.colors.primary,
-    fontSize: "17@s",
-    paddingVertical: "10@s",
     textAlign: "center",
     width: "100%",
   },

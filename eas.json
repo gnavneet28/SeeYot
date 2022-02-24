@@ -23,7 +23,7 @@
       "releaseChannel": "staging"
     },
     "production": {
-      "node": "16.13.1",
+      "node": "16.14.0",
       "releaseChannel": "production"
     }
   },

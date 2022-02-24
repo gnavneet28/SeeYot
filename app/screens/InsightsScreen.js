@@ -1,23 +1,305 @@
-import React, { useCallback } from "react";
-import { ScrollView } from "react-native";
-import { ScaledSheet, scale } from "react-native-size-matters";
-import MaterialCommunityIcons from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
-import Feather from "../../node_modules/react-native-vector-icons/Feather";
+import React, { useCallback, useState, useEffect } from "react";
+import { ScrollView, RefreshControl } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
+import { useIsFocused } from "@react-navigation/native";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
 import Screen from "../components/Screen";
-import Information from "../components/Information";
+import InfoAlert from "../components/InfoAlert";
 
 import useAuth from "../auth/useAuth";
+
+import usersApi from "../api/users";
 
 import defaultStyles from "../config/styles";
 
 import debounce from "../utilities/debounce";
 import ScreenSub from "../components/ScreenSub";
+import Chart from "../components/Chart";
+import defaultProps from "../utilities/defaultProps";
+
+import apiActivity from "../utilities/apiActivity";
+
+let defaultStats = {
+  photoTaps: [],
+  messagesReceived: [],
+  thoughtsReceived: [],
+};
 
 function InsightsScreen({ navigation }) {
+  dayjs.extend(relativeTime);
   const { user } = useAuth();
+  const { tackleProblem } = apiActivity;
+  const isFocused = useIsFocused();
+  // SUBSCRIPTION DETAILS
+  let subscription = user.vip.subscription ? "Active" : "Inactive";
+
+  const [stats, setStats] = useState(defaultStats);
+  const [infoAlert, setInfoAlert] = useState({
+    showInfoAlert: false,
+    infoAlertMessage: "",
+  });
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Stat STATE
+  const [tapsData, setTapsData] = useState({
+    tapCategory: "All",
+    totalTaps: 0,
+    tapsDetails: [
+      {
+        name: "Friends",
+        population: 0,
+        color: defaultStyles.colors.secondary_Variant,
+        ...defaultProps.defaultStylesForData,
+      },
+      {
+        name: "Others",
+        population: 0,
+        color: defaultStyles.colors.yellow_Variant,
+        ...defaultProps.defaultStylesForData,
+      },
+    ],
+  });
+  const [messageData, setMessageData] = useState({
+    messageCategory: "All",
+    totalMessages: 0,
+    messagesDetails: [
+      {
+        name: "Favorites",
+        population: 0,
+        color: defaultStyles.colors.secondary_Variant,
+        ...defaultProps.defaultStylesForData,
+      },
+      {
+        name: "Others",
+        population: 0,
+        color: defaultStyles.colors.yellow_Variant,
+        ...defaultProps.defaultStylesForData,
+      },
+    ],
+  });
+  const [thoughtsData, setThoughtsData] = useState({
+    thoughtCategory: "All",
+    totalThoughts: 0,
+    thoughtDetails: [
+      {
+        name: "Friends",
+        population: 0,
+        color: defaultStyles.colors.secondary_Variant,
+        ...defaultProps.defaultStylesForData,
+      },
+      {
+        name: "Others",
+        population: 0,
+        color: defaultStyles.colors.yellow_Variant,
+        ...defaultProps.defaultStylesForData,
+      },
+    ],
+  });
+
+  const setUpPage = async () => {
+    if (subscription !== "Active") return;
+    const { ok, data, problem } = await usersApi.getMyStats();
+    if (ok) {
+      setStats(data);
+      setChartDetailsForMessagesReceived("All", data.messagesReceived);
+      setChartDetailsForTotalTaps("All", data.photoTaps);
+      setChartDetailsForTotalThoughts("All", data.thoughtsReceived);
+    }
+  };
+
+  const handleRefresh = () => {
+    setUpPage();
+  };
+
+  useEffect(() => {
+    if (isFocused) {
+      setUpPage();
+    }
+  }, [isFocused]);
+
+  // FUNCTION TO CALCULATE/PROCESS STATS DATA
+
+  const getNumberOfPeopleInContacts = (totalData = [], duration = "All") => {
+    if (!totalData.length) return 0;
+    let currentDate = new Date();
+    let numberOfPeopleInContacts = 0;
+    let dataToConsider;
+
+    if (duration == "All") {
+      dataToConsider = totalData;
+    } else if (duration == "Week") {
+      dataToConsider = totalData.filter(
+        (d) => dayjs(currentDate).diff(d.timeStamp, "days") < 8
+      );
+    } else if (duration == "Month") {
+      dataToConsider = totalData.filter(
+        (d) => dayjs(currentDate).diff(d.timeStamp, "days") < 29
+      );
+    }
+
+    for (let data of dataToConsider) {
+      if (user.contacts.filter((u) => u._id == data.statsId).length) {
+        numberOfPeopleInContacts = numberOfPeopleInContacts + 1;
+      }
+    }
+
+    let others = dataToConsider.length - numberOfPeopleInContacts;
+
+    return { numberOfPeopleInContacts, others };
+  };
+
+  const getNumberOfPeopleInFavorites = (totalData = [], duration = "All") => {
+    if (!totalData.length) return 0;
+    let currentDate = new Date();
+    let numberOfPeopleInFavorites = 0;
+
+    let dataToConsider;
+
+    if (duration == "All") {
+      dataToConsider = totalData;
+    } else if (duration == "Week") {
+      dataToConsider = totalData.filter(
+        (d) => dayjs(currentDate).diff(d.timeStamp, "days") < 8
+      );
+    } else if (duration == "Month") {
+      dataToConsider = totalData.filter(
+        (d) => dayjs(currentDate).diff(d.timeStamp, "days") < 29
+      );
+    }
+
+    for (let data of dataToConsider) {
+      if (user.favorites.filter((u) => u._id == data.statsId).length) {
+        numberOfPeopleInFavorites = numberOfPeopleInFavorites + 1;
+      }
+    }
+
+    let others = dataToConsider.length - numberOfPeopleInFavorites;
+
+    return { numberOfPeopleInFavorites, others };
+  };
+
+  const setChartDetailsForMessagesReceived = (duration, data) => {
+    // get data from getStats and calculate data for total messages received
+    const totalMessages = typeof data !== "undefined" ? data : [];
+    if (!totalMessages.length) {
+      return setMessageData({
+        ...messageData,
+        messageCategory: duration,
+        totalMessages: 0,
+      });
+    }
+    let { numberOfPeopleInFavorites, others } = getNumberOfPeopleInFavorites(
+      totalMessages,
+      duration
+    );
+
+    setMessageData({
+      ...messageData,
+      totalMessages: totalMessages.length,
+      messageCategory: duration,
+      messagesDetails: [
+        {
+          name: "Favorites",
+          population: numberOfPeopleInFavorites,
+          color: defaultStyles.colors.secondary_Variant,
+          ...defaultProps.defaultStylesForData,
+        },
+        {
+          name: "Others",
+          population: others,
+          color: defaultStyles.colors.yellow_Variant,
+          ...defaultProps.defaultStylesForData,
+        },
+      ],
+    });
+  };
+  const setChartDetailsForTotalTaps = (duration, data) => {
+    // get data from getStats and calculate data for total taps
+
+    const totalPhotoTaps = typeof data !== "undefined" ? data : [];
+    if (!totalPhotoTaps.length) {
+      return setTapsData({
+        ...tapsData,
+        tapCategory: duration,
+        totalTaps: 0,
+      });
+    }
+    let { numberOfPeopleInContacts, others } = getNumberOfPeopleInContacts(
+      totalPhotoTaps,
+      duration
+    );
+
+    setTapsData({
+      ...tapsData,
+      tapCategory: duration,
+      totalTaps: totalPhotoTaps.length,
+      tapsDetails: [
+        {
+          name: "Friends",
+          population: numberOfPeopleInContacts,
+          color: defaultStyles.colors.secondary_Variant,
+          ...defaultProps.defaultStylesForData,
+        },
+        {
+          name: "Others",
+          population: others,
+          color: defaultStyles.colors.yellow_Variant,
+          ...defaultProps.defaultStylesForData,
+        },
+      ],
+    });
+  };
+  const setChartDetailsForTotalThoughts = (duration, data) => {
+    // get data from getStats and calculate data for total taps
+
+    //return console.log(data);
+    const totalThoughts = typeof data !== "undefined" ? data : [];
+    if (!totalThoughts.length) {
+      return setThoughtsData({
+        ...thoughtsData,
+        thoughtCategory: duration,
+        totalThoughts: 0,
+      });
+    }
+    let { numberOfPeopleInContacts, others } = getNumberOfPeopleInContacts(
+      totalThoughts,
+      duration
+    );
+
+    setThoughtsData({
+      ...thoughtsData,
+      thoughtCategory: duration,
+      totalThoughts: totalThoughts.length,
+      thoughtDetails: [
+        {
+          name: "Friends",
+          population: numberOfPeopleInContacts,
+          color: defaultStyles.colors.secondary_Variant,
+          ...defaultProps.defaultStylesForData,
+        },
+        {
+          name: "Others",
+          population: others,
+          color: defaultStyles.colors.yellow_Variant,
+          ...defaultProps.defaultStylesForData,
+        },
+      ],
+    });
+  };
+
+  // INFO ALERT ACTIONS
+
+  const handleCloseInfoAlert = () => {
+    setInfoAlert({
+      ...infoAlert,
+      showInfoAlert: false,
+    });
+  };
 
   // HEADER ACTION
   const handleBack = useCallback(
@@ -31,63 +313,113 @@ function InsightsScreen({ navigation }) {
     []
   );
 
-  // SUBSCRIPTION DETAILS
-  let subscription = user.vip.subscription ? "Active" : "Inactive";
+  // TAPS
+  const handleGetDataForTapsInLastMonth = () => {
+    setChartDetailsForTotalTaps("Month", stats.photoTaps);
+  };
+
+  const handleGetDataForTapsInLastWeek = () => {
+    setChartDetailsForTotalTaps("Week", stats.photoTaps);
+  };
+
+  const handleGetDataForTapsAll = () => {
+    setChartDetailsForTotalTaps("All", stats.photoTaps);
+  };
+
+  // THOUGHTS
+  const handleGetDataForThoughtsInLastMonth = () => {
+    setChartDetailsForTotalThoughts("Month", stats.thoughtsReceived);
+  };
+
+  const handleGetDataForThoughtsInLastWeek = () => {
+    setChartDetailsForTotalThoughts("Week", stats.thoughtsReceived);
+  };
+
+  const handleGetDataForThoughtsAll = () => {
+    setChartDetailsForTotalThoughts("All", stats.thoughtsReceived);
+  };
+  // MESSAGES
+  const handleGetDataForMessagesInLastMonth = () => {
+    setChartDetailsForMessagesReceived("Month", stats.messagesReceived);
+  };
+
+  const handleGetDataForMessagesInLastWeek = () => {
+    setChartDetailsForMessagesReceived("Week", stats.messagesReceived);
+  };
+
+  const handleGetDataForMessagesAll = () => {
+    setChartDetailsForMessagesReceived("All", stats.messagesReceived);
+  };
 
   return (
     <Screen>
       <AppHeader
         leftIcon="arrow-back"
-        title="Account Information"
+        title="Profile Insights"
         onPressLeft={handleBack}
       />
       <ScreenSub style={{ paddingTop: 10 }}>
         <ScrollView
+          refreshControl={
+            <RefreshControl onRefresh={handleRefresh} refreshing={refreshing} />
+          }
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
         >
-          {subscription == "Inactive" ? (
+          {subscription == "Active" ? (
+            <>
+              <Chart
+                chartConfig={defaultProps.defaultChartConfig}
+                description="Total number of times people tapped on your Display Picture."
+                onLastMonthDataPress={handleGetDataForTapsInLastMonth}
+                onLastWeekDataPress={handleGetDataForTapsInLastWeek}
+                onTotalDataPress={handleGetDataForTapsAll}
+                opted={tapsData.tapCategory}
+                pieChartData={tapsData.tapsDetails}
+                style={styles.chart}
+                title="Total Photo Taps"
+                totalData={tapsData.totalTaps}
+              />
+              <Chart
+                chartConfig={defaultProps.defaultChartConfig}
+                description="Total number of times people sent you their Thoughts."
+                onLastMonthDataPress={handleGetDataForThoughtsInLastMonth}
+                onLastWeekDataPress={handleGetDataForThoughtsInLastWeek}
+                onTotalDataPress={handleGetDataForThoughtsAll}
+                opted={thoughtsData.thoughtCategory}
+                pieChartData={thoughtsData.thoughtDetails}
+                style={styles.chart}
+                title="Total Thoughts Received"
+                totalData={thoughtsData.totalThoughts}
+              />
+              <Chart
+                chartConfig={defaultProps.defaultChartConfig}
+                description="Total Favorite Messages received is the total number of time, people tried to send you message, that includes people in your favorites as well as others. Messages sent by people other than in your favorites are not delivered to you."
+                onLastMonthDataPress={handleGetDataForMessagesInLastMonth}
+                onLastWeekDataPress={handleGetDataForMessagesInLastWeek}
+                onTotalDataPress={handleGetDataForMessagesAll}
+                opted={messageData.messageCategory}
+                pieChartData={messageData.messagesDetails}
+                style={styles.chart}
+                title="Total Messages Received"
+                totalData={messageData.totalMessages}
+              />
+            </>
+          ) : (
             <AppText style={styles.noActiveSubsInfo}>
               There are no active subscriptions. Subscribe to SeeYot Vip and get
               insights on the number of people who tapped on your Display
               Picture, sent you Thoughts and Messages.
             </AppText>
-          ) : (
-            <>
-              <Information
-                IconCategory={MaterialCommunityIcons}
-                iconName="gesture-tap-box"
-                data={user.stats.photoTaps}
-                iconSize={scale(38)}
-                iconColor={defaultStyles.colors.blue}
-                information="Total Photo Taps"
-                infoDetails="Total number of times people tapped on your Display Picture."
-              />
-              <Information
-                IconCategory={MaterialCommunityIcons}
-                iconName="thought-bubble"
-                data={user.stats.thoughtsReceived}
-                iconSize={scale(38)}
-                iconColor={defaultStyles.colors.blue}
-                information="Total Thoughts Received"
-                infoDetails="Total number of times people sent you their Thoughts."
-              />
-              <Information
-                IconCategory={Feather}
-                iconName="inbox"
-                data={user.stats.messagesReceived}
-                iconSize={scale(38)}
-                iconColor={defaultStyles.colors.blue}
-                information="Total Favorite Messages Received"
-                infoDetails="Total Favorite Messages received is the
-              total number of time, people tried to send you message, that
-              includes people in your favorites as well as others. Messages sent
-              by people other than in your favorites are not delivered to you."
-              />
-            </>
           )}
         </ScrollView>
       </ScreenSub>
+      <InfoAlert
+        description={infoAlert.infoAlertMessage}
+        leftPress={handleCloseInfoAlert}
+        visible={infoAlert.showInfoAlert}
+      />
     </Screen>
   );
 }
@@ -95,6 +427,9 @@ const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     flexGrow: 1,
+  },
+  chart: {
+    marginBottom: "10@s",
   },
   noActiveSubsInfo: {
     backgroundColor: defaultStyles.colors.white,

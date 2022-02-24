@@ -13,8 +13,6 @@ import InfoAlert from "../components/InfoAlert";
 import Screen from "../components/Screen";
 import useMountedRef from "../hooks/useMountedRef";
 
-import Constant from "../navigation/NavigationConstants";
-
 import usersApi from "../api/users";
 import useAuth from "../auth/useAuth";
 
@@ -73,6 +71,7 @@ function AddContactsScreen({ navigation }) {
 
   // ON PAGE FOCUS ACTION
   const requestPermission = async () => {
+    setIsReady(false);
     try {
       const { status } = await Contacts.requestPermissionsAsync();
       let contacts = [];
@@ -135,16 +134,9 @@ function AddContactsScreen({ navigation }) {
       setUser(data.user);
       if (!isReady || mounted) {
         return setUsers(
-          data.user.phoneContacts.sort(
-            (a, b) => a.isRegistered < b.isRegistered
-          )
-        );
-      }
-    }
-    if (user.phoneContacts.length) {
-      if (!isReady || mounted) {
-        setUsers(
-          user.phoneContacts.sort((a, b) => a.isRegistered < b.isRegistered)
+          data.user.phoneContacts
+            .sort((a, b) => a.name < b.name)
+            .sort((a, b) => a.isRegistered < b.isRegistered)
         );
       }
     }
@@ -154,25 +146,30 @@ function AddContactsScreen({ navigation }) {
   };
 
   const setUpPage = async () => {
-    if (user.phoneContacts.length) {
-      if (!isReady || mounted) {
-        setUsers(
-          user.phoneContacts
-            .sort((a, b) => a.name < b.name)
-            .sort((a, b) => a.isRegistered < b.isRegistered)
-        );
-        setIsReady(true);
+    if (await permission()) {
+      if (user.phoneContacts.length) {
+        if (!isReady || mounted) {
+          setUsers(
+            user.phoneContacts
+              .sort((a, b) => a.name < b.name)
+              .sort((a, b) => a.isRegistered < b.isRegistered)
+          );
+        }
+      } else if (!user.phoneContacts.length) {
+        return requestPermission();
       }
-    }
-    let canUpdate = await authorizeUpdates.authorizePhoneContactsUpdate();
-    if (!canUpdate) {
-      return setIsReady(true);
+      let canUpdate = await authorizeUpdates.authorizePhoneContactsUpdate();
+      if (!canUpdate) {
+        return setIsReady(true);
+      }
     }
     return requestPermission();
   };
 
   useEffect(() => {
-    setUpPage();
+    if (isFocused) {
+      setUpPage();
+    }
   }, [isFocused]);
 
   useEffect(() => {
@@ -188,15 +185,26 @@ function AddContactsScreen({ navigation }) {
   const handleRefresh = useCallback(async () => {
     if (mounted) {
       setRefreshing(true);
-      let canUpdate = await authorizeUpdates.authorizePhoneContactsUpdate();
-      if (!canUpdate) {
-        setRefreshing(false);
-        return setInfoAlert({
-          infoAlertMessage:
-            "You can update your contacts only once within 4 hours.",
-          showInfoAlert: true,
-        });
-      }
+      // if (!user.phoneContacts.length) {
+      //   await requestPermission();
+      //   return setRefreshing(false);
+      // } else if (
+      //   user.phoneContacts.length &&
+      //   (await getPhoneContacts()) > user.phoneContacts.length
+      // ) {
+      //   console.log(user.phoneContacts.length);
+      //   await requestPermission();
+      //   return setRefreshing(false);
+      // }
+      // let canUpdate = await authorizeUpdates.authorizePhoneContactsUpdate();
+      // if (!canUpdate) {
+      //   setRefreshing(false);
+      //   return setInfoAlert({
+      //     infoAlertMessage:
+      //       "You can update your contacts only once within 4 hours.",
+      //     showInfoAlert: true,
+      //   });
+      // }
       await requestPermission();
       return setRefreshing(false);
     }
@@ -267,46 +275,48 @@ function AddContactsScreen({ navigation }) {
   );
 
   return (
-    <Screen style={styles.container}>
-      <AppHeader
-        leftIcon="arrow-back"
-        onPressLeft={handleBack}
-        title="Add Contacts"
+    <>
+      <Screen style={styles.container}>
+        <AppHeader
+          leftIcon="arrow-back"
+          onPressLeft={handleBack}
+          title="Add Contacts"
+        />
+        <ScreenSub>
+          {!isReady ? (
+            <AppActivityIndicator />
+          ) : (
+            <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
+              <AddContactList
+                isConnected={isConnected}
+                isFocused={isFocused}
+                onRefresh={handleRefresh}
+                refreshing={refreshing}
+                onInvitePress={
+                  SMS.isAvailableAsync() ? handleUserInvite : handleInvitePress
+                }
+                users={users}
+              />
+            </ApiContext.Provider>
+          )}
+        </ScreenSub>
+      </Screen>
+      <Alert
+        visible={contactaAccessDeniedAlertVisibility}
+        title="Contacts Access Denied"
+        description="Please give access to your contacts to find them on SeeYot."
+        onRequestClose={handleContactsAccessDeniedAlertVisibility}
+        leftOption="Cancel"
+        rightOption="Ok"
+        leftPress={handleContactsAccessDeniedAlertVisibility}
+        rightPress={openPermissionSettings}
       />
-      <ScreenSub>
-        <Alert
-          visible={contactaAccessDeniedAlertVisibility}
-          title="Contacts Access Denied"
-          description="Please give access to your contacts to find out your contacts on SeeYot."
-          onRequestClose={handleContactsAccessDeniedAlertVisibility}
-          leftOption="Cancel"
-          rightOption="Ok"
-          leftPress={handleContactsAccessDeniedAlertVisibility}
-          rightPress={openPermissionSettings}
-        />
-        <InfoAlert
-          leftPress={handleCloseInfoAlert}
-          description={infoAlert.infoAlertMessage}
-          visible={infoAlert.showInfoAlert}
-        />
-        {!isReady ? (
-          <AppActivityIndicator />
-        ) : (
-          <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
-            <AddContactList
-              isConnected={isConnected}
-              isFocused={isFocused}
-              onRefresh={handleRefresh}
-              refreshing={refreshing}
-              onInvitePress={
-                SMS.isAvailableAsync() ? handleUserInvite : handleInvitePress
-              }
-              users={users}
-            />
-          </ApiContext.Provider>
-        )}
-      </ScreenSub>
-    </Screen>
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
+      />
+    </>
   );
 }
 const styles = ScaledSheet.create({

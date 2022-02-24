@@ -75,7 +75,6 @@ const styles = ScaledSheet.create({
     letterSpacing: "0.3@s",
     paddingHorizontal: "20@s",
     textAlign: "left",
-    width: "100%",
   },
 });
 

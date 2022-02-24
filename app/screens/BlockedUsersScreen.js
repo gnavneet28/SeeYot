@@ -21,7 +21,7 @@ import ScreenSub from "../components/ScreenSub";
 
 function BlockedUsersScreen({ navigation }) {
   const { user, setUser } = useAuth();
-  const { tackleProblem, showSucessMessage } = apiActivity;
+  const { tackleProblem } = apiActivity;
 
   // STATES
   const [apiProcessing, setApiProcessing] = useState(false);
@@ -81,36 +81,38 @@ function BlockedUsersScreen({ navigation }) {
   const keyExtractor = useCallback((item) => item._id, []);
 
   return (
-    <Screen style={styles.container}>
-      <AppHeader
-        leftIcon="arrow-back"
-        onPressLeft={handleBackPress}
-        title="Blocklist"
-      />
-      <ScreenSub>
-        <InfoAlert
-          leftPress={handleCloseInfoAlert}
-          description={infoAlert.infoAlertMessage}
-          visible={infoAlert.showInfoAlert}
+    <>
+      <Screen style={styles.container}>
+        <AppHeader
+          leftIcon="arrow-back"
+          onPressLeft={handleBackPress}
+          title="Blocklist"
         />
-        {user && !currentUser.blocked.length ? (
-          <AppText style={styles.emptyBlocklistInfo}>
-            Blocklist is empty.
-          </AppText>
-        ) : null}
-        <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
-          <FlatList
-            data={data}
-            ItemSeparatorComponent={ItemSeperatorComponent}
-            keyExtractor={keyExtractor}
-            onRefresh={handleRefresh}
-            refreshing={refreshing}
-            renderItem={renderItem}
-            style={styles.blockList}
-          />
-        </ApiContext.Provider>
-      </ScreenSub>
-    </Screen>
+        <ScreenSub>
+          {user && !currentUser.blocked.length ? (
+            <AppText style={styles.emptyBlocklistInfo}>
+              Blocklist is empty.
+            </AppText>
+          ) : null}
+          <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
+            <FlatList
+              data={data}
+              ItemSeparatorComponent={ItemSeperatorComponent}
+              keyExtractor={keyExtractor}
+              onRefresh={handleRefresh}
+              refreshing={refreshing}
+              renderItem={renderItem}
+              style={styles.blockList}
+            />
+          </ApiContext.Provider>
+        </ScreenSub>
+      </Screen>
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
+      />
+    </>
   );
 }
 const styles = ScaledSheet.create({

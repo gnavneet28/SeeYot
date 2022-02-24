@@ -9,7 +9,7 @@ import defaultStyles from "../config/styles";
 
 function ProfileOption({
   icon = "",
-  iconColor = defaultStyles.colors.tomato,
+  iconColor = defaultStyles.colors.secondary_Variant,
   onPress,
   style,
   title = "",

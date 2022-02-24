@@ -12,6 +12,8 @@ import OptionalAnswer from "./OptionalAnswer";
 
 import defaultStyles from "../config/styles";
 
+const modalHeaderColor = defaultStyles.colors.secondary_Variant;
+
 function FavoriteMessageInput({
   handleAddOptionPress,
   handleCloseMessage,
@@ -58,6 +60,7 @@ function FavoriteMessageInput({
     >
       <View style={styles.messageBackground}>
         <ScrollView
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.scrollView}
         >
@@ -65,7 +68,7 @@ function FavoriteMessageInput({
             <AntDesign
               onPress={processing === true ? () => null : handleCloseMessage}
               name="downcircle"
-              color={defaultStyles.colors.tomato}
+              color={defaultStyles.colors.white}
               size={scale(28)}
             />
           </View>
@@ -83,103 +86,91 @@ function FavoriteMessageInput({
             <AppText style={styles.favoriteMessaggingTitle}>
               Favorite Messaging
             </AppText>
-            <View style={styles.inputBoxContainerMain}>
-              <AppImage
-                imageUrl={recipient.picture}
-                style={styles.image}
-                subStyle={styles.imageSub}
-              />
-              <View style={styles.inputBoxContainer}>
-                <TextInput
-                  ref={textInputRef}
-                  editable={!processing}
-                  placeholder={
-                    "What would you like to say to" +
-                    " " +
-                    recipient.name +
-                    "..."
-                  }
-                  multiline={true}
-                  value={message.textMessage}
-                  maxLength={250}
-                  onChangeText={(text) =>
-                    setMessage({ ...message, textMessage: text })
-                  }
-                  style={styles.messageInput}
+            <View style={styles.contentContainer}>
+              <View style={styles.inputBoxContainerMain}>
+                <AppImage
+                  imageUrl={recipient.picture}
+                  style={styles.image}
+                  subStyle={styles.imageSub}
                 />
-                <AppText style={styles.wordCount}>
-                  {message.textMessage.length}/250
-                </AppText>
-              </View>
-            </View>
-            <View style={styles.moodContainerMain}>
-              <AppText style={styles.selectMood}>Select your mood</AppText>
-              <ScrollView
-                keyboardShouldPersistTaps="handled"
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.moodContainerSub}
-              >
-                {moodData.map((d, index) => (
-                  <Mood
-                    key={d.mood + index.toString()}
-                    mood={d.mood}
-                    isSelected={message.mood === d.mood ? true : false}
-                    onPress={
-                      processing === true
-                        ? () => null
-                        : () => handleSetMood(d.mood)
+                <View style={styles.inputBoxContainer}>
+                  <TextInput
+                    ref={textInputRef}
+                    editable={!processing}
+                    placeholder={
+                      "What would you like to say to" +
+                      " " +
+                      recipient.name +
+                      "..."
                     }
+                    multiline={true}
+                    value={message.textMessage}
+                    maxLength={250}
+                    onChangeText={(text) =>
+                      setMessage({ ...message, textMessage: text })
+                    }
+                    style={styles.messageInput}
                   />
-                ))}
-              </ScrollView>
-            </View>
-            {optionalAnswer.length >= 1 ? (
-              <View style={styles.optionContainerMain}>
-                <ScrollView>
-                  <AppText style={styles.selectOption}>
-                    Optional Replies
+                  <AppText style={styles.wordCount}>
+                    {message.textMessage.length}/250
                   </AppText>
-                  {optionalAnswer.map((d, index) => (
-                    <OptionalAnswer
-                      key={d + index.toString()}
-                      answer={d}
+                </View>
+              </View>
+              <View style={styles.moodContainerMain}>
+                <AppText style={styles.selectMood}>Select your mood</AppText>
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.moodContainerSub}
+                >
+                  {moodData.map((d, index) => (
+                    <Mood
+                      key={d.mood + index.toString()}
+                      mood={d.mood}
+                      isSelected={message.mood === d.mood ? true : false}
                       onPress={
                         processing === true
                           ? () => null
-                          : () => handleRemoveOptionalAnswer(d)
+                          : () => handleSetMood(d.mood)
                       }
                     />
                   ))}
                 </ScrollView>
               </View>
-            ) : null}
-            {optionalAnswer.length < 4 ? (
-              <AppButton
-                onPress={
-                  processing === true ? () => null : handleAddOptionPress
-                }
-                title="Add Options"
-                style={styles.addOptions}
-                subStyle={styles.addOptionsSub}
-              />
-            ) : null}
-            <ApiProcessingContainer
-              style={[
-                styles.apiProcessingContainer,
-                {
-                  backgroundColor:
-                    checkSendButtonDisability() || processing === true
-                      ? defaultStyles.colors.lightGrey
-                      : defaultStyles.colors.secondary,
-                },
-              ]}
-              processing={processing}
-            >
-              <AppButton
-                disabled={checkSendButtonDisability() ? true : false}
+              {optionalAnswer.length >= 1 ? (
+                <View style={styles.optionContainerMain}>
+                  <ScrollView>
+                    <AppText style={styles.selectOption}>
+                      Optional Replies
+                    </AppText>
+                    {optionalAnswer.map((d, index) => (
+                      <OptionalAnswer
+                        key={d + index.toString()}
+                        answer={d}
+                        onPress={
+                          processing === true
+                            ? () => null
+                            : () => handleRemoveOptionalAnswer(d)
+                        }
+                      />
+                    ))}
+                  </ScrollView>
+                </View>
+              ) : null}
+              {optionalAnswer.length < 4 ? (
+                <AppButton
+                  onPress={
+                    processing === true ? () => null : handleAddOptionPress
+                  }
+                  title="Add Options"
+                  style={styles.addOptions}
+                  subStyle={styles.addOptionsSub}
+                />
+              ) : null}
+              <ApiProcessingContainer
                 style={[
-                  styles.sendButton,
+                  styles.apiProcessingContainer,
                   {
                     backgroundColor:
                       checkSendButtonDisability() || processing === true
@@ -187,12 +178,26 @@ function FavoriteMessageInput({
                         : defaultStyles.colors.secondary,
                   },
                 ]}
-                title="Send"
-                onPress={
-                  processing === true ? () => null : handleSendMessagePress
-                }
-              />
-            </ApiProcessingContainer>
+                processing={processing}
+              >
+                <AppButton
+                  disabled={checkSendButtonDisability() ? true : false}
+                  style={[
+                    styles.sendButton,
+                    {
+                      backgroundColor:
+                        checkSendButtonDisability() || processing === true
+                          ? defaultStyles.colors.lightGrey
+                          : defaultStyles.colors.secondary,
+                    },
+                  ]}
+                  title="Send"
+                  onPress={
+                    processing === true ? () => null : handleSendMessagePress
+                  }
+                />
+              </ApiProcessingContainer>
+            </View>
           </View>
         </ScrollView>
       </View>
@@ -218,7 +223,7 @@ const styles = ScaledSheet.create({
   closeMessageIconContainer: {
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: modalHeaderColor,
     borderRadius: "25@s",
     bottom: "-25@s",
     height: "40@s",
@@ -227,10 +232,16 @@ const styles = ScaledSheet.create({
     width: "40@s",
     zIndex: 222,
   },
+  contentContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    paddingTop: "10@s",
+    width: "100%",
+  },
   favoriteMessaggingTitle: {
-    borderBottomColor: defaultStyles.colors.lightGrey,
-    borderBottomWidth: 1,
-    marginBottom: "10@s",
+    backgroundColor: modalHeaderColor,
+    color: defaultStyles.colors.white,
+    marginBottom: "5@s",
     textAlign: "center",
     width: "100%",
   },
@@ -241,12 +252,12 @@ const styles = ScaledSheet.create({
   },
   messageMainContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: modalHeaderColor,
     borderBottomWidth: 2,
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
     overflow: "hidden",
-    paddingTop: "25@s",
+    paddingTop: "20@s",
     width: "100%",
   },
   inputBoxContainerMain: {
@@ -303,12 +314,13 @@ const styles = ScaledSheet.create({
     justifyContent: "flex-end",
   },
   selectMood: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: "20@s",
-    color: defaultStyles.colors.secondary,
+    backgroundColor: defaultStyles.colors.light,
+    borderTopLeftRadius: "5@s",
+    borderBottomLeftRadius: "5@s",
+    color: defaultStyles.colors.dark,
     fontSize: "12@s",
-    height: "32@s",
-    marginHorizontal: "5@s",
+    height: "35@s",
+    marginLeft: "5@s",
     paddingHorizontal: "10@s",
     textAlign: "center",
     textAlignVertical: "center",

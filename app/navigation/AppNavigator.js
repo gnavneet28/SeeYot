@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import * as IAP from "expo-in-app-purchases";
 
 import IndexNavigator from "./IndexNavigator";
 import ProfileNavigator from "./ProfileNavigator";
 import VipNavigator from "./VipNavigator";
 import Constant from "./NavigationConstants";
 import storeDetails from "../utilities/storeDetails";
+import { showMessage } from "react-native-flash-message";
+import cache from "../utilities/cache";
 
 import socket from "../api/socketClient";
 
@@ -23,6 +25,9 @@ import ActiveForContext from "../utilities/activeForContext";
 import ActiveMessagesContext from "../utilities/activeMessagesContext";
 import TypingContext from "../utilities/typingContext";
 
+import defaultProps from "../utilities/defaultProps";
+import usersApi from "../api/users";
+
 const Tab = createBottomTabNavigator();
 
 let timeOut;
@@ -33,6 +38,97 @@ function AppNavigator(props) {
   const [activeFor, setActiveFor] = useState([]);
   const [activeMessages, setActiveMessages] = useState([]);
   const [typing, setTyping] = useState(false);
+
+  const purchaseItem = async (id) => {
+    const { ok, data, problem } = await usersApi.vipSubscribe(id);
+    if (ok) {
+      await storeDetails(data.user);
+      setUser(data.user);
+      return showMessage({
+        ...defaultProps.alertMessageConfig,
+        message: data.message,
+        type: "success",
+      });
+    }
+
+    return showMessage({
+      ...defaultProps.alertMessageConfig,
+      message: data.message
+        ? data.message
+        : "Something went wrong! Please contact support if needed",
+      type: "warning",
+    });
+  };
+
+  useEffect(() => {
+    const subscription = IAP.setPurchaseListener(
+      ({ responseCode, errorCode, results }) => {
+        if (responseCode === IAP.IAPResponseCode.OK) {
+          results.forEach(async (purchase) => {
+            if (!purchase.acknowledged) {
+              let purchaseObject = { ...purchase };
+              if (purchaseObject.purchaseState === 1) {
+                let expiryInDays;
+                let productId = purchaseObject.productId;
+                const plans = [
+                  "seeyotvip_125_1m",
+                  "seeyotvip_225_2m",
+                  "seeyotvip_325_3m",
+                  "seeyotvip_525_6m",
+                ];
+
+                if (productId == plans[0]) {
+                  expiryInDays = 30;
+                } else if (productId == plans[1]) {
+                  expiryInDays = 60;
+                } else if (productId == plans[2]) {
+                  expiryInDays = 90;
+                } else {
+                  expiryInDays = 180;
+                }
+                await cache.storeWithExpiry(
+                  "subscription",
+                  purchaseObject,
+                  expiryInDays
+                );
+                await purchaseItem(purchaseObject.productId);
+              }
+              // Then when you're done
+              IAP.finishTransactionAsync(purchase, true);
+            }
+          });
+        } else if (responseCode === IAP.IAPResponseCode.USER_CANCELED) {
+          showMessage({
+            ...defaultProps.alertMessageConfig,
+            message: "The transaction was canceled!",
+            type: "info",
+          });
+        } else if (responseCode === IAP.IAPResponseCode.DEFERRED) {
+          showMessage({
+            ...defaultProps.alertMessageConfig,
+            message:
+              "User does not have permissions to buy but requested parental approval (iOS only)",
+            type: "info",
+          });
+        } else {
+          showMessage({
+            ...defaultProps.alertMessageConfig,
+            message: `Something went wrong with the purchase. Received errorCode ${errorCode}`,
+            type: "info",
+          });
+        }
+      }
+    );
+
+    return () => {
+      try {
+        subscription.remove();
+      } catch (error) {}
+      try {
+        IAP.disconnectAsync();
+      } catch (error) {}
+    };
+  }, []);
 
   useEffect(() => {
     const subscription1 = socket.on(`newNotification${user._id}`, (data) => {

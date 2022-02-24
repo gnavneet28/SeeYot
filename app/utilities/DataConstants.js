@@ -19,7 +19,7 @@ export default DataConstants = {
   PHONE_CONTACTS: "userPhoneContacts",
   POINTS: "userPoints",
   SEARCH_HISTORY: "userSearchHistory",
-  STATS: "stats",
+  STATS: "statsPresent",
   THOUGHTS: "userThoughts",
   VIP: "vip",
 };

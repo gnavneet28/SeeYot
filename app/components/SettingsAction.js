@@ -17,11 +17,13 @@ function SettingsAction({
   containerStyle,
   titleStyle,
   buttonStyle,
+  AdditionalActionComponent,
 }) {
   return (
     <View style={[styles.container, containerStyle]}>
       <AppText style={[styles.title, titleStyle]}>{title}</AppText>
       <AppText style={styles.info}>{info}</AppText>
+      {AdditionalActionComponent ? <AdditionalActionComponent /> : null}
       <ApiProcessingContainer
         style={styles.apiProcessingContainer}
         processing={processing}
@@ -53,13 +55,15 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
-    borderRadius: "5@s",
-    elevation: 4,
+    backgroundColor: defaultStyles.colors.white,
+    //borderRadius: "5@s",
+    //elevation: 4,
+    borderBottomWidth: 1,
+    borderColor: defaultStyles.colors.light,
     justifyContent: "center",
     marginTop: "10@s",
     padding: "5@s",
-    width: "95%",
+    width: "100%",
   },
   info: {
     color: defaultStyles.colors.dark_Variant,
@@ -68,10 +72,12 @@ const styles = ScaledSheet.create({
     width: "90%",
   },
   title: {
-    alignSelf: "flex-start",
+    // alignSelf: "flex-start",
     color: defaultStyles.colors.dark,
     fontSize: "15@s",
     marginBottom: "5@s",
+    textAlign: "left",
+    width: "90%",
   },
 });
 

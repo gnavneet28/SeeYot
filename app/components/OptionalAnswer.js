@@ -12,19 +12,20 @@ function OptionalAnswer({ answer, onPress }) {
     <View style={styles.container}>
       <AppText style={styles.answer}>{answer}</AppText>
       <Ionicons
-        color={defaultStyles.colors.lightGrey}
+        color={defaultStyles.colors.white}
         name="close"
         onPress={onPress}
         size={scale(22)}
+        style={styles.icon}
       />
     </View>
   );
 }
 const styles = ScaledSheet.create({
   answer: {
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.lightGrey,
     borderRadius: "10@s",
-    color: defaultStyles.colors.blue,
+    color: defaultStyles.colors.dark,
     fontSize: "13.5@s",
     marginLeft: "10@s",
     maxWidth: "85%",
@@ -37,6 +38,10 @@ const styles = ScaledSheet.create({
     marginVertical: "5@s",
     padding: "5@s",
     width: "95%",
+  },
+  icon: {
+    backgroundColor: defaultStyles.colors.dark_Variant,
+    borderRadius: "5@s",
   },
 });
 

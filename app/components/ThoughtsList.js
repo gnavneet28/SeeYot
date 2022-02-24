@@ -2,9 +2,6 @@ import React, { useCallback, memo } from "react";
 import { View, FlatList } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 
-import ChatListHeader from "./ChatListHeader";
-import ChatBubble from "./ChatBubble";
-import defaultStyles from "../config/styles";
 import ActiveChatBubble from "./ActiveChatBubble";
 
 import useAuth from "../auth/useAuth";
@@ -32,10 +29,6 @@ function ThoughtsList({
     [activeChat, recipient._id]
   );
 
-  const renderListFooter = useCallback(() => {
-    return <ChatListHeader activeChat={activeChat} user={recipient} />;
-  }, [recipient, user.contacts, activeChat]);
-
   return (
     <View style={[styles.container]}>
       <FlatList
@@ -43,8 +36,7 @@ function ThoughtsList({
         keyboardShouldPersistTaps="handled"
         data={[...thoughts].reverse()}
         keyExtractor={keyExtractor}
-        ListFooterComponent={renderListFooter}
-        inverted={-1}
+        inverted={true}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={true}
@@ -56,13 +48,9 @@ function ThoughtsList({
 }
 const styles = ScaledSheet.create({
   container: {
-    flexShrink: 1,
+    flex: 1,
+    paddingTop: "5@s",
     width: "100%",
-  },
-  typing: {
-    backgroundColor: defaultStyles.colors.primary,
-    paddingHorizontal: "10@s",
-    paddingVertical: "5@s",
   },
 });
 

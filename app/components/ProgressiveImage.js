@@ -1,12 +1,12 @@
-import React from "react";
+import React, { memo } from "react";
 import { StyleSheet, Animated, TouchableHighlight } from "react-native";
-import FastImage from "react-native-fast-image";
 
 import defaultStyles from "../config/styles";
 
 function ProgressiveImage({
   activeOpacity = 0.8,
-  customImage,
+  customImage = "image_placeholder",
+  disabled = false,
   imageUrl = "",
   onPress = () => null,
   style,
@@ -30,6 +30,7 @@ function ProgressiveImage({
   };
   return (
     <TouchableHighlight
+      disabled={disabled}
       underlayColor={defaultStyles.colors.white}
       activeOpacity={activeOpacity}
       onPress={onPress}
@@ -37,21 +38,21 @@ function ProgressiveImage({
     >
       <>
         <Animated.Image
-          resizeMode="cover"
+          resizeMode="contain"
           style={[styles.image, { opacity: defaultImageAnimated }, subStyle]}
-          source={{ uri: "user" }}
+          source={{ uri: customImage }}
           onLoad={handleDefaultImageLoad}
           blurRadius={2}
         />
         <Animated.Image
-          resizeMode="cover"
+          resizeMode="contain"
           style={[
             styles.image,
             { opacity: imageAnimated },
             styles.imageOverlay,
             subStyle,
           ]}
-          source={{ uri: imageUrl ? imageUrl : "user" }}
+          source={{ uri: imageUrl ? imageUrl : customImage }}
           onLoad={handleImageLoad}
         />
       </>
@@ -61,26 +62,25 @@ function ProgressiveImage({
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
-    borderRadius: 30,
-    height: 60,
+    backgroundColor: defaultStyles.colors.white,
+    height: "100%",
     justifyContent: "center",
     overflow: "hidden",
-    width: 60,
+    width: "100%",
   },
   image: {
-    borderRadius: 30,
     flex: 1,
-    height: 60,
-    width: 60,
+    height: "100%",
+    width: "100%",
   },
   imageOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
+    backgroundColor: defaultStyles.colors.white,
     bottom: 0,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0,
   },
 });
 
-export default ProgressiveImage;
+export default memo(ProgressiveImage);

@@ -166,7 +166,10 @@ class AddContactList extends React.Component {
         </View>
         <View style={styles.listView}>
           <RecyclerListView
-            scrollViewProps={{ keyboardShouldPersistTaps: "handled" }}
+            scrollViewProps={{
+              keyboardShouldPersistTaps: "handled",
+              showsVerticalScrollIndicator: false,
+            }}
             canChangeSize={true}
             dataProvider={this.state.dataProvider}
             extendedState={this.state}

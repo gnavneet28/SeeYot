@@ -136,70 +136,71 @@ export default function VerifyOtpScreen({ navigation, route }) {
   };
 
   return (
-    <Screen style={styles.container}>
+    <>
+      <Screen style={styles.container}>
+        <View style={styles.infoIconContainer}>
+          <MaterialCommunityIcons
+            color={defaultStyles.colors.white}
+            name="cellphone-text"
+            size={scale(40)}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <View style={styles.otpInputContainer}>
+            <CodeField
+              ref={ref}
+              {...props}
+              value={value}
+              onChangeText={setValue}
+              cellCount={6}
+              rootStyle={styles.codeFieldRoot}
+              keyboardType="number-pad"
+              textContentType="oneTimeCode"
+              renderCell={({ index, symbol, isFocused }) => (
+                <Text
+                  key={index}
+                  style={[
+                    styles.cell,
+                    isFocused && styles.focusCell,
+                    { fontFamily: "ComicNeue-Bold" },
+                  ]}
+                  onLayout={getCellOnLayoutHandler(index)}
+                >
+                  {symbol || (isFocused ? <Cursor /> : null)}
+                </Text>
+              )}
+            />
+          </View>
+          <AppButton
+            disabled={!value || value.length < 6 ? true : false}
+            onPress={handleSubmit}
+            style={styles.button}
+            subStyle={{
+              color: defaultStyles.colors.primary,
+              letterSpacing: scale(2),
+              fontSize: scale(16),
+            }}
+            title="Next"
+          />
+          <AppButton
+            disabled={disabled}
+            title="Send Otp again"
+            style={styles.sendOtpAgain}
+            subStyle={{ fontSize: scale(14) }}
+            onPress={handleSendOtpAgainPress}
+          />
+        </View>
+        <AppText onPress={openPrivacyPage} style={styles.infoText}>
+          By continuing you agree to the Terms and Privacy policy.
+        </AppText>
+      </Screen>
       <LoadingIndicator visible={isLoading} />
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
         visible={infoAlert.showInfoAlert}
       />
-
-      <View style={styles.infoIconContainer}>
-        <MaterialCommunityIcons
-          color={defaultStyles.colors.white}
-          name="cellphone-text"
-          size={scale(40)}
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <View style={styles.otpInputContainer}>
-          <CodeField
-            ref={ref}
-            {...props}
-            value={value}
-            onChangeText={setValue}
-            cellCount={6}
-            rootStyle={styles.codeFieldRoot}
-            keyboardType="number-pad"
-            textContentType="oneTimeCode"
-            renderCell={({ index, symbol, isFocused }) => (
-              <Text
-                key={index}
-                style={[
-                  styles.cell,
-                  isFocused && styles.focusCell,
-                  { fontFamily: "ComicNeue-Bold" },
-                ]}
-                onLayout={getCellOnLayoutHandler(index)}
-              >
-                {symbol || (isFocused ? <Cursor /> : null)}
-              </Text>
-            )}
-          />
-        </View>
-        <AppButton
-          disabled={!value || value.length < 6 ? true : false}
-          onPress={handleSubmit}
-          style={styles.button}
-          subStyle={{
-            color: defaultStyles.colors.primary,
-            letterSpacing: scale(2),
-            fontSize: scale(16),
-          }}
-          title="Next"
-        />
-        <AppButton
-          disabled={disabled}
-          title="Send Otp again"
-          style={styles.sendOtpAgain}
-          subStyle={{ fontSize: scale(14) }}
-          onPress={handleSendOtpAgainPress}
-        />
-      </View>
-      <AppText onPress={openPrivacyPage} style={styles.infoText}>
-        By continuing you agree to the Terms and Privacy policy.
-      </AppText>
-    </Screen>
+    </>
   );
 }
 

@@ -19,6 +19,8 @@ import Icon from "./Icon";
 
 import defaultStyles from "../config/styles";
 
+const modalHeaderColor = defaultStyles.colors.secondary_Variant;
+
 function FavoriteMessageReplyModal({
   isVisible,
   reply,
@@ -42,17 +44,15 @@ function FavoriteMessageReplyModal({
     >
       <View style={styles.messageBackground}>
         <ScrollView
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            flexGrow: 1,
-            justifyContent: "flex-end",
-          }}
+          contentContainerStyle={styles.scrollView}
         >
           <View style={styles.closeMessageIconContainer}>
             <AntDesign
-              onPress={sendingReply ? null : handleCloseMessage}
+              onPress={sendingReply ? () => null : handleCloseMessage}
               name="downcircle"
-              color={defaultStyles.colors.tomato}
+              color={defaultStyles.colors.white}
               size={scale(28)}
             />
           </View>
@@ -60,79 +60,90 @@ function FavoriteMessageReplyModal({
             <AppText style={styles.favoriteMessaggingTitle}>
               Favorite Messaging
             </AppText>
-            <View style={styles.messageCreatorDetails}>
-              <AppImage
-                activeOpacity={1}
-                style={styles.image}
-                subStyle={styles.imageSub}
-                imageUrl={messageCreator.picture}
-              />
-              <View style={styles.messageDetailsContainer}>
-                <AppText style={styles.creatorName}>
-                  {messageCreator.name}
-                </AppText>
-                <AppText style={styles.message}>{message.message}</AppText>
-                <AppText style={styles.createdAt}>
-                  {dayjs(message.createdAt).fromNow()}
-                </AppText>
+            <View style={styles.contentContainer}>
+              <View style={styles.messageCreatorDetails}>
+                <AppImage
+                  activeOpacity={1}
+                  style={styles.image}
+                  subStyle={styles.imageSub}
+                  imageUrl={messageCreator.picture}
+                />
+                <View style={styles.messageDetailsContainer}>
+                  <AppText style={styles.creatorName}>
+                    {messageCreator.name}
+                  </AppText>
+                  <AppText style={styles.message}>{message.message}</AppText>
+                  <AppText style={styles.createdAt}>
+                    {dayjs(message.createdAt).fromNow()}
+                  </AppText>
+                </View>
               </View>
-            </View>
 
-            {message.options.length >= 1 ? (
-              <View style={styles.optionContainerMain}>
-                <ScrollView keyboardShouldPersistTaps="handled">
-                  <AppText style={styles.selectOption}>Select a Reply</AppText>
-                  {message.options.map((d, index) => (
-                    <ReplyOption
-                      key={d._id + index.toString()}
-                      selectedMessageId={selectedMessageId}
-                      option={d}
-                      onPress={
-                        sendingReply ? null : () => setSelectedMessageId(d._id)
+              {message.options.length >= 1 ? (
+                <View style={styles.optionContainerMain}>
+                  <ScrollView keyboardShouldPersistTaps="handled">
+                    <AppText style={styles.selectOption}>
+                      Select a Reply
+                    </AppText>
+                    {message.options.map((d, index) => (
+                      <ReplyOption
+                        key={d._id + index.toString()}
+                        selectedMessageId={selectedMessageId}
+                        option={d}
+                        onPress={
+                          sendingReply
+                            ? () => null
+                            : () => setSelectedMessageId(d._id)
+                        }
+                      />
+                    ))}
+                  </ScrollView>
+                </View>
+              ) : null}
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  multiline={true}
+                  editable={!sendingReply}
+                  maxLength={250}
+                  onChangeText={setReply}
+                  placeholder={
+                    message.replied
+                      ? "Reply again..."
+                      : "Reply to know who sent this message..."
+                  }
+                  style={[
+                    styles.inputBox,
+                    { fontFamily: "ComicNeue-Bold", fontWeight: "normal" },
+                  ]}
+                  value={reply}
+                />
+                <TouchableOpacity
+                  disabled={
+                    reply.replace(/\s/g, "").length >= 1 && isConnected
+                      ? false
+                      : true
+                  }
+                  onPress={
+                    sendingReply || !isConnected ? null : handleMessageReply
+                  }
+                  style={styles.send}
+                >
+                  <ApiProcessingContainer processing={sendingReply}>
+                    <Icon
+                      color={
+                        reply.replace(/\s/g, "").length >= 1 &&
+                        !sendingReply &&
+                        isConnected
+                          ? defaultStyles.colors.secondary
+                          : defaultStyles.colors.lightGrey
                       }
+                      name="send"
+                      size={scale(28)}
                     />
-                  ))}
-                </ScrollView>
+                  </ApiProcessingContainer>
+                </TouchableOpacity>
               </View>
-            ) : null}
-
-            <View style={styles.inputContainer}>
-              <TextInput
-                editable={!sendingReply}
-                maxLength={250}
-                onChangeText={setReply}
-                placeholder="Reply to know who sent this message..."
-                style={[
-                  styles.inputBox,
-                  { fontFamily: "ComicNeue-Bold", fontWeight: "normal" },
-                ]}
-                value={reply}
-              />
-              <TouchableOpacity
-                disabled={
-                  reply.replace(/\s/g, "").length >= 1 && isConnected
-                    ? false
-                    : true
-                }
-                onPress={
-                  sendingReply || !isConnected ? null : handleMessageReply
-                }
-                style={styles.send}
-              >
-                <ApiProcessingContainer processing={sendingReply}>
-                  <Icon
-                    color={
-                      reply.replace(/\s/g, "").length >= 1 &&
-                      !sendingReply &&
-                      isConnected
-                        ? defaultStyles.colors.secondary
-                        : defaultStyles.colors.lightGrey
-                    }
-                    name="send"
-                    size={scale(28)}
-                  />
-                </ApiProcessingContainer>
-              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
@@ -144,7 +155,7 @@ const styles = ScaledSheet.create({
   closeMessageIconContainer: {
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: modalHeaderColor,
     borderRadius: "25@s",
     bottom: "-25@s",
     height: "40@s",
@@ -161,10 +172,15 @@ const styles = ScaledSheet.create({
     color: defaultStyles.colors.primary,
     fontSize: "15@s",
   },
+  contentContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    width: "100%",
+  },
   favoriteMessaggingTitle: {
-    borderBottomColor: defaultStyles.colors.lightGrey,
-    borderBottomWidth: 1,
-    marginBottom: "10@s",
+    backgroundColor: modalHeaderColor,
+    color: defaultStyles.colors.white,
+    marginBottom: "5@s",
     textAlign: "center",
     width: "100%",
   },
@@ -174,7 +190,7 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.light,
     borderRadius: "30@s",
     flexDirection: "row",
-    height: "38@s",
+    minHeight: "38@s",
     justifyContent: "space-between",
     marginVertical: "15@s",
     width: "90%",
@@ -186,6 +202,8 @@ const styles = ScaledSheet.create({
     height: "100%",
     marginRight: "5@s",
     paddingHorizontal: "10@s",
+    paddingLeft: "15@s",
+    paddingVertical: "8@s",
     width: "86%",
   },
   messageBackground: {
@@ -195,11 +213,11 @@ const styles = ScaledSheet.create({
   },
   messageMainContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: modalHeaderColor,
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
     overflow: "hidden",
-    paddingTop: "25@s",
+    paddingTop: "20@s",
     width: "100%",
   },
   messageCreatorDetails: {
@@ -233,7 +251,7 @@ const styles = ScaledSheet.create({
   message: {
     borderColor: defaultStyles.colors.yellow_Variant,
     borderLeftWidth: 2,
-    color: defaultStyles.colors.secondary,
+    color: defaultStyles.colors.blue,
     fontSize: "14@s",
     opacity: 0.8,
     paddingHorizontal: "10@s",
@@ -242,6 +260,10 @@ const styles = ScaledSheet.create({
   optionContainerMain: {
     marginVertical: "5@s",
     width: "100%",
+  },
+  scrollView: {
+    flexGrow: 1,
+    justifyContent: "flex-end",
   },
   selectOption: {
     alignSelf: "center",

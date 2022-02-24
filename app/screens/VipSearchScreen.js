@@ -264,11 +264,7 @@ function VipSearchScreen({ navigation }) {
           rightIcon="help-outline"
           title="Vip Area"
         />
-        <InfoAlert
-          description={infoAlert.infoAlertMessage}
-          leftPress={handleCloseInfoAlert}
-          visible={infoAlert.showInfoAlert}
-        />
+
         <ScreenSub>
           <SearchBox
             invite={false}
@@ -309,6 +305,11 @@ function VipSearchScreen({ navigation }) {
           handlePopUpOnSendThoughtButtonPress
         }
         hanldeRemoveFromSearchHistory={hanldeRemoveFromSearchHistory}
+      />
+      <InfoAlert
+        description={infoAlert.infoAlertMessage}
+        leftPress={handleCloseInfoAlert}
+        visible={infoAlert.showInfoAlert}
       />
     </>
   );

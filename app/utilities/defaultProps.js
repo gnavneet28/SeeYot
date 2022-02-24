@@ -1,3 +1,8 @@
+import { scale } from "react-native-size-matters";
+import Constants from "expo-constants";
+import { Platform } from "react-native";
+import defaultStyles from "../config/styles";
+
 export default {
   defaultMessage: {
     _id: "",
@@ -58,28 +63,28 @@ export default {
   },
   plans: [
     {
-      _id: "seeyotvip_250_1m",
+      _id: "seeyotvip_125_1m",
       planDuration: "1 Month",
-      planName: "Plan A",
-      planRate: 250,
+      planName: "Lite",
+      planRate: 125,
     },
     {
-      _id: "seeyotvip_450_2m",
+      _id: "seeyotvip_225_2m",
       planDuration: "2 Months",
-      planName: "Plan B",
-      planRate: 450,
+      planName: "Ultra",
+      planRate: 225,
     },
     {
-      _id: "seeyotvip_700_3m",
+      _id: "seeyotvip_325_3m",
       planDuration: "3 Months",
-      planName: "Plan C",
-      planRate: 700,
+      planName: "Premium",
+      planRate: 325,
     },
     {
-      _id: "seeyotvip_1250_6m",
+      _id: "seeyotvip_525_6m",
       planDuration: "6 Months",
-      planName: "Plan D",
-      planRate: 1250,
+      planName: "Pro",
+      planRate: 525,
     },
   ],
   defaultEchoMessageOption: {
@@ -88,5 +93,42 @@ export default {
     messageFor: "",
     name: "",
     picture: "",
+  },
+  alertMessageConfig: {
+    duration: 3000,
+    backgroundColor: defaultStyles.colors.green,
+    animated: true,
+    autoHide: true,
+    statusBarHeight:
+      Platform.OS == "android" ? Constants.statusBarHeight : null,
+    style: {
+      alignItems: "center",
+      justifyContent: "center",
+      borderBottomRightRadius: scale(15),
+      borderBottomLeftRadius: scale(15),
+    },
+    textProps: {
+      style: {
+        fontFamily: "ComicNeue-Bold",
+        fontSize: scale(15),
+        color: defaultStyles.colors.white,
+        textAlign: "center",
+      },
+    },
+  },
+
+  defaultChartConfig: {
+    backgroundColor: "#e26a00",
+    backgroundGradientFrom: "#fb8c00",
+    backgroundGradientTo: "#ffa726",
+    color: (opacity = 0.5) => `rgba(255, 255, 255, ${opacity})`,
+    style: {
+      borderRadius: 5,
+    },
+  },
+  defaultStylesForData: {
+    legendFontColor: defaultStyles.colors.dark_Variant,
+    legendFontSize: scale(13),
+    legendFontFamily: "ComicNeue-Bold",
   },
 };

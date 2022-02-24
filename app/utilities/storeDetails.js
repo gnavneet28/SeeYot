@@ -30,7 +30,7 @@ const storeDetails = async (data) => {
   await asyncStorage.store(DataConstants.FAVORITES, data.favorites);
   await asyncStorage.store(DataConstants.MESSAGES, data.messages);
   await asyncStorage.store(DataConstants.ADSSTATS, adStats);
-  await asyncStorage.store(DataConstants.STATS, data.stats);
+  //await asyncStorage.store(DataConstants.STATS, data.statsPresent);
 };
 
 export default storeDetails;

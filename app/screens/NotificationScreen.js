@@ -228,16 +228,6 @@ function NotificationScreen({ navigation }) {
           title="Notifications"
         />
         <ScreenSub>
-          <SeeThought
-            visible={visible}
-            setVisible={setVisible}
-            message={thought}
-          />
-          <InfoAlert
-            leftPress={handleCloseInfoAlert}
-            description={infoAlert.infoAlertMessage}
-            visible={infoAlert.showInfoAlert}
-          />
           {user.vip.subscription || (
             <VipAdCard onPress={handleVipCardPress} style={styles.adCard} />
           )}
@@ -274,6 +264,12 @@ function NotificationScreen({ navigation }) {
           />
         </View>
       </AppModal>
+      <SeeThought visible={visible} setVisible={setVisible} message={thought} />
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
+      />
     </>
   );
 }

@@ -58,7 +58,7 @@ function FavoriteOptionsModal({
               />
               <AppButton
                 disabled={
-                  optionalMessage.replace(/\s/g, "").length >= 3 ? false : true
+                  optionalMessage.replace(/\s/g, "").length >= 1 ? false : true
                 }
                 onPress={handleAddOptionalReplyPress}
                 title="Add"
@@ -66,7 +66,7 @@ function FavoriteOptionsModal({
                   styles.addButton,
                   {
                     backgroundColor:
-                      optionalMessage.replace(/\s/g, "").length >= 3
+                      optionalMessage.replace(/\s/g, "").length >= 1
                         ? defaultStyles.colors.blue
                         : defaultStyles.colors.lightGrey,
                   },
@@ -93,13 +93,13 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
     borderRadius: "10@s",
-    borderWidth: 2,
+    borderWidth: 1,
     elevation: 5,
     overflow: "hidden",
     width: "80%",
   },
   addOptionTitle: {
-    backgroundColor: defaultStyles.colors.dark_Variant,
+    backgroundColor: defaultStyles.colors.secondary_Variant,
     color: defaultStyles.colors.white,
     height: "40@s",
     textAlign: "center",
@@ -107,7 +107,7 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   addOptionInfo: {
-    color: defaultStyles.colors.secondary,
+    color: defaultStyles.colors.dark_Variant,
     fontSize: "12.5@s",
     marginVertical: "5@s",
     textAlign: "left",

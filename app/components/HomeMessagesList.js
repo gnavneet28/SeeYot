@@ -38,7 +38,7 @@ function HomeMessagesList({ messages = [], onMessagePress, style }) {
     return messages
       .sort((a, b) => a.createdAt > b.createdAt)
       .sort((a, b) => a.seen > b.seen)
-      .filter((m) => dayjs(new Date()).diff(dayjs(m.createdAt), "hours") <= 24);
+      .filter((m) => dayjs(new Date()).diff(dayjs(m.createdAt), "hours") < 24);
   }, [messages]);
 
   return (

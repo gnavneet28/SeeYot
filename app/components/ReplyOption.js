@@ -25,10 +25,10 @@ function ReplyOption({ option = defaultOption, onPress, selectedMessageId }) {
           {
             backgroundColor: option.selected
               ? defaultStyles.colors.blue
-              : defaultStyles.colors.light,
+              : defaultStyles.colors.lightGrey,
             color: option.selected
               ? defaultStyles.colors.white
-              : defaultStyles.colors.dark_Variant,
+              : defaultStyles.colors.dark,
           },
         ]}
       >
@@ -43,7 +43,7 @@ const styles = ScaledSheet.create({
     fontSize: "14@s",
     paddingHorizontal: "10@s",
     paddingVertical: "5@s",
-    textAlign: "center",
+    textAlign: "left",
     textAlignVertical: "center",
   },
   container: {

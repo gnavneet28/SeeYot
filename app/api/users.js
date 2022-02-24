@@ -71,7 +71,8 @@ const updateEchoWhenMessage = () =>
 const updateEchoWhenPhotoTap = () =>
   apiClient.put(endPoint + "/me/echoWhen/photoTap", {});
 
-const vipSubscribe = () => apiClient.put(endPoint + "/me/vip/subscribe", {});
+const vipSubscribe = (productId) =>
+  apiClient.put(endPoint + "/me/vip/subscribe", { productId });
 
 const vipUnSubscribe = () =>
   apiClient.put(endPoint + "/me/vip/unsubscribe", {});
@@ -127,12 +128,40 @@ const updateReceivedMessagesCount = (id) =>
 const setTyping = (id) => apiClient.put(endPoint + "/setTyping/" + id, {});
 const stopTyping = (id) => apiClient.put(endPoint + "/stopTyping/" + id, {});
 
+const getUserActiveForMe = (id) =>
+  apiClient.get(endPoint + "/activeForMe/" + id, {});
+
+const getMyStats = () => apiClient.get(endPoint + "/stats", {});
+
+const getUploadedPhoto = (picture) => {
+  const formData = new FormData();
+
+  if (picture) {
+    formData.append("picture", {
+      name: picture.split("/").pop(),
+      uri: picture,
+      type: "image/jpg",
+    });
+  }
+  return apiClient.put(endPoint + "/temp/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+const checkIsVip = () => apiClient.get(endPoint + "/isVip", {});
+
 export default {
   addContact,
   addFavorite,
   addToSearchHistory,
   blockContact,
+  checkIsVip,
   getCurrentUser,
+  getMyStats,
+  getUploadedPhoto,
+  getUserActiveForMe,
   makeCurrentUserActiveFor,
   makeCurrentUserInActiveFor,
   notifyUserForActiveChat,

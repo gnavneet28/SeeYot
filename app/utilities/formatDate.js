@@ -1,6 +1,8 @@
 export default formatDate = (date) => {
-  let dateOfDate = new Date(date).getDate().toString();
-  let monthOfDate = new Date(date).getMonth().toString();
+  let actualDate = new Date(date);
+  let dateOfDate = actualDate.getDate().toString();
+  let monthOfDate = (actualDate.getMonth() + 1).toString();
+  let yearOfDate = actualDate.getFullYear().toString();
 
-  return dateOfDate + "/" + monthOfDate;
+  return dateOfDate + "/" + monthOfDate + "/" + yearOfDate;
 };

@@ -152,8 +152,8 @@ android {
         applicationId "com.seeyot"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "1.0.1"
+        versionCode 3
+        versionName "1.0.2"
         vectorDrawables.useSupportLibrary = true
     }
     splits {
@@ -210,6 +210,8 @@ dependencies {
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
     implementation project(':react-native-vector-icons')
+
+
 
     
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";

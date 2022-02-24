@@ -4,14 +4,16 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
 
-function ApiProcessingContainer({ children, processing, style }) {
+function ApiProcessingContainer({
+  children,
+  processing,
+  style,
+  color = defaultStyles.colors.tomato,
+}) {
   if (processing)
     return (
       <View style={[styles.container, style]}>
-        <ActivityIndicator
-          size={scale(16)}
-          color={defaultStyles.colors.tomato}
-        />
+        <ActivityIndicator size={scale(16)} color={color} />
       </View>
     );
 

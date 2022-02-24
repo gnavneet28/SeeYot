@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Dimensions, View, RefreshControl } from "react-native";
+import { Dimensions, View, RefreshControl } from "react-native";
 import {
   RecyclerListView,
   DataProvider,
@@ -156,6 +156,7 @@ class RepliesList extends React.Component {
                 refreshing={this.props.refreshing}
               />
             }
+            scrollViewProps={{ showsVerticalScrollIndicator: false }}
             canChangeSize={true}
             dataProvider={this.state.dataProvider}
             extendedState={this.state}

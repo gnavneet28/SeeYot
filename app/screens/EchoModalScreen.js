@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { View, Image, ImageBackground } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Image,
+  ImageBackground,
+  TouchableWithoutFeedback,
+} from "react-native";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import {
   PinchGestureHandler,
   GestureHandlerRootView,
+  ScrollView,
 } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
@@ -24,6 +30,8 @@ import Screen from "../components/Screen";
 import useAuth from "../auth/useAuth";
 import useMountedRef from "../hooks/useMountedRef";
 
+import debounce from "../utilities/debounce";
+
 import defaultStyles from "../config/styles";
 import ScreenSub from "../components/ScreenSub";
 
@@ -40,12 +48,12 @@ function EchoModalScreen({ route, navigation }) {
   const [echoMessage, setEchoMessage] = useState({ message: "" });
 
   const getEchoMessage = async () => {
+    if (user._id != recipient._id) {
+      usersApi.updatePhotoTapsCount(recipient._id);
+    }
     const { data, problem, ok } = await echosApi.getEcho(recipient._id);
     if (ok && mounted) {
       setEchoMessage(data);
-      if (user._id != recipient._id) {
-        usersApi.updatePhotoTapsCount(recipient._id);
-      }
     }
   };
 
@@ -57,7 +65,10 @@ function EchoModalScreen({ route, navigation }) {
 
   let imageUri = recipient.picture;
 
-  const handleBack = () => navigation.goBack();
+  const handleBack = useCallback(
+    debounce(() => navigation.goBack(), 500, true),
+    []
+  );
   // PinchGesture Image Zoom
 
   const AnimatedImage = Animated.createAnimatedComponent(Image);
@@ -94,49 +105,57 @@ function EchoModalScreen({ route, navigation }) {
   });
   return (
     <Screen style={styles.container}>
-      <ScreenSub>
-        <ImageBackground
-          blurRadius={4}
-          source={imageUri ? { uri: imageUri } : { uri: "user" }}
-          style={styles.largeImageModalFallback}
-        >
-          <View style={styles.contentContainer}>
-            <View style={styles.inlargedHeader}>
-              <MaterialIcons
-                onPress={handleBack}
-                name="arrow-back"
-                size={scale(23)}
-                color={defaultStyles.colors.primary}
-                style={styles.closeIcon}
-              />
-
-              <AppText style={{ zIndex: 222, fontSize: scale(15) }}>
-                {recipient.name}
-              </AppText>
-            </View>
-            <SharedElement id={recipient._id}>
-              <GestureHandlerRootView>
-                <PinchGestureHandler onGestureEvent={pinchHandler}>
-                  <AnimatedImage
-                    activeOpacity={1}
-                    source={
-                      recipient.picture
-                        ? { uri: recipient.picture }
-                        : { uri: "user" }
-                    }
-                    style={[styles.inlargedImage, rStyle]}
+      <ScreenSub style={styles.screenSub}>
+        <TouchableWithoutFeedback onPress={handleBack}>
+          <ImageBackground
+            blurRadius={4}
+            source={imageUri ? { uri: imageUri } : { uri: "user" }}
+            style={styles.largeImageModalFallback}
+          >
+            <View style={styles.contentContainer}>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollView}
+              >
+                <View style={styles.inlargedHeader}>
+                  <MaterialIcons
+                    onPress={handleBack}
+                    name="arrow-back"
+                    size={scale(23)}
+                    color={defaultStyles.colors.primary}
+                    style={styles.closeIcon}
                   />
-                </PinchGestureHandler>
-              </GestureHandlerRootView>
-            </SharedElement>
-            {echoMessage ? (
-              <EchoMessage
-                id={`echoIcon${recipient._id}`}
-                echoMessage={echoMessage.message}
-              />
-            ) : null}
-          </View>
-        </ImageBackground>
+
+                  <AppText style={{ zIndex: 222, fontSize: scale(15) }}>
+                    {recipient.name}
+                  </AppText>
+                </View>
+                <SharedElement id={recipient._id}>
+                  <GestureHandlerRootView>
+                    <PinchGestureHandler onGestureEvent={pinchHandler}>
+                      <AnimatedImage
+                        activeOpacity={1}
+                        source={
+                          recipient.picture
+                            ? { uri: recipient.picture }
+                            : { uri: "user" }
+                        }
+                        style={[styles.inlargedImage, rStyle]}
+                      />
+                    </PinchGestureHandler>
+                  </GestureHandlerRootView>
+                </SharedElement>
+                {echoMessage ? (
+                  <EchoMessage
+                    id={`echoIcon${recipient._id}`}
+                    echoMessage={echoMessage.message}
+                    style={styles.echoMessage}
+                  />
+                ) : null}
+              </ScrollView>
+            </View>
+          </ImageBackground>
+        </TouchableWithoutFeedback>
       </ScreenSub>
     </Screen>
   );
@@ -144,6 +163,10 @@ function EchoModalScreen({ route, navigation }) {
 const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
+    backgroundColor: defaultStyles.colors.primary,
+  },
+  screenSub: {
+    backgroundColor: defaultStyles.colors.primary,
   },
   closeIcon: {
     left: "15@s",
@@ -158,6 +181,7 @@ const styles = ScaledSheet.create({
     overflow: "hidden",
     width: width < height ? width - GAP : height - GAP,
   },
+  echoMessage: { marginTop: "5@s", marginBottom: "10@s" },
   inlargedImage: {
     height: width < height ? width - GAP : height - GAP,
     width: width < height ? width - GAP : height - GAP,
@@ -173,8 +197,10 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     flex: 1,
     justifyContent: "center",
+    paddingVertical: "10@s",
     width: "100%",
   },
+  scrollView: { alignItems: "center" },
 });
 
 export default EchoModalScreen;

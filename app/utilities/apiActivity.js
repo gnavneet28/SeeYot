@@ -31,5 +31,4 @@ const showSucessMessage = (setSuccess, message, timeOut = 2500) => {
 
 export default {
   tackleProblem,
-  showSucessMessage,
 };

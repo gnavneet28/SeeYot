@@ -21,8 +21,6 @@ import defaultStyles from "../config/styles";
 import ApiContext from "../utilities/apiContext";
 import apiActivity from "../utilities/apiActivity";
 
-import useConnection from "../hooks/useConnection";
-
 const defaulFavoriteUser = {
   _id: "",
   name: "",
@@ -149,7 +147,7 @@ function AddContactCard({
             {
               backgroundColor: inFavourites
                 ? defaultStyles.colors.light
-                : defaultStyles.colors.yellow_Variant,
+                : defaultStyles.colors.secondary_Variant,
             },
           ]}
           subStyle={[
@@ -157,7 +155,7 @@ function AddContactCard({
             {
               color: inFavourites
                 ? defaultStyles.colors.tomato
-                : defaultStyles.colors.secondary,
+                : defaultStyles.colors.white,
             },
           ]}
           onPress={!inFavourites ? handleAddPress : handleRemovePress}

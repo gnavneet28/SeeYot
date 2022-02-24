@@ -1,7 +1,8 @@
 import React, { memo } from "react";
 import { View, Modal } from "react-native";
 import LottieView from "lottie-react-native";
-import { ScaledSheet } from "react-native-size-matters";
+import { scale, ScaledSheet } from "react-native-size-matters";
+import Feather from "../../node_modules/react-native-vector-icons/Feather";
 
 import AppButton from "./AppButton";
 import AppText from "./AppText";
@@ -41,15 +42,18 @@ function SendingThoughtActivity({
               />
             ) : (
               <>
-                <LottieView
-                  autoPlay
-                  loop={false}
-                  source={messageSent}
-                  style={{ flex: 1, opacity: success ? 1 : 0 }}
+                <Feather
+                  name="check"
+                  size={scale(35)}
+                  color={defaultStyles.colors.green}
+                  style={{
+                    borderRadius: 10,
+                    opacity: success ? 1 : 0,
+                  }}
                 />
                 <LottieView
                   autoPlay
-                  loop={false}
+                  loop
                   source={failed}
                   style={{ flex: 1, opacity: success ? 0 : 1 }}
                 />
@@ -92,7 +96,7 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
     borderRadius: "20@s",
-    borderWidth: 1,
+    borderWidth: 2,
     justifyContent: "center",
     overflow: "hidden",
     padding: "5@s",
@@ -106,10 +110,11 @@ const styles = ScaledSheet.create({
     width: "50@s",
   },
   echoMessageContainer: {
-    backgroundColor: defaultStyles.colors.light,
-    borderColor: defaultStyles.colors.lightGrey,
-    borderRadius: "10@s",
-    borderWidth: 1,
+    borderLeftColor: defaultStyles.colors.yellow_Variant,
+    borderLeftWidth: 2,
+    borderRadius: "5@s",
+    marginBottom: "5@s",
+    paddingBottom: "5@s",
     paddingHorizontal: "10@s",
     width: "90%",
   },
@@ -118,13 +123,13 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.white,
     borderRadius: "10@s",
     height: "50@s",
-    justifyContent: "space-between",
+    justifyContent: "center",
     width: "80@s",
   },
   message: {
-    marginBottom: "15@s",
+    marginBottom: "10@s",
     marginHorizontal: "5@s",
-    marginTop: "5@s",
+    // marginTop: "5@s",
     opacity: 0.8,
     textAlign: "center",
     width: "95%",

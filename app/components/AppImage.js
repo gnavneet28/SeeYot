@@ -11,6 +11,7 @@ function AppImage({
   style,
   subStyle,
   onLongPress = () => null,
+  ...props
 }) {
   return (
     <TouchableHighlight
@@ -21,6 +22,7 @@ function AppImage({
       style={[styles.container, style]}
     >
       <Image
+        {...props}
         style={[styles.image, subStyle]}
         source={
           imageUrl

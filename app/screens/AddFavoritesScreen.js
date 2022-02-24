@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
+import { showMessage } from "react-native-flash-message";
 
 import AddFavoriteList from "../components/AddFavoriteList";
 import FavoriteOptionsModal from "../components/FavoriteOptionsModal";
@@ -21,11 +22,12 @@ import useConnection from "../hooks/useConnection";
 
 import Constants from "../navigation/NavigationConstants";
 
-import SuccessMessageContext from "../utilities/successMessageContext";
 import debounce from "../utilities/debounce";
 import ApiContext from "../utilities/apiContext";
 import apiActivity from "../utilities/apiActivity";
 import ScreenSub from "../components/ScreenSub";
+import defaultProps from "../utilities/defaultProps";
+import defaultStyles from "../config/styles";
 
 const defaultRecipient = {
   name: "",
@@ -41,12 +43,11 @@ const moodData = [
 ];
 
 function AddFavoritesScreen({ navigation }) {
-  const { user, setUser } = useAuth();
+  const { user } = useAuth();
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
   const isConnected = useConnection();
-  const { setSuccess } = useContext(SuccessMessageContext);
-  const { tackleProblem, showSucessMessage } = apiActivity;
+  const { tackleProblem } = apiActivity;
   // STATES
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState({
@@ -170,7 +171,12 @@ function AddFavoritesScreen({ navigation }) {
           if (recipient._id != user._id) {
             usersApi.updateReceivedMessagesCount(recipient._id);
           }
-          return showSucessMessage(setSuccess, "Message Sent!");
+          showMessage({
+            ...defaultProps.alertMessageConfig,
+            type: "success",
+            message: "Message Sent!",
+            backgroundColor: defaultStyles.colors.green,
+          });
         }
         setProcessing(false);
         tackleProblem(problem, data, setInfoAlert);
@@ -240,17 +246,6 @@ function AddFavoritesScreen({ navigation }) {
           onPressRight={handleHelpPress}
         />
         <ScreenSub>
-          <HelpDialogueBox
-            information="Add people to your Favorites to receive messages from them. When you send a message to someone who has added you in Favorites, he/she could see your name only when they reply to your messages.This way of interaction ensures mutual interest."
-            onPress={handleCloseHelp}
-            setVisible={setShowHelp}
-            visible={showHelp}
-          />
-          <InfoAlert
-            leftPress={handleCloseInfoAlert}
-            description={infoAlert.infoAlertMessage}
-            visible={infoAlert.showInfoAlert}
-          />
           {!isReady ? (
             <AppActivityIndicator />
           ) : (
@@ -289,6 +284,17 @@ function AddFavoritesScreen({ navigation }) {
         setOptionalMessage={setOptionalMessage}
         showAddoption={showAddoption}
         recipient={recipient}
+      />
+      <HelpDialogueBox
+        information="Add people to your Favorites to receive messages from them. When you send a message to someone who has added you in Favorites, he/she could see your name only when they reply to your messages.This way of interaction ensures mutual interest."
+        onPress={handleCloseHelp}
+        setVisible={setShowHelp}
+        visible={showHelp}
+      />
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
       />
     </>
   );

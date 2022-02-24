@@ -1,7 +1,8 @@
-import React, { useState, useCallback, useEffect, useContext } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { ScrollView, Share, View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
+import { showMessage } from "react-native-flash-message";
 
 import AddPicture from "../components/AddPicture";
 import Alert from "../components/Alert";
@@ -16,7 +17,6 @@ import ProfileOptionsModal from "../components/ProfileOptionsModal";
 import ReportModal from "../components/ReportModal";
 import Screen from "../components/Screen";
 import Selection from "../components/Selection";
-import SuccessMessageContext from "../utilities/successMessageContext";
 import UserDetailsCard from "../components/UserDetailsCard";
 
 import Constant from "../navigation/NavigationConstants";
@@ -37,14 +37,14 @@ import useConnection from "../hooks/useConnection";
 
 import defaultStyles from "../config/styles";
 import ScreenSub from "../components/ScreenSub";
+import defaultProps from "../utilities/defaultProps";
 
 function ProfileScreen({ navigation }) {
   const { user, setUser, logOut } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
   const isConnected = useConnection();
-  const { setSuccess } = useContext(SuccessMessageContext);
-  const { tackleProblem, showSucessMessage } = apiActivity;
+  const { tackleProblem } = apiActivity;
   // STATES
   const [name, setName] = useState(user.name.trim());
   const [openEditName, setOpenEditName] = useState(false);
@@ -146,8 +146,10 @@ function ProfileScreen({ navigation }) {
   }, [problemDescription]);
 
   const handleLogOutPress = useCallback(async () => {
-    await expoPushTokensApi.removeToken();
-    return await logOut();
+    setShowLogOut(false);
+    expoPushTokensApi.removeToken();
+    await logOut();
+    return;
   }, []);
 
   const handleHelpPress = useCallback(() => {
@@ -259,7 +261,11 @@ function ProfileScreen({ navigation }) {
       setUser(data.user);
       setSavingName(false);
       setOpenEditName(false);
-      return showSucessMessage(setSuccess, "Name Updated.");
+      return showMessage({
+        ...defaultProps.alertMessageConfig,
+        type: "success",
+        message: "Name Updated.",
+      });
     }
     setOpenEditName(false);
     setSavingName(false);
@@ -305,22 +311,6 @@ function ProfileScreen({ navigation }) {
           title="Profile"
         />
         <ScreenSub>
-          <Alert
-            visible={showLogOut}
-            title="Log Out"
-            description="Are you sure you want to logout?"
-            onRequestClose={handleCloseLogout}
-            leftOption="Cancel"
-            rightOption="Yes"
-            leftPress={handleCloseLogout}
-            rightPress={isConnected ? handleLogOutPress : null}
-          />
-          <LoadingIndicator visible={isLoading} />
-          <InfoAlert
-            leftPress={handleCloseInfoAlert}
-            description={infoAlert.infoAlertMessage}
-            visible={infoAlert.showInfoAlert}
-          />
           <ScrollView
             keyboardShouldPersistTaps="handled"
             style={{ width: "100%" }}
@@ -408,6 +398,22 @@ function ProfileScreen({ navigation }) {
         setOpenEditName={setOpenEditName}
         user={user}
         isConnected={isConnected}
+      />
+      <Alert
+        visible={showLogOut}
+        title="Log Out"
+        description="Are you sure you want to logout?"
+        onRequestClose={handleCloseLogout}
+        leftOption="Cancel"
+        rightOption="Yes"
+        leftPress={handleCloseLogout}
+        rightPress={isConnected ? handleLogOutPress : null}
+      />
+      <LoadingIndicator visible={isLoading} />
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
       />
     </>
   );

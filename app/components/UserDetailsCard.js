@@ -23,7 +23,7 @@ function UserDetailsCard({
     <>
       <View style={[styles.container, style]}>
         <Icon
-          color={defaultStyles.colors.tomato}
+          color={defaultStyles.colors.secondary_Variant}
           fw={fw}
           name={iconName}
           size={size}

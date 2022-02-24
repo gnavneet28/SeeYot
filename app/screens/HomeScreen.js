@@ -1,15 +1,10 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-  useContext,
-} from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { View, Linking } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
+import { showMessage } from "react-native-flash-message";
 
 import ContactList from "../components/ContactList";
 import HomeAppHeader from "../components/HomeAppHeader";
@@ -30,7 +25,6 @@ import useConnection from "../hooks/useConnection";
 
 import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
-import SuccessMessageContext from "../utilities/successMessageContext";
 import apiActivity from "../utilities/apiActivity";
 import authorizeUpdates from "../utilities/authorizeUpdates";
 
@@ -47,19 +41,13 @@ function HomeScreen({ navigation }) {
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
   const isConnected = useConnection();
-  const { setSuccess } = useContext(SuccessMessageContext);
-  const { tackleProblem, showSucessMessage } = apiActivity;
+  const { tackleProblem } = apiActivity;
 
   const [infoAlert, setInfoAlert] = useState({
     showInfoAlert: false,
     infoAlertMessage: "",
   });
   const [selectedMessageId, setSelectedMessageId] = useState("");
-  const [echoModal, setEchoModal] = useState({
-    recipient: defaultProps.defaultEchoMessageRecipient,
-    visible: false,
-    echoMessage: { message: "" },
-  });
 
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState(
@@ -69,7 +57,6 @@ function HomeScreen({ navigation }) {
     name: "************",
     picture: "",
   });
-  const [messagesList, setMessagesList] = useState([]);
   const [reply, setReply] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
 
@@ -95,9 +82,8 @@ function HomeScreen({ navigation }) {
     updateCurrentUser();
   }, []);
 
-  useEffect(() => {
-    let messages = user.messages ? user.messages : [];
-    setMessagesList(messages);
+  const userMessages = useMemo(() => {
+    return user.messages ? user.messages : [];
   }, [user]);
 
   useEffect(() => {
@@ -127,12 +113,6 @@ function HomeScreen({ navigation }) {
   useEffect(() => {
     if (mounted && selectedMessageId) {
       setSelectedMessageId("");
-    }
-  }, [isFocused, mounted]);
-
-  useEffect(() => {
-    if (!isFocused && mounted && echoModal.visible === true) {
-      setEchoModal({ ...echoModal, visible: false });
     }
   }, [isFocused, mounted]);
 
@@ -168,7 +148,6 @@ function HomeScreen({ navigation }) {
         if (message.seen === false) {
           const { ok, data, problem } = await messagesApi.markRead(message._id);
           if (ok) {
-            setMessagesList(data.messages);
             await storeDetails(data.user);
             return setUser(data.user);
           }
@@ -179,7 +158,7 @@ function HomeScreen({ navigation }) {
       500,
       true
     ),
-    [user.messages, message]
+    [user.messages, user]
   );
 
   // HEADER ACTIONS
@@ -240,11 +219,11 @@ function HomeScreen({ navigation }) {
 
   const shouldShowMessagesList = useMemo(() => {
     return (
-      messagesList.filter(
-        (m) => dayjs(new Date()).diff(dayjs(m.createdAt), "hours") <= 24
+      userMessages.filter(
+        (m) => dayjs(new Date()).diff(dayjs(m.createdAt), "hours") < 24
       ).length > 0
     );
-  }, [messagesList]);
+  }, [user]);
 
   //MESSAGE MODAL ACTION
 
@@ -272,10 +251,15 @@ function HomeScreen({ navigation }) {
               name: data.name,
               picture: data.picture,
             });
-            return showSucessMessage(setSuccess, "Reply Sent!");
+            setUser(data.user);
+            return showMessage({
+              ...defaultProps.alertMessageConfig,
+              type: "success",
+              message: "Reply Sent!",
+            });
           }
           setSendingReply(false);
-          tackleProblem(problem, data, setInfoAlert);
+          return tackleProblem(problem, data, setInfoAlert);
         }
 
         const { data, ok, problem } = await messagesApi.reply(
@@ -289,7 +273,12 @@ function HomeScreen({ navigation }) {
             name: data.name,
             picture: data.picture,
           });
-          return showSucessMessage(setSuccess, "Reply Sent!");
+          setUser(data.user);
+          return showMessage({
+            ...defaultProps.alertMessageConfig,
+            type: "success",
+            message: "Reply Sent!",
+          });
         }
         setSendingReply(false);
         tackleProblem(problem, data, setInfoAlert);
@@ -297,7 +286,7 @@ function HomeScreen({ navigation }) {
       1000,
       true
     ),
-    [message._id, reply]
+    [message._id, reply, user, selectedMessageId]
   );
 
   return (
@@ -313,15 +302,11 @@ function HomeScreen({ navigation }) {
         <ScreenSub>
           {shouldShowMessagesList ? (
             <HomeMessagesList
-              messages={messagesList}
+              messages={userMessages}
               onMessagePress={handleMessagePress}
             />
           ) : null}
-          <InfoAlert
-            description={infoAlert.infoAlertMessage}
-            leftPress={handleCloseInfoAlert}
-            visible={infoAlert.showInfoAlert}
-          />
+
           <ContactList
             onAddEchoPress={handleAddEchoButtonPress}
             onAddFriendPress={handleAddFriendPress}
@@ -344,6 +329,11 @@ function HomeScreen({ navigation }) {
         sendingReply={sendingReply}
         setReply={setReply}
         setSelectedMessageId={setSelectedMessageId}
+      />
+      <InfoAlert
+        description={infoAlert.infoAlertMessage}
+        leftPress={handleCloseInfoAlert}
+        visible={infoAlert.showInfoAlert}
       />
     </>
   );

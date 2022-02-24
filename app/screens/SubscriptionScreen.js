@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, View, Platform } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import Bugsnag from "@bugsnag/react-native";
+import * as IAP from "expo-in-app-purchases";
 
 import AppButton from "../components/AppButton";
 import AppHeader from "../components/AppHeader";
@@ -10,6 +11,7 @@ import DescriptionItem from "../components/DescriptionItem";
 import PlanCard from "../components/PlanCard";
 import Screen from "../components/Screen";
 import VipAdCard from "../components/VipAdCard";
+import InfoAlert from "../components/InfoAlert";
 
 import Constant from "../navigation/NavigationConstants";
 
@@ -19,24 +21,32 @@ import defaultProps from "../utilities/defaultProps";
 
 import debounce from "../utilities/debounce";
 
-import * as IAP from "expo-in-app-purchases";
+import usersApi from "../api/users";
+
 import ScreenSub from "../components/ScreenSub";
+import apiActivity from "../utilities/apiActivity";
 
 const items = Platform.select({
   ios: [],
   android: [
-    "seeyotvip_250_1m",
-    "seeyotvip_450_2m",
-    "seeyotvip_700_3m",
-    "seeyotvip_1250_6m",
+    "seeyotvip_125_1m",
+    "seeyotvip_225_2m",
+    "seeyotvip_325_3m",
+    "seeyotvip_525_6m",
   ],
 });
 
 const plans = defaultProps.plans;
 
 function SubscriptionScreen({ navigation, route }) {
+  const { tackleProblem } = apiActivity;
   const [products, setProducts] = useState([]);
   const [purchased, setPurchased] = useState(false);
+  const [checkingVip, setCheckingVip] = useState("");
+  const [infoAlert, setInfoAlert] = useState({
+    infoAlertMessage: "",
+    showInfoAlert: false,
+  });
   // HEADER ACTION
   const hanldeHeaderLeftPress = useCallback(
     debounce(
@@ -57,86 +67,120 @@ function SubscriptionScreen({ navigation, route }) {
     navigation.navigate(Constant.POINTS_SCREEN);
   }, []);
 
-  useEffect(() => {
+  // INFO ALERT ACTION
+  const handleCloseInfoAlert = () =>
+    setInfoAlert({ ...infoAlert, showInfoAlert: false });
+
+  const connectToTheAppStore = () => {
     IAP.connectAsync()
       .catch((err) => {
         Bugsnag.notify(err);
       })
       .then(() => {
         IAP.getProductsAsync(items).then(({ responseCode, results }) =>
-          console.log(results)
+          console.log(results[0])
         );
       })
       .catch((err) => Bugsnag.notify(err));
-  }, []);
-
-  const handlePayment = async (id) => {
-    await IAP.purchaseItemAsync(id);
   };
 
+  useEffect(() => {
+    connectToTheAppStore();
+  }, []);
+
+  const handlePayment = debounce(
+    async (id) => {
+      setCheckingVip(id);
+      const { ok, problem, data } = await usersApi.checkIsVip();
+      if (ok) {
+        setCheckingVip("");
+        try {
+          return await IAP.purchaseItemAsync(id);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      setCheckingVip("");
+      tackleProblem(problem, data, setInfoAlert);
+    },
+    5000,
+    true
+  );
+
   return (
-    <Screen>
-      <AppHeader
-        leftIcon="arrow-back"
-        onPressLeft={hanldeHeaderLeftPress}
-        title="Subscription"
+    <>
+      <Screen>
+        <AppHeader
+          leftIcon="arrow-back"
+          onPressLeft={hanldeHeaderLeftPress}
+          title="Subscription"
+        />
+        <ScreenSub>
+          <VipAdCard style={styles.vipAdCard} />
+          <AppText
+            onPress={handleManageSubscriptionPress}
+            style={styles.manageSubscription}
+          >
+            Active Subscriptions
+          </AppText>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.scrollView}>
+              <DescriptionItem
+                description="You can search people outside your contacts."
+                name="account-search"
+              />
+              <DescriptionItem
+                description="You can send your thoughts to anyone outside your contacts."
+                name="thought-bubble"
+              />
+              <DescriptionItem
+                description="You can see the actual thoughts sent by anyone, without your thoughts being matched."
+                name="lock-open"
+              />
+              <DescriptionItem
+                description="You can only be blocked by other vip members."
+                name="block-helper"
+              />
+              <DescriptionItem
+                description="Get insights on the number of people who tapped on your Display Picture, sent you Thoughts and Messages."
+                name="information-outline"
+              />
+              <AppText style={styles.selectPlanText}>Select a Plan</AppText>
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                horizontal
+                showsHorizontalScrollIndicator={false}
+              >
+                {plans.map((p) => (
+                  <PlanCard
+                    key={p._id}
+                    _id={p._id}
+                    planName={p.planName}
+                    planDuration={p.planDuration}
+                    planRate={p.planRate}
+                    onProcess={handlePayment}
+                    processing={checkingVip}
+                  />
+                ))}
+              </ScrollView>
+              <AppButton
+                onPress={handleCollectButtonPress}
+                style={styles.collectPoints}
+                title="Or Collect Points"
+              />
+            </View>
+          </ScrollView>
+        </ScreenSub>
+      </Screen>
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
       />
-      <ScreenSub>
-        <VipAdCard style={styles.vipAdCard} />
-        <AppText
-          onPress={handleManageSubscriptionPress}
-          style={styles.manageSubscription}
-        >
-          Current Subscriptions
-        </AppText>
-        <ScrollView keyboardShouldPersistTaps="handled">
-          <View style={styles.scrollView}>
-            <DescriptionItem
-              description="You can only be blocked by other vip members."
-              name="block-helper"
-            />
-            <DescriptionItem
-              description="You can search people outside your contacts."
-              name="account-search"
-            />
-            <DescriptionItem
-              description="You can send your thoughts to anyone outside your contacts."
-              name="thought-bubble"
-            />
-            <DescriptionItem
-              description="You can see the actual thoughts sent by anyone, without your thoughts being matched."
-              name="lock-open"
-            />
-            <DescriptionItem
-              description="Get insights on the number of people who tapped on your Display Picture, sent you Thoughts and Messages."
-              name="information-outline"
-            />
-            <AppText style={styles.selectPlanText}>Select a Plan</AppText>
-            <ScrollView
-              keyboardShouldPersistTaps="handled"
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            >
-              {plans.map((p) => (
-                <PlanCard
-                  key={p._id}
-                  _id={p._id}
-                  planName={p.planName}
-                  planDuration={p.planDuration}
-                  planRate={p.planRate}
-                  onProcess={handlePayment}
-                />
-              ))}
-            </ScrollView>
-            <AppButton
-              onPress={handleCollectButtonPress}
-              style={styles.collectPoints}
-              title="Or Collect Points"
-            />
-          </View>
-        </ScrollView>
-      </ScreenSub>
-    </Screen>
+    </>
   );
 }
 const styles = ScaledSheet.create({

@@ -11,14 +11,14 @@ function ChatListHeader({ user, activeChat }) {
   return (
     <View style={styles.container}>
       <View style={styles.recipientDetailsContainerMain}>
-        <AppImage
+        {/* <AppImage
           activeOpacity={1}
           imageUrl={user.picture}
           style={styles.image}
           subStyle={styles.subImage}
-        />
+        /> */}
         <View style={styles.recipientDetailsContainerSub}>
-          <AppText style={styles.name}>{user.name}</AppText>
+          {/* <AppText style={styles.name}>{user.name}</AppText> */}
           {activeChat ? (
             <AppText style={styles.infoText}>
               Send direct messages to{" "}

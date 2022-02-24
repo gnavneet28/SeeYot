@@ -1,14 +1,12 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AppLoading from "expo-app-loading";
 import * as SystemUI from "expo-system-ui";
-import { Image } from "react-native";
-import { Asset } from "expo-asset";
-import Bugsnag from "@bugsnag/react-native";
 import AccessDeniedScreen from "./app/screens/AccessDeniedScreen";
-import * as IAP from "expo-in-app-purchases";
+import FlashMessage from "react-native-flash-message";
+import jwtDecode from "jwt-decode";
 
 import getDetails from "./app/utilities/getDetails";
 
@@ -29,18 +27,6 @@ import OnboardingContext from "./app/utilities/onboardingContext";
 import useJailBreak from "./app/hooks/useJailBreak";
 
 import Onboarding from "./app/components/Onboarding";
-import SuccessMessage from "./app/components/SuccessMessage";
-import SuccessMessageContext from "./app/utilities/successMessageContext";
-
-function cacheImages(images) {
-  return images.map((image) => {
-    if (typeof image === "string") {
-      return Image.prefetch(image);
-    } else {
-      return Asset.fromModule(image).downloadAsync();
-    }
-  });
-}
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -49,10 +35,6 @@ export default function App() {
     isReady: false,
   });
   const jailBroken = useJailBreak();
-  const [success, setSuccess] = useState({
-    message: "",
-    show: false,
-  });
   const [onboarded, setOnboarded] = useState(false);
 
   const checkOnBoard = async () => {
@@ -60,28 +42,13 @@ export default function App() {
     if (userOnboarded) return setOnboarded(true);
   };
 
-  useEffect(() => {
-    const subscription = IAP.setPurchaseListener(
-      ({ responseCode, errorCode, results }) => {
-        console.log(errorCode, responseCode, results);
-      }
-    );
-
-    return () => {
-      try {
-        subscription.remove();
-      } catch (error) {}
-      try {
-        IAP.disconnectAsync();
-      } catch (error) {}
-    };
-  }, []);
-
   const restoreUser = async () => {
     const token = await authStorage.getUser();
     if (token) {
+      let decodedToken = jwtDecode(token);
       const cachedUser = await getDetails();
-      if (cachedUser) return setUser(cachedUser);
+      if (cachedUser && cachedUser._id == decodedToken._id)
+        return setUser(cachedUser);
       return setUser(null);
     }
     return setUser(null);
@@ -92,16 +59,6 @@ export default function App() {
       SystemUI.setBackgroundColorAsync(defaultStyles.colors.primary),
       checkOnBoard(),
       restoreUser(),
-      // cacheImages([
-      //   require("./app/assets/activeChat.png"),
-      //   require("./app/assets/echoMessage.png"),
-      //   require("./app/assets/nickname.png"),
-      //   require("./app/assets/sendMessages.png"),
-      //   require("./app/assets/sendThoughts.png"),
-      //   require("./app/assets/user.png"),
-      //   require("./app/assets/vipBanner.png"),
-      //   require("./app/assets/logo.png"),
-      // ]),
     ]);
   };
 
@@ -122,20 +79,16 @@ export default function App() {
       ) : (
         <AuthContext.Provider value={{ user, setUser }}>
           <OnboardingContext.Provider value={{ onboarded, setOnboarded }}>
-            <SuccessMessageContext.Provider value={{ success, setSuccess }}>
-              <OfflineNotice />
-              {success.show ? (
-                <SuccessMessage message={success.message} />
-              ) : null}
-              {onboarded ? (
-                <NavigationContainer ref={navigationRef}>
-                  {user ? <AppNavigator /> : <AuthNavigator />}
-                </NavigationContainer>
-              ) : (
-                <Onboarding />
-              )}
-              <StatusBar style="light" />
-            </SuccessMessageContext.Provider>
+            <OfflineNotice />
+            {onboarded ? (
+              <NavigationContainer ref={navigationRef}>
+                {user ? <AppNavigator /> : <AuthNavigator />}
+              </NavigationContainer>
+            ) : (
+              <Onboarding />
+            )}
+            <StatusBar style="light" />
+            <FlashMessage position="top" />
           </OnboardingContext.Provider>
         </AuthContext.Provider>
       )}

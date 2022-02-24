@@ -23,14 +23,14 @@ import verifyApi from "../api/verify";
 import Screen from "../components/Screen";
 
 // TODO: For google verification
-// import usersApi from "../api/users";
-// import useAuth from "../auth/useAuth";
-// import authStorage from "../auth/storage";
-// import storeDetails from "../utilities/storeDetails";
+import usersApi from "../api/users";
+import useAuth from "../auth/useAuth";
+import authStorage from "../auth/storage";
+import storeDetails from "../utilities/storeDetails";
 
 function SendOtpScreen({ navigation }) {
   // TODO: google verification
-  // const { logIn, setUser } = useAuth();
+  const { logIn, setUser } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
   //STATES
@@ -55,15 +55,15 @@ function SendOtpScreen({ navigation }) {
 
   // TODO: google verification
 
-  // const setAuthToken = async () => {
-  //   const authToken =
-  //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWVhYWI2NTNlZGU3NDA0YThhZDZkODAiLCJwaG9uZU51bWJlciI6MTIzNDU2Nzg5MCwiaWF0IjoxNjQyNzcwMDUyfQ.Uoy0c-fhWWyMGPToiR4wOitFnSXqpIdZm1RIX-hgv1g";
-  //   await authStorage.storeToken(authToken);
-  // };
+  const setAuthToken = async () => {
+    const authToken =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWVhYWI2NTNlZGU3NDA0YThhZDZkODAiLCJwaG9uZU51bWJlciI6MTIzNDU2Nzg5MCwiaWF0IjoxNjQ1MDEyMzY1fQ.c47x_zurxwpRWIvLJWzAJE__8dmQQFKzoywDsuUgihw";
+    await authStorage.storeToken(authToken);
+  };
 
-  // useEffect(() => {
-  //   setAuthToken();
-  // }, []);
+  useEffect(() => {
+    setAuthToken();
+  }, []);
 
   useEffect(() => {
     if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
@@ -134,70 +134,72 @@ function SendOtpScreen({ navigation }) {
   };
 
   // TODO: for google verification
-  // const handleSubmitForm = async () => {
-  //   setIsLoading(true);
+  const handleSubmitForm = async () => {
+    setIsLoading(true);
 
-  //   const { ok, problem, data } = await usersApi.getCurrentUser();
+    const { ok, problem, data } = await usersApi.getCurrentUser();
 
-  //   if (ok) {
-  //     await storeDetails(data);
-  //     setIsLoading(false);
-  //     return setUser(data);
-  //   }
-  //   setIsLoading(false);
-  //   tackleProblem(problem, data, setInfoAlert);
-  // };
+    if (ok) {
+      await storeDetails(data);
+      setIsLoading(false);
+      return setUser(data);
+    }
+    setIsLoading(false);
+    tackleProblem(problem, data, setInfoAlert);
+  };
 
   return (
-    <Screen style={styles.container}>
+    <>
+      <Screen style={styles.container}>
+        {/* <CountryPicker
+        onPress={handleSetCode}
+        setVisible={setVisible}
+        visible={visible}
+      /> */}
+        <View style={styles.infoIconContainer}>
+          <FontAwesome5
+            color={defaultStyles.colors.white}
+            name="mobile-alt"
+            size={scale(40)}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <View style={styles.phoneInputContainer}>
+            <AppText style={styles.code}>+91</AppText>
+            <AppTextInput
+              autoCorrect={false}
+              keyboardType="phone-pad"
+              maxLength={10}
+              onChangeText={(number) => setNumber(number)}
+              placeholder="Enter phone number"
+              style={styles.number}
+              subStyle={styles.numberSub}
+              textContentType="telephoneNumber"
+              value={number}
+            />
+          </View>
+          <AppButton
+            disabled={
+              number && number.length == 10 && !verificationId ? false : true
+            }
+            onPress={number == 1234567890 ? handleSubmitForm : handleSubmit}
+            style={styles.button}
+            subStyle={styles.submitButtonSub}
+            title="Send Otp"
+          />
+        </View>
+        <AppText style={styles.infoText}>
+          by continuing you confirm that you are authorized to use this phone
+          number and agree to receive text messages.
+        </AppText>
+      </Screen>
       <LoadingIndicator visible={isLoading} />
       <InfoAlert
         description={infoAlert.infoAlertMessage}
         leftPress={handleCloseInfoAlert}
         visible={infoAlert.showInfoAlert}
       />
-      {/* <CountryPicker
-        onPress={handleSetCode}
-        setVisible={setVisible}
-        visible={visible}
-      /> */}
-      <View style={styles.infoIconContainer}>
-        <FontAwesome5
-          color={defaultStyles.colors.white}
-          name="mobile-alt"
-          size={scale(40)}
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <View style={styles.phoneInputContainer}>
-          <AppText style={styles.code}>+91</AppText>
-          <AppTextInput
-            autoCorrect={false}
-            keyboardType="phone-pad"
-            maxLength={10}
-            onChangeText={(number) => setNumber(number)}
-            placeholder="Enter phone number"
-            style={styles.number}
-            subStyle={styles.numberSub}
-            textContentType="telephoneNumber"
-            value={number}
-          />
-        </View>
-        <AppButton
-          disabled={
-            number && number.length == 10 && !verificationId ? false : true
-          }
-          onPress={handleSubmit}
-          style={styles.button}
-          subStyle={styles.submitButtonSub}
-          title="Send Otp"
-        />
-      </View>
-      <AppText style={styles.infoText}>
-        by continuing you confirm that you are authorized to use this phone
-        number and agree to receive text messages.
-      </AppText>
-    </Screen>
+    </>
   );
 }
 

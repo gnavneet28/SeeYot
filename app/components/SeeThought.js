@@ -6,6 +6,8 @@ import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 import defaultStyles from "../config/styles";
 import AppText from "./AppText";
 
+const modalHeaderColor = defaultStyles.colors.secondary_Variant;
+
 function SeeThought({ visible = false, setVisible, message = "" }) {
   return (
     <Modal
@@ -19,13 +21,15 @@ function SeeThought({ visible = false, setVisible, message = "" }) {
           <AntDesign
             onPress={() => setVisible(false)}
             name="downcircle"
-            color={defaultStyles.colors.tomato}
+            color={defaultStyles.colors.white}
             size={scale(28)}
           />
         </View>
         <View style={styles.mainContainer}>
           <AppText style={styles.title}>Thought</AppText>
-          <AppText style={styles.message}>{message}</AppText>
+          <View style={styles.contentContainer}>
+            <AppText style={styles.message}>{message}</AppText>
+          </View>
         </View>
       </View>
     </Modal>
@@ -35,7 +39,7 @@ const styles = ScaledSheet.create({
   closeMessageIconContainer: {
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: modalHeaderColor,
     borderRadius: "25@s",
     bottom: "-25@s",
     height: "40@s",
@@ -51,9 +55,15 @@ const styles = ScaledSheet.create({
     justifyContent: "flex-end",
     width: "100%",
   },
-  mainContainer: {
+  contentContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
+    paddingTop: "10@s",
+    width: "100%",
+  },
+  mainContainer: {
+    alignItems: "center",
+    backgroundColor: modalHeaderColor,
     borderRadius: "5@s",
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
@@ -69,9 +79,9 @@ const styles = ScaledSheet.create({
     width: "80%",
   },
   title: {
-    borderBottomColor: defaultStyles.colors.lightGrey,
-    borderBottomWidth: 1,
-    marginBottom: "10@s",
+    backgroundColor: modalHeaderColor,
+    color: defaultStyles.colors.white,
+    marginBottom: "5@s",
     textAlign: "center",
     width: "100%",
   },

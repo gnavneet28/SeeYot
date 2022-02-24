@@ -16,6 +16,8 @@ const defaultMessage = {
   isVisible: false,
 };
 
+const modalHeaderColor = defaultStyles.colors.secondary_Variant;
+
 function ReplyModal({ message = defaultMessage, handleCloseModal }) {
   return (
     <Modal
@@ -26,50 +28,51 @@ function ReplyModal({ message = defaultMessage, handleCloseModal }) {
     >
       <View style={styles.messageBackground}>
         <ScrollView
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            flexGrow: 1,
-            justifyContent: "flex-end",
-          }}
+          contentContainerStyle={styles.scrollView}
         >
           <View style={styles.closeMessageIconContainer}>
             <AntDesign
               onPress={handleCloseModal}
               name="downcircle"
-              color={defaultStyles.colors.tomato}
+              color={defaultStyles.colors.white}
               size={scale(28)}
             />
           </View>
           <View style={styles.messageMainContainer}>
             <AppText style={styles.replyModalTitle}>Replies</AppText>
-            <AppText style={styles.modalMessage}>
-              {message.message.message}
-            </AppText>
 
-            {message.message.options.length >= 1 ? (
-              <View style={styles.optionContainerMain}>
-                <ScrollView keyboardShouldPersistTaps="handled">
-                  {message.message.options.map((d, index) => (
-                    <ReplyOption
-                      key={d._id + index.toString()}
-                      selectedMessageId={
-                        message.message.options.filter(
-                          (m) => m.selected == true
-                        )[0]
-                          ? message.message.options.filter(
-                              (m) => m.selected == true
-                            )[0]._id
-                          : ""
-                      }
-                      option={d}
-                    />
-                  ))}
-                </ScrollView>
-              </View>
-            ) : null}
-            {message.message.reply.map((r) => (
-              <ReplyCardSub key={r._id} reply={r} message={message.message} />
-            ))}
+            <View style={styles.contentContainer}>
+              <AppText style={styles.modalMessage}>
+                {message.message.message}
+              </AppText>
+
+              {message.message.options.length >= 1 ? (
+                <View style={styles.optionContainerMain}>
+                  <ScrollView keyboardShouldPersistTaps="handled">
+                    {message.message.options.map((d, index) => (
+                      <ReplyOption
+                        key={d._id + index.toString()}
+                        selectedMessageId={
+                          message.message.options.filter(
+                            (m) => m.selected == true
+                          )[0]
+                            ? message.message.options.filter(
+                                (m) => m.selected == true
+                              )[0]._id
+                            : ""
+                        }
+                        option={d}
+                      />
+                    ))}
+                  </ScrollView>
+                </View>
+              ) : null}
+              {message.message.reply.map((r) => (
+                <ReplyCardSub key={r._id} reply={r} message={message.message} />
+              ))}
+            </View>
           </View>
         </ScrollView>
       </View>
@@ -80,7 +83,7 @@ const styles = ScaledSheet.create({
   closeMessageIconContainer: {
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: modalHeaderColor,
     borderRadius: "25@s",
     bottom: "-25@s",
     height: "40@s",
@@ -89,6 +92,12 @@ const styles = ScaledSheet.create({
     width: "40@s",
     zIndex: 222,
   },
+  contentContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    paddingTop: "10@s",
+    width: "100%",
+  },
   messageBackground: {
     flex: 1,
     justifyContent: "flex-end",
@@ -96,11 +105,11 @@ const styles = ScaledSheet.create({
   },
   messageMainContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: modalHeaderColor,
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
     overflow: "hidden",
-    paddingTop: "25@s",
+    paddingTop: "20@s",
     width: "100%",
   },
   modalMessage: {
@@ -118,11 +127,15 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   replyModalTitle: {
-    borderBottomColor: defaultStyles.colors.lightGrey,
-    borderBottomWidth: 1,
-    marginBottom: "10@s",
+    backgroundColor: modalHeaderColor,
+    color: defaultStyles.colors.white,
+    marginBottom: "5@s",
     textAlign: "center",
     width: "100%",
+  },
+  scrollView: {
+    flexGrow: 1,
+    justifyContent: "flex-end",
   },
 });
 

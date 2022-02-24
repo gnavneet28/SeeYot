@@ -6,8 +6,17 @@ import AppButton from "./AppButton";
 import AppText from "./AppText";
 
 import defaultStyles from "../config/styles";
+import ApiProcessingContainer from "./ApiProcessingContainer";
 
-function PlanCard({ _id, planName, planDuration, planRate, onProcess, style }) {
+function PlanCard({
+  _id,
+  planName,
+  planDuration,
+  planRate,
+  onProcess,
+  style,
+  processing,
+}) {
   return (
     <LinearGradient
       colors={["#FC5C7D", "#6A82FB"]}
@@ -18,21 +27,33 @@ function PlanCard({ _id, planName, planDuration, planRate, onProcess, style }) {
         {"\u20B9"} {planRate}
       </AppText>
       <AppText style={styles.planDuration}>{planDuration}</AppText>
-      <AppButton
-        style={styles.button}
-        subStyle={{ color: defaultStyles.colors.dark }}
-        title="Select"
-        onPress={() => onProcess(_id)}
-      />
+      <ApiProcessingContainer
+        processing={processing == _id}
+        style={styles.apiProcessingContainer}
+      >
+        <AppButton
+          style={styles.button}
+          subStyle={{ color: defaultStyles.colors.dark }}
+          title="Select"
+          onPress={() => onProcess(_id)}
+        />
+      </ApiProcessingContainer>
     </LinearGradient>
   );
 }
 const styles = ScaledSheet.create({
-  button: {
+  apiProcessingContainer: {
     backgroundColor: defaultStyles.colors.white,
     borderRadius: "20@s",
     height: "30@s",
     marginBottom: "5@s",
+    width: "70%",
+  },
+  button: {
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: "20@s",
+    height: "30@s",
+    // marginBottom: "5@s",
     width: "70%",
   },
   container: {

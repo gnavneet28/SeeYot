@@ -108,7 +108,7 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
                 {
                   backgroundColor: inContacts
                     ? defaultStyles.colors.light
-                    : defaultStyles.colors.yellow_Variant,
+                    : defaultStyles.colors.secondary_Variant,
                 },
               ]}
               subStyle={[
@@ -116,7 +116,7 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
                 {
                   color: inContacts
                     ? defaultStyles.colors.dark_Variant
-                    : defaultStyles.colors.secondary,
+                    : defaultStyles.colors.white,
                 },
               ]}
               onPress={handleAddPress}

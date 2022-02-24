@@ -18,8 +18,8 @@ function EchoMessage({ echoMessage, style, id }) {
 }
 const styles = ScaledSheet.create({
   container: {
-    alignItems: "center",
     flexDirection: "row",
+    paddingTop: "5@s",
     width: "95%",
   },
   echoIcon: {
@@ -30,8 +30,8 @@ const styles = ScaledSheet.create({
   echoMessage: {
     alignSelf: "center",
     flexShrink: 1,
-    marginVertical: "10@s",
     overflow: "hidden",
+    paddingTop: 0,
     textAlign: "center",
     textAlignVertical: "center",
     width: "95%",

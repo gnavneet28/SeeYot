@@ -1,13 +1,8 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useContext,
-} from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, Keyboard } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
+import { showMessage } from "react-native-flash-message";
 
 import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppActivityIndicator from "../components/ActivityIndicator";
@@ -25,7 +20,6 @@ import Screen from "../components/Screen";
 import useMountedRef from "../hooks/useMountedRef";
 import useConnection from "../hooks/useConnection";
 import storeDetails from "../utilities/storeDetails";
-import SuccessMessageContext from "../utilities/successMessageContext";
 
 import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
@@ -42,8 +36,7 @@ import ScreenSub from "../components/ScreenSub";
 function AddEchoScreen({ navigation, route }) {
   const { recipient, from } = route.params;
   const isConnected = useConnection();
-  const { setSuccess } = useContext(SuccessMessageContext);
-  const { tackleProblem, showSucessMessage } = apiActivity;
+  const { tackleProblem } = apiActivity;
 
   const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
@@ -140,7 +133,11 @@ function AddEchoScreen({ navigation, route }) {
           await storeDetails(data.user);
           setUser(data.user);
           setSavingEcho(false);
-          return showSucessMessage(setSuccess, "Echo Updated successfully.");
+          return showMessage({
+            ...defaultProps.alertMessageConfig,
+            message: "Echo Updated successfully!",
+            type: "success",
+          });
         }
         setSavingEcho(false);
         tackleProblem(problem, data, setInfoAlert);
@@ -220,17 +217,6 @@ function AddEchoScreen({ navigation, route }) {
           onPressRight={handleHelpPress}
         />
         <ScreenSub>
-          <HelpDialogueBox
-            information="Echo messages are flash messages and will only be displayed when a person interacts with you by either tapping on your profile picture or by sending you thoughts. You can set the type of interaction from your profile."
-            onPress={handleCloseHelp}
-            setVisible={setShowHelp}
-            visible={showHelp}
-          />
-          <InfoAlert
-            leftPress={handleCloseInfoAlert}
-            description={infoAlert.infoAlertMessage}
-            visible={infoAlert.showInfoAlert}
-          />
           <View style={styles.mainContainer}>
             {!isReady ? (
               <AppActivityIndicator />
@@ -303,6 +289,17 @@ function AddEchoScreen({ navigation, route }) {
         isVisible={isVisible}
         recipient={recipient}
         removingEcho={removingEcho}
+      />
+      <HelpDialogueBox
+        information="Echo messages are flash messages and will only be displayed when a person interacts with you by either tapping on your profile picture or by sending you thoughts. You can set the type of interaction from your profile."
+        onPress={handleCloseHelp}
+        setVisible={setShowHelp}
+        visible={showHelp}
+      />
+      <InfoAlert
+        leftPress={handleCloseInfoAlert}
+        description={infoAlert.infoAlertMessage}
+        visible={infoAlert.showInfoAlert}
       />
     </>
   );

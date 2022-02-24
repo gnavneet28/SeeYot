@@ -28,6 +28,7 @@ import com.bugsnag.android.Bugsnag;
 import com.oblador.vectoricons.VectorIconsPackage;
 
 
+
 public class MainApplication extends Application implements ReactApplication {
  
 

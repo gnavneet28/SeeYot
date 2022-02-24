@@ -33,7 +33,7 @@ function ReportModal({
             <AntDesign
               onPress={() => setOpenReport(false)}
               name="downcircle"
-              color={defaultStyles.colors.tomato}
+              color={defaultStyles.colors.secondary_Variant}
               size={scale(28)}
             />
           </View>
@@ -144,8 +144,8 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   reportProblemTitle: {
-    borderBottomColor: defaultStyles.colors.lightGrey,
-    borderBottomWidth: 1,
+    // borderBottomColor: defaultStyles.colors.lightGrey,
+    //borderBottomWidth: 1,
     marginBottom: "10@s",
     textAlign: "center",
     width: "100%",

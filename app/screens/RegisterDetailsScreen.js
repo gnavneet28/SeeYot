@@ -84,38 +84,40 @@ function RegisterDetailsScreen({ route }) {
   };
 
   return (
-    <Screen style={styles.container}>
+    <>
+      <Screen style={styles.container}>
+        <View style={styles.enterDetailsContainer}>
+          <AddPicture
+            image={image}
+            onChangeImage={(image) => setImage(image)}
+            style={styles.addPhoto}
+          />
+          <AppTextInput
+            maxLength={25}
+            onChangeText={(name) => setName(name)}
+            placeholder="Enter your name here..."
+            style={styles.enterName}
+            subStyle={styles.enterNameSub}
+          />
+          <AppText style={styles.info}>
+            Name you enter here, will be visible to your friends.
+          </AppText>
+        </View>
+        <AppButton
+          disabled={name ? false : true}
+          onPress={handleSubmitForm}
+          style={[styles.button, { display: keyboardShown ? "none" : "flex" }]}
+          subStyle={styles.submitButtonSub}
+          title="Next"
+        />
+      </Screen>
       <LoadingIndicator visible={isLoading} />
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
         visible={infoAlert.showInfoAlert}
       />
-      <View style={styles.enterDetailsContainer}>
-        <AddPicture
-          image={image}
-          onChangeImage={(image) => setImage(image)}
-          style={styles.addPhoto}
-        />
-        <AppTextInput
-          maxLength={25}
-          onChangeText={(name) => setName(name)}
-          placeholder="Enter your name here..."
-          style={styles.enterName}
-          subStyle={styles.enterNameSub}
-        />
-        <AppText style={styles.info}>
-          Name you enter here, will be visible to your friends.
-        </AppText>
-      </View>
-      <AppButton
-        disabled={name ? false : true}
-        onPress={handleSubmitForm}
-        style={[styles.button, { display: keyboardShown ? "none" : "flex" }]}
-        subStyle={styles.submitButtonSub}
-        title="Next"
-      />
-    </Screen>
+    </>
   );
 }
 const styles = ScaledSheet.create({

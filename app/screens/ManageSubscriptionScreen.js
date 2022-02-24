@@ -51,6 +51,7 @@ function ManageSubscriptionScreen({ navigation }) {
       />
       <ScreenSub>
         <ScrollView
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.container}
         >

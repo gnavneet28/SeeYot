@@ -30,7 +30,7 @@ function ProfileOptionsModal({
           <AntDesign
             onPress={() => setVisible(false)}
             name="downcircle"
-            color={defaultStyles.colors.tomato}
+            color={defaultStyles.colors.secondary_Variant}
             size={scale(28)}
           />
         </View>

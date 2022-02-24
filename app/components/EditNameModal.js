@@ -78,7 +78,19 @@ function EditNameModal({
                       : true
                   }
                   onPress={handleNameChange}
-                  style={styles.button}
+                  style={[
+                    styles.button,
+                    {
+                      backgroundColor:
+                        name &&
+                        name.replace(/\s/g, "").length >= 4 &&
+                        isConnected &&
+                        !savingName &&
+                        name !== user.name
+                          ? defaultStyles.colors.yellow_Variant
+                          : defaultStyles.colors.light,
+                    },
+                  ]}
                   subStyle={styles.saveButtonSub}
                   title="Save"
                 />

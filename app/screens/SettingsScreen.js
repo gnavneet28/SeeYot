@@ -1,14 +1,17 @@
-import React, { useCallback, useState, useEffect, useContext } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
+import { Linking } from "react-native";
+import { showMessage } from "react-native-flash-message";
 
 import Alert from "../components/Alert";
 import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
 import Screen from "../components/Screen";
 import SettingsAction from "../components/SettingsAction";
+import ScreenSub from "../components/ScreenSub";
+import AppText from "../components/AppText";
 
-import SuccessMessageContext from "../utilities/successMessageContext";
 import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
@@ -17,15 +20,16 @@ import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
 import useConnection from "../hooks/useConnection";
-import ScreenSub from "../components/ScreenSub";
+
+import defaultStyles from "../config/styles";
+import defaultProps from "../utilities/defaultProps";
 
 function SettingsScreen({ navigation }) {
   const { setUser } = useAuth();
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
   const isConnected = useConnection();
-  const { setSuccess } = useContext(SuccessMessageContext);
-  const { tackleProblem, showSucessMessage, updateUserDate } = apiActivity;
+  const { tackleProblem } = apiActivity;
 
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
@@ -66,7 +70,11 @@ function SettingsScreen({ navigation }) {
       await storeDetails(data.user);
       setUser(data.user);
       setRemovingContact(false);
-      return showSucessMessage(setSuccess, "Contacts deleted successfully.");
+      return showMessage({
+        ...defaultProps.alertMessageConfig,
+        type: "success",
+        message: "Contacts deleted successfully.",
+      });
     }
 
     setRemovingContact(false);
@@ -88,6 +96,8 @@ function SettingsScreen({ navigation }) {
     setContactAlert(true);
   }, []);
 
+  const handleChangePermission = async () => await Linking.openSettings();
+
   return (
     <>
       <Screen style={styles.container}>
@@ -103,6 +113,14 @@ function SettingsScreen({ navigation }) {
             info="We store your contacts available on your device to let you discover people who are on SeeYot, if you give access to your contacts. You can opt to remove your contacts from our server anytime you want. We recommend you disabling the contacts access from your device first before removing the contacts from the server."
             buttonTitle="Remove my Contacts"
             onPress={handleOpenContactsAlert}
+            AdditionalActionComponent={() => (
+              <AppText
+                onPress={handleChangePermission}
+                style={styles.permissionChange}
+              >
+                Change permission from here.
+              </AppText>
+            )}
           />
           {/* <SettingsAction
           title="Delete my Account."
@@ -123,7 +141,7 @@ function SettingsScreen({ navigation }) {
         leftPress={() => setContactAlert(false)}
         leftOption="Cancel"
         rightOption="Ok"
-        rightPress={isConnected ? deletePhoneContacts : null}
+        rightPress={isConnected ? deletePhoneContacts : () => null}
         setVisible={setContactAlert}
         title="Delete this Message"
         visible={contactAlert}
@@ -134,6 +152,12 @@ function SettingsScreen({ navigation }) {
 const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
+  },
+  permissionChange: {
+    color: defaultStyles.colors.blue,
+    marginBottom: "10@s",
+    textAlign: "left",
+    width: "90%",
   },
 });
 

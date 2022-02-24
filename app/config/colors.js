@@ -11,6 +11,7 @@ export default {
   lightGrey: "#D3D3D3",
   placeholder: "#6B6B6B",
   primary: "#1d1f24",
+  secondary_Variant: "rgba(134, 67, 161,1)",
   secondary: "#6F009E",
   tomato: "#ff6347",
   white: "#FFFFFF",
