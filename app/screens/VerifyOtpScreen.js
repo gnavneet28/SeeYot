@@ -61,13 +61,19 @@ export default function VerifyOtpScreen({ navigation, route }) {
     }
   }, [value]);
 
-  useEffect(() => {
+  const otpListener = () =>
     OtpAutocomplete.getOtp()
       .then((p) => OtpAutocomplete.addListener(otpHandler))
       .catch((p) => Bugsnag.notify(p));
 
+  useEffect(() => {
+    otpListener();
+    // OtpAutocomplete.getOtp()
+    //   .then((p) => OtpAutocomplete.addListener(otpHandler))
+    //   .catch((p) => Bugsnag.notify(p));
+
     return () => OtpAutocomplete.removeListener();
-  }, []);
+  }, [otpListener]);
 
   const openPrivacyPage = () => {
     Linking.openURL("https://seeyot-frontend.herokuapp.com/privacy_policy");

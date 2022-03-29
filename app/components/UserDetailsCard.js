@@ -10,7 +10,7 @@ import defaultStyles from "../config/styles";
 function UserDetailsCard({
   data,
   editable = false,
-  fw,
+  iconCategory = "FontAwesome",
   iconName,
   size,
   style,
@@ -24,7 +24,7 @@ function UserDetailsCard({
       <View style={[styles.container, style]}>
         <Icon
           color={defaultStyles.colors.secondary_Variant}
-          fw={fw}
+          icon={iconCategory}
           name={iconName}
           size={size}
           style={{ marginHorizontal: 2 }}
@@ -54,6 +54,7 @@ function UserDetailsCard({
               color={defaultStyles.colors.secondary}
               name="mode-edit"
               size={scale(14)}
+              icon="MaterialIcons"
             />
           </TouchableOpacity>
         ) : null}

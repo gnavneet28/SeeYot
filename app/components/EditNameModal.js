@@ -8,6 +8,7 @@ import AppText from "./AppText";
 import AppTextInput from "./AppTextInput";
 import AppButton from "./AppButton";
 import ApiProcessingContainer from "./ApiProcessingContainer";
+import Backdrop from "./Backdrop";
 
 function EditNameModal({
   savingName,
@@ -34,6 +35,7 @@ function EditNameModal({
     >
       <TouchableWithoutFeedback onPress={handleKeyboardDismiss}>
         <View style={styles.modal}>
+          <Backdrop onPress={savingName ? doNothing : handleHideEditName} />
           <View style={styles.editContainer}>
             <AppText style={styles.editName}>Edit your name</AppText>
             <View style={styles.inputBoxContainer}>
@@ -154,7 +156,7 @@ const styles = ScaledSheet.create({
   modal: {
     backgroundColor: "rgba(0,0,0,0.7)",
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
   },
   nameLength: {
     opacity: 0.7,

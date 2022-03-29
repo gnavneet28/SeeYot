@@ -1,11 +1,11 @@
 import React, { useCallback } from "react";
-import { ScrollView } from "react-native";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import { ScrollView, View } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
-import Details from "../components/Details";
 import Screen from "../components/Screen";
+import SubscriptionDetailsCard from "../components/SubscriptionDetailsCard";
 
 import useAuth from "../auth/useAuth";
 
@@ -46,7 +46,7 @@ function ManageSubscriptionScreen({ navigation }) {
     <Screen>
       <AppHeader
         leftIcon="arrow-back"
-        title="Current Subscription"
+        title="Active Subscription"
         onPressLeft={handleBack}
       />
       <ScreenSub>
@@ -61,20 +61,30 @@ function ManageSubscriptionScreen({ navigation }) {
             </AppText>
           ) : (
             <>
-              <Details
-                style={{ marginTop: scale(20) }}
-                title="Subscription:"
-                value={subscription}
-              />
-              <Details title="Subscription Mode:" value={subscriptionType} />
-              <Details
-                title="Subscription Start Date:"
-                value={subscriptionStartDate}
-              />
-              <Details
-                title="Subscription End Date:"
-                value={subscriptionEndDate}
-              />
+              <View style={styles.firstRow}>
+                <SubscriptionDetailsCard
+                  uri={"alarm_bell"}
+                  title="Subscription"
+                  value={subscription}
+                />
+                <SubscriptionDetailsCard
+                  uri={"credit_card"}
+                  title="Subscription Mode"
+                  value={subscriptionType}
+                />
+              </View>
+              <View style={styles.secondRow}>
+                <SubscriptionDetailsCard
+                  uri={"calendar"}
+                  title="Subscription Start Date"
+                  value={subscriptionStartDate}
+                />
+                <SubscriptionDetailsCard
+                  uri={"calendar"}
+                  title="Subscription End Date"
+                  value={subscriptionEndDate}
+                />
+              </View>
             </>
           )}
         </ScrollView>
@@ -100,6 +110,19 @@ const styles = ScaledSheet.create({
     textAlign: "center",
     textAlignVertical: "center",
     width: "90%",
+  },
+  firstRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: "30@s",
+    width: "100%",
+  },
+  secondRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
   },
 });
 

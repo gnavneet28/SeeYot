@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import * as Animatable from "react-native-animatable";
 
 import defaultStyles from "../config/styles";
 import AppText from "./AppText";
@@ -20,8 +21,12 @@ function Alert({
 }) {
   return (
     <Modal transparent visible={visible} onRequestClose={onRequestClose}>
-      <View style={styles.container}>
-        <View style={styles.alertContainer}>
+      <View style={[styles.container]}>
+        <Animatable.View
+          useNativeDriver={true}
+          animation="pulse"
+          style={styles.alertContainer}
+        >
           <AppText style={styles.title}>{title}</AppText>
           <AppText style={styles.description}>{description}</AppText>
           <View style={styles.actionButtonContainer}>
@@ -43,7 +48,7 @@ function Alert({
               />
             </ApiProcessingContainer>
           </View>
-        </View>
+        </Animatable.View>
       </View>
     </Modal>
   );

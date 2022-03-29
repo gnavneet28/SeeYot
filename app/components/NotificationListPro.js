@@ -76,7 +76,10 @@ class NotificationListPro extends React.Component {
     }
   }
   componentDidUpdate(prevProps) {
-    if (prevProps.notifications != this.props.notifications) {
+    if (
+      prevProps.notifications != this.props.notifications ||
+      prevProps != this.props
+    ) {
       return this.setState({
         ...this.state,
         dataProvider: this.props.notifications.length
@@ -89,7 +92,7 @@ class NotificationListPro extends React.Component {
   render() {
     return (
       <>
-        <View style={styles.listView}>
+        <View style={[styles.listView, this.props.style]}>
           <RecyclerListView
             refreshControl={
               <RefreshControl

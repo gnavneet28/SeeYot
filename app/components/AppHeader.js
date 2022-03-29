@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import { View, TouchableHighlight } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
+import Tooltip from "react-native-walkthrough-tooltip";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
@@ -9,8 +10,8 @@ import Icon from "./Icon";
 import defaultStyles from "../config/styles";
 
 function AppHeader({
-  fwl,
-  fwr,
+  iconLeftCategory,
+  iconRightCategory,
   style,
   onPressRight,
   onPressLeft,
@@ -23,20 +24,25 @@ function AppHeader({
   leftIconColor = defaultStyles.colors.white,
   rightIconColor = defaultStyles.colors.white,
   underlayColor = defaultStyles.colors.primary,
+  showTip,
+  setShowTip,
+  tip = "hi",
+  rightOptionContainerStyle,
+  leftOptionContainerStyle,
 }) {
   return (
     <View style={[styles.container, style]}>
       <TouchableHighlight
         activeOpacity={1}
         onPress={onPressLeft}
-        style={styles.leftOption}
+        style={[styles.leftOption, leftOptionContainerStyle]}
         underlayColor={underlayColor}
       >
         <>
           {leftIcon ? (
             <Icon
               color={leftIconColor}
-              fw={fwl}
+              icon={iconLeftCategory}
               name={leftIcon}
               size={scale(23)}
             />
@@ -58,27 +64,46 @@ function AppHeader({
       <TouchableHighlight
         activeOpacity={1}
         onPress={onPressRight}
-        style={styles.rightOption}
+        style={[styles.rightOption, rightOptionContainerStyle]}
         underlayColor={underlayColor}
       >
         <>
-          {rightIcon ? (
-            <Icon
-              color={rightIconColor}
-              fw={fwr}
-              name={rightIcon}
-              size={scale(23)}
-            />
-          ) : null}
+          <Tooltip
+            contentStyle={{
+              backgroundColor: defaultStyles.colors.white,
+              height: "100%",
+            }}
+            displayInsets={{
+              top: scale(24),
+              bottom: scale(24),
+              right: scale(24),
+              left: scale(24),
+            }}
+            supportedOrientations={["portrait"]}
+            showChildInTooltip={false}
+            isVisible={showTip}
+            content={<AppText style={styles.tip}>{tip}</AppText>}
+            placement="left"
+            onClose={() => setShowTip(false)}
+          >
+            {rightIcon ? (
+              <Icon
+                color={rightIconColor}
+                icon={iconRightCategory}
+                name={rightIcon}
+                size={scale(23)}
+              />
+            ) : null}
 
-          {rightImageUrl ? (
-            <AppImage
-              imageUrl={rightImageUrl}
-              onPress={onPressRight}
-              style={styles.image}
-              subStyle={styles.imageSub}
-            />
-          ) : null}
+            {rightImageUrl ? (
+              <AppImage
+                imageUrl={rightImageUrl}
+                onPress={onPressRight}
+                style={styles.image}
+                subStyle={styles.imageSub}
+              />
+            ) : null}
+          </Tooltip>
         </>
       </TouchableHighlight>
     </View>
@@ -129,6 +154,10 @@ const styles = ScaledSheet.create({
     position: "absolute",
     right: "5@s",
     width: "50@s",
+  },
+  tip: {
+    color: defaultStyles.colors.dark,
+    fontSize: "13@s",
   },
 });
 

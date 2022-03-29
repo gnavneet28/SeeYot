@@ -1,7 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import { View } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-import { ScaledSheet } from "react-native-size-matters";
+import { scale, ScaledSheet } from "react-native-size-matters";
+import * as Animatable from "react-native-animatable";
 
 import AppHeader from "../components/AppHeader";
 import AppModal from "../components/AppModal";
@@ -9,6 +16,7 @@ import Option from "../components/Option";
 import ApiOption from "../components/ApiOption";
 import InfoAlert from "../components/InfoAlert";
 import NotificationListPro from "../components/NotificationListPro";
+import NotificationCategorySelector from "../components/NotificationCategorySelector";
 import ReplyModal from "../components/ReplyModal";
 import Screen from "../components/Screen";
 import SeeThought from "../components/SeeThought";
@@ -41,10 +49,12 @@ function NotificationScreen({ navigation }) {
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
 
+  const modalRef = useRef(null);
+
   // STATES
   const [clearNotification, setClearNotification] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [thought, setThought] = useState("");
+  const [thought, setThought] = useState({ message: "", hint: "" });
   const [refreshing, setRefreshing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
@@ -57,6 +67,28 @@ function NotificationScreen({ navigation }) {
     isVisible: false,
     message: defaultProps.defaultMessage,
   });
+
+  // NOTIFICATION FILTER
+
+  const [notificationCategory, setNotificationCategory] = useState("All");
+
+  const handleNotificationCategoryChange = (notification) => {
+    setNotificationCategory(notification.alias);
+  };
+
+  const filterNotifications = (category, user) => {
+    if (category == "All") {
+      return user.notifications;
+    } else if (category == "Matched Thoughts") {
+      return user.notifications.filter((n) => n.type == "Matched");
+    } else if (category == "Active Chat") {
+      return user.notifications.filter((n) => n.type == "ActiveChat");
+    } else if (category == "Add") {
+      return user.notifications.filter((n) => n.type == "Add");
+    } else if (category == "Replies") {
+      return user.notifications.filter((n) => n.type == "Replied");
+    }
+  };
 
   useEffect(() => {
     if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
@@ -160,7 +192,7 @@ function NotificationScreen({ navigation }) {
     }
     setClearNotification(false);
     tackleProblem(problem, data, setInfoAlert);
-  }, []);
+  }, [user]);
 
   const handleSendMessage = (notification) => {
     return navigation.navigate(Constant.SEND_THOUGHT_SCREEN, {
@@ -170,8 +202,13 @@ function NotificationScreen({ navigation }) {
   };
 
   const handleTapToSeeThought = useCallback((thought) => {
-    setThought(thought.data.message);
+    setThought(thought.data);
     setVisible(true);
+  }, []);
+
+  const handleCloseThoughtModal = useCallback(() => {
+    setThought({ message: "", hint: "" });
+    setVisible(false);
   }, []);
 
   const handleTapToSeeMatchedThought = useCallback((notification) => {
@@ -212,9 +249,12 @@ function NotificationScreen({ navigation }) {
   const data = useMemo(
     () =>
       typeof user.notifications !== "undefined"
-        ? user.notifications.sort((a, b) => a.createdAt < b.createdAt)
+        ? filterNotifications(notificationCategory, user).sort(
+            (a, b) => a.createdAt < b.createdAt
+          )
         : [],
-    [user.notifications]
+
+    [user.notifications, notificationCategory]
   );
 
   return (
@@ -231,6 +271,11 @@ function NotificationScreen({ navigation }) {
           {user.vip.subscription || (
             <VipAdCard onPress={handleVipCardPress} style={styles.adCard} />
           )}
+          <NotificationCategorySelector
+            style={{ marginBottom: scale(15) }}
+            selected={notificationCategory}
+            onPress={handleNotificationCategoryChange}
+          />
           <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
             <NotificationListPro
               isConnected={isConnected}
@@ -241,6 +286,7 @@ function NotificationScreen({ navigation }) {
               notifications={data}
               onRefresh={handleRefresh}
               refreshing={refreshing}
+              //style={styles.list}
             />
           </ApiContext.Provider>
         </ScreenSub>
@@ -248,10 +294,16 @@ function NotificationScreen({ navigation }) {
       {message.isVisible ? <View style={styles.modalFallback} /> : null}
       <ReplyModal message={message} handleCloseModal={handleCloseModal} />
       <AppModal
+        animationType="none"
         visible={showClearAllModal}
         onRequestClose={handleCloseClearAllModal}
       >
-        <View style={styles.clearAllActionContainer}>
+        <Animatable.View
+          animation="pulse"
+          useNativeDriver={true}
+          ref={modalRef}
+          style={[styles.clearAllActionContainer]}
+        >
           <Option
             title="Close"
             titleStyle={styles.closeOption}
@@ -262,9 +314,13 @@ function NotificationScreen({ navigation }) {
             onPress={isConnected ? handleClearAllPress : () => null}
             processing={clearNotification}
           />
-        </View>
+        </Animatable.View>
       </AppModal>
-      <SeeThought visible={visible} setVisible={setVisible} message={thought} />
+      <SeeThought
+        visible={visible}
+        onClose={handleCloseThoughtModal}
+        thought={thought}
+      />
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
@@ -300,6 +356,9 @@ const styles = ScaledSheet.create({
     position: "absolute",
     width: "100%",
     zIndex: 22,
+  },
+  list: {
+    paddingBottom: "10@s",
   },
 });
 

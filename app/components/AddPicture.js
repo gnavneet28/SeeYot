@@ -3,13 +3,13 @@ import { Image, Modal, TouchableHighlight, View } from "react-native";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import ImagePicker from "react-native-image-crop-picker";
 import { ScaledSheet, scale } from "react-native-size-matters";
-import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
+import * as Animatable from "react-native-animatable";
 
 import defaultStyles from "../config/styles";
 
 import Alert from "./Alert";
 import AppImage from "./AppImage";
-import AppText from "./AppText";
+import EditImageOptionSelecter from "./EditImageOptionSelecter";
 
 const width = defaultStyles.width;
 
@@ -35,7 +35,7 @@ function AddPicture({
       .then((image) => {
         onChangeImage(image.path);
       })
-      .catch();
+      .catch((err) => null);
   };
 
   const handleEditPress = () => {
@@ -45,18 +45,20 @@ function AddPicture({
 
   const hanldeRemovePicturePress = useCallback(() => {
     if (!image) return;
+    if (visible) {
+      setVisible(false);
+    }
     setShowImageEdit(false);
     setShowAlert(true);
-  }, []);
+  }, [visible]);
 
   const handleSelectPicture = useCallback(() => {
+    if (visible) {
+      setVisible(false);
+    }
     setShowImageEdit(false);
     selectImage();
-  }, []);
-
-  const handleShowAlert = () => {
-    setShowAlert(true);
-  };
+  }, [visible]);
 
   const handleHideAlert = () => {
     setShowAlert(false);
@@ -82,17 +84,6 @@ function AddPicture({
   return (
     <>
       <View style={[styles.container, style]}>
-        <Alert
-          onRequestClose={handleHideAlert}
-          description="Are you sure you want to remove this picture?"
-          leftPress={handleHideAlert}
-          leftOption="Cancel"
-          rightOption="Ok"
-          rightPress={handleAlertRightOptionPress}
-          setVisible={setShowAlert}
-          title="Remove"
-          visible={showAlert}
-        />
         <TouchableHighlight
           onPress={imageView ? handleShowInlargedImage : () => null}
           style={styles.imageContainer}
@@ -125,86 +116,86 @@ function AddPicture({
         visible={visible}
       >
         <View style={styles.contentContainer}>
-          <MaterialIcons
-            onPress={handleHideInlargedImage}
-            name="arrow-back"
-            size={scale(23)}
-            color={defaultStyles.colors.white}
-            style={styles.closeIcon}
-          />
-          <View>
+          <View style={styles.header}>
+            <MaterialIcons
+              onPress={handleHideInlargedImage}
+              name="arrow-back"
+              size={scale(23)}
+              color={defaultStyles.colors.white}
+            />
+            <TouchableHighlight
+              onPress={handleEditPress}
+              style={styles.editIconContainer}
+              underlayColor={defaultStyles.colors.primary}
+            >
+              <MaterialIcons
+                color={defaultStyles.colors.white}
+                name={icon}
+                size={scale(20)}
+              />
+            </TouchableHighlight>
+          </View>
+          <Animatable.View
+            duration={400}
+            animation="zoomIn"
+            useNativeDriver={true}
+          >
             <AppImage
               activeOpacity={1}
               imageUrl={image}
               style={styles.inlargedImage}
               subStyle={styles.inlargedImage}
             />
-          </View>
+          </Animatable.View>
         </View>
       </Modal>
-      <Modal
-        animationType="slide"
-        onRequestClose={handleHideImageEditOptions}
-        transparent={true}
-        visible={showImageEdit}
-      >
-        <View style={styles.imageEditContainer}>
-          <View style={styles.closeMessageIconContainer}>
-            <AntDesign
-              onPress={handleHideImageEditOptions}
-              name="downcircle"
-              color={defaultStyles.colors.tomato}
-              size={scale(28)}
-            />
-          </View>
-          <View style={styles.imageEditOptionContainer}>
-            <AppText
-              onPress={hanldeRemovePicturePress}
-              style={styles.imageEditButtonRemovePicture}
-            >
-              Remove Picture
-            </AppText>
-            <AppText
-              onPress={handleSelectPicture}
-              style={styles.imageEditButtonSelectPicture}
-            >
-              Select from Gallery
-            </AppText>
-          </View>
-        </View>
-      </Modal>
+      <Alert
+        onRequestClose={handleHideAlert}
+        description="Are you sure you want to remove this picture?"
+        leftPress={handleHideAlert}
+        leftOption="Cancel"
+        rightOption="Ok"
+        rightPress={handleAlertRightOptionPress}
+        setVisible={setShowAlert}
+        title="Remove"
+        visible={showAlert}
+      />
+      <EditImageOptionSelecter
+        showImageEdit={showImageEdit}
+        handleHideImageEditOptions={handleHideImageEditOptions}
+        handleSelectPicture={handleSelectPicture}
+        hanldeRemovePicturePress={hanldeRemovePicturePress}
+        setShowImageEdit={setShowImageEdit}
+      />
     </>
   );
 }
 const styles = ScaledSheet.create({
-  closeIcon: {
-    position: "absolute",
-    top: "13@s",
-    left: "19@s",
-  },
   contentContainer: {
     backgroundColor: defaultStyles.colors.primary,
     flex: 1,
     justifyContent: "center",
     width: "100%",
   },
-  closeMessageIconContainer: {
-    alignItems: "center",
-    alignSelf: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderRadius: "25@s",
-    bottom: "-25@s",
-    height: "40@s",
-    justifyContent: "center",
-    padding: "5@s",
-    width: "40@s",
-    zIndex: 222,
-  },
   container: {
     alignItems: "center",
     height: "120@s",
     justifyContent: "center",
     width: "120@s",
+  },
+  editIconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  header: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: "15@s",
+    paddingVertical: "10@s",
+    position: "absolute",
+    top: 0,
+    width: "100%",
   },
   icon: {
     alignItems: "center",
@@ -219,27 +210,6 @@ const styles = ScaledSheet.create({
     right: "8@s",
     width: "25@s",
   },
-  imageEditButtonRemovePicture: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderRadius: "5@s",
-    color: defaultStyles.colors.secondary,
-    elevation: 2,
-    height: "30@s",
-    marginVertical: "15@s",
-    textAlign: "center",
-    textAlignVertical: "center",
-    width: "70%",
-  },
-  imageEditButtonSelectPicture: {
-    backgroundColor: defaultStyles.colors.secondary,
-    borderRadius: "5@s",
-    color: defaultStyles.colors.yellow_Variant,
-    elevation: 2,
-    height: "30@s",
-    textAlign: "center",
-    textAlignVertical: "center",
-    width: "70%",
-  },
   imageContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
@@ -250,26 +220,6 @@ const styles = ScaledSheet.create({
     justifyContent: "center",
     width: "115@s",
   },
-  imageEditContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-    overflow: "hidden",
-    width: "100%",
-  },
-  imageEditOptionContainer: {
-    alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
-    borderTopColor: defaultStyles.colors.light,
-    borderTopLeftRadius: "10@s",
-    borderTopRightRadius: "10@s",
-    borderTopWidth: 1,
-    bottom: 0,
-    height: "140@s",
-    overflow: "hidden",
-    paddingTop: "20@s",
-    width: "100%",
-  },
-
   image: {
     borderRadius: "60@s",
     height: "108@s",

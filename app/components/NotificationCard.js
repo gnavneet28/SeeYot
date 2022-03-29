@@ -9,7 +9,8 @@ import React, {
 import { View, Text, TouchableHighlight } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { ScaledSheet } from "react-native-size-matters";
+import { scale, ScaledSheet } from "react-native-size-matters";
+import IonIcons from "../../node_modules/react-native-vector-icons/Ionicons";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
@@ -18,20 +19,23 @@ import DeleteAction from "./DeleteAction";
 
 import useAuth from "../auth/useAuth";
 import myApi from "../api/my";
+import usersApi from "../api/users";
 
 import debounce from "../utilities/debounce";
 import storeDetails from "../utilities/storeDetails";
 import apiActivity from "../utilities/apiActivity";
 import ApiContext from "../utilities/apiContext";
 
-import useConnection from "../hooks/useConnection";
-
 import defaultStyles from "../config/styles";
+import ApiProcessingContainer from "./ApiProcessingContainer";
 
 let defaultNotification = {
   type: "",
   message: "",
   createdAt: Date.now(),
+  data: {
+    phoneNumber: parseInt(""),
+  },
 };
 
 function NotificationCard({
@@ -46,10 +50,10 @@ function NotificationCard({
 }) {
   dayjs.extend(relativeTime);
   let currentDate = new Date();
-  // let customImage;
 
   const { user, setUser } = useAuth();
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
+  const [addingUser, setAddingUser] = useState(false);
   const { tackleProblem } = apiActivity;
 
   const [processing, setProcessing] = useState(false);
@@ -58,11 +62,55 @@ function NotificationCard({
     showInfoAlert: false,
   });
 
+  let inContacts;
+  const contacts = user.contacts;
+  let savedName = "";
+
+  if (user.phoneContacts && notification.type == "Add") {
+    let inPhoneContacts = user.phoneContacts.filter(
+      (c) => c.phoneNumber == notification.data.phoneNumber
+    )[0];
+    if (inPhoneContacts) {
+      savedName = inPhoneContacts.name ? inPhoneContacts.name : "";
+    }
+  }
+
+  if (notification.type == "Add") {
+    inContacts =
+      contacts &&
+      contacts.length > 0 &&
+      contacts.filter((c) => c.phoneNumber == notification.data.phoneNumber)[0];
+  }
+
   useEffect(() => {
     setProcessing(false);
 
     return () => setProcessing(false);
   }, [notification._id]);
+
+  // ADD CONTACTS ACTION
+  const handleAddPress = useCallback(
+    debounce(
+      async () => {
+        setAddingUser(true);
+        const { ok, data, problem } = await usersApi.addContact(
+          notification.data.phoneNumber,
+          savedName
+        );
+
+        if (ok) {
+          await storeDetails(data.user);
+          setUser(data.user);
+          return setAddingUser(false);
+        }
+        setAddingUser(false);
+        tackleProblem(problem, data, setInfoAlert);
+      },
+      1000,
+      true
+    ),
+    [user, notification]
+  );
 
   // INFO ALERT ACTIONS
   const handleCloseInfoAlert = useCallback(async () => {
@@ -72,7 +120,8 @@ function NotificationCard({
   const imageUrl = useMemo(() => {
     return notification.type == "Matched" ||
       notification.type == "Replied" ||
-      notification.type == "ActiveChat"
+      notification.type == "ActiveChat" ||
+      notification.type == "Add"
       ? notification.createdBy.picture
         ? notification.createdBy.picture
         : "user"
@@ -116,7 +165,8 @@ function NotificationCard({
     );
 
   const doWhenTappedWithType = () => {
-    if (notification.type == "Vip") return () => onTapToSeePress(notification);
+    if (notification.type == "Vip" || notification.type == "Unmatched")
+      return () => onTapToSeePress(notification);
 
     if (notification.type == "Replied") {
       return () => tapToSeeMessage(notification);
@@ -138,79 +188,135 @@ function NotificationCard({
       notification.type == "Vip" ||
       notification.type == "Replied" ||
       notification.type == "ActiveChat" ||
-      notification.type == "Matched"
+      notification.type == "Matched" ||
+      notification.type == "Add" ||
+      notification.type == "Unmatched"
     )
       return 0.9;
     return 0.7;
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor:
-            index % 2 === 0
-              ? defaultStyles.colors.light
-              : defaultStyles.colors.white,
-        },
-      ]}
-    >
-      <AppImage
-        activeOpacity={1}
-        style={styles.image}
-        subStyle={styles.imageSub}
-        imageUrl={imageUrl}
-        customImage={{ uri: "logo" }}
-      />
-      <TouchableHighlight
-        onLongPress={onLongPress}
-        underlayColor={
-          index % 2 == 0
-            ? defaultStyles.colors.light
-            : defaultStyles.colors.white
-        }
-        onPress={doWhenTappedWithType()}
-        style={styles.notificationInfo}
+    <>
+      <View
+        style={[
+          styles.container,
+          // {
+          //   backgroundColor:
+          //     index % 2 === 0
+          //       ? defaultStyles.colors.light
+          //       : defaultStyles.colors.white,
+          // },
+        ]}
       >
-        <>
-          <Text
-            numberOfLines={2}
-            onPress={doWhenTappedWithType()}
-            style={[styles.notificationMessage, { opacity: opacity() }]}
-          >
-            {notification.message}
-          </Text>
-          <Text style={styles.date}>
-            {dayjs(notification.createdAt).fromNow()}
-          </Text>
-        </>
-      </TouchableHighlight>
-      {dayjs(currentDate).diff(notification.createdAt, "minutes") <
-      10 ? null : (
-        <DeleteAction
-          style={{
-            backgroundColor:
-              index % 2 !== 0
-                ? defaultStyles.colors.light
-                : defaultStyles.colors.white,
-          }}
-          apiAction={true}
-          processing={processing}
-          onPress={
-            apiProcessing || !isConnected ? () => null : handleDeletePress
-          }
+        <AppImage
+          activeOpacity={1}
+          style={styles.image}
+          subStyle={styles.imageSub}
+          imageUrl={imageUrl}
+          customImage={{ uri: "logo" }}
         />
-      )}
+        <TouchableHighlight
+          onLongPress={onLongPress}
+          underlayColor={defaultStyles.colors.white}
+          onPress={doWhenTappedWithType()}
+          style={styles.notificationInfo}
+        >
+          <>
+            <Text
+              numberOfLines={2}
+              onPress={doWhenTappedWithType()}
+              style={[styles.notificationMessage, { opacity: opacity() }]}
+            >
+              {notification.message}
+            </Text>
+            <Text style={styles.date}>
+              {dayjs(notification.createdAt).fromNow()}
+            </Text>
+          </>
+        </TouchableHighlight>
+        {notification.type == "Add" && !inContacts ? (
+          <ApiProcessingContainer
+            color={defaultStyles.colors.dark}
+            style={styles.addUserIconContainer}
+            processing={addingUser}
+          >
+            <TouchableHighlight
+              underlayColor={defaultStyles.colors.yellow}
+              onPress={handleAddPress}
+              style={styles.addIconContainer}
+            >
+              <IonIcons
+                name="person-add"
+                onPress={handleAddPress}
+                size={scale(15)}
+                color={defaultStyles.colors.secondary}
+              />
+            </TouchableHighlight>
+          </ApiProcessingContainer>
+        ) : (
+          notification.type == "Add" && (
+            <AppText style={styles.addedInfo}>Added</AppText>
+          )
+        )}
+        {dayjs(currentDate).diff(notification.createdAt, "minutes") < 10 ||
+        notification.type == "Add" ? null : (
+          <DeleteAction
+            style={{
+              marginRight: scale(10),
+              marginLeft: 0,
+            }}
+            apiAction={"true"}
+            processing={processing}
+            onPress={
+              apiProcessing || !isConnected ? () => null : handleDeletePress
+            }
+          />
+        )}
+      </View>
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
         visible={infoAlert.showInfoAlert}
       />
-    </View>
+    </>
   );
 }
 const styles = ScaledSheet.create({
+  addUserIconContainer: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "10@s",
+    height: "32@s",
+    marginRight: "15@s",
+    padding: 0,
+    width: "32@s",
+  },
+  addedInfo: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    color: defaultStyles.colors.secondary,
+    marginHorizontal: "8@s",
+    borderRadius: "8@s",
+    paddingHorizontal: "10@s",
+    paddingVertical: "8@s",
+    fontSize: "13@s",
+  },
+  addIconContainer: {
+    alignItems: "center",
+    height: "32@s",
+    justifyContent: "center",
+    padding: 0,
+    width: "32@s",
+  },
+  addButton: {
+    backgroundColor: defaultStyles.colors.light,
+    borderRadius: "8@s",
+    height: "32@s",
+    width: "60@s",
+  },
+  addButtonSub: {
+    fontSize: "14@s",
+    letterSpacing: 0.2,
+  },
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
@@ -238,22 +344,23 @@ const styles = ScaledSheet.create({
   },
   image: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "17.5@s",
+    borderRadius: "21@s",
     elevation: 1,
-    height: "35@s",
+    height: "42@s",
     marginLeft: "10@s",
-    marginRight: "2@s",
-    width: "35@s",
+    marginRight: "6@s",
+    width: "42@s",
   },
   imageSub: {
-    borderRadius: "18@s",
-    height: "36@s",
-    width: "36@s",
+    borderRadius: "21@s",
+    height: "42@s",
+    width: "42@s",
   },
   notificationInfo: {
     borderRadius: "10@s",
     flexShrink: 1,
     justifyContent: "center",
+    marginRight: "5@s",
     padding: "5@s",
     width: "80%",
   },

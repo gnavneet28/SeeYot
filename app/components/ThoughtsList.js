@@ -5,35 +5,55 @@ import { ScaledSheet } from "react-native-size-matters";
 import ActiveChatBubble from "./ActiveChatBubble";
 
 import useAuth from "../auth/useAuth";
+import ThoughtBubble from "./ThoughtBubble";
 
 function ThoughtsList({
   thoughts = [],
   recipient,
   activeChat,
   onLongPress = () => null,
+  onSelectReply,
+  listRef,
 }) {
   const { user } = useAuth();
 
   const keyExtractor = useCallback((item) => item._id.toString(), []);
 
   const renderItem = useCallback(
-    ({ item }) => (
-      <ActiveChatBubble
-        recipient={recipient}
-        activeChat={activeChat}
-        onLongPress={() => onLongPress(item)}
-        mine={item.createdBy == user._id ? true : false}
-        thought={item}
-      />
-    ),
+    ({ item }) =>
+      activeChat ? (
+        <ActiveChatBubble
+          recipient={recipient}
+          user={user}
+          activeChat={activeChat}
+          mine={item.createdBy == user._id ? true : false}
+          thought={item}
+          onSelectReply={() =>
+            onSelectReply({
+              message: item.message ? item.message : "",
+              media: item.media ? item.media : "",
+              createdBy: item.createdBy,
+            })
+          }
+        />
+      ) : (
+        <ThoughtBubble
+          recipient={recipient}
+          activeChat={activeChat}
+          onLongPress={() => onLongPress(item)}
+          mine={item.createdBy == user._id ? true : false}
+          thought={item}
+        />
+      ),
     [activeChat, recipient._id]
   );
 
   return (
     <View style={[styles.container]}>
       <FlatList
+        ref={listRef}
         bounces={false}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="never"
         data={[...thoughts].reverse()}
         keyExtractor={keyExtractor}
         inverted={true}
@@ -41,7 +61,7 @@ function ThoughtsList({
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={true}
         maxToRenderPerBatch={15}
-        windowSize={10}
+        windowSize={7}
       />
     </View>
   );

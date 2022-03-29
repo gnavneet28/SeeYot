@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { ScrollView, Share, View } from "react-native";
+import React, { useState, useCallback, useEffect, useRef } from "react";
+import { ScrollView, Share, View, Text } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 import { showMessage } from "react-native-flash-message";
@@ -292,7 +292,9 @@ function ProfileScreen({ navigation }) {
           } else if (result.action === Share.dismissedAction) {
             // dismissed
           }
-        } catch (error) {}
+        } catch (error) {
+          setIsLoading(false);
+        }
       },
       5000,
       true
@@ -368,6 +370,7 @@ function ProfileScreen({ navigation }) {
           </ScrollView>
         </ScreenSub>
       </Screen>
+
       {visible || openReport ? <ModalFallback /> : null}
       <ProfileOptionsModal
         handleBlockListPress={handleBlockListPress}
@@ -419,6 +422,8 @@ function ProfileScreen({ navigation }) {
   );
 }
 const styles = ScaledSheet.create({
+  text: {},
+  body: {},
   addPicture: {
     marginTop: "10@s",
     marginBottom: "20@s",

@@ -110,7 +110,7 @@ function SettingsScreen({ navigation }) {
           <SettingsAction
             processing={removingContact}
             title="Remove my Contacts from the server."
-            info="We store your contacts available on your device to let you discover people who are on SeeYot, if you give access to your contacts. You can opt to remove your contacts from our server anytime you want. We recommend you disabling the contacts access from your device first before removing the contacts from the server."
+            info="We store your contacts available on your device to let you discover people who are on SeeYot, after you give access to your contacts. You can opt to remove your contacts from our server anytime you want. We recommend you disabling the contacts access from your device first before removing the contacts from the server."
             buttonTitle="Remove my Contacts"
             onPress={handleOpenContactsAlert}
             AdditionalActionComponent={() => (

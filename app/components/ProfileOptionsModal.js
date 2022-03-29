@@ -2,6 +2,7 @@ import React, { memo } from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
+import Backdrop from "./Backdrop";
 
 import defaultStyles from "../config/styles";
 
@@ -26,6 +27,7 @@ function ProfileOptionsModal({
       visible={visible}
     >
       <View style={styles.optionsContainerBackground}>
+        <Backdrop onPress={() => setVisible(false)} />
         <View style={styles.closeMessageIconContainer}>
           <AntDesign
             onPress={() => setVisible(false)}
@@ -95,7 +97,7 @@ const styles = ScaledSheet.create({
   },
   optionsContainerBackground: {
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     overflow: "hidden",
     width: "100%",
   },

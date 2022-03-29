@@ -18,7 +18,7 @@ const authorizeAds = async () => {
 
   const { joinedAt, numberOfAdsSeen } = await currentAdsStats();
 
-  if (dayjs(currentDate).diff(joinedAt, "days") < DAY_LIMIT) return false;
+  //if (dayjs(currentDate).diff(joinedAt, "days") < DAY_LIMIT) return false;
 
   if (!numberOfAdsSeen.length) return true;
 

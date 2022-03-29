@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import * as Animatable from "react-native-animatable";
 
 import defaultStyles from "../config/styles";
 import AppText from "./AppText";
@@ -8,9 +9,13 @@ import AppButton from "./AppButton";
 
 function InfoAlert({ description = "", leftPress, visible = false }) {
   return (
-    <Modal animationType="fade" transparent visible={visible}>
-      <View style={styles.container}>
-        <View style={styles.alertContainer}>
+    <Modal animationType="none" transparent visible={visible}>
+      <View style={[styles.container]}>
+        <Animatable.View
+          useNativeDriver={true}
+          animation="shake"
+          style={styles.alertContainer}
+        >
           <AppText style={styles.title}>Message</AppText>
           <AppText style={styles.description}>{description}</AppText>
           <View style={styles.actionButtonContainer}>
@@ -21,7 +26,7 @@ function InfoAlert({ description = "", leftPress, visible = false }) {
               title="Ok"
             />
           </View>
-        </View>
+        </Animatable.View>
       </View>
     </Modal>
   );

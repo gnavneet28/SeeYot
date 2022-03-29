@@ -34,9 +34,9 @@ function GalleryImages({ data, onImageSelection, selectedImage }) {
 const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.white,
-    borderTopLeftRadius: "5@s",
-    borderTopRightRadius: "5@s",
+    backgroundColor: defaultStyles.colors.primary,
+    borderTopLeftRadius: "10@s",
+    borderTopRightRadius: "10@s",
     flex: 1,
     overflow: "hidden",
     width: "100%",

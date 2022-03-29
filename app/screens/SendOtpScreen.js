@@ -23,10 +23,10 @@ import verifyApi from "../api/verify";
 import Screen from "../components/Screen";
 
 // TODO: For google verification
-import usersApi from "../api/users";
+// import usersApi from "../api/users";
 import useAuth from "../auth/useAuth";
-import authStorage from "../auth/storage";
-import storeDetails from "../utilities/storeDetails";
+// import authStorage from "../auth/storage";
+// import storeDetails from "../utilities/storeDetails";
 
 function SendOtpScreen({ navigation }) {
   // TODO: google verification
@@ -49,21 +49,23 @@ function SendOtpScreen({ navigation }) {
     if (mounted) {
       OtpAutocomplete.getHash()
         .then((hash) => setAppHash(hash))
-        .catch((err) => Bugsnag.notify(err));
+        .catch((err) => {
+          Bugsnag.notify(err);
+        });
     }
   }, [mounted]);
 
   // TODO: google verification
 
-  const setAuthToken = async () => {
-    const authToken =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWVhYWI2NTNlZGU3NDA0YThhZDZkODAiLCJwaG9uZU51bWJlciI6MTIzNDU2Nzg5MCwiaWF0IjoxNjQ1MDEyMzY1fQ.c47x_zurxwpRWIvLJWzAJE__8dmQQFKzoywDsuUgihw";
-    await authStorage.storeToken(authToken);
-  };
+  // const setAuthToken = async () => {
+  //   const authToken =
+  //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWVhYWI2NTNlZGU3NDA0YThhZDZkODAiLCJwaG9uZU51bWJlciI6MTIzNDU2Nzg5MCwiaWF0IjoxNjQ1MDEyMzY1fQ.c47x_zurxwpRWIvLJWzAJE__8dmQQFKzoywDsuUgihw";
+  //   await authStorage.storeToken(authToken);
+  // };
 
-  useEffect(() => {
-    setAuthToken();
-  }, []);
+  // useEffect(() => {
+  //   setAuthToken();
+  // }, []);
 
   useEffect(() => {
     if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
@@ -134,19 +136,19 @@ function SendOtpScreen({ navigation }) {
   };
 
   // TODO: for google verification
-  const handleSubmitForm = async () => {
-    setIsLoading(true);
+  // const handleSubmitForm = async () => {
+  //   setIsLoading(true);
 
-    const { ok, problem, data } = await usersApi.getCurrentUser();
+  //   const { ok, problem, data } = await usersApi.getCurrentUser();
 
-    if (ok) {
-      await storeDetails(data);
-      setIsLoading(false);
-      return setUser(data);
-    }
-    setIsLoading(false);
-    tackleProblem(problem, data, setInfoAlert);
-  };
+  //   if (ok) {
+  //     await storeDetails(data);
+  //     setIsLoading(false);
+  //     return setUser(data);
+  //   }
+  //   setIsLoading(false);
+  //   tackleProblem(problem, data, setInfoAlert);
+  // };
 
   return (
     <>
@@ -182,7 +184,8 @@ function SendOtpScreen({ navigation }) {
             disabled={
               number && number.length == 10 && !verificationId ? false : true
             }
-            onPress={number == 1234567890 ? handleSubmitForm : handleSubmit}
+            // onPress={number == 1234567890 ? handleSubmitForm : handleSubmit}
+            onPress={handleSubmit}
             style={styles.button}
             subStyle={styles.submitButtonSub}
             title="Send Otp"

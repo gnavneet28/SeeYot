@@ -1,19 +1,29 @@
-import React, { memo } from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-
+import React, { memo, useContext, useEffect, useState } from "react";
+import { StyleSheet, View, TouchableWithoutFeedback } from "react-native";
 import { moderateScale, scale } from "react-native-size-matters";
 import Autolink from "react-native-autolink";
+import { SocketContext } from "../api/socketClient";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 
 import ActiveChatImage from "./ActiveChatImage";
 
 import defaultStyles from "../config/styles";
+import ActiveChatReply from "./ActiveChatReply";
 
 let defaultThought = {
   message: "",
   createdAt: Date.now(),
+  secondaryId: "",
   media: "",
+  reply: {
+    createdBy: "",
+    message: "",
+    media: "",
+  },
 };
 
 function ActiveChatBubble({
@@ -21,81 +31,141 @@ function ActiveChatBubble({
   mine,
   onLongPress,
   activeChat,
+  onSelectReply,
+  user = { _id: "" },
+  recipient = { name: "" },
 }) {
-  dayjs.extend(relativeTime);
+  const socket = useContext(SocketContext);
+  const [refresh, setRefresh] = useState(false);
+  let isUnmounting = false;
+
+  const translateX = useSharedValue(-20);
+
+  const rStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateX: translateX.value,
+        },
+      ],
+    };
+  }, [thought]);
+
+  useEffect(() => {
+    if (thought.seen) {
+      translateX.value = withTiming(0);
+    }
+    const listener = () => {
+      thought.seen = true;
+
+      translateX.value = withTiming(0);
+
+      if (!isUnmounting) {
+        setRefresh(!refresh);
+      }
+    };
+
+    socket.on(`${thought.secondaryId}`, listener);
+
+    return () => {
+      socket.off(`${thought.secondaryId}`, listener);
+      isUnmounting = true;
+    };
+  }, [thought]);
 
   return (
-    <TouchableOpacity
-      activeOpacity={activeChat ? 1 : 0.9}
-      onLongPress={onLongPress}
-      style={[styles.message, !mine ? styles.mine : styles.not_mine]}
-    >
-      <View
+    <TouchableWithoutFeedback onLongPress={onSelectReply}>
+      <Animated.View
         style={[
-          styles.cloud,
-          {
-            backgroundColor: !mine
-              ? defaultStyles.colors.secondary
-              : defaultStyles.colors.yellow_Variant,
-            paddingHorizontal: activeChat
-              ? thought.media
-                ? scale(2)
-                : scale(10)
-              : scale(10),
-            paddingVertical: activeChat
-              ? thought.media
-                ? scale(2)
-                : scale(6)
-              : scale(6),
-          },
+          styles.message,
+          !mine ? styles.mine : styles.not_mine,
+          mine ? rStyle : {},
+          // mine
+          //   ? { transform: [{ translateX: thought.seen && mine ? 0 : -20 }] }
+          //   : {},
         ]}
       >
-        {thought.media ? (
-          <ActiveChatImage uri={thought.media} />
-        ) : (
-          <Autolink
-            showAlert={true}
-            text={thought.message}
-            linkProps={{
-              suppressHighlighting: true,
-              testID: "link",
+        {thought.reply.message || thought.reply.media ? (
+          <ActiveChatReply
+            style={{
+              minWidth: "20%",
+              maxWidth: "50%",
+              alignSelf: mine ? "flex-end" : "flex-start",
+              borderBottomRightRadius: !mine ? scale(10) : 0,
+              borderBottomLeftRadius: !mine ? 0 : scale(10),
             }}
-            linkStyle={{
-              ...styles.text,
-              color: defaultStyles.colors.blue,
-            }}
-            textProps={{
-              selectable: true,
-              style: [
-                styles.text,
-                {
-                  color: !mine
-                    ? defaultStyles.colors.white
-                    : defaultStyles.colors.dark,
-                },
-              ],
-              onLongPress,
-            }}
-            email={true}
-            phone="sms"
+            media={thought.reply.media}
+            message={thought.reply.message}
+            creator={
+              thought.reply.createdBy == user._id ? "You" : recipient.name
+            }
+            show={false}
           />
-        )}
-        {activeChat ? null : (
-          <Text
-            style={[
-              styles.createdAt,
-              {
-                color: !mine
-                  ? defaultStyles.colors.white
-                  : defaultStyles.colors.dark_Variant,
-              },
-            ]}
-          >
-            {dayjs(thought.createdAt).fromNow()}
-          </Text>
-        )}
-      </View>
-    </TouchableOpacity>
+        ) : null}
+        <View
+          style={[
+            styles.cloud,
+            {
+              backgroundColor: !mine
+                ? defaultStyles.colors.secondary
+                : defaultStyles.colors.yellow_Variant,
+              paddingHorizontal: thought.media ? 0 : scale(10),
+              paddingVertical: thought.media ? 0 : scale(6),
+
+              borderTopLeftRadius: mine
+                ? scale(15)
+                : thought.reply.message || thought.reply.media
+                ? 0
+                : scale(5),
+              borderTopRightRadius: mine
+                ? thought.reply.message || thought.reply.media
+                  ? 0
+                  : scale(5)
+                : scale(15),
+            },
+          ]}
+        >
+          {thought.media ? (
+            <ActiveChatImage
+              containerStyle={{
+                borderTopLeftRadius: mine ? scale(15) : 0,
+                borderTopRightRadius: mine ? 0 : scale(15),
+              }}
+              mine={mine}
+              onLongPress={onSelectReply}
+              uri={thought.media}
+            />
+          ) : (
+            <Autolink
+              showAlert={true}
+              text={thought.message}
+              linkProps={{
+                suppressHighlighting: true,
+                testID: "link",
+              }}
+              linkStyle={{
+                ...styles.text,
+                color: defaultStyles.colors.blue,
+              }}
+              textProps={{
+                selectable: true,
+                style: [
+                  styles.text,
+                  {
+                    color: !mine
+                      ? defaultStyles.colors.white
+                      : defaultStyles.colors.dark,
+                  },
+                ],
+                onLongPress,
+              }}
+              email={true}
+              phone="sms"
+            />
+          )}
+        </View>
+      </Animated.View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -114,7 +184,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   message: {
-    marginVertical: scale(2),
+    marginVertical: scale(3),
     overflow: "hidden",
     width: "100%",
   },

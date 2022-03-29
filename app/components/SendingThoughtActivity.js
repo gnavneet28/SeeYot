@@ -11,7 +11,6 @@ import EchoMessage from "./EchoMessage";
 import defaultStyles from "../config/styles";
 
 const sendingThought = "sendingThought.json";
-const messageSent = "messagesent.json";
 const failed = "failed.json";
 
 function SendingThoughtActivity({
@@ -44,11 +43,12 @@ function SendingThoughtActivity({
               <>
                 <Feather
                   name="check"
-                  size={scale(35)}
-                  color={defaultStyles.colors.green}
+                  size={scale(30)}
+                  color={defaultStyles.colors.white}
                   style={{
-                    borderRadius: 10,
+                    borderRadius: 20,
                     opacity: success ? 1 : 0,
+                    backgroundColor: defaultStyles.colors.blue,
                   }}
                 />
                 <LottieView
@@ -129,7 +129,6 @@ const styles = ScaledSheet.create({
   message: {
     marginBottom: "10@s",
     marginHorizontal: "5@s",
-    // marginTop: "5@s",
     opacity: 0.8,
     textAlign: "center",
     width: "95%",

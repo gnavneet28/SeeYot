@@ -2,13 +2,12 @@ import React, { useCallback, useState, useEffect } from "react";
 import { ScrollView, RefreshControl } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
-import Screen from "../components/Screen";
+import AppActivityIndicator from "../components/ActivityIndicator";
 import InfoAlert from "../components/InfoAlert";
+import Screen from "../components/Screen";
 
 import useAuth from "../auth/useAuth";
 
@@ -22,6 +21,7 @@ import Chart from "../components/Chart";
 import defaultProps from "../utilities/defaultProps";
 
 import apiActivity from "../utilities/apiActivity";
+import insight from "../utilities/insight";
 
 let defaultStats = {
   photoTaps: [],
@@ -30,7 +30,6 @@ let defaultStats = {
 };
 
 function InsightsScreen({ navigation }) {
-  dayjs.extend(relativeTime);
   const { user } = useAuth();
   const { tackleProblem } = apiActivity;
   const isFocused = useIsFocused();
@@ -42,6 +41,7 @@ function InsightsScreen({ navigation }) {
     showInfoAlert: false,
     infoAlertMessage: "",
   });
+  const [isReady, setIsReady] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -109,7 +109,10 @@ function InsightsScreen({ navigation }) {
       setChartDetailsForMessagesReceived("All", data.messagesReceived);
       setChartDetailsForTotalTaps("All", data.photoTaps);
       setChartDetailsForTotalThoughts("All", data.thoughtsReceived);
+      return setIsReady(true);
     }
+    setIsReady(true);
+    tackleProblem(problem, data, setInfoAlert);
   };
 
   const handleRefresh = () => {
@@ -124,65 +127,6 @@ function InsightsScreen({ navigation }) {
 
   // FUNCTION TO CALCULATE/PROCESS STATS DATA
 
-  const getNumberOfPeopleInContacts = (totalData = [], duration = "All") => {
-    if (!totalData.length) return 0;
-    let currentDate = new Date();
-    let numberOfPeopleInContacts = 0;
-    let dataToConsider;
-
-    if (duration == "All") {
-      dataToConsider = totalData;
-    } else if (duration == "Week") {
-      dataToConsider = totalData.filter(
-        (d) => dayjs(currentDate).diff(d.timeStamp, "days") < 8
-      );
-    } else if (duration == "Month") {
-      dataToConsider = totalData.filter(
-        (d) => dayjs(currentDate).diff(d.timeStamp, "days") < 29
-      );
-    }
-
-    for (let data of dataToConsider) {
-      if (user.contacts.filter((u) => u._id == data.statsId).length) {
-        numberOfPeopleInContacts = numberOfPeopleInContacts + 1;
-      }
-    }
-
-    let others = dataToConsider.length - numberOfPeopleInContacts;
-
-    return { numberOfPeopleInContacts, others };
-  };
-
-  const getNumberOfPeopleInFavorites = (totalData = [], duration = "All") => {
-    if (!totalData.length) return 0;
-    let currentDate = new Date();
-    let numberOfPeopleInFavorites = 0;
-
-    let dataToConsider;
-
-    if (duration == "All") {
-      dataToConsider = totalData;
-    } else if (duration == "Week") {
-      dataToConsider = totalData.filter(
-        (d) => dayjs(currentDate).diff(d.timeStamp, "days") < 8
-      );
-    } else if (duration == "Month") {
-      dataToConsider = totalData.filter(
-        (d) => dayjs(currentDate).diff(d.timeStamp, "days") < 29
-      );
-    }
-
-    for (let data of dataToConsider) {
-      if (user.favorites.filter((u) => u._id == data.statsId).length) {
-        numberOfPeopleInFavorites = numberOfPeopleInFavorites + 1;
-      }
-    }
-
-    let others = dataToConsider.length - numberOfPeopleInFavorites;
-
-    return { numberOfPeopleInFavorites, others };
-  };
-
   const setChartDetailsForMessagesReceived = (duration, data) => {
     // get data from getStats and calculate data for total messages received
     const totalMessages = typeof data !== "undefined" ? data : [];
@@ -193,14 +137,12 @@ function InsightsScreen({ navigation }) {
         totalMessages: 0,
       });
     }
-    let { numberOfPeopleInFavorites, others } = getNumberOfPeopleInFavorites(
-      totalMessages,
-      duration
-    );
+    let { numberOfPeopleInFavorites, others } =
+      insight.getNumberOfPeopleInFavorites(totalMessages, duration, user);
 
     setMessageData({
       ...messageData,
-      totalMessages: totalMessages.length,
+      totalMessages: numberOfPeopleInFavorites + others,
       messageCategory: duration,
       messagesDetails: [
         {
@@ -229,15 +171,13 @@ function InsightsScreen({ navigation }) {
         totalTaps: 0,
       });
     }
-    let { numberOfPeopleInContacts, others } = getNumberOfPeopleInContacts(
-      totalPhotoTaps,
-      duration
-    );
+    let { numberOfPeopleInContacts, others } =
+      insight.getNumberOfPeopleInContacts(totalPhotoTaps, duration, user);
 
     setTapsData({
       ...tapsData,
       tapCategory: duration,
-      totalTaps: totalPhotoTaps.length,
+      totalTaps: numberOfPeopleInContacts + others,
       tapsDetails: [
         {
           name: "Friends",
@@ -256,8 +196,6 @@ function InsightsScreen({ navigation }) {
   };
   const setChartDetailsForTotalThoughts = (duration, data) => {
     // get data from getStats and calculate data for total taps
-
-    //return console.log(data);
     const totalThoughts = typeof data !== "undefined" ? data : [];
     if (!totalThoughts.length) {
       return setThoughtsData({
@@ -266,15 +204,13 @@ function InsightsScreen({ navigation }) {
         totalThoughts: 0,
       });
     }
-    let { numberOfPeopleInContacts, others } = getNumberOfPeopleInContacts(
-      totalThoughts,
-      duration
-    );
+    let { numberOfPeopleInContacts, others } =
+      insight.getNumberOfPeopleInContacts(totalThoughts, duration, user);
 
     setThoughtsData({
       ...thoughtsData,
       thoughtCategory: duration,
-      totalThoughts: totalThoughts.length,
+      totalThoughts: numberOfPeopleInContacts + others,
       thoughtDetails: [
         {
           name: "Friends",
@@ -359,61 +295,68 @@ function InsightsScreen({ navigation }) {
         onPressLeft={handleBack}
       />
       <ScreenSub style={{ paddingTop: 10 }}>
-        <ScrollView
-          refreshControl={
-            <RefreshControl onRefresh={handleRefresh} refreshing={refreshing} />
-          }
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.container}
-          showsVerticalScrollIndicator={false}
-        >
-          {subscription == "Active" ? (
-            <>
-              <Chart
-                chartConfig={defaultProps.defaultChartConfig}
-                description="Total number of times people tapped on your Display Picture."
-                onLastMonthDataPress={handleGetDataForTapsInLastMonth}
-                onLastWeekDataPress={handleGetDataForTapsInLastWeek}
-                onTotalDataPress={handleGetDataForTapsAll}
-                opted={tapsData.tapCategory}
-                pieChartData={tapsData.tapsDetails}
-                style={styles.chart}
-                title="Total Photo Taps"
-                totalData={tapsData.totalTaps}
+        {!isReady ? (
+          <AppActivityIndicator />
+        ) : (
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                onRefresh={handleRefresh}
+                refreshing={refreshing}
               />
-              <Chart
-                chartConfig={defaultProps.defaultChartConfig}
-                description="Total number of times people sent you their Thoughts."
-                onLastMonthDataPress={handleGetDataForThoughtsInLastMonth}
-                onLastWeekDataPress={handleGetDataForThoughtsInLastWeek}
-                onTotalDataPress={handleGetDataForThoughtsAll}
-                opted={thoughtsData.thoughtCategory}
-                pieChartData={thoughtsData.thoughtDetails}
-                style={styles.chart}
-                title="Total Thoughts Received"
-                totalData={thoughtsData.totalThoughts}
-              />
-              <Chart
-                chartConfig={defaultProps.defaultChartConfig}
-                description="Total Favorite Messages received is the total number of time, people tried to send you message, that includes people in your favorites as well as others. Messages sent by people other than in your favorites are not delivered to you."
-                onLastMonthDataPress={handleGetDataForMessagesInLastMonth}
-                onLastWeekDataPress={handleGetDataForMessagesInLastWeek}
-                onTotalDataPress={handleGetDataForMessagesAll}
-                opted={messageData.messageCategory}
-                pieChartData={messageData.messagesDetails}
-                style={styles.chart}
-                title="Total Messages Received"
-                totalData={messageData.totalMessages}
-              />
-            </>
-          ) : (
-            <AppText style={styles.noActiveSubsInfo}>
-              There are no active subscriptions. Subscribe to SeeYot Vip and get
-              insights on the number of people who tapped on your Display
-              Picture, sent you Thoughts and Messages.
-            </AppText>
-          )}
-        </ScrollView>
+            }
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.container}
+            showsVerticalScrollIndicator={false}
+          >
+            {subscription == "Active" ? (
+              <>
+                <Chart
+                  chartConfig={defaultProps.defaultChartConfig}
+                  description="Total number of times people tapped on your Display Picture."
+                  onLastMonthDataPress={handleGetDataForTapsInLastMonth}
+                  onLastWeekDataPress={handleGetDataForTapsInLastWeek}
+                  onTotalDataPress={handleGetDataForTapsAll}
+                  opted={tapsData.tapCategory}
+                  pieChartData={tapsData.tapsDetails}
+                  style={styles.chart}
+                  title="Total Photo Taps"
+                  totalData={tapsData.totalTaps}
+                />
+                <Chart
+                  chartConfig={defaultProps.defaultChartConfig}
+                  description="Total number of times people sent you their Thoughts."
+                  onLastMonthDataPress={handleGetDataForThoughtsInLastMonth}
+                  onLastWeekDataPress={handleGetDataForThoughtsInLastWeek}
+                  onTotalDataPress={handleGetDataForThoughtsAll}
+                  opted={thoughtsData.thoughtCategory}
+                  pieChartData={thoughtsData.thoughtDetails}
+                  style={styles.chart}
+                  title="Total Thoughts Received"
+                  totalData={thoughtsData.totalThoughts}
+                />
+                <Chart
+                  chartConfig={defaultProps.defaultChartConfig}
+                  description="Total Favorite Messages received is the total number of time, people tried to send you message, that includes people in your favorites as well as others. Messages sent by people other than in your favorites are not delivered to you."
+                  onLastMonthDataPress={handleGetDataForMessagesInLastMonth}
+                  onLastWeekDataPress={handleGetDataForMessagesInLastWeek}
+                  onTotalDataPress={handleGetDataForMessagesAll}
+                  opted={messageData.messageCategory}
+                  pieChartData={messageData.messagesDetails}
+                  style={styles.chart}
+                  title="Total Messages Received"
+                  totalData={messageData.totalMessages}
+                />
+              </>
+            ) : (
+              <AppText style={styles.noActiveSubsInfo}>
+                There are no active subscriptions. Subscribe to SeeYot Vip and
+                get insights on the number of people who tapped on your Display
+                Picture, sent you Thoughts and Messages.
+              </AppText>
+            )}
+          </ScrollView>
+        )}
       </ScreenSub>
       <InfoAlert
         description={infoAlert.infoAlertMessage}

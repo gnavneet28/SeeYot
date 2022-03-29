@@ -29,7 +29,7 @@
 	<key>bugsnag</key>
      <dict>
     <key>apiKey</key>
-    <string>2c834e302661fd76cab7e7be6bca44dc</string>
+    <string>9f3d26c96a5f08efc1b513c64fb6a637</string>
     </dict>
 
 
@@ -40,6 +40,8 @@
 	<string>Give $(PRODUCT_NAME) permission to save photos</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Give $(PRODUCT_NAME) permission to access your camera</string>
+	<key>NSMicrophoneUsageDescription</key>
+<string>Allow $(PRODUCT_NAME) to access your microphone</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>

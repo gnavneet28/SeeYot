@@ -11,6 +11,7 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 import defaultStyles from "../config/styles";
 
 import AppTextInput from "./AppTextInput";
+import AppText from "./AppText";
 import AddFavoriteCard from "./AddFavoriteCard";
 import Icon from "./Icon";
 
@@ -151,12 +152,13 @@ class AddContactList extends React.Component {
               />
             </View>
             <TouchableHighlight
-              underlayColor={defaultStyles.colors.blue}
+              underlayColor={defaultStyles.colors.secondary}
               style={styles.allReplies}
               activeOpacity={0.8}
               onPress={this.props.onAllRepliesPress}
             >
               <Icon
+                icon="MaterialIcons"
                 name="reply"
                 size={scale(18)}
                 color={defaultStyles.colors.white}
@@ -185,7 +187,7 @@ class AddContactList extends React.Component {
 const styles = ScaledSheet.create({
   allReplies: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.blue,
+    backgroundColor: defaultStyles.colors.secondary_Variant,
     borderBottomRightRadius: "20@s",
     borderTopRightRadius: "20@s",
     height: "32@s",
@@ -231,6 +233,10 @@ const styles = ScaledSheet.create({
     borderBottomWidth: "1@s",
     justifyContent: "center",
     width: "100%",
+  },
+  tip: {
+    color: defaultStyles.colors.dark,
+    fontSize: "13@s",
   },
 });
 

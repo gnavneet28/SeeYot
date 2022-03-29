@@ -11,6 +11,8 @@ function ProgressiveImage({
   onPress = () => null,
   style,
   subStyle,
+  resizeMode = "cover",
+  onLongPress,
 }) {
   const defaultImageAnimated = new Animated.Value(1);
   const imageAnimated = new Animated.Value(0);
@@ -30,6 +32,7 @@ function ProgressiveImage({
   };
   return (
     <TouchableHighlight
+      onLongPress={onLongPress}
       disabled={disabled}
       underlayColor={defaultStyles.colors.white}
       activeOpacity={activeOpacity}
@@ -38,14 +41,14 @@ function ProgressiveImage({
     >
       <>
         <Animated.Image
-          resizeMode="contain"
+          resizeMode={resizeMode}
           style={[styles.image, { opacity: defaultImageAnimated }, subStyle]}
           source={{ uri: customImage }}
           onLoad={handleDefaultImageLoad}
           blurRadius={2}
         />
         <Animated.Image
-          resizeMode="contain"
+          resizeMode={resizeMode}
           style={[
             styles.image,
             { opacity: imageAnimated },

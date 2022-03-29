@@ -5,7 +5,13 @@ import MaterialIcons from "../../node_modules/react-native-vector-icons/Material
 
 import defaultStyles from "../config/styles";
 
-function EchoIcon({ onPress, forInfo = false, containerStyle, textStyle }) {
+function EchoIcon({
+  onPress,
+  forInfo = false,
+  containerStyle,
+  textStyle,
+  size = scale(22),
+}) {
   return (
     <TouchableOpacity
       activeOpacity={0.9}
@@ -14,7 +20,7 @@ function EchoIcon({ onPress, forInfo = false, containerStyle, textStyle }) {
     >
       <MaterialIcons
         name="swap-horiz"
-        size={scale(22)}
+        size={size}
         color={defaultStyles.colors.white}
         style={styles.icon}
       />

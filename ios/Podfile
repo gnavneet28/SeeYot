@@ -18,6 +18,13 @@ podfile_properties = JSON.parse(File.read('./Podfile.properties.json')) rescue {
     :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes'
   )
 
+  permissions_path = '../node_modules/react-native-permissions/ios'
+   pod 'Permission-Camera', :path => "#{permissions_path}/Camera"
+
+   pod 'rn-fetch-blob',
+    :path => '../node_modules/rn-fetch-blob'
+
+
    # Uncomment to opt-in to using Flipper
    #
    # if !ENV['CI']

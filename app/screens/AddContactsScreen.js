@@ -16,6 +16,8 @@ import useMountedRef from "../hooks/useMountedRef";
 import usersApi from "../api/users";
 import useAuth from "../auth/useAuth";
 
+import defaultStyles from "../config/styles";
+
 import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
 import ApiContext from "../utilities/apiContext";
@@ -24,6 +26,7 @@ import authorizeUpdates from "../utilities/authorizeUpdates";
 import createShortInviteLink from "../utilities/createDynamicLinks";
 import ScreenSub from "../components/ScreenSub";
 import useConnection from "../hooks/useConnection";
+import NavigationConstants from "../navigation/NavigationConstants";
 
 function AddContactsScreen({ navigation }) {
   const { user, setUser } = useAuth();
@@ -185,26 +188,6 @@ function AddContactsScreen({ navigation }) {
   const handleRefresh = useCallback(async () => {
     if (mounted) {
       setRefreshing(true);
-      // if (!user.phoneContacts.length) {
-      //   await requestPermission();
-      //   return setRefreshing(false);
-      // } else if (
-      //   user.phoneContacts.length &&
-      //   (await getPhoneContacts()) > user.phoneContacts.length
-      // ) {
-      //   console.log(user.phoneContacts.length);
-      //   await requestPermission();
-      //   return setRefreshing(false);
-      // }
-      // let canUpdate = await authorizeUpdates.authorizePhoneContactsUpdate();
-      // if (!canUpdate) {
-      //   setRefreshing(false);
-      //   return setInfoAlert({
-      //     infoAlertMessage:
-      //       "You can update your contacts only once within 4 hours.",
-      //     showInfoAlert: true,
-      //   });
-      // }
       await requestPermission();
       return setRefreshing(false);
     }
@@ -221,6 +204,10 @@ function AddContactsScreen({ navigation }) {
     ),
     []
   );
+
+  const handleHeaderRightPress = () => {
+    navigation.navigate(NavigationConstants.VIP_NAVIGATOR);
+  };
 
   // INFO ALERT ACTIONS
   const handleCloseInfoAlert = useCallback(async () => {
@@ -280,11 +267,17 @@ function AddContactsScreen({ navigation }) {
         <AppHeader
           leftIcon="arrow-back"
           onPressLeft={handleBack}
-          title="Add Contacts"
+          title={`Add Contacts (${user.contacts.length})`}
+          iconLeftCategory="MaterialIcons"
+          iconRightCategory="MaterialCommunityIcons"
+          rightIcon="crown-outline"
+          onPressRight={handleHeaderRightPress}
+          //rightOptionContainerStyle={styles.headerRightOptionStyle}
+          // rightIconColor={defaultStyles.colors.secondary}
         />
         <ScreenSub>
           {!isReady ? (
-            <AppActivityIndicator />
+            <AppActivityIndicator info="Syncing contacts. Please wait..." />
           ) : (
             <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
               <AddContactList
@@ -322,6 +315,12 @@ function AddContactsScreen({ navigation }) {
 const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
+  },
+  headerRightOptionStyle: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    width: "35@s",
+    height: "35@s",
+    borderRadius: "18@s",
   },
 });
 

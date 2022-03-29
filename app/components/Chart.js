@@ -88,7 +88,7 @@ function Chart({
             <PieChart
               data={pieChartData}
               height={200}
-              width={width}
+              width={width * 0.92}
               chartConfig={chartConfig}
               accessor="population"
               style={chartConfig.style}
@@ -107,9 +107,8 @@ function Chart({
 }
 const styles = ScaledSheet.create({
   container: {
-    borderColor: defaultStyles.colors.light,
-    borderRadius: "8@s",
-    borderWidth: 1,
+    backgroundColor: defaultStyles.colors.primary,
+    borderRadius: "10@s",
     minHeight: "40@s",
     overflow: "hidden",
     width: "95%",
@@ -120,10 +119,12 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   description: {
-    color: defaultStyles.colors.dark_Variant,
+    color: defaultStyles.colors.white,
     fontSize: "12.5@s",
+    letterSpacing: "0.4@s",
     marginTop: "5@s",
     paddingTop: 0,
+    paddingHorizontal: "10@s",
   },
   title: {
     backgroundColor: defaultStyles.colors.secondary,
@@ -132,9 +133,11 @@ const styles = ScaledSheet.create({
     color: defaultStyles.colors.white,
     fontSize: "14@s",
     paddingHorizontal: "10@s",
+    paddingVertical: "10@s",
     width: "100%",
   },
   notData: {
+    color: defaultStyles.colors.white,
     marginVertical: "10@s",
     paddingHorizontal: "10@s",
     textAlign: "center",
@@ -142,10 +145,9 @@ const styles = ScaledSheet.create({
   },
   optionsContainer: {
     alignSelf: "center",
-    borderBottomColor: defaultStyles.colors.light,
-    borderBottomWidth: 1,
     borderRadius: "5@s",
     flexDirection: "row",
+    height: "25@s",
     marginVertical: "10@s",
     overflow: "hidden",
     width: "95%",
@@ -164,6 +166,7 @@ const styles = ScaledSheet.create({
     justifyContent: "space-between",
     marginTop: "5@s",
     paddingHorizontal: "5@s",
+    paddingVertical: "5@s",
     width: "100%",
   },
   totalDataInfo: {

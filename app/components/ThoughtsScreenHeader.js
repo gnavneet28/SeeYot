@@ -1,4 +1,4 @@
-import React, { memo, useContext } from "react";
+import React, { memo, useContext, useState, useEffect } from "react";
 import { View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
@@ -8,10 +8,14 @@ import defaultStyles from "../config/styles";
 import AppImage from "./AppImage";
 import AppText from "./AppText";
 
-import TypingContext from "../utilities/typingContext";
+import { SocketContext } from "../api/socketClient";
+import useAuth from "../auth/useAuth";
 
 const typingIndicator = "typing.json";
 const headerColor = "#343436";
+
+let timeOut;
+let TIMER_LENGTH = 2000;
 
 function ThoughtsScreenHeader({
   imageUrl,
@@ -23,9 +27,52 @@ function ThoughtsScreenHeader({
   activeChat,
   isRecipientActive,
 }) {
-  const { typing } = useContext(TypingContext);
+  const { user } = useAuth();
+  const [typing, setTyping] = useState(false);
+
+  const socket = useContext(SocketContext);
+
+  useEffect(() => {
+    const listener1 = (data) => {
+      if (!typing) {
+        setTyping(true);
+      } else {
+        clearTimeout(timeOut);
+      }
+      let lastTypingTime = new Date().getTime();
+      timeOut = setTimeout(() => {
+        let typingTimer = new Date().getTime();
+        let timeDiff = typingTimer - lastTypingTime;
+
+        if (timeDiff >= TIMER_LENGTH && typing) {
+          setTyping(false);
+        }
+      }, TIMER_LENGTH);
+    };
+
+    socket.on(`typing${user._id}`, listener1);
+
+    const listener2 = (data) => {
+      if (typing) setTyping(false);
+    };
+
+    socket.on(`stopTyping${user._id}`, listener2);
+
+    return () => {
+      socket.off(`typing${user._id}`, listener1);
+      socket.off(`stopTyping${user._id}`, listener2);
+    };
+  }, [typing]);
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: headerColor,
+        },
+      ]}
+    >
       <View style={styles.leftSectionMainContainer}>
         <MaterialIcons
           name="arrow-back"
@@ -64,7 +111,14 @@ function ThoughtsScreenHeader({
           )}
         </View>
       </View>
-      <View style={styles.middleSectionContainer}>
+      <View
+        style={[
+          styles.middleSectionContainer,
+          {
+            backgroundColor: headerColor,
+          },
+        ]}
+      >
         {activeChat ? (
           <AppText style={[styles.name]}>
             {activeChat && isRecipientActive
@@ -79,9 +133,7 @@ function ThoughtsScreenHeader({
             style={[
               styles.thoughtMode,
               {
-                backgroundColor: activeChat
-                  ? defaultStyles.colors.lightGrey
-                  : defaultStyles.colors.white,
+                backgroundColor: defaultStyles.colors.white,
 
                 color: activeChat
                   ? defaultStyles.colors.dark
@@ -96,9 +148,7 @@ function ThoughtsScreenHeader({
             style={[
               styles.activeMode,
               {
-                backgroundColor: activeChat
-                  ? defaultStyles.colors.white
-                  : defaultStyles.colors.lightGrey,
+                backgroundColor: defaultStyles.colors.lightGrey,
                 color: !activeChat
                   ? defaultStyles.colors.dark
                   : defaultStyles.colors.dark,
@@ -109,15 +159,6 @@ function ThoughtsScreenHeader({
             Active Chat
           </AppText>
         </View>
-        {/* {activeChat ? (
-          <AppText style={[styles.name]}>
-            {activeChat && isRecipientActive
-              ? `${name} is Active`
-              : `${name} is not Active`}
-          </AppText>
-        ) : (
-          <AppText style={styles.name}>{name}</AppText>
-        )} */}
       </View>
       <MaterialIcons
         name="more-vert"
@@ -139,7 +180,7 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
-    backgroundColor: headerColor,
+    // backgroundColor: headerColor,
     borderTopRightRadius: "20@s",
     //elevation: 10,
     flexDirection: "row",

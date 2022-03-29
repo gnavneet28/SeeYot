@@ -9,6 +9,8 @@ import AppText from "./AppText";
 import defaultStyles from "../config/styles";
 import defaultProps from "../utilities/defaultProps";
 
+import checkFileType from "../utilities/checkFileType";
+
 function EchoMessageCard({
   echoMessage = defaultProps.defaultEchoMessage,
   cardStyle,
@@ -18,6 +20,7 @@ function EchoMessageCard({
     <>
       <View style={[styles.container, cardStyle]}>
         <AppImage
+          activeOpacity={1}
           imageUrl={echoMessage.picture}
           style={styles.image}
           subStyle={styles.subImage}
@@ -26,9 +29,17 @@ function EchoMessageCard({
           <AppText numberOfLines={1} style={styles.name}>
             {echoMessage.name}
           </AppText>
-          <AppText numberOfLines={1} style={styles.message}>
-            {echoMessage.message}
-          </AppText>
+          {checkFileType(echoMessage.message) ? (
+            <MaterialIcons
+              name="audiotrack"
+              size={scale(15)}
+              color={defaultStyles.colors.secondary}
+            />
+          ) : (
+            <AppText numberOfLines={1} style={styles.message}>
+              {echoMessage.message}
+            </AppText>
+          )}
         </View>
         <TouchableOpacity
           onPress={onEchoMessagePress}
@@ -52,11 +63,18 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderColor: defaultStyles.colors.light,
+    borderRadius: "10@s",
+    borderWidth: 0.5,
+    elevation: 0.5,
     flexDirection: "row",
-    height: "60@s",
+    height: "55@s",
     justifyContent: "center",
+    marginBottom: "5@s",
     paddingHorizontal: "10@s",
-    width: "100%",
+    width: "95%",
   },
   contactsActionConatiner: {
     alignItems: "center",

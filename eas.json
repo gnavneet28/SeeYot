@@ -24,7 +24,11 @@
     },
     "production": {
       "node": "16.14.0",
-      "releaseChannel": "production"
+      "releaseChannel": "production",
+      "env": {
+        "PROD_API_URL": "https://seeyot-backend.herokuapp.com/",
+        "PROD_AUTH_TOKEN": "x-auth-token"
+      }
     }
   },
   "submit": {

@@ -4,11 +4,26 @@ import React, {
   useEffect,
   useMemo,
   useState,
+  useRef,
 } from "react";
-import { Keyboard, TouchableWithoutFeedback } from "react-native";
+import {
+  Keyboard,
+  TouchableWithoutFeedback,
+  View,
+  TextInput,
+} from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
 import { showMessage } from "react-native-flash-message";
+import {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
+
+import onBoarding from "../utilities/onBoarding";
+
+import ChatBackgroundSelector from "../components/ChatBackgroundSelector";
 
 import Alert from "../components/Alert";
 import AppText from "../components/AppText";
@@ -24,7 +39,6 @@ import ScreenSub from "../components/ScreenSub";
 import Constant from "../navigation/NavigationConstants";
 
 import ActiveForContext from "../utilities/activeForContext";
-import ActiveMessagesContext from "../utilities/activeMessagesContext";
 import apiActivity from "../utilities/apiActivity";
 import ApiContext from "../utilities/apiContext";
 import debounce from "../utilities/debounce";
@@ -40,19 +54,32 @@ import useAuth from "../auth/useAuth";
 import thoughtsApi from "../api/thoughts";
 import usersApi from "../api/users";
 
+import { SocketContext } from "../api/socketClient";
+
 import useMountedRef from "../hooks/useMountedRef";
 import useAppState from "../hooks/useAppState";
+
+const defaultReply = {
+  message: "",
+  media: "",
+  createdBy: "",
+};
 
 function SendThoughtsScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
   const { recipient, from } = route.params;
+
   const { activeFor, setActiveFor } = useContext(ActiveForContext);
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
   const appStateVisible = useAppState();
+  const listRef = useRef(null);
+  const socket = useContext(SocketContext);
+  const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
 
   // STATES
+  const [showHelp, setShowHelp] = useState(false);
   const [sendingMedia, setSendingMedia] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [unfriendProcessing, setUnfriendProcessing] = useState(false);
@@ -66,9 +93,8 @@ function SendThoughtsScreen({ navigation, route }) {
     echoMessage: null,
   });
   const [activeChat, setActiveChat] = useState(false);
-  const { activeMessages, setActiveMessages } = useContext(
-    ActiveMessagesContext
-  );
+  const [activeMessages, setActiveMessages] = useState([]);
+
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
@@ -79,8 +105,58 @@ function SendThoughtsScreen({ navigation, route }) {
     messageToDelete: null,
     deletingMessage: false,
   });
-  // ALERT ACTION
+  const [reply, setReply] = useState({
+    message: "",
+    media: "",
+    createdBy: "",
+  });
+  const [message, setMessage] = useState("");
+  const [hint, setHint] = useState("");
 
+  let isRecipientActive = activeFor.filter((u) => u == recipient._id)[0];
+
+  useEffect(() => {
+    const listener = async (data) => {
+      let modifiedMessage = { ...data.newMessage, seen: true };
+      activeMessages.push(modifiedMessage);
+      setActiveMessages([...activeMessages]);
+      await usersApi.setSeen(data.newMessage.secondaryId);
+    };
+    socket.on(`newActiveMessage${user._id}`, listener);
+
+    return () => {
+      socket.off(`newActiveMessage${user._id}`, listener);
+    };
+  }, [activeMessages]);
+
+  // REPLY ACTIONS
+
+  const translateX = useSharedValue(800);
+
+  const rStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateX: translateX.value,
+        },
+      ],
+    };
+  }, []);
+
+  const handleRemoveReply = useCallback(() => {
+    translateX.value = withSpring(800);
+    setReply(defaultReply);
+  }, [reply]);
+
+  const handleOnSelectReply = useCallback(
+    (data) => {
+      translateX.value = withSpring(0);
+      setReply(data);
+    },
+    [reply]
+  );
+
+  // ALERT ACTION
   const handleCloseAlert = useCallback(() => setShowAlert(false), []);
 
   const handleSendNewMessageNotification = debounce(
@@ -123,6 +199,7 @@ function SendThoughtsScreen({ navigation, route }) {
   // SETTING ACTIVECHATMESSAGES, ACTIVE CHAT TO NULL AND REMOVING THE ACTIVECHAT FOR USER
   useEffect(() => {
     if (mounted) {
+      setReply(defaultReply);
       if (activeMessages.length) {
         setActiveMessages([]);
       }
@@ -181,10 +258,10 @@ function SendThoughtsScreen({ navigation, route }) {
   }, [isFocused, mounted]);
 
   useEffect(() => {
-    if (mounted && showAlert === true && isRecipientActive) {
+    if (mounted && isRecipientActive) {
       setShowAlert(false);
     }
-  }, [isRecipientActive, showAlert, mounted, isFocused]);
+  }, [isRecipientActive, mounted, isFocused]);
   // HEADER ACTIONS
   const handleBack = useCallback(
     debounce(
@@ -214,8 +291,6 @@ function SendThoughtsScreen({ navigation, route }) {
   );
 
   // INFORMATION IN NEED
-
-  let isRecipientActive = activeFor.filter((u) => u == recipient._id)[0];
 
   let isBlocked = useMemo(
     () => user.blocked.filter((b) => b._id == recipient._id)[0],
@@ -255,14 +330,18 @@ function SendThoughtsScreen({ navigation, route }) {
           visible: true,
         });
 
+        setHint("");
+
         const message = textMessage.trim();
         const messageFor = recipient._id;
         const isVip = user.vip.subscription;
+        const hintProvided = hint.trim();
 
         const { data, problem, ok } = await thoughtsApi.sendThought(
           message,
           messageFor,
-          isVip
+          isVip,
+          hintProvided
         );
         if (ok) {
           if (recipient._id != user._id) {
@@ -275,6 +354,11 @@ function SendThoughtsScreen({ navigation, route }) {
               data.thoughtData.key
             );
           }
+          if (!(await isInfoSeen(onboardingKeys.THOUGHT_HISTORY))) {
+            setShowHelp(true);
+            updateInfoSeen(onboardingKeys.THOUGHT_HISTORY);
+          }
+
           return setMessageActivity({
             message: data.matched
               ? "Congrats! Your thoughts matched"
@@ -306,36 +390,50 @@ function SendThoughtsScreen({ navigation, route }) {
       1000,
       true
     ),
-    [recipient._id, user]
+    [recipient._id, user, hint]
   );
 
   const handleSendActiveMessage = useCallback(
     async (textMessage, media) => {
-      // listRef.current.scrollToEnd({ animated: false });
+      translateX.value = withSpring(800);
+      listRef.current.scrollToOffset({ offset: -300, animated: true });
       stopCurrentUserTyping();
       if (!isRecipientActive && mounted) {
         return setShowAlert(true);
       }
+      let newId =
+        Date.now().toString(36) + Math.random().toString(36).substring(2);
       let newMessage = media
         ? {
-            _id:
-              Date.now().toString(36) + Math.random().toString(36).substring(2),
+            _id: newId,
+            secondaryId: newId,
             createdAt: new Date(),
             createdBy: user._id,
             createdFor: recipient._id,
             media: media,
+            reply: reply,
+            seen: false,
           }
         : {
-            _id:
-              Date.now().toString(36) + Math.random().toString(36).substring(2),
+            _id: newId,
+            secondaryId: newId,
             message: textMessage.trim(),
             createdAt: new Date(),
             createdBy: user._id,
             createdFor: recipient._id,
+            seen: false,
+            reply: reply,
           };
       if (mounted) {
         activeMessages.push(newMessage);
         setActiveMessages([...activeMessages]);
+        if (reply.createdBy) {
+          setReply({
+            message: "",
+            media: "",
+            createdBy: "",
+          });
+        }
       }
       const { ok, data, problem } = await usersApi.sendNewActiveMessage(
         newMessage
@@ -350,7 +448,14 @@ function SendThoughtsScreen({ navigation, route }) {
         tackleProblem(problem, data, setInfoAlert);
       }
     },
-    [recipient._id, activeMessages, mounted, isRecipientActive]
+    [
+      recipient._id,
+      activeMessages,
+      activeFor,
+      mounted,
+      isRecipientActive,
+      reply,
+    ]
   );
 
   const handleThoughtLongPress = useCallback((thought) => {
@@ -392,10 +497,12 @@ function SendThoughtsScreen({ navigation, route }) {
 
   useEffect(() => {
     if (isFocused) {
-      if (from == Constant.NOTIFICATION_SCREEN && isRecipientActive) {
-        return handleSetChatActive();
+      if (isRecipientActive) {
+        handleSetChatActive();
       } else if (from == Constant.NOTIFICATION_SCREEN) {
         addRecipientToActiveList();
+      } else if (from == "Favorite") {
+        handleSetChatActive();
       }
     }
   }, [isFocused, mounted, isRecipientActive]);
@@ -543,7 +650,7 @@ function SendThoughtsScreen({ navigation, route }) {
 
     if (ok) return;
     return;
-  }, [activeChat, recipient._id, mounted, isFocused]);
+  }, [activeChat, recipient._id, mounted, isFocused, isRecipientActive]);
 
   const handleSetChatInActive = async () => {
     if (!activeChat) return;
@@ -576,21 +683,24 @@ function SendThoughtsScreen({ navigation, route }) {
 
   // MEDIA SEND ACTIVE CHAT
 
-  const handleSendSelectedMedia = async (uri) => {
-    setSendingMedia(true);
+  const handleSendSelectedMedia = useCallback(
+    async (uri) => {
+      setSendingMedia(true);
 
-    const { ok, data, problem } = await usersApi.getUploadedPhoto(uri);
-    if (ok) {
-      handleSendActiveMessage("", data);
-      return setSendingMedia(false);
-    }
-    setSendingMedia(false);
-    if (problem) tackleProblem(problem, data, setInfoAlert);
-  };
+      const { ok, data, problem } = await usersApi.getUploadedPhoto(uri);
+      if (ok) {
+        handleSendActiveMessage("", data);
+        return setSendingMedia(false);
+      }
+      setSendingMedia(false);
+      if (problem) tackleProblem(problem, data, setInfoAlert);
+    },
+    [activeMessages]
+  );
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <>
+    <>
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <Screen style={styles.container}>
           <ThoughtsScreenHeader
             activeChat={activeChat}
@@ -603,112 +713,152 @@ function SendThoughtsScreen({ navigation, route }) {
             onThoughtsModePress={handleSetChatInActive}
           />
           <ScreenSub style={styles.screenSub}>
-            <ThoughtsList
-              onLongPress={activeChat ? doNullFunction : handleThoughtLongPress}
-              activeChat={activeChat}
-              thoughts={activeChat ? activeMessagesList : thoughts}
-              recipient={recipient}
-            />
-            {activeChat && !activeMessagesList.length ? (
-              <AppText style={styles.activeChatInfoText}>
-                Send direct messages to{" "}
-                {recipient.savedName ? recipient.savedName : recipient.name} and
-                have an active conversation. These are temporary messages and
-                are not stored anywhere, except your device until you refresh
-                this chat, visit another one, leave this screen or the app
-                becomes inactive.
-              </AppText>
-            ) : null}
-            {!activeChat && !thoughts.length ? (
-              <AppText style={styles.activeChatInfoText}>
-                Send your thoughts to{" "}
-                {recipient.savedName ? recipient.savedName : recipient.name},
-                and within 10 minutes if{" "}
-                {recipient.savedName ? recipient.savedName : recipient.name}{" "}
-                does the same for you, your thoughts will match. You can see all
-                your matched thoughts here. You can send only one Thought within
-                10 minutes to a single person.
-              </AppText>
-            ) : null}
-            <ApiContext.Provider value={{ sendingMedia, setSendingMedia }}>
-              <SendThoughtsInput
-                onSendSelectedMedia={handleSendSelectedMedia}
-                isFocused={isFocused}
-                setTyping={handleSetTyping}
-                placeholder={placeholder}
+            <ChatBackgroundSelector activeChat={activeChat}>
+              <ThoughtsList
+                listRef={listRef}
+                onLongPress={
+                  activeChat ? doNullFunction : handleThoughtLongPress
+                }
                 activeChat={activeChat}
-                isRecipientActive={isRecipientActive}
-                onActiveChatSelection={
-                  activeChat ? handleSetChatInActive : handleSetChatActive
-                }
-                style={[styles.inputBox]}
-                submit={
-                  activeChat ? handleSendActiveMessage : handleSendThought
-                }
+                thoughts={activeChat ? activeMessagesList : thoughts}
+                recipient={recipient}
+                onSelectReply={handleOnSelectReply}
               />
-            </ApiContext.Provider>
+              {activeChat && !activeMessagesList.length ? (
+                <AppText style={styles.activeChatInfoText}>
+                  Send direct messages to{" "}
+                  {recipient.savedName ? recipient.savedName : recipient.name}{" "}
+                  and have an active conversation. These are temporary messages
+                  and are not stored anywhere, except your device until you
+                  refresh this chat, visit another one, leave this screen or the
+                  app becomes inactive.
+                </AppText>
+              ) : null}
+              {!activeChat && thoughts.length < 5 ? (
+                <AppText style={styles.thoughtInfoText}>
+                  Send your thoughts to{" "}
+                  {recipient.savedName ? recipient.savedName : recipient.name},
+                  and within 10 minutes if{" "}
+                  {recipient.savedName ? recipient.savedName : recipient.name}{" "}
+                  does the same for you, your thoughts will match. You can see
+                  all your matched thoughts here. You can send only one Thought
+                  within 10 minutes to a single person.
+                </AppText>
+              ) : null}
+              {!activeChat && message.replace(/\s/g, "").length >= 1 ? (
+                <View style={styles.hintContainer}>
+                  <TextInput
+                    maxLength={100}
+                    onChangeText={setHint}
+                    placeholder="Add a hint..."
+                    placeholderTextColor={defaultStyles.colors.white}
+                    style={styles.hintInput}
+                    value={hint}
+                  />
+                </View>
+              ) : null}
+              {isFocused ? (
+                <ApiContext.Provider value={{ sendingMedia, setSendingMedia }}>
+                  <SendThoughtsInput
+                    rStyle={rStyle}
+                    recipient={recipient}
+                    reply={reply}
+                    onRemoveReply={handleRemoveReply}
+                    onSendSelectedMedia={handleSendSelectedMedia}
+                    isFocused={isFocused}
+                    setTyping={handleSetTyping}
+                    message={message}
+                    setMessage={setMessage}
+                    placeholder={placeholder}
+                    activeChat={activeChat}
+                    isRecipientActive={isRecipientActive}
+                    onActiveChatSelection={
+                      activeChat ? handleSetChatInActive : handleSetChatActive
+                    }
+                    style={[styles.inputBox]}
+                    submit={
+                      activeChat ? handleSendActiveMessage : handleSendThought
+                    }
+                    historyTip="See sent thoughts that did not match or delete before getting matched."
+                    showTip={showHelp}
+                    setShowTip={setShowHelp}
+                  />
+                </ApiContext.Provider>
+              ) : null}
+            </ChatBackgroundSelector>
           </ScreenSub>
         </Screen>
-        <SendingThoughtActivity
-          echoMessage={messageActivity.echoMessage}
-          message={messageActivity.message}
-          onDoneButtonPress={handleSendingActivityClose}
-          onRequestClose={handleSendingActivityClose}
-          processing={messageActivity.processing}
-          success={messageActivity.success}
-          visible={messageActivity.visible}
-        />
-        <Alert
-          visible={showAlert}
-          title="Not Active"
-          description={`${
-            recipient.savedName ? recipient.savedName : recipient.name
-          } is not active for you right now. Send a notification requesting to come online.`}
-          onRequestClose={handleCloseAlert}
-          leftOption="Cancel"
-          rightOption="Yes"
-          leftPress={handleCloseAlert}
-          rightPress={handleSendNewMessageNotification}
-        />
-        <Alert
-          apiProcessing={deleteMessageOption.deletingMessage}
-          description="Delete this thought. This action will delete the thought only from your side."
-          leftOption="Cancel"
-          leftPress={handleCloseDeleteMessageModal}
-          onRequestClose={handleCloseDeleteMessageModal}
-          rightOption="Yes"
-          rightPress={handleDeleteMessage}
-          title="Delete"
-          visible={deleteMessageOption.isVisible}
-        />
+      </TouchableWithoutFeedback>
+      <SendingThoughtActivity
+        echoMessage={messageActivity.echoMessage}
+        message={messageActivity.message}
+        onDoneButtonPress={handleSendingActivityClose}
+        onRequestClose={handleSendingActivityClose}
+        processing={messageActivity.processing}
+        success={messageActivity.success}
+        visible={messageActivity.visible}
+      />
+      <Alert
+        visible={showAlert}
+        title="Not Active"
+        description={`${
+          recipient.savedName ? recipient.savedName : recipient.name
+        } is not active for you right now. Send a notification requesting to come online.`}
+        onRequestClose={handleCloseAlert}
+        leftOption="Cancel"
+        rightOption="Yes"
+        leftPress={handleCloseAlert}
+        rightPress={handleSendNewMessageNotification}
+      />
+      <Alert
+        apiProcessing={deleteMessageOption.deletingMessage}
+        description="Delete this thought. This action will delete the thought only from your side."
+        leftOption="Cancel"
+        leftPress={handleCloseDeleteMessageModal}
+        onRequestClose={handleCloseDeleteMessageModal}
+        rightOption="Yes"
+        rightPress={handleDeleteMessage}
+        title="Delete"
+        visible={deleteMessageOption.isVisible}
+      />
 
-        <InfoAlert
-          description={infoAlert.infoAlertMessage}
-          leftPress={handleCloseInfoAlert}
-          visible={infoAlert.showInfoAlert}
-        />
-        <SendThoughtsOptionsModal
-          blockProcessing={blockProcessing}
-          favoriteProcessing={favoriteProcessing}
-          handleAddFavoritePress={handleAddFavoritePress}
-          handleBlockPress={handleBlockPress}
-          handleModalClose={handleModalClose}
-          handleRemoveFavoritePress={handleRemoveFavoritePress}
-          handleUnblockPress={handleUnblockPress}
-          handleUnfriendPress={handleUnfriendPress}
-          inContacts={inContacts}
-          inFavorites={inFavorites}
-          isBlocked={isBlocked}
-          isVisible={isVisible}
-          unfriendProcessing={unfriendProcessing}
-        />
-      </>
-    </TouchableWithoutFeedback>
+      <InfoAlert
+        description={infoAlert.infoAlertMessage}
+        leftPress={handleCloseInfoAlert}
+        visible={infoAlert.showInfoAlert}
+      />
+      <SendThoughtsOptionsModal
+        blockProcessing={blockProcessing}
+        favoriteProcessing={favoriteProcessing}
+        handleAddFavoritePress={handleAddFavoritePress}
+        handleBlockPress={handleBlockPress}
+        handleModalClose={handleModalClose}
+        handleRemoveFavoritePress={handleRemoveFavoritePress}
+        handleUnblockPress={handleUnblockPress}
+        handleUnfriendPress={handleUnfriendPress}
+        inContacts={inContacts}
+        inFavorites={inFavorites}
+        isBlocked={isBlocked}
+        isVisible={isVisible}
+        unfriendProcessing={unfriendProcessing}
+      />
+    </>
   );
 }
 const styles = ScaledSheet.create({
   activeChatInfoText: {
     alignSelf: "center",
+    color: defaultStyles.colors.white,
+    fontSize: "13@s",
+    marginTop: "20@s",
+    textAlign: "center",
+    width: "80%",
+  },
+  thoughtInfoText: {
+    alignSelf: "center",
+    backgroundColor: "rgba(255,255,255,0.8)",
+    borderRadius: "5@s",
+    color: defaultStyles.colors.dark,
     fontSize: "13@s",
     marginTop: "20@s",
     textAlign: "center",
@@ -722,6 +872,23 @@ const styles = ScaledSheet.create({
     backgroundColor: "rgba(0,0,0,0.8)",
     flex: 1,
     justifyContent: "center",
+    width: "100%",
+  },
+  hintContainer: {
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.8)",
+    borderRadius: "5@s",
+    justifyContent: "center",
+    marginBottom: "2@s",
+    padding: "10@s",
+    width: "90%",
+  },
+  hintInput: {
+    color: defaultStyles.colors.white,
+    fontFamily: "ComicNeue-Bold",
+    fontSize: "12@s",
+    fontStyle: "normal",
+    fontWeight: "normal",
     width: "100%",
   },
   imageBackground: {
@@ -756,6 +923,8 @@ const styles = ScaledSheet.create({
   },
   screenSub: {
     borderTopRightRadius: 0,
+    flex: 1,
+    backgroundColor: "red",
   },
 });
 

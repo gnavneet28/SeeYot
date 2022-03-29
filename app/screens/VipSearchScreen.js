@@ -9,7 +9,6 @@ import Screen from "../components/Screen";
 import SearchBox from "../components/SearchBox";
 import VipSearchResultList from "../components/VipSearchResultList";
 import VipThoughtCardList from "../components/VipThoughtCardList";
-import HelpDialogueBox from "../components/HelpDialogueBox";
 import VipScreenOptions from "../components/VipScreenOptions";
 
 import Constant from "../navigation/NavigationConstants";
@@ -24,6 +23,7 @@ import apiActivity from "../utilities/apiActivity";
 import defaultProps from "../utilities/defaultProps";
 
 import useAuth from "../auth/useAuth";
+import onBoarding from "../utilities/onBoarding";
 import ScreenSub from "../components/ScreenSub";
 
 let defaultSearchHistory = [];
@@ -33,6 +33,7 @@ function VipSearchScreen({ navigation }) {
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
+  const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
 
   // STATES
   const [apiProcessing, setApiProcessing] = useState(false);
@@ -50,6 +51,20 @@ function VipSearchScreen({ navigation }) {
     echoMessage: { message: "" },
   });
   const [showHelp, setShowHelp] = useState(false);
+
+  // ONBOADING INFO
+
+  const showOnboarding = async () => {
+    const isShown = await isInfoSeen(onboardingKeys.VIP_INFO);
+    if (!isShown) {
+      setShowHelp(true);
+      updateInfoSeen(onboardingKeys.VIP_INFO);
+    }
+  };
+
+  useEffect(() => {
+    showOnboarding();
+  }, []);
 
   useEffect(() => {
     if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
@@ -114,7 +129,7 @@ function VipSearchScreen({ navigation }) {
   const handleSearchQuery = useCallback(
     debounce(
       async (searchQuery) => {
-        if (searchQuery && searchQuery.length >= 3) {
+        if (searchQuery && searchQuery.length >= 2) {
           setIsLoading(true);
           const { data, problem, ok } = await usersApi.searchUser(searchQuery);
           if (ok) {
@@ -262,7 +277,10 @@ function VipSearchScreen({ navigation }) {
           onPressLeft={handleLeftPress}
           onPressRight={handleHelpPress}
           rightIcon="help-outline"
-          title="Vip Area"
+          title="Vip"
+          tip="Only SeeYot Vip members can interact with people outside their contacts."
+          showTip={showHelp}
+          setShowTip={setShowHelp}
         />
 
         <ScreenSub>
@@ -290,12 +308,7 @@ function VipSearchScreen({ navigation }) {
           />
         </ScreenSub>
       </Screen>
-      <HelpDialogueBox
-        information="Only SeeYot Vip members can search people outside their contacts and interact with them."
-        onPress={handleCloseHelp}
-        setVisible={setShowHelp}
-        visible={showHelp}
-      />
+
       <VipScreenOptions
         apiProcessing={apiProcessing}
         isVisible={isVisible}

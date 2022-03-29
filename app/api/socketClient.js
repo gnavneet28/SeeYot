@@ -1,8 +1,11 @@
 import io from "socket.io-client";
 import apiUrl from "../config/apiUrl";
+import React from "react";
 
-const socket = io(apiUrl.baseApiUrl, {
+let api_url = __DEV__ ? apiUrl.DEV_API_URL : apiUrl.PROD_API_URL;
+
+export const socket = io(api_url, {
   transports: ["websocket", "polling"],
 });
 
-export default socket;
+export const SocketContext = React.createContext();

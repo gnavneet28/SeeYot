@@ -18,6 +18,8 @@ import MaterialCommunityIcons from "../../node_modules/react-native-vector-icons
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import CameraRoll from "@react-native-community/cameraroll";
+import Animated from "react-native-reanimated";
+import Tooltip from "react-native-walkthrough-tooltip";
 
 import AppActivityIndicator from "./ActivityIndicator";
 import Alert from "./Alert";
@@ -40,6 +42,7 @@ import defaultStyles from "../config/styles";
 import MediaGalleryModal from "./MediaGalleryModal";
 import ApiContext from "../utilities/apiContext";
 import ApiProcessingContainer from "./ApiProcessingContainer";
+import ActiveChatReply from "./ActiveChatReply";
 
 function SendThoughtsInput({
   activeChat,
@@ -50,6 +53,16 @@ function SendThoughtsInput({
   setTyping = () => null,
   style,
   submit,
+  reply,
+  recipient,
+  onRemoveReply,
+  onLayout,
+  rStyle,
+  historyTip,
+  showTip = false,
+  setShowTip = () => null,
+  message,
+  setMessage,
 }) {
   dayjs.extend(relativeTime);
   let currentDate = new Date();
@@ -57,16 +70,15 @@ function SendThoughtsInput({
 
   const { sendingMedia } = useContext(ApiContext);
 
-  const [message, setMessage] = useState("");
   const isConnected = useConnection();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [previousThoughts, setPreviousThoughts] = useState([]);
   const [isReady, setIsReady] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [height, setHeight] = useState(0);
   const mounted = useMountedRef();
 
   // MEDIA ACTIVE CHAT
-
   const [activeMediaPermissionAlert, setActiveMediaPermissionAlert] =
     useState(false);
   const [mediaImagesModal, setMediaImagesModal] = useState({
@@ -226,8 +238,24 @@ function SendThoughtsInput({
     [currentDate]
   );
 
+  const handleFocusInput = () => {
+    setFocused(true);
+  };
+
   return (
     <>
+      <Animated.View style={[styles.animatedContainer, rStyle]}>
+        <ActiveChatReply
+          onLayout={onLayout}
+          style={styles.activeChatReplyContainer}
+          messageContainerStyle={{ width: "100%" }}
+          media={reply.media}
+          message={reply.message}
+          creator={reply.createdBy == user._id ? user.name : recipient.name}
+          onClose={onRemoveReply}
+        />
+      </Animated.View>
+
       <View style={[styles.contentContainer, style]}>
         {!activeChat ? (
           <TouchableOpacity
@@ -235,11 +263,30 @@ function SendThoughtsInput({
             onPress={handleOpenModal}
             style={styles.previousMessages}
           >
-            <IonicIcons
-              color={defaultStyles.colors.white}
-              name="list-circle-outline"
-              size={scale(22)}
-            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: defaultStyles.colors.white,
+                height: "100%",
+              }}
+              displayInsets={{
+                top: scale(24),
+                bottom: scale(40),
+                right: scale(24),
+                left: scale(24),
+              }}
+              supportedOrientations={["portrait"]}
+              showChildInTooltip={false}
+              isVisible={showTip}
+              content={<AppText style={styles.tip}>{historyTip}</AppText>}
+              placement="right"
+              onClose={() => setShowTip(false)}
+            >
+              <IonicIcons
+                color={defaultStyles.colors.white}
+                name="list-circle-outline"
+                size={scale(22)}
+              />
+            </Tooltip>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -269,14 +316,21 @@ function SendThoughtsInput({
             multiline={true}
             maxLength={250}
             onBlur={() => setFocused(false)}
-            onFocus={() => setFocused(true)}
+            onFocus={handleFocusInput}
             onChangeText={handleOnChangeText}
             placeholder={placeholder}
             style={[
               styles.inputBox,
-              { fontFamily: "ComicNeue-Bold", fontWeight: "normal" },
+              {
+                fontFamily: "ComicNeue-Bold",
+                fontWeight: "normal",
+                height: Math.min(100, Math.max(35, height)),
+              },
             ]}
             value={message}
+            onContentSizeChange={(event) =>
+              setHeight(event.nativeEvent.contentSize.height)
+            }
           />
           <TouchableOpacity
             disabled={
@@ -307,6 +361,7 @@ function SendThoughtsInput({
               }
               name="send"
               size={scale(28)}
+              icon="MaterialIcons"
             />
           </TouchableOpacity>
         </View>
@@ -371,15 +426,26 @@ function SendThoughtsInput({
 }
 
 const styles = ScaledSheet.create({
+  activeChatReplyContainer: {
+    minHeight: "40@s",
+    width: "90%",
+  },
   addMedia: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.blue,
+    backgroundColor: defaultStyles.colors.secondary,
     borderRadius: "18@s",
     height: "30@s",
     justifyContent: "center",
     marginRight: "5@s",
     overflow: "hidden",
     width: "30@s",
+  },
+  animatedContainer: {
+    alignItems: "center",
+    bottom: "50@s",
+    justifyContent: "center",
+    position: "absolute",
+    width: "100%",
   },
   container: {
     alignItems: "center",
@@ -432,7 +498,7 @@ const styles = ScaledSheet.create({
   },
   previousMessages: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.secondary_Variant,
+    backgroundColor: defaultStyles.colors.secondary,
     borderRadius: "18@s",
     height: "30@s",
     justifyContent: "center",

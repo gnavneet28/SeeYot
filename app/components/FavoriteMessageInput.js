@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import { View, ScrollView, TextInput, Modal } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
@@ -11,6 +11,7 @@ import ApiProcessingContainer from "./ApiProcessingContainer";
 import OptionalAnswer from "./OptionalAnswer";
 
 import defaultStyles from "../config/styles";
+import Backdrop from "./Backdrop";
 
 const modalHeaderColor = defaultStyles.colors.secondary_Variant;
 
@@ -30,6 +31,7 @@ function FavoriteMessageInput({
   setMessage,
   textInputRef,
 }) {
+  const [height, setHeight] = useState(0);
   const checkSendButtonDisability = () => {
     if (!isConnected) return true;
     if (optionalAnswer.length) {
@@ -64,6 +66,9 @@ function FavoriteMessageInput({
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.scrollView}
         >
+          <Backdrop
+            onPress={processing === true ? () => null : handleCloseMessage}
+          />
           <View style={styles.closeMessageIconContainer}>
             <AntDesign
               onPress={processing === true ? () => null : handleCloseMessage}
@@ -97,19 +102,20 @@ function FavoriteMessageInput({
                   <TextInput
                     ref={textInputRef}
                     editable={!processing}
-                    placeholder={
-                      "What would you like to say to" +
-                      " " +
-                      recipient.name +
-                      "..."
-                    }
+                    placeholder="Type your message here..."
                     multiline={true}
                     value={message.textMessage}
                     maxLength={250}
                     onChangeText={(text) =>
                       setMessage({ ...message, textMessage: text })
                     }
-                    style={styles.messageInput}
+                    onContentSizeChange={(event) =>
+                      setHeight(event.nativeEvent.contentSize.height)
+                    }
+                    style={[
+                      styles.messageInput,
+                      { height: Math.min(100, Math.max(40, height)) },
+                    ]}
                   />
                   <AppText style={styles.wordCount}>
                     {message.textMessage.length}/250
@@ -311,7 +317,7 @@ const styles = ScaledSheet.create({
   },
   scrollView: {
     flexGrow: 1,
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
   },
   selectMood: {
     backgroundColor: defaultStyles.colors.light,

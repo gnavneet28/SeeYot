@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import * as Animatable from "react-native-animatable";
 
 import Option from "./Option";
 import ApiOption from "./ApiOption";
@@ -29,8 +30,12 @@ function SendThoughtsOptionsModal({
       transparent={true}
       visible={isVisible}
     >
-      <View style={styles.modalMainContainer}>
-        <View style={styles.optionsContainer}>
+      <View style={[styles.modalMainContainer]}>
+        <Animatable.View
+          useNativeDriver={true}
+          animation="pulse"
+          style={styles.optionsContainer}
+        >
           <Option
             title="Close"
             titleStyle={styles.closeOption}
@@ -57,7 +62,7 @@ function SendThoughtsOptionsModal({
             onPress={!isBlocked ? handleBlockPress : handleUnblockPress}
             processing={blockProcessing}
           />
-        </View>
+        </Animatable.View>
       </View>
     </Modal>
   );

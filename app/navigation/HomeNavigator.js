@@ -8,6 +8,12 @@ import EchoModalScreen from "../screens/EchoModalScreen";
 
 const Stack = createSharedElementStackNavigator();
 
+const forFade = ({ current, closing }) => ({
+  cardStyle: {
+    opacity: current.progress,
+  },
+});
+
 function HomeNavigator(props) {
   return (
     <Stack.Navigator
@@ -15,7 +21,7 @@ function HomeNavigator(props) {
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen
-        options={{ animation: "none" }}
+        options={{ cardStyleInterpolator: forFade }}
         name={Constants.HOME_SCREEN}
         component={HomeScreen}
       />
@@ -24,7 +30,7 @@ function HomeNavigator(props) {
           route.params.recipient._id,
           `echoIcon${route.params.recipient._id}`,
         ]}
-        options={{ animation: "none" }}
+        options={{ cardStyleInterpolator: forFade }}
         name={Constants.ECHO_MODAL_SCREEN}
         component={EchoModalScreen}
       />

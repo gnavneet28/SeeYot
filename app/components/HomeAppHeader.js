@@ -1,7 +1,8 @@
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
 import { View, TouchableHighlight } from "react-native";
-import LottieView from "lottie-react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import LottieView from "lottie-react-native";
+import * as Animatable from "react-native-animatable";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
@@ -16,21 +17,51 @@ function AppHeader({
 }) {
   return (
     <View style={[styles.container, style]}>
-      <AppText onPress={onPressLeft} style={styles.title}>
-        SeeYot
-      </AppText>
-      <TouchableHighlight onPress={onPressRight} style={styles.rightOption}>
-        <AppImage
-          imageUrl={rightImageUrl}
-          onPress={onPressRight}
-          style={styles.image}
-          subStyle={styles.imageSub}
+      <View style={styles.animationContainer}>
+        <LottieView
+          autoPlay
+          loop={false}
+          source={"chatanimation.json"}
+          style={{ width: 50 }}
         />
+        <Animatable.View
+          iterationCount={3}
+          useNativeDriver={true}
+          animation="rubberBand"
+          style={[styles.animatedViewContainer]}
+        >
+          <AppText onPress={onPressLeft} style={styles.title}>
+            SeeYot
+          </AppText>
+        </Animatable.View>
+      </View>
+      <TouchableHighlight onPress={onPressRight} style={styles.rightOption}>
+        <Animatable.View
+          useNativeDriver={true}
+          animation="zoomIn"
+          style={styles.rightOption}
+        >
+          <AppImage
+            imageUrl={rightImageUrl}
+            onPress={onPressRight}
+            style={styles.image}
+            subStyle={styles.imageSub}
+          />
+        </Animatable.View>
       </TouchableHighlight>
     </View>
   );
 }
 const styles = ScaledSheet.create({
+  animatedViewContainer: {
+    flexShrink: 1,
+  },
+  animationContainer: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingLeft: "10@s",
+  },
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.primary,
@@ -71,9 +102,8 @@ const styles = ScaledSheet.create({
     color: defaultStyles.colors.white,
     flexShrink: 1,
     fontFamily: "ComicNeue-Bold",
-    fontSize: "22@s",
+    fontSize: "20@s",
     letterSpacing: "0.3@s",
-    paddingHorizontal: "20@s",
     textAlign: "left",
   },
 });

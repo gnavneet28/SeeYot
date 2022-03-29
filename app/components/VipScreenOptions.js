@@ -1,6 +1,11 @@
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 
 import ApiOption from "./ApiOption";
 import Option from "./Option";
@@ -15,6 +20,25 @@ function VipScreenOptions({
   hanldeRemoveFromSearchHistory,
   isVisible,
 }) {
+  const size = useSharedValue(1);
+
+  const rStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          scale: size.value,
+        },
+      ],
+    };
+  }, []);
+
+  useEffect(() => {
+    size.value = withTiming(1.2, {}, (isFinished) => {
+      if (isFinished) {
+        size.value = withTiming(1);
+      }
+    });
+  }, [isVisible]);
   return (
     <Modal
       animationType="fade"
@@ -22,7 +46,7 @@ function VipScreenOptions({
       transparent={true}
       visible={isVisible}
     >
-      <View style={styles.searchHistoryMainContainer}>
+      <Animated.View style={[styles.searchHistoryMainContainer, rStyle]}>
         <View style={styles.optionsContainer}>
           <Option
             onPress={handleCloseOptionModal}
@@ -41,7 +65,7 @@ function VipScreenOptions({
             onPress={handlePopUpOnSendThoughtButtonPress}
           />
         </View>
-      </View>
+      </Animated.View>
     </Modal>
   );
 }

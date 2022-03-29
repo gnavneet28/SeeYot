@@ -1,16 +1,27 @@
-import React, { useCallback, memo } from "react";
-import { View, FlatList } from "react-native";
+import React, { useCallback, memo, useRef } from "react";
+import { View, FlatList, Animated } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import EchoMessageCard from "./EchoMessageCard";
 
 function EchoMessageList({ echoMessages = [], onEchoMessagePress, style }) {
-  const renderItem = useCallback(({ item }) => {
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const renderItem = useCallback(({ item, index }) => {
+    const inputRange = [-1, 0, scale(60 * index), scale(60 * (index + 2))];
+
+    const scaleItem = scrollY.interpolate({
+      inputRange,
+      outputRange: [1, 1, 1, 0],
+    });
     return (
-      <EchoMessageCard
-        echoMessage={item}
-        onEchoMessagePress={() => onEchoMessagePress(item)}
-      />
+      <Animated.View style={{ transform: [{ scale: scaleItem }] }}>
+        <EchoMessageCard
+          index={index}
+          echoMessage={item}
+          onEchoMessagePress={() => onEchoMessagePress(item)}
+        />
+      </Animated.View>
     );
   }, []);
 
@@ -31,14 +42,21 @@ function EchoMessageList({ echoMessages = [], onEchoMessagePress, style }) {
 
   return (
     <View style={[styles.container, style]}>
-      <FlatList
+      <Animated.FlatList
+        onScroll={Animated.event(
+          [
+            {
+              nativeEvent: { contentOffset: { y: scrollY } },
+            },
+          ],
+          { useNativeDriver: true }
+        )}
         data={getData()}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         removeClippedSubviews={true}
         getItemLayout={getItemLayout}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
         maxToRenderPerBatch={15}
         windowSize={10}
       />

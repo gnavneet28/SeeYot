@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import * as Animatable from "react-native-animatable";
 
 import Option from "./Option";
 import ApiOption from "./ApiOption";
@@ -18,12 +19,17 @@ function EchoScreenOptions({
 }) {
   return (
     <Modal
+      animationType="none"
       onRequestClose={handleCloseModal}
       transparent={true}
       visible={isVisible}
     >
-      <View style={styles.echoOptionMainContainer}>
-        <View style={styles.optionsContainer}>
+      <View style={[styles.echoOptionMainContainer]}>
+        <Animatable.View
+          useNativeDriver={true}
+          animation="pulse"
+          style={styles.optionsContainer}
+        >
           <Option
             onPress={handleCloseModal}
             title="Close"
@@ -38,7 +44,7 @@ function EchoScreenOptions({
           {recipient._id == echoMessageOption.messageFor ? null : (
             <Option title="Use this echo" onPress={handleUseThisEchoPress} />
           )}
-        </View>
+        </Animatable.View>
       </View>
     </Modal>
   );

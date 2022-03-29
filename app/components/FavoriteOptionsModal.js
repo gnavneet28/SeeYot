@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import {
   View,
   Modal,
@@ -7,6 +7,7 @@ import {
   Keyboard,
 } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import * as Animatable from "react-native-animatable";
 
 import AppText from "./AppText";
 import AppButton from "./AppButton";
@@ -21,6 +22,7 @@ function FavoriteOptionsModal({
   setOptionalMessage,
   showAddoption,
 }) {
+  const [height, setHeight] = useState(0);
   const handleKeyboardDismiss = () => Keyboard.dismiss();
   return (
     <Modal
@@ -31,7 +33,11 @@ function FavoriteOptionsModal({
     >
       <TouchableWithoutFeedback onPress={handleKeyboardDismiss}>
         <View style={styles.addoptionModalFallback}>
-          <View style={styles.addOptionContainer}>
+          <Animatable.View
+            useNativeDriver={true}
+            animation="zoomInUp"
+            style={styles.addOptionContainer}
+          >
             <AppText style={styles.addOptionTitle}>Add Option</AppText>
             <AppText style={styles.addOptionInfo}>
               Add optional replies that you expect {recipient.name} would most
@@ -43,12 +49,15 @@ function FavoriteOptionsModal({
               multiline={true}
               onChangeText={setOptionalMessage}
               placeholder="Add an expected reply..."
-              style={styles.addOptionInput}
+              onContentSizeChange={(event) =>
+                setHeight(event.nativeEvent.contentSize.height)
+              }
+              style={[
+                styles.addOptionInput,
+                { height: Math.min(80, Math.max(40, height)) },
+              ]}
               value={optionalMessage}
             />
-            <AppText style={styles.optionLengthInfo}>
-              Option should be minimum 3 characters long.
-            </AppText>
             <View style={styles.addOptionActionContainer}>
               <AppButton
                 onPress={handleCloseAddOption}
@@ -74,7 +83,7 @@ function FavoriteOptionsModal({
                 subStyle={styles.addButtonSub}
               />
             </View>
-          </View>
+          </Animatable.View>
         </View>
       </TouchableWithoutFeedback>
     </Modal>
@@ -153,16 +162,6 @@ const styles = ScaledSheet.create({
   closeButtonSub: {
     color: defaultStyles.colors.secondary,
     fontSize: 15,
-  },
-  optionLengthInfo: {
-    alignSelf: "flex-start",
-    color: defaultStyles.colors.dark_Variant,
-    fontSize: "12@s",
-    marginBottom: "10@s",
-    marginLeft: "10@s",
-    marginTop: "5@s",
-    paddingBottom: 0,
-    paddingTop: 0,
   },
 });
 

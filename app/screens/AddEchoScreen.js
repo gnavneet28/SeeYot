@@ -1,21 +1,29 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { View, Keyboard } from "react-native";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
+import { View, Keyboard, Pressable, TextInput, Text } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-import { ScaledSheet } from "react-native-size-matters";
+import { scale, ScaledSheet } from "react-native-size-matters";
 import { showMessage } from "react-native-flash-message";
+import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
+import * as Animatable from "react-native-animatable";
 
 import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppActivityIndicator from "../components/ActivityIndicator";
 import AppButton from "../components/AppButton";
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
-import AppTextInput from "../components/AppTextInput";
+import AudioRecorder from "../components/AudioRecorder";
 import EchoIcon from "../components/EchoIcon";
 import EchoMessageList from "../components/EchoMessageList";
 import EchoScreenOptions from "../components/EchoScreenOptions";
-import HelpDialogueBox from "../components/HelpDialogueBox";
 import InfoAlert from "../components/InfoAlert";
 import Screen from "../components/Screen";
+import Selection from "../components/Selection";
 
 import useMountedRef from "../hooks/useMountedRef";
 import useConnection from "../hooks/useConnection";
@@ -32,21 +40,30 @@ import usersApi from "../api/users";
 import defaultStyles from "../config/styles";
 import defaultProps from "../utilities/defaultProps";
 import ScreenSub from "../components/ScreenSub";
+import AudioPlayer from "../components/AudioPlayer";
+
+import checkFileType from "../utilities/checkFileType";
+
+import onBoarding from "../utilities/onBoarding";
 
 function AddEchoScreen({ navigation, route }) {
   const { recipient, from } = route.params;
   const isConnected = useConnection();
   const { tackleProblem } = apiActivity;
+  const textModeRef = useRef(null);
+  const audioModeRef = useRef(null);
+  const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
 
   const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
+  let isUnmounting = false;
 
   const [savingEcho, setSavingEcho] = useState(false);
   const [removingEcho, setRemovingEcho] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [initialMessage, setInitialMessage] = useState("");
-  const [message, setMessage] = useState("".trim());
+  const [message, setMessage] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [echoMessageOption, setEchoMessageOption] = useState(
     defaultProps.defaultEchoMessageOption
@@ -56,12 +73,40 @@ function AddEchoScreen({ navigation, route }) {
     showInfoAlert: false,
   });
   const [showHelp, setShowHelp] = useState(false);
+  const [sendNotification, setSendNotification] = useState(false);
+
+  const [height, setHeight] = useState(0);
+
+  // // AUDIO STATES
+  const [recordAudio, setRecordAudio] = useState(false);
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
     () => setInfoAlert({ ...infoAlert, showInfoAlert: false }),
     []
   );
+
+  // ONBOADING INFO
+
+  const showOnboarding = async () => {
+    const isShown = await isInfoSeen(onboardingKeys.ECHO);
+    if (!isShown) {
+      setShowHelp(true);
+      updateInfoSeen(onboardingKeys.ECHO);
+    }
+  };
+
+  useEffect(() => {
+    if (!isUnmounting && isFocused) {
+      setSendNotification(false);
+    }
+
+    return () => (isUnmounting = true);
+  }, [isFocused]);
+
+  useEffect(() => {
+    showOnboarding();
+  }, []);
 
   // ON PAGE FOCUS ACTION
 
@@ -81,6 +126,13 @@ function AddEchoScreen({ navigation, route }) {
     if (!isReady || mounted) {
       setMessage(echoMessage ? echoMessage.message : "");
       setInitialMessage(echoMessage ? echoMessage.message : "");
+      if (echoMessage) {
+        if (checkFileType(echoMessage.message)) {
+          setRecordAudio(true);
+        } else if (!checkFileType(echoMessage.message)) {
+          setRecordAudio(false);
+        }
+      }
       setIsReady(true);
     }
   };
@@ -88,6 +140,8 @@ function AddEchoScreen({ navigation, route }) {
   useEffect(() => {
     if (isFocused) {
       setUpPage();
+    } else if (!isFocused) {
+      setIsReady(false);
     }
   }, [isFocused]);
 
@@ -122,11 +176,12 @@ function AddEchoScreen({ navigation, route }) {
     debounce(
       async () => {
         if (message == initialMessage) return;
+        if (checkFileType(message.trim())) return;
         setSavingEcho(true);
-
         const { ok, data, problem } = await usersApi.updateEcho(
           recipient._id,
-          message.trim()
+          message.trim(),
+          sendNotification
         );
         if (ok) {
           Keyboard.dismiss();
@@ -145,7 +200,38 @@ function AddEchoScreen({ navigation, route }) {
       1000,
       true
     ),
-    [message, recipient._id, user]
+    [message, recipient._id, user, sendNotification]
+  );
+
+  const handleSaveAudio = useCallback(
+    debounce(
+      async () => {
+        if (message == initialMessage) return;
+        if (!checkFileType(message)) return;
+        setSavingEcho(true);
+        const { ok, data, problem } = await usersApi.updateAudioEcho(
+          message.trim(),
+          recipient._id,
+          sendNotification
+        );
+        if (ok) {
+          Keyboard.dismiss();
+          await storeDetails(data.user);
+          setUser(data.user);
+          setSavingEcho(false);
+          return showMessage({
+            ...defaultProps.alertMessageConfig,
+            message: "Echo Updated successfully!",
+            type: "success",
+          });
+        }
+        setSavingEcho(false);
+        tackleProblem(problem, data, setInfoAlert);
+      },
+      1000,
+      true
+    ),
+    [message, recipient._id, user, sendNotification]
   );
 
   // HEADER ACTIONS
@@ -163,10 +249,6 @@ function AddEchoScreen({ navigation, route }) {
     setShowHelp(true);
   }, []);
 
-  const handleCloseHelp = useCallback(() => {
-    setShowHelp(false);
-  }, []);
-
   // ECHO_MESSAGE MODAL ACTIONS
   const handleCloseModal = useCallback(() => {
     setEchoMessageOption(defaultProps.defaultEchoMessageOption);
@@ -175,6 +257,9 @@ function AddEchoScreen({ navigation, route }) {
 
   const handleUseThisEchoPress = useCallback(() => {
     setMessage(echoMessageOption.message);
+    if (checkFileType(echoMessageOption.message)) {
+      setRecordAudio(true);
+    }
     setIsVisible(false);
   }, [message, echoMessageOption]);
 
@@ -206,6 +291,30 @@ function AddEchoScreen({ navigation, route }) {
     [user.echoMessage.length, echoMessageOption, user]
   );
 
+  // // Audio Actions
+
+  const handleChangeToAudioMode = () => {
+    if (!recordAudio && !savingEcho) {
+      audioModeRef.current.rubberBand();
+      return setRecordAudio(true);
+    }
+  };
+  const handleChangeToMessageMode = () => {
+    if (recordAudio && !savingEcho) {
+      textModeRef.current.rubberBand();
+      return setRecordAudio(false);
+    }
+  };
+
+  const handleAudioRefresh = () => {
+    setMessage("");
+  };
+
+  const handleCheckBoxSelection = useCallback(
+    () => setSendNotification(!sendNotification),
+    [sendNotification]
+  );
+
   return (
     <>
       <Screen style={styles.container}>
@@ -215,6 +324,9 @@ function AddEchoScreen({ navigation, route }) {
           onPressLeft={handleBack}
           rightIcon="help-outline"
           onPressRight={handleHelpPress}
+          tip="Echo messages are flash messages and will only be displayed when a person interacts with you by either tapping on your profile picture or by sending you thoughts. You can set the type of interaction from your profile."
+          showTip={showHelp}
+          setShowTip={setShowHelp}
         />
         <ScreenSub>
           <View style={styles.mainContainer}>
@@ -222,31 +334,120 @@ function AddEchoScreen({ navigation, route }) {
               <AppActivityIndicator />
             ) : (
               <>
-                <AppText style={styles.heading}>Create Echo</AppText>
+                <View style={styles.messageTypeSelector}>
+                  <Pressable
+                    onPress={handleChangeToMessageMode}
+                    style={[
+                      styles.messageMode,
+                      {
+                        backgroundColor: recordAudio
+                          ? defaultStyles.colors.lightGrey
+                          : defaultStyles.colors.secondary,
+                      },
+                    ]}
+                  >
+                    <Animatable.View ref={textModeRef}>
+                      <MaterialIcons
+                        name="textsms"
+                        size={scale(20)}
+                        color={
+                          recordAudio
+                            ? defaultStyles.colors.dark
+                            : defaultStyles.colors.yellow_Variant
+                        }
+                        onPress={handleChangeToMessageMode}
+                      />
+                    </Animatable.View>
+                  </Pressable>
+                  <Pressable
+                    onPress={handleChangeToAudioMode}
+                    style={[
+                      styles.audioMode,
+                      {
+                        backgroundColor: recordAudio
+                          ? defaultStyles.colors.secondary
+                          : defaultStyles.colors.lightGrey,
+                      },
+                    ]}
+                  >
+                    <Animatable.View ref={audioModeRef} useNativeDriver={true}>
+                      <MaterialIcons
+                        name="audiotrack"
+                        size={scale(20)}
+                        color={
+                          recordAudio
+                            ? defaultStyles.colors.yellow_Variant
+                            : defaultStyles.colors.dark
+                        }
+                        onPress={handleChangeToAudioMode}
+                      />
+                    </Animatable.View>
+                  </Pressable>
+                </View>
                 <View style={styles.inputBoxContainer}>
                   <View style={styles.echoInfoContainer}>
-                    <EchoIcon forInfo={true} style={styles.echoIcon} />
+                    <EchoIcon
+                      forInfo={true}
+                      size={scale(18)}
+                      containerStyle={styles.echoIcon}
+                    />
 
                     <AppText style={styles.saveEchoInfo}>
-                      What would you like to say when {recipient.name} taps on
-                      your Display Picture or sends you thoughts.
+                      What would you like to say when{" "}
+                      <Text style={styles.recipientNameInInfo}>
+                        {recipient.name}
+                      </Text>{" "}
+                      taps on your Display Picture or sends you thoughts.
                     </AppText>
                   </View>
-                  <AppTextInput
-                    editable={!savingEcho}
-                    maxLength={100}
-                    multiline={true}
-                    numberOfLines={4}
-                    onChangeText={setMessage}
-                    placeholder={`Enter your echo message for ${recipient.name}...`}
-                    style={styles.inputBox}
-                    subStyle={styles.textInputSub}
-                    value={message}
-                  />
-                  <AppText style={styles.echoMessageLength}>
-                    {message.length}/100
-                  </AppText>
+                  {recordAudio ? (
+                    message && checkFileType(message) ? (
+                      <AudioPlayer
+                        onRefresh={handleAudioRefresh}
+                        recordedFile={message}
+                      />
+                    ) : (
+                      <AudioRecorder onStopRecording={setMessage} />
+                    )
+                  ) : (
+                    <>
+                      <TextInput
+                        editable={!savingEcho}
+                        maxLength={300}
+                        multiline={true}
+                        onChangeText={setMessage}
+                        placeholder="Enter your echo message..."
+                        style={[
+                          styles.inputBox,
+                          { height: Math.min(100, Math.max(35, height)) },
+                        ]}
+                        value={checkFileType(message.trim()) ? "" : message}
+                        onContentSizeChange={(event) =>
+                          setHeight(event.nativeEvent.contentSize.height)
+                        }
+                      />
+                      <AppText style={styles.echoMessageLength}>
+                        {checkFileType(message.trim()) ? 0 : message.length}/300
+                      </AppText>
+                    </>
+                  )}
                 </View>
+                <Selection
+                  iconSize={scale(8)}
+                  style={styles.checkBoxContainer}
+                  fontStyle={styles.checkBoxValue}
+                  containerStyle={[
+                    styles.checkBox,
+                    {
+                      borderColor: sendNotification
+                        ? defaultStyles.colors.green
+                        : defaultStyles.colors.yellow_Variant,
+                    },
+                  ]}
+                  opted={sendNotification}
+                  value={`Notify ${recipient.name} about this Echo Message.`}
+                  onPress={handleCheckBoxSelection}
+                />
                 <ApiProcessingContainer
                   style={styles.apiProcessingContainer}
                   processing={savingEcho}
@@ -259,7 +460,11 @@ function AddEchoScreen({ navigation, route }) {
                         ? false
                         : true
                     }
-                    onPress={handleSave}
+                    onPress={
+                      checkFileType(message.trim())
+                        ? handleSaveAudio
+                        : handleSave
+                    }
                     style={styles.button}
                     subStyle={{ color: defaultStyles.colors.secondary }}
                     title="Save"
@@ -290,12 +495,6 @@ function AddEchoScreen({ navigation, route }) {
         recipient={recipient}
         removingEcho={removingEcho}
       />
-      <HelpDialogueBox
-        information="Echo messages are flash messages and will only be displayed when a person interacts with you by either tapping on your profile picture or by sending you thoughts. You can set the type of interaction from your profile."
-        onPress={handleCloseHelp}
-        setVisible={setShowHelp}
-        visible={showHelp}
-      />
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
@@ -316,9 +515,22 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   apiProcessingContainer: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "5@s",
     height: "38@s",
     marginTop: "5@s",
-    width: "100%",
+    padding: 0,
+    width: "90%",
+  },
+  audioMode: {
+    alignItems: "center",
+    borderRadius: "20@s",
+    flexShrink: 1,
+    height: "35@s",
+    justifyContent: "center",
+    textAlign: "center",
+    textAlignVertical: "center",
+    width: "35@s",
   },
   button: {
     alignSelf: "center",
@@ -327,17 +539,31 @@ const styles = ScaledSheet.create({
     borderRadius: "5@s",
     borderWidth: 2,
     height: "38@s",
-    width: "90%",
+    width: "100%",
   },
   container: {
     // backgroundColor: defaultStyles.colors.white,
   },
+  checkBoxContainer: {
+    alignSelf: "center",
+    width: "92%",
+  },
+  checkBox: {
+    height: "20@s",
+    width: "20@s",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: "5@s",
+  },
+  checkBoxValue: { fontSize: "10@s" },
   echoIcon: {
     borderRadius: "5@s",
-    width: "30@s",
+    height: "25@s",
+    width: "25@s",
   },
   echoInfoContainer: {
     flexDirection: "row",
+    marginBottom: "5@s",
   },
   echoMessageListContainer: {
     flex: 1,
@@ -346,45 +572,67 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   echoMessageLength: {
-    textAlign: "right",
     fontSize: "10@s",
-  },
-  heading: {
-    fontSize: "15@s",
-    marginTop: "10@s",
-    textAlign: "center",
+    textAlign: "right",
   },
   inputBoxContainer: {
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: defaultStyles.colors.light,
     borderBottomWidth: 1,
     borderColor: defaultStyles.colors.light,
     borderRadius: "8@s",
-    marginBottom: "20@s",
+    marginBottom: "10@s",
     marginTop: "10@s",
     overflow: "hidden",
+    padding: "10@s",
     width: "90%",
   },
   inputBox: {
+    backgroundColor: "rgba(255,255,255,0.8)",
     borderRadius: "5@s",
-    height: "70@s",
+    fontFamily: "ComicNeue-Bold",
+    fontSize: "13.5@s",
+    fontWeight: "normal",
     marginBottom: "5@s",
-    paddingHorizontal: "5@s",
-    paddingTop: "10@s",
+    padding: "5@s",
     width: "100%",
   },
   mainContainer: {
     alignItems: "center",
     flexGrow: 1,
   },
-  saveEchoInfo: {
-    backgroundColor: defaultStyles.colors.light,
+  messageTypeSelector: {
     borderRadius: "8@s",
-    color: defaultStyles.colors.secondary,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: "10@s",
+    marginVertical: "5@s",
+    overflow: "hidden",
+    width: "35%",
+  },
+  messageMode: {
+    alignItems: "center",
+    borderRadius: "20@s",
+    flexShrink: 1,
+    height: "35@s",
+    justifyContent: "center",
+    textAlign: "center",
+    textAlignVertical: "center",
+    width: "35@s",
+  },
+  recipientNameInInfo: {
+    color: defaultStyles.colors.blue,
+  },
+  saveEchoInfo: {
+    borderColor: defaultStyles.colors.light,
+    borderRadius: "8@s",
+    borderWidth: 1,
+    color: defaultStyles.colors.dark,
     flexShrink: 1,
     fontSize: "11.5@s",
     letterSpacing: "0.3@s",
     marginLeft: "5@s",
     paddingHorizontal: "10@s",
+    paddingTop: 0,
     width: "100%",
   },
   saveButtonContainer: {
@@ -392,10 +640,6 @@ const styles = ScaledSheet.create({
     justifyContent: "center",
     minHeight: "40@s",
     width: "100%",
-  },
-  textInputSub: {
-    fontSize: "14@s",
-    textAlignVertical: "top",
   },
 });
 

@@ -1,13 +1,19 @@
-import React, { memo } from "react";
-import { View, Modal, Keyboard, TouchableWithoutFeedback } from "react-native";
+import React, { memo, useState } from "react";
+import {
+  View,
+  Modal,
+  Keyboard,
+  TouchableWithoutFeedback,
+  TextInput,
+} from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
 import defaultStyles from "../config/styles";
 
-import AppTextInput from "./AppTextInput";
 import AppText from "./AppText";
 import AppButton from "./AppButton";
+import Backdrop from "./Backdrop";
 
 function ReportModal({
   handleProblemSubmitPress,
@@ -19,6 +25,7 @@ function ReportModal({
   setProblemDescription,
 }) {
   const handleDismissKeyboard = () => Keyboard.dismiss();
+  const [height, setHeight] = useState(0);
 
   return (
     <Modal
@@ -29,6 +36,7 @@ function ReportModal({
     >
       <TouchableWithoutFeedback onPress={handleDismissKeyboard}>
         <View style={styles.reportModal}>
+          <Backdrop onPress={() => setOpenReport(false)} />
           <View style={styles.closeMessageIconContainer}>
             <AntDesign
               onPress={() => setOpenReport(false)}
@@ -39,14 +47,20 @@ function ReportModal({
           </View>
           <View style={styles.optionsContainerReport}>
             <AppText style={styles.reportProblemTitle}>Report Problem</AppText>
-            <AppTextInput
+            <TextInput
               editable={!isLoading}
               maxLength={250}
               multiline={true}
               onChangeText={setProblemDescription}
               placeholder="Describe your problem..."
               subStyle={styles.inputProblem}
-              style={styles.problemInput}
+              style={[
+                styles.problemInput,
+                { height: Math.min(100, Math.max(60, height)) },
+              ]}
+              onContentSizeChange={(event) =>
+                setHeight(event.nativeEvent.contentSize.height)
+              }
             />
             <View style={styles.actionContainer}>
               <AppText style={styles.problemDescriptionLength}>
@@ -119,10 +133,11 @@ const styles = ScaledSheet.create({
     borderTopRightRadius: "10@s",
     borderTopWidth: 1,
     bottom: 0,
-    height: "210@s",
+    //height: "210@s",
     overflow: "hidden",
     paddingHorizontal: "10@s",
     paddingTop: "20@s",
+    paddingBottom: "15@s",
     width: "100%",
   },
   problemInput: {
@@ -130,16 +145,20 @@ const styles = ScaledSheet.create({
     borderColor: defaultStyles.colors.light,
     borderRadius: "5@s",
     borderWidth: 1,
-    height: "100@s",
+    color: defaultStyles.colors.dark,
+    fontFamily: "ComicNeue-Bold",
+    fontSize: "14@s",
+    fontStyle: "normal",
     marginBottom: "10@s",
     padding: "5@s",
+    width: "95%",
   },
   problemDescriptionLength: {
     fontSize: "12@s",
   },
   reportModal: {
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     overflow: "hidden",
     width: "100%",
   },

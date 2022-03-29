@@ -56,6 +56,7 @@ function HomeScreen({ navigation }) {
   const [messageCreator, setMessageCreator] = useState({
     name: "************",
     picture: "",
+    _id: "",
   });
   const [reply, setReply] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
@@ -97,6 +98,7 @@ function HomeScreen({ navigation }) {
       setMessageCreator({
         name: "************",
         picture: "",
+        _id: "",
       });
     }
   }, [isFocused, mounted]);
@@ -116,11 +118,18 @@ function HomeScreen({ navigation }) {
     }
   }, [isFocused, mounted]);
 
-  const handleImagePress = useCallback((recipient) => {
-    navigation.push(NavigationConstants.ECHO_MODAL_SCREEN, {
-      recipient,
-    });
-  }, []);
+  const handleImagePress = useCallback(
+    debounce(
+      (recipient) => {
+        navigation.push(NavigationConstants.ECHO_MODAL_SCREEN, {
+          recipient,
+        });
+      },
+      1000,
+      true
+    ),
+    []
+  );
 
   // MESSAGES ACTION
 
@@ -133,6 +142,7 @@ function HomeScreen({ navigation }) {
       return setMessageCreator({
         name: data.name,
         picture: data.picture,
+        _id: data._id,
       });
     }
 
@@ -196,6 +206,19 @@ function HomeScreen({ navigation }) {
     });
   }, []);
 
+  const handleOnSendThoughtButtonPressFromFavorites = useCallback((user) => {
+    if (user) {
+      return navigation.navigate(Constant.SEND_THOUGHT_SCREEN, {
+        recipient: user,
+        from: "Favorite",
+      });
+    }
+    setInfoAlert({
+      infoAlertMessage: "Something went wrong! Please try again.",
+      showInfoAlert: true,
+    });
+  }, []);
+
   const handleAddEchoButtonPress = useCallback((user) => {
     if (user) {
       return navigation.navigate(Constant.ADD_ECHO_SCREEN, {
@@ -228,7 +251,7 @@ function HomeScreen({ navigation }) {
   //MESSAGE MODAL ACTION
 
   const handleCloseMessage = useCallback(() => {
-    setMessageCreator({ name: "**********", picture: "" });
+    setMessageCreator({ name: "**********", picture: "", _id: "" });
     setMessage(defaultProps.defaultMessageVisibleToCurrentUserWithoutReplying);
     setSelectedMessageId("");
     setIsVisible(false);
@@ -245,13 +268,15 @@ function HomeScreen({ navigation }) {
             selectedMessageId
           );
           if (ok) {
+            setUser(data.user);
+            setMessage(data.replied);
             setSendingReply(false);
             setReply("");
             setMessageCreator({
               name: data.name,
               picture: data.picture,
+              _id: data._id,
             });
-            setUser(data.user);
             return showMessage({
               ...defaultProps.alertMessageConfig,
               type: "success",
@@ -267,13 +292,15 @@ function HomeScreen({ navigation }) {
           reply
         );
         if (ok) {
+          setUser(data.user);
           setSendingReply(false);
+          setMessage(data.replied);
           setReply("");
           setMessageCreator({
             name: data.name,
             picture: data.picture,
+            _id: data._id,
           });
-          setUser(data.user);
           return showMessage({
             ...defaultProps.alertMessageConfig,
             type: "success",
@@ -329,6 +356,8 @@ function HomeScreen({ navigation }) {
         sendingReply={sendingReply}
         setReply={setReply}
         setSelectedMessageId={setSelectedMessageId}
+        onSendThoughtPress={handleOnSendThoughtButtonPressFromFavorites}
+        user={user}
       />
       <InfoAlert
         description={infoAlert.infoAlertMessage}

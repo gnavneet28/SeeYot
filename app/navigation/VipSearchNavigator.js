@@ -7,6 +7,12 @@ import VipSearchScreen from "../screens/VipSearchScreen";
 
 const Stack = createSharedElementStackNavigator();
 
+const forFade = ({ current, closing }) => ({
+  cardStyle: {
+    opacity: current.progress,
+  },
+});
+
 function VipSearchNavigator(props) {
   return (
     <Stack.Navigator
@@ -14,7 +20,7 @@ function VipSearchNavigator(props) {
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen
-        options={{ animation: "none" }}
+        options={{ cardStyleInterpolator: forFade }}
         name={Constants.VIP_SEARCH_SCREEN}
         component={VipSearchScreen}
       />
@@ -23,7 +29,7 @@ function VipSearchNavigator(props) {
           route.params.recipient._id,
           `echoIcon${route.params.recipient._id}`,
         ]}
-        options={{ animation: "none" }}
+        options={{ cardStyleInterpolator: forFade }}
         name={Constants.ECHO_MODAL_SCREEN}
         component={EchoModalScreen}
       />

@@ -17,18 +17,18 @@ const getDetails = async () => {
   const phoneContacts = await asyncStorage.get(DataConstants.PHONE_CONTACTS);
   //const statsPresent = await asyncStorage.get(DataConstants.STATS);
   let cachedUser = {
-    _id: currentUser._id,
+    _id: currentUser ? currentUser._id : "",
     blocked,
     contacts: contacts,
     echoMessage: echoMessage,
     echoWhen: echoWhen,
     favorites,
     messages,
-    name: currentUser.name,
+    name: currentUser ? currentUser.name : "",
     notifications: notifications,
-    phoneNumber: currentUser.phoneNumber,
+    phoneNumber: currentUser ? currentUser.phoneNumber : parseInt(""),
     phoneContacts,
-    picture: currentUser.picture,
+    picture: currentUser ? currentUser.picture : "",
     points,
     searchHistory: searchHistory,
     thoughts: thoughts,

@@ -41,7 +41,6 @@ const plans = defaultProps.plans;
 function SubscriptionScreen({ navigation, route }) {
   const { tackleProblem } = apiActivity;
   const [products, setProducts] = useState([]);
-  const [purchased, setPurchased] = useState(false);
   const [checkingVip, setCheckingVip] = useState("");
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
@@ -78,7 +77,7 @@ function SubscriptionScreen({ navigation, route }) {
       })
       .then(() => {
         IAP.getProductsAsync(items).then(({ responseCode, results }) =>
-          console.log(results[0])
+          setProducts(results)
         );
       })
       .catch((err) => Bugsnag.notify(err));
@@ -86,6 +85,8 @@ function SubscriptionScreen({ navigation, route }) {
 
   useEffect(() => {
     connectToTheAppStore();
+
+    return;
   }, []);
 
   const handlePayment = debounce(
@@ -128,10 +129,10 @@ function SubscriptionScreen({ navigation, route }) {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.scrollView}>
-              <DescriptionItem
+              {/* <DescriptionItem
                 description="You can search people outside your contacts."
                 name="account-search"
-              />
+              /> */}
               <DescriptionItem
                 description="You can send your thoughts to anyone outside your contacts."
                 name="thought-bubble"
@@ -202,6 +203,7 @@ const styles = ScaledSheet.create({
     borderRadius: "20@s",
     height: "35@s",
     marginVertical: "5@s",
+    marginBottom: "15@s",
     width: "95%",
   },
   scrollView: {

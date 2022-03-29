@@ -17,11 +17,11 @@ const GalleryImage = ({ uri, onPress, selected }) => {
       style={[
         styles.container,
         {
-          padding: selected == uri ? 6 : 0,
+          padding: selected == uri ? 2 : 0,
           backgroundColor:
             selected == uri
-              ? defaultStyles.colors.blue
-              : defaultStyles.colors.white,
+              ? defaultStyles.colors.yellow_Variant
+              : defaultStyles.colors.primary,
         },
       ]}
     >
@@ -40,14 +40,17 @@ const GalleryImage = ({ uri, onPress, selected }) => {
 
 const styles = ScaledSheet.create({
   container: {
-    backgroundColor: defaultStyles.colors.white,
-    borderRadius: "5@s",
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.primary,
+    borderRadius: "10@s",
     height: IMAGE_HEIGHT,
+    justifyContent: "center",
     width: IMAGE_WIDTH - 5,
   },
   image: {
-    height: "100%",
-    width: "100%",
+    borderRadius: "10@s",
+    height: "95%",
+    width: "95%",
   },
 });
 

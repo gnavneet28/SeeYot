@@ -14,7 +14,7 @@ const createShortInviteLink = () => {
         "https://seeyot-photos.s3.ap-south-1.amazonaws.com/link_logo.png",
       title: "SeeYot",
     },
-    link: "http://www.seeyot.com",
+    link: "https://play.google.com/store/apps/details?id=com.seeyot",
     navigation: {
       forcedRedirectEnabled: false,
     },

@@ -9,6 +9,7 @@ import AppImage from "./AppImage";
 import AppText from "./AppText";
 import InfoAlert from "./InfoAlert";
 import ApiProcessingContainer from "./ApiProcessingContainer";
+import ActionSelector from "./ActionSelector";
 
 import storeDetails from "../utilities/storeDetails";
 
@@ -135,44 +136,46 @@ function AddContactCard({
           {favoriteUser.name}
         </AppText>
       </View>
-      <ApiProcessingContainer
-        processing={processing}
-        style={styles.buttonContainer}
-      >
-        <AppButton
-          disabled={apiProcessing || !isConnected ? true : false}
-          title={inFavourites ? "Remove" : "Add"}
-          style={[
-            styles.addButton,
-            {
-              backgroundColor: inFavourites
-                ? defaultStyles.colors.light
-                : defaultStyles.colors.secondary_Variant,
-            },
-          ]}
-          subStyle={[
-            styles.addButtonSub,
-            {
-              color: inFavourites
-                ? defaultStyles.colors.tomato
-                : defaultStyles.colors.white,
-            },
-          ]}
-          onPress={!inFavourites ? handleAddPress : handleRemovePress}
-        />
-      </ApiProcessingContainer>
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={onMessagePress}
-        style={styles.favoriteMessageIconContainer}
-      >
-        <AntDesign
-          color={defaultStyles.colors.secondary}
-          name="message1"
+      <View style={styles.actionContainer}>
+        <ActionSelector
+          processing={processing}
+          style={styles.actionSelectionStyle}
+          plusAction={!inFavourites}
+        >
+          <ApiProcessingContainer
+            processing={processing}
+            style={styles.buttonContainer}
+          >
+            <AppButton
+              disabled={apiProcessing || !isConnected ? true : false}
+              title={inFavourites ? "Remove" : "Add"}
+              style={styles.addButton}
+              subStyle={[
+                styles.addButtonSub,
+                {
+                  color: inFavourites
+                    ? defaultStyles.colors.yellow_Variant
+                    : defaultStyles.colors.white,
+                },
+              ]}
+              onPress={!inFavourites ? handleAddPress : handleRemovePress}
+            />
+          </ApiProcessingContainer>
+        </ActionSelector>
+        <TouchableOpacity
+          underlayColor={defaultStyles.colors.yellow}
+          // activeOpacity={0.5}
           onPress={onMessagePress}
-          size={scale(16)}
-        />
-      </TouchableOpacity>
+          style={styles.favoriteMessageIconContainer}
+        >
+          <AntDesign
+            color={defaultStyles.colors.secondary}
+            name="message1"
+            onPress={onMessagePress}
+            size={scale(18)}
+          />
+        </TouchableOpacity>
+      </View>
       <InfoAlert
         description={infoAlert.infoAlertMessage}
         leftPress={handleCloseInfoAlert}
@@ -183,19 +186,25 @@ function AddContactCard({
 }
 
 const styles = ScaledSheet.create({
+  actionSelectionStyle: {
+    backgroundColor: defaultStyles.colors.secondary,
+  },
+  actionContainer: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "8@s",
+    flexDirection: "row",
+    alignItems: "center",
+    overflow: "hidden",
+  },
   buttonContainer: {
     alignItems: "center",
-    borderColor: defaultStyles.colors.light,
-    borderRadius: "8@s",
-    borderWidth: 1,
     height: "32@s",
     justifyContent: "center",
-    marginRight: "6@s",
     overflow: "hidden",
     width: "60@s",
   },
   addButton: {
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.secondary,
     borderRadius: "8@s",
     height: "32@s",
     width: "60@s",
@@ -229,12 +238,10 @@ const styles = ScaledSheet.create({
   favoriteMessageIconContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderColor: defaultStyles.colors.yellow,
     borderRadius: "10@s",
-    borderWidth: 1,
     height: "32@s",
     justifyContent: "center",
-    marginLeft: "8@s",
+    marginLeft: "5@s",
     width: "32@s",
   },
   image: {

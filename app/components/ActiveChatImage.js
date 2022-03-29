@@ -9,7 +9,13 @@ import ProgressiveImage from "./ProgressiveImage";
 
 import defaultStyles from "../config/styles";
 
-function ActiveChatImage({ uri }) {
+function ActiveChatImage({
+  uri,
+  canOpen = true,
+  containerStyle,
+  imageStyle,
+  onLongPress,
+}) {
   const [isVisible, setIsVisible] = useState(false);
 
   const handleClose = useCallback(() => {
@@ -22,9 +28,15 @@ function ActiveChatImage({ uri }) {
 
   return (
     <>
-      <TouchableWithoutFeedback onPress={handleOpen}>
-        <View style={styles.container}>
-          <ProgressiveImage imageUrl={uri} onPress={handleOpen} />
+      <TouchableWithoutFeedback onLongPress={onLongPress} onPress={handleOpen}>
+        <View style={[styles.container, containerStyle]}>
+          <ProgressiveImage
+            onLongPress={onLongPress}
+            style={imageStyle}
+            resizeMode="cover"
+            imageUrl={uri}
+            onPress={canOpen ? handleOpen : () => null}
+          />
         </View>
       </TouchableWithoutFeedback>
       <AppModal visible={isVisible} onRequestClose={handleClose}>
@@ -55,7 +67,7 @@ const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "10@s",
+    borderRadius: "5@s",
     height: "100@s",
     justifyContent: "center",
     overflow: "hidden",

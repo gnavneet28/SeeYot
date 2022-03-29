@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as IAP from "expo-in-app-purchases";
 
@@ -10,7 +10,7 @@ import storeDetails from "../utilities/storeDetails";
 import { showMessage } from "react-native-flash-message";
 import cache from "../utilities/cache";
 
-import socket from "../api/socketClient";
+import { SocketContext } from "../api/socketClient";
 
 import navigation from "./rootNavigation";
 
@@ -27,38 +27,44 @@ import TypingContext from "../utilities/typingContext";
 
 import defaultProps from "../utilities/defaultProps";
 import usersApi from "../api/users";
+import debounce from "../utilities/debounce";
 
 const Tab = createBottomTabNavigator();
-
-let timeOut;
-let TIMER_LENGTH = 2000;
 
 function AppNavigator(props) {
   const { user, setUser } = useAuth();
   const [activeFor, setActiveFor] = useState([]);
   const [activeMessages, setActiveMessages] = useState([]);
   const [typing, setTyping] = useState(false);
+  const socket = useContext(SocketContext);
 
-  const purchaseItem = async (id) => {
-    const { ok, data, problem } = await usersApi.vipSubscribe(id);
-    if (ok) {
-      await storeDetails(data.user);
-      setUser(data.user);
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+
+  const purchaseItem = debounce(
+    async (id) => {
+      if (purchaseSuccess) return;
+      const { ok, data, problem } = await usersApi.vipSubscribe(id);
+      if (ok) {
+        await storeDetails(data.user);
+        setUser(data.user);
+        return showMessage({
+          ...defaultProps.alertMessageConfig,
+          message: data.message,
+          type: "success",
+        });
+      }
+
       return showMessage({
         ...defaultProps.alertMessageConfig,
-        message: data.message,
-        type: "success",
+        message: data.message
+          ? data.message
+          : "Something went wrong! Please contact support if needed",
+        type: "warning",
       });
-    }
-
-    return showMessage({
-      ...defaultProps.alertMessageConfig,
-      message: data.message
-        ? data.message
-        : "Something went wrong! Please contact support if needed",
-      type: "warning",
-    });
-  };
+    },
+    5000,
+    true
+  );
 
   useEffect(() => {
     const subscription = IAP.setPurchaseListener(
@@ -91,8 +97,11 @@ function AppNavigator(props) {
                   purchaseObject,
                   expiryInDays
                 );
-                await purchaseItem(purchaseObject.productId);
+                if (!purchaseSuccess) {
+                  await purchaseItem(purchaseObject.productId);
+                }
               }
+              setPurchaseSuccess(true);
               // Then when you're done
               IAP.finishTransactionAsync(purchase, true);
             }
@@ -128,86 +137,70 @@ function AppNavigator(props) {
         IAP.disconnectAsync();
       } catch (error) {}
     };
-  }, []);
+  }, [purchaseSuccess]);
 
   useEffect(() => {
-    const subscription1 = socket.on(`newNotification${user._id}`, (data) => {
+    const listener1 = (data) => {
       if (data.user) {
         setUser(data.user);
         return storeDetails(data.user);
       }
       return;
-    });
+    };
+    socket.on(`newNotification${user._id}`, listener1);
 
-    const subscription2 = socket.on(`thoughtMatched${user._id}`, (data) => {
+    const listener2 = (data) => {
       let modifiedUser = { ...user };
       modifiedUser.thoughts = data.thoughts;
       return setUser(modifiedUser);
-    });
+    };
 
-    const subscription3 = socket.on(`newMessage${user._id}`, (data) => {
+    socket.on(`thoughtMatched${user._id}`, listener2);
+
+    const listener3 = (data) => {
       let modifiedUser = { ...user };
       modifiedUser.messages = data.messages;
       return setUser(modifiedUser);
-    });
+    };
 
-    const subscription4 = socket.on(`deletedThought${user._id}`, (data) => {
+    socket.on(`newMessage${user._id}`, listener3);
+
+    const listener4 = (data) => {
       let modifiedUser = { ...user };
       modifiedUser.thoughts = data.thoughts;
       return setUser(modifiedUser);
-    });
+    };
 
-    const subscription5 = socket.on(`newActiveMessage${user._id}`, (data) => {
-      activeMessages.push(data.newMessage);
-      return setActiveMessages([...activeMessages]);
-    });
+    socket.on(`deletedThought${user._id}`, listener4);
 
-    const subscription6 = socket.on(`setActiveFor${user._id}`, (data) => {
+    const listener5 = (data) => {
       if (activeFor.filter((u) => u == data._id)[0]) return;
       setActiveFor([...activeFor, data._id]);
-    });
+    };
 
-    const subscription7 = socket.on(`setInActiveFor${user._id}`, (data) => {
+    socket.on(`setActiveFor${user._id}`, listener5);
+
+    const listener6 = (data) => {
       let newList = activeFor.filter((u) => u != data._id);
       setActiveFor(newList);
-    });
+    };
 
-    const subscription8 = socket.on(`typing${user._id}`, (data) => {
-      if (!typing) {
-        setTyping(true);
-      } else {
-        clearTimeout(timeOut);
-      }
-      let lastTypingTime = new Date().getTime();
-      timeOut = setTimeout(() => {
-        let typingTimer = new Date().getTime();
-        let timeDiff = typingTimer - lastTypingTime;
-
-        if (timeDiff >= TIMER_LENGTH && typing) {
-          setTyping(false);
-        }
-      }, TIMER_LENGTH);
-    });
-
-    const subscription9 = socket.on(`stopTyping${user._id}`, (data) => {
-      if (typing) setTyping(false);
-    });
+    socket.on(`setInActiveFor${user._id}`, listener6);
 
     return () => {
-      subscription1.off();
-      subscription2.off();
-      subscription3.off();
-      subscription4.off();
-      subscription5.off();
-      subscription6.off();
-      subscription7.off();
-      subscription8.off();
-      subscription9.off();
+      socket.off(`newNotification${user._id}`, listener1);
+      socket.off(`thoughtMatched${user._id}`, listener2);
+      socket.off(`newMessage${user._id}`, listener3);
+      socket.off(`deletedThought${user._id}`, listener4);
+      socket.off(`setActiveFor${user._id}`, listener5);
+      socket.off(`setInActiveFor${user._id}`, listener6);
     };
-  }, [user, activeMessages, activeFor, typing]);
+  }, [user, activeFor, typing]);
 
   useNotifications((data) => {
-    //console.log(data.notification.request.content.data.message);
+    if (data.notification.request.content.title == "Echo") {
+      return;
+    }
     if (
       data.notification.request.content.data.message !==
       "One of your favorites sent you a message!"

@@ -15,6 +15,7 @@ function Heading({ iconName, title, onPress, style }) {
         name={iconName}
         onPress={onPress}
         size={scale(22)}
+        icon="MaterialIcons"
       />
       <AppText onPress={onPress} style={styles.title}>
         {title}

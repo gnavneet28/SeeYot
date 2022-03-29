@@ -9,7 +9,15 @@ import useConnection from "../hooks/useConnection";
 
 import defaultStyles from "../config/styles";
 
-function Selection({ style, onPress, opted, containerStyle, value = "" }) {
+function Selection({
+  style,
+  onPress,
+  opted,
+  containerStyle,
+  value = "",
+  iconSize = scale(14),
+  fontStyle,
+}) {
   const isConnected = useConnection();
   return (
     <View style={[styles.container, style]}>
@@ -20,7 +28,7 @@ function Selection({ style, onPress, opted, containerStyle, value = "" }) {
       >
         {opted ? (
           <Feather
-            size={scale(14)}
+            size={iconSize}
             color={defaultStyles.colors.secondary_Variant}
             name="check"
           />
@@ -28,7 +36,7 @@ function Selection({ style, onPress, opted, containerStyle, value = "" }) {
       </TouchableOpacity>
       {value ? (
         <AppText
-          style={{ fontSize: scale(15), opacity: 0.8 }}
+          style={[styles.value, fontStyle]}
           onPress={isConnected ? onPress : null}
         >
           {value}
@@ -57,6 +65,12 @@ const styles = ScaledSheet.create({
     marginHorizontal: "5@s",
     padding: "5@s",
     width: "28@s",
+  },
+  value: {
+    flexShrink: 1,
+    fontSize: "14@s",
+    opacity: 0.8,
+    width: "100%",
   },
 });
 

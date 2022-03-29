@@ -40,6 +40,7 @@ import usersApi from "../api/users";
 import ModalFallback from "../components/ModalFallback";
 import ScreenSub from "../components/ScreenSub";
 import defaultProps from "../utilities/defaultProps";
+import Backdrop from "../components/Backdrop";
 
 const Points = {
   totalPoints: 0,
@@ -334,6 +335,7 @@ function PointsScreen({ navigation }) {
             animationType="slide"
           >
             <View style={styles.adsInfoContainerBackground}>
+              <Backdrop onPress={() => setShowAdsInfo(false)} />
               <View style={styles.closeAdsInfoIconContainer}>
                 <AntDesign
                   onPress={() => setShowAdsInfo(false)}
@@ -346,14 +348,14 @@ function PointsScreen({ navigation }) {
                 <AppText style={styles.adsTermAndConditionInfo}>
                   Terms to use Ads to avail SeeYot Vip membership.
                 </AppText>
-                <Information
+                {/* <Information
                   IconCategory={MaterialCommunityIcon}
                   iconName="account"
                   iconSize={scale(25)}
                   data={currentAdsStats.accountLife}
                   information="Account Life (Days)"
                   infoDetails="You account should be minimum 15 days old."
-                />
+                /> */}
                 <Information
                   IconCategory={MaterialCommunityIcon}
                   iconName="google-ads"
@@ -394,7 +396,7 @@ const styles = ScaledSheet.create({
   },
   adsInfoContainerBackground: {
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     overflow: "hidden",
     width: "100%",
   },

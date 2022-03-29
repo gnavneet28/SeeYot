@@ -106,7 +106,9 @@ class ContactList extends React.Component {
         ) : null}
         <View style={styles.listView}>
           <RecyclerListView
-            scrollViewProps={{ showsVerticalScrollIndicator: false }}
+            scrollViewProps={{
+              showsVerticalScrollIndicator: false,
+            }}
             dataProvider={this.state.dataProvider}
             extendedState={this.state}
             layoutProvider={this._layoutProvider}

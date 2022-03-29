@@ -68,7 +68,7 @@ function RegisterDetailsScreen({ route }) {
     const { ok, problem, data, headers } = await usersApi.registerUser(
       parseInt(number),
       image,
-      name,
+      name.trim(),
       verifiedId
     );
 

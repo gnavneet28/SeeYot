@@ -2,7 +2,7 @@ const tackleProblem = (problem, data, setInfoAlert) => {
   if (problem) {
     if (data) {
       return setInfoAlert({
-        infoAlertMessage: data.message,
+        infoAlertMessage: data.message ? data.message : "Something failed!",
         showInfoAlert: true,
       });
     }

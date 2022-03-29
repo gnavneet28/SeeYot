@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useContext, useState } from "react";
 import {
   View,
   Modal,
@@ -7,17 +7,22 @@ import {
   TouchableOpacity,
 } from "react-native";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
+import Feather from "../../node_modules/react-native-vector-icons/Feather";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
+import Backdrop from "./Backdrop";
 import ReplyOption from "./ReplyOption";
 import ApiProcessingContainer from "./ApiProcessingContainer";
 import Icon from "./Icon";
 
+import ActiveForContext from "../utilities/activeForContext";
+
 import defaultStyles from "../config/styles";
+import FavoritesReplyCard from "./FavoritesReplyCard";
 
 const modalHeaderColor = defaultStyles.colors.secondary_Variant;
 
@@ -33,8 +38,16 @@ function FavoriteMessageReplyModal({
   selectedMessageId,
   setSelectedMessageId,
   isConnected,
+  onSendThoughtPress,
+  user,
 }) {
   dayjs.extend(relativeTime);
+  const [height, setHeight] = useState(0);
+
+  const { activeFor } = useContext(ActiveForContext);
+
+  let isRecipientActive = activeFor.filter((u) => u == user._id)[0];
+
   return (
     <Modal
       visible={isVisible}
@@ -48,6 +61,7 @@ function FavoriteMessageReplyModal({
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.scrollView}
         >
+          <Backdrop onPress={sendingReply ? () => null : handleCloseMessage} />
           <View style={styles.closeMessageIconContainer}>
             <AntDesign
               onPress={sendingReply ? () => null : handleCloseMessage}
@@ -77,6 +91,38 @@ function FavoriteMessageReplyModal({
                     {dayjs(message.createdAt).fromNow()}
                   </AppText>
                 </View>
+                {message.replied ? (
+                  <TouchableOpacity
+                    onPress={
+                      sendingReply
+                        ? () => null
+                        : () => onSendThoughtPress(messageCreator)
+                    }
+                    style={[
+                      styles.contactsActionConatiner,
+                      {
+                        backgroundColor: !isRecipientActive
+                          ? defaultStyles.colors.yellow_Variant
+                          : defaultStyles.colors.green,
+                      },
+                    ]}
+                  >
+                    <Feather
+                      onPress={
+                        sendingReply
+                          ? () => null
+                          : () => onSendThoughtPress(messageCreator)
+                      }
+                      color={
+                        !isRecipientActive
+                          ? defaultStyles.colors.secondary
+                          : defaultStyles.colors.white
+                      }
+                      name="send"
+                      size={scale(16)}
+                    />
+                  </TouchableOpacity>
+                ) : null}
               </View>
 
               {message.options.length >= 1 ? (
@@ -100,6 +146,19 @@ function FavoriteMessageReplyModal({
                   </ScrollView>
                 </View>
               ) : null}
+              {message.replies.length >= 1 ? (
+                <View style={styles.optionContainerMain}>
+                  <ScrollView keyboardShouldPersistTaps="handled">
+                    {message.replies.map((d, index) => (
+                      <FavoritesReplyCard
+                        key={d._id + index.toString()}
+                        user={user}
+                        reply={d}
+                      />
+                    ))}
+                  </ScrollView>
+                </View>
+              ) : null}
 
               <View style={styles.inputContainer}>
                 <TextInput
@@ -112,9 +171,12 @@ function FavoriteMessageReplyModal({
                       ? "Reply again..."
                       : "Reply to know who sent this message..."
                   }
+                  onContentSizeChange={(event) =>
+                    setHeight(event.nativeEvent.contentSize.height)
+                  }
                   style={[
                     styles.inputBox,
-                    { fontFamily: "ComicNeue-Bold", fontWeight: "normal" },
+                    { height: Math.min(100, Math.max(40, height)) },
                   ]}
                   value={reply}
                 />
@@ -138,6 +200,7 @@ function FavoriteMessageReplyModal({
                           ? defaultStyles.colors.secondary
                           : defaultStyles.colors.lightGrey
                       }
+                      icon="MaterialIcons"
                       name="send"
                       size={scale(28)}
                     />
@@ -163,6 +226,17 @@ const styles = ScaledSheet.create({
     padding: "5@s",
     width: "40@s",
     zIndex: 222,
+  },
+  contactsActionConatiner: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "8@s",
+    elevation: 1,
+    height: "32@s",
+    justifyContent: "center",
+    marginHorizontal: "5@s",
+    overflow: "hidden",
+    width: "32@s",
   },
   createdAt: {
     color: defaultStyles.colors.lightGrey,
@@ -190,15 +264,17 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.light,
     borderRadius: "30@s",
     flexDirection: "row",
-    minHeight: "38@s",
     justifyContent: "space-between",
-    marginVertical: "15@s",
+    marginBottom: "15@s",
+    minHeight: "38@s",
     width: "90%",
   },
   inputBox: {
     borderRadius: "30@s",
     flex: 1,
+    fontFamily: "ComicNeue-Bold",
     fontSize: "14@s",
+    fontWeight: "normal",
     height: "100%",
     marginRight: "5@s",
     paddingHorizontal: "10@s",
@@ -232,8 +308,9 @@ const styles = ScaledSheet.create({
     width: "95%",
   },
   messageDetailsContainer: {
-    flex: 1,
+    flexShrink: 1,
     padding: "5@s",
+    width: "100%",
   },
   image: {
     borderColor: defaultStyles.colors.light,
@@ -263,7 +340,7 @@ const styles = ScaledSheet.create({
   },
   scrollView: {
     flexGrow: 1,
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
   },
   selectOption: {
     alignSelf: "center",

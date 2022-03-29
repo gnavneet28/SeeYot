@@ -6,7 +6,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import { ScaledSheet, s } from "react-native-size-matters";
 import {
   PinchGestureHandler,
   GestureHandlerRootView,
@@ -45,6 +45,8 @@ function EchoModalScreen({ route, navigation }) {
   const { user } = useAuth();
   const mounted = useMountedRef();
 
+  let isUnmounting = false;
+
   const [echoMessage, setEchoMessage] = useState({ message: "" });
 
   const getEchoMessage = async () => {
@@ -52,15 +54,17 @@ function EchoModalScreen({ route, navigation }) {
       usersApi.updatePhotoTapsCount(recipient._id);
     }
     const { data, problem, ok } = await echosApi.getEcho(recipient._id);
-    if (ok && mounted) {
+    if (ok && mounted && !isUnmounting) {
       setEchoMessage(data);
     }
   };
 
   useEffect(() => {
-    if (mounted) {
+    if (mounted && !isUnmounting) {
       getEchoMessage();
     }
+
+    return () => (isUnmounting = true);
   }, [mounted]);
 
   let imageUri = recipient.picture;
@@ -103,16 +107,18 @@ function EchoModalScreen({ route, navigation }) {
       ],
     };
   });
+
   return (
     <Screen style={styles.container}>
       <ScreenSub style={styles.screenSub}>
         <TouchableWithoutFeedback onPress={handleBack}>
           <ImageBackground
+            resizeMode="cover"
             blurRadius={4}
             source={imageUri ? { uri: imageUri } : { uri: "user" }}
             style={styles.largeImageModalFallback}
           >
-            <View style={styles.contentContainer}>
+            <View style={[styles.contentContainer]}>
               <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollView}
@@ -121,12 +127,12 @@ function EchoModalScreen({ route, navigation }) {
                   <MaterialIcons
                     onPress={handleBack}
                     name="arrow-back"
-                    size={scale(23)}
+                    size={s(23)}
                     color={defaultStyles.colors.primary}
                     style={styles.closeIcon}
                   />
 
-                  <AppText style={{ zIndex: 222, fontSize: scale(15) }}>
+                  <AppText style={{ zIndex: 222, fontSize: s(15) }}>
                     {recipient.name}
                   </AppText>
                 </View>

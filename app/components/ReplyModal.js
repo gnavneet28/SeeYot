@@ -10,6 +10,7 @@ import AppText from "./AppText";
 import defaultStyles from "../config/styles";
 
 import defaultProps from "../utilities/defaultProps";
+import Backdrop from "./Backdrop";
 
 const defaultMessage = {
   message: defaultProps.defaultMessage,
@@ -32,6 +33,7 @@ function ReplyModal({ message = defaultMessage, handleCloseModal }) {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.scrollView}
         >
+          <Backdrop onPress={handleCloseModal} />
           <View style={styles.closeMessageIconContainer}>
             <AntDesign
               onPress={handleCloseModal}
@@ -135,7 +137,7 @@ const styles = ScaledSheet.create({
   },
   scrollView: {
     flexGrow: 1,
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
   },
 });
 

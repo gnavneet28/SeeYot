@@ -7,6 +7,7 @@ import * as SystemUI from "expo-system-ui";
 import AccessDeniedScreen from "./app/screens/AccessDeniedScreen";
 import FlashMessage from "react-native-flash-message";
 import jwtDecode from "jwt-decode";
+import { SocketContext, socket } from "./app/api/socketClient";
 
 import getDetails from "./app/utilities/getDetails";
 
@@ -82,7 +83,13 @@ export default function App() {
             <OfflineNotice />
             {onboarded ? (
               <NavigationContainer ref={navigationRef}>
-                {user ? <AppNavigator /> : <AuthNavigator />}
+                {user ? (
+                  <SocketContext.Provider value={socket}>
+                    <AppNavigator />
+                  </SocketContext.Provider>
+                ) : (
+                  <AuthNavigator />
+                )}
               </NavigationContainer>
             ) : (
               <Onboarding />

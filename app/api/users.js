@@ -62,8 +62,31 @@ const removeCurrentUserPhoto = () =>
 const updateCurrentUserName = (name) =>
   apiClient.put(endPoint + "/me/update/name", { name: name });
 
-const updateEcho = (messageFor, message) =>
-  apiClient.put(endPoint + "/me/echos", { messageFor, message });
+const updateEcho = (messageFor, message, canNotify) =>
+  apiClient.put(endPoint + "/me/echos", {
+    messageFor,
+    message,
+    canNotify: canNotify ? canNotify : false,
+  });
+
+const updateAudioEcho = (file, messageFor, canNotify) => {
+  const formData = new FormData();
+
+  if (file) {
+    formData.append("audio", {
+      name: file.split("/").pop(),
+      uri: file,
+      type: "audio/mpeg",
+    });
+  }
+  formData.append("messageFor", messageFor);
+  formData.append("canNotify", canNotify ? canNotify : false);
+  return apiClient.put(endPoint + "/me/echos/audio", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
 
 const updateEchoWhenMessage = () =>
   apiClient.put(endPoint + "/me/echoWhen/message", {});
@@ -152,9 +175,18 @@ const getUploadedPhoto = (picture) => {
 
 const checkIsVip = () => apiClient.get(endPoint + "/isVip", {});
 
+const setSeen = (id) => apiClient.put(endPoint + "/message/seen/" + id, {});
+
+const addToGroupHistory = (id) =>
+  apiClient.put(endPoint + "/groups/addToGroupHistory/" + id, {});
+
+const removeGroupFromHistory = (id) =>
+  apiClient.put(endPoint + "/groups/removeFromGroupHistory/" + id, {});
+
 export default {
   addContact,
   addFavorite,
+  addToGroupHistory,
   addToSearchHistory,
   blockContact,
   checkIsVip,
@@ -171,15 +203,18 @@ export default {
   removeCurrentUserPhoto,
   removeFavorite,
   removeFromSearchHstory,
+  removeGroupFromHistory,
   removeUserPhoneContacts,
   searchUser,
   sendNewActiveMessage,
   setPrivacyMessage,
   setPrivacySearch,
+  setSeen,
   setTyping,
   stopTyping,
   syncContacts,
   unBlockContact,
+  updateAudioEcho,
   updateCurrentUserName,
   updateCurrentUserPhoto,
   updateEcho,

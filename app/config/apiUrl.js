@@ -1,9 +1,18 @@
-// export default {
-//   baseApiUrl: "http://192.168.0.96:3000/",
-//   headerToken: "x-auth-token",
-// };
+import {
+  PROD_API_URL,
+  PROD_AUTH_TOKEN,
+  DEV_API_URL,
+  DEV_AUTH_TOKEN,
+} from "@env";
 
-export default {
-  baseApiUrl: "https://seeyot-backend.herokuapp.com/",
-  headerToken: "x-auth-token",
+const developmentConfig = {
+  DEV_API_URL,
+  DEV_AUTH_TOKEN,
 };
+
+const productionEnvironment = {
+  PROD_API_URL,
+  PROD_AUTH_TOKEN,
+};
+
+export default __DEV__ ? developmentConfig : productionEnvironment;

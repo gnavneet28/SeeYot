@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
 import { showMessage } from "react-native-flash-message";
@@ -8,7 +8,6 @@ import FavoriteOptionsModal from "../components/FavoriteOptionsModal";
 import AppActivityIndicator from "../components/ActivityIndicator";
 import AppHeader from "../components/AppHeader";
 import FavoriteMessageInput from "../components/FavoriteMessageInput";
-import HelpDialogueBox from "../components/HelpDialogueBox";
 import InfoAlert from "../components/InfoAlert";
 import Screen from "../components/Screen";
 import ModalFallback from "../components/ModalFallback";
@@ -27,6 +26,7 @@ import ApiContext from "../utilities/apiContext";
 import apiActivity from "../utilities/apiActivity";
 import ScreenSub from "../components/ScreenSub";
 import defaultProps from "../utilities/defaultProps";
+import onBoarding from "../utilities/onBoarding";
 import defaultStyles from "../config/styles";
 
 const defaultRecipient = {
@@ -48,6 +48,7 @@ function AddFavoritesScreen({ navigation }) {
   const mounted = useMountedRef().current;
   const isConnected = useConnection();
   const { tackleProblem } = apiActivity;
+  const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
   // STATES
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState({
@@ -67,6 +68,20 @@ function AddFavoritesScreen({ navigation }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+
+  // ONBOADING INFO
+
+  const showOnboarding = async () => {
+    const isFavoriteInfoShown = await isInfoSeen(onboardingKeys.FAVORITES);
+    if (!isFavoriteInfoShown) {
+      setShowHelp(true);
+      updateInfoSeen(onboardingKeys.FAVORITES);
+    }
+  };
+
+  useEffect(() => {
+    showOnboarding();
+  }, []);
 
   // ON PAGE FOCUS ACTION
   const setUsersList = () => {
@@ -122,7 +137,7 @@ function AddFavoritesScreen({ navigation }) {
     // check if there is already a option with the given option to add and then add
     if (optionalAnswer.length < 4) {
       let newList = [...optionalAnswer];
-      newList.push(optionalMessage);
+      newList.push(optionalMessage.trim());
       setOptionalAnswer(newList);
       return setOptionalMessage("");
     }
@@ -148,7 +163,7 @@ function AddFavoritesScreen({ navigation }) {
     debounce(
       async () => {
         setProcessing(true);
-        let msg = message.textMessage;
+        let msg = message.textMessage.trim();
         let mood = message.mood;
         let optionalReplies = optionalAnswer;
 
@@ -241,9 +256,12 @@ function AddFavoritesScreen({ navigation }) {
         <AppHeader
           leftIcon="arrow-back"
           onPressLeft={handleBack}
-          title="Favorites"
+          title={`Favorites (${user.favorites.length})`}
           rightIcon="help-outline"
           onPressRight={handleHelpPress}
+          showTip={showHelp}
+          setShowTip={setShowHelp}
+          tip="Add people to your Favorites to receive messages from them. When you send a message to someone who has added you in Favorites, he/she could see your name only when they reply to your messages.This way of interaction ensures mutual interest."
         />
         <ScreenSub>
           {!isReady ? (
@@ -256,6 +274,10 @@ function AddFavoritesScreen({ navigation }) {
                 onAllRepliesPress={handleOnAllRepliesPress}
                 onMessagePress={handleMessagePress}
                 users={users}
+                style={styles.list}
+                // showTip={showReplyHelp}
+                // setShowTip={setShowReplyHelp}
+                // tip="Tap to see all the replies of favorite messages."
               />
             </ApiContext.Provider>
           )}
@@ -284,12 +306,6 @@ function AddFavoritesScreen({ navigation }) {
         setOptionalMessage={setOptionalMessage}
         showAddoption={showAddoption}
         recipient={recipient}
-      />
-      <HelpDialogueBox
-        information="Add people to your Favorites to receive messages from them. When you send a message to someone who has added you in Favorites, he/she could see your name only when they reply to your messages.This way of interaction ensures mutual interest."
-        onPress={handleCloseHelp}
-        setVisible={setShowHelp}
-        visible={showHelp}
       />
       <InfoAlert
         leftPress={handleCloseInfoAlert}

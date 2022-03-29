@@ -9,7 +9,7 @@
 
 # Add any project specific keep options here:
 
-
+# fastimage
 -keep public class com.dylanvann.fastimage.* {*;}
 -keep public class com.dylanvann.fastimage.** {*;}
 -keep public class * implements com.bumptech.glide.module.GlideModule

@@ -62,12 +62,12 @@ function MediaGalleryModal({
                 {
                   backgroundColor:
                     albumName == a.title
-                      ? defaultStyles.colors.blue
+                      ? defaultStyles.colors.tomato
                       : defaultStyles.colors.white,
                   color:
                     albumName == a.title
                       ? defaultStyles.colors.white
-                      : defaultStyles.colors.dark,
+                      : defaultStyles.colors.tomato,
                 },
               ]}
               onPress={() => {
@@ -91,7 +91,7 @@ function MediaGalleryModal({
           processing={sendingMedia}
           style={[
             styles.apiProcessingContainer,
-            { backgroundColor: defaultStyles.colors.secondary_Variant },
+            { backgroundColor: defaultStyles.colors.secondary },
           ]}
         >
           <TouchableWithoutFeedback
@@ -112,11 +112,10 @@ function MediaGalleryModal({
 const styles = ScaledSheet.create({
   albumTitle: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "20@s",
+    borderRadius: "10@s",
     marginRight: "5@s",
     marginVertical: "6@s",
     paddingHorizontal: "10@s",
-    paddingVertical: "5@s",
     textAlign: "center",
     textAlignVertical: "center",
   },
@@ -141,7 +140,7 @@ const styles = ScaledSheet.create({
   },
   contentContainerStyle: {
     backgroundColor: defaultStyles.colors.primary,
-    height: "50@s",
+    height: "48@s",
     paddingLeft: "5@s",
   },
   scrollViewContainer: {

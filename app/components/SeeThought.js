@@ -1,25 +1,31 @@
 import React, { memo } from "react";
-import { View, Modal } from "react-native";
+import { View, Modal, Text } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
 import defaultStyles from "../config/styles";
 import AppText from "./AppText";
+import Backdrop from "./Backdrop";
 
 const modalHeaderColor = defaultStyles.colors.secondary_Variant;
 
-function SeeThought({ visible = false, setVisible, message = "" }) {
+function SeeThought({
+  visible = false,
+  thought = { message: "", hint: "" },
+  onClose,
+}) {
   return (
     <Modal
-      animationType="none"
+      animationType="fade"
       transparent
-      onRequestClose={() => setVisible(false)}
+      onRequestClose={onClose}
       visible={visible}
     >
       <View style={styles.container}>
+        <Backdrop onPress={onClose} />
         <View style={styles.closeMessageIconContainer}>
           <AntDesign
-            onPress={() => setVisible(false)}
+            onPress={onClose}
             name="downcircle"
             color={defaultStyles.colors.white}
             size={scale(28)}
@@ -28,7 +34,16 @@ function SeeThought({ visible = false, setVisible, message = "" }) {
         <View style={styles.mainContainer}>
           <AppText style={styles.title}>Thought</AppText>
           <View style={styles.contentContainer}>
-            <AppText style={styles.message}>{message}</AppText>
+            <AppText style={styles.message}>
+              {thought.message
+                ? thought.message
+                : "No thoughts to show. Please subscribe to SeeYot Vip to see thoughts without being matched."}
+            </AppText>
+
+            <AppText style={styles.hint}>
+              <Text style={{ color: defaultStyles.colors.blue }}>Hint:</Text>{" "}
+              {thought.hint ? thought.hint : "No hints were provided!"}
+            </AppText>
           </View>
         </View>
       </View>
@@ -50,9 +65,9 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.7)",
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     width: "100%",
   },
   contentContainer: {
@@ -77,6 +92,16 @@ const styles = ScaledSheet.create({
     marginBottom: "15@s",
     textAlign: "center",
     width: "80%",
+  },
+  hint: {
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.light,
+    borderRadius: "10@s",
+    color: defaultStyles.colors.dark_Variant,
+    marginBottom: "15@s",
+    maxWidth: "80%",
+    paddingHorizontal: "10@s",
+    textAlign: "center",
   },
   title: {
     backgroundColor: modalHeaderColor,

@@ -35,6 +35,10 @@ export default {
     message: "",
     name: "",
     picture: "",
+    audio: {
+      file: "",
+      duration: "",
+    },
   },
   defaultBlockedUser: {
     _id: "",
@@ -60,6 +64,7 @@ export default {
     mood: "",
     seen: false,
     options: [],
+    replies: [],
   },
   plans: [
     {
@@ -127,8 +132,39 @@ export default {
     },
   },
   defaultStylesForData: {
-    legendFontColor: defaultStyles.colors.dark_Variant,
-    legendFontSize: scale(13),
+    legendFontColor: defaultStyles.colors.light,
+    legendFontSize: scale(12),
     legendFontFamily: "ComicNeue-Bold",
+  },
+
+  notificationType: [
+    { type: "Add", alias: "Add" },
+    { type: "ActiveChat", alias: "Active Chat" },
+    { type: "Replied", alias: "Replies" },
+    { type: "Matched", alias: "Matched Thoughts" },
+    { type: "All", alias: "All" },
+  ],
+  defaultGroup: {
+    _id: "random",
+    name: "HotShot",
+    qrCode: "",
+    picture: "",
+    createdBy: {
+      _id: "random",
+      name: "Gaurav Navneet",
+      picture: "",
+    },
+    createdAt: "",
+    type: "",
+    information:
+      "This group is all about Great things to explore around yourself and interact as much as you can.",
+    recyclePeriod: "",
+    posts: [],
+    messages: [],
+    stats: {
+      totalCoinsDistributed: parseInt(""),
+      totalCoinsOffered: parseInt(""),
+      totalActiveUsers: [],
+    },
   },
 };
