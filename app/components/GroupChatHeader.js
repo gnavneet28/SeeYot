@@ -27,8 +27,11 @@ function GroupChatHeader({
     picture: "",
     name: "",
   },
+  onAddEchoPress,
+  onSendThoughtsPress,
 }) {
   const [typing, setTyping] = useState(false);
+  const { user } = useAuth();
 
   let isUnmounting = false;
 
@@ -36,7 +39,7 @@ function GroupChatHeader({
 
   useEffect(() => {
     const listener1 = (data) => {
-      if (!typing && !isUnmounting) {
+      if (!typing && !isUnmounting && data.userId != user._id) {
         setTyping(true);
       } else {
         clearTimeout(timeOut);
@@ -68,14 +71,7 @@ function GroupChatHeader({
   }, [typing]);
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: headerColor,
-        },
-      ]}
-    >
+    <View style={styles.container}>
       <View style={styles.leftSectionMainContainer}>
         <MaterialIcons
           name="arrow-back"
@@ -84,14 +80,7 @@ function GroupChatHeader({
           style={styles.icon}
           size={scale(23)}
         />
-        <View
-          style={[
-            styles.imageContainer,
-            {
-              borderColor: defaultStyles.colors.white,
-            },
-          ]}
-        >
+        <View style={styles.imageContainer}>
           {typing ? (
             <LottieView
               autoPlay
@@ -112,17 +101,14 @@ function GroupChatHeader({
           )}
         </View>
       </View>
-      <View
-        style={[
-          styles.middleSectionContainer,
-          {
-            backgroundColor: headerColor,
-          },
-        ]}
-      >
+      <View style={styles.middleSectionContainer}>
         <AppText style={styles.name}>{group.name}</AppText>
       </View>
-      <TotalActiveUsers totalActiveUsers={totalActiveUsers} />
+      <TotalActiveUsers
+        onAddEchoPress={onAddEchoPress}
+        onSendThoughtsPress={onSendThoughtsPress}
+        totalActiveUsers={totalActiveUsers}
+      />
       <MaterialIcons
         name="more-vert"
         size={scale(23)}
@@ -144,6 +130,7 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
+    backgroundColor: headerColor,
     borderTopRightRadius: "20@s",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -163,6 +150,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     borderRadius: "25@s",
     borderWidth: "1.5@s",
+    borderColor: defaultStyles.colors.white,
     height: "50@s",
     justifyContent: "center",
     marginBottom: "15@s",
@@ -201,7 +189,7 @@ const styles = ScaledSheet.create({
     paddingTop: "5@s",
   },
   optionIcon: {
-    marginRight: "10@s",
+    marginHorizontal: "10@s",
   },
 });
 

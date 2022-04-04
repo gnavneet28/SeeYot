@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { View, TouchableWithoutFeedback } from "react-native";
 import FontAwesome from "../../node_modules/react-native-vector-icons/FontAwesome";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";

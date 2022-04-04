@@ -30,7 +30,6 @@ function ActiveChatBubble({
   thought = defaultThought,
   mine,
   onLongPress,
-  activeChat,
   onSelectReply,
   user = { _id: "" },
   recipient = { name: "" },
@@ -80,9 +79,6 @@ function ActiveChatBubble({
           styles.message,
           !mine ? styles.mine : styles.not_mine,
           mine ? rStyle : {},
-          // mine
-          //   ? { transform: [{ translateX: thought.seen && mine ? 0 : -20 }] }
-          //   : {},
         ]}
       >
         {thought.reply.message || thought.reply.media ? (
@@ -189,12 +185,12 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   mine: {
-    paddingLeft: scale(15),
     alignItems: "flex-start",
+    paddingLeft: scale(15),
   },
   not_mine: {
-    paddingRight: scale(15),
     alignItems: "flex-end",
+    paddingRight: scale(15),
   },
   text: {
     ...defaultStyles.text,

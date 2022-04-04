@@ -47,22 +47,30 @@ function ActiveChatImage({
           activeOpacity={1}
           imageUrl={uri}
         />
-        <IonicIcons
-          color={defaultStyles.colors.dark}
-          name="close-circle"
-          onPress={handleClose}
-          size={scale(45)}
-          style={styles.closeIcon}
-        />
+        <View style={styles.closeIcon}>
+          <IonicIcons
+            color={defaultStyles.colors.dark}
+            name="close"
+            onPress={handleClose}
+            size={scale(25)}
+          />
+        </View>
       </AppModal>
     </>
   );
 }
 const styles = ScaledSheet.create({
   closeIcon: {
+    alignItems: "center",
     alignSelf: "center",
-    bottom: "50@s",
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "20@s",
+    bottom: "40@s",
+    justifyContent: "center",
     position: "absolute",
+    padding: "5@s",
+    height: "40@s",
+    width: "40@s",
   },
   container: {
     alignItems: "center",

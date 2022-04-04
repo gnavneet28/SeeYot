@@ -63,6 +63,7 @@ function SendThoughtsInput({
   setShowTip = () => null,
   message,
   setMessage,
+  onCameraImageSelection,
 }) {
   dayjs.extend(relativeTime);
   let currentDate = new Date();
@@ -420,6 +421,7 @@ function SendThoughtsInput({
         handleAlbumChange={handleAlbumChange}
         albumName={mediaImagesModal.albumName}
         onSelectImageFromGallery={handleSendSelectedImage}
+        onCameraImageSelection={onCameraImageSelection}
       />
     </>
   );

@@ -1,7 +1,17 @@
-import React, { useCallback, useState, useEffect, useContext } from "react";
-import { View, StyleSheet } from "react-native";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+} from "react";
+import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
+import {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 import Screen from "../components/Screen";
 import ScreenSub from "../components/ScreenSub";
@@ -20,9 +30,13 @@ import { SocketContext } from "../api/socketClient";
 import groupsApi from "../api/groups";
 import usersApi from "../api/users";
 
+import ImageContext from "../utilities/ImageContext";
+
 import defaultStyles from "../config/styles";
 import useAuth from "../auth/useAuth";
 import NavigationConstants from "../navigation/NavigationConstants";
+import GroupChatScreenOptions from "../components/GroupChatScreenOptions";
+import InviteUsersModal from "../components/InviteUsersModal";
 
 let defaultReply = {
   message: "",
@@ -42,8 +56,10 @@ function GroupChatScreen({ navigation, route }) {
   const { user } = useAuth();
   const socket = useContext(SocketContext);
   const isFocused = useIsFocused();
+  const listRef = useRef(null);
 
   const [isReady, setIsReady] = useState(false);
+  const [mediaImage, setMediaImage] = useState("");
   const [activeUsers, setActiveUsers] = useState([]);
   const [sendingMedia, setSendingMedia] = useState(false);
   const [message, setMessage] = useState("");
@@ -51,6 +67,8 @@ function GroupChatScreen({ navigation, route }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+  const [showOptions, setShowOptions] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   const [groupMessages, setGroupMessages] = useState([]);
   const [reply, setReply] = useState({
@@ -64,7 +82,34 @@ function GroupChatScreen({ navigation, route }) {
     createdFor: "",
   });
 
-  const getCurrentMessages = async () => {
+  // // REPLY ACTIONS
+
+  const translateX = useSharedValue(800);
+
+  const rStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateX: translateX.value,
+        },
+      ],
+    };
+  }, []);
+
+  const handleRemoveReply = useCallback(() => {
+    translateX.value = withSpring(800);
+    setReply(defaultReply);
+  }, [reply]);
+
+  const handleOnSelectReply = useCallback(
+    (data) => {
+      translateX.value = withSpring(0);
+      setReply(data);
+    },
+    [reply]
+  );
+
+  const getCurrentMessages = useCallback(async () => {
     const { ok, data, problem } = await groupsApi.getMessages(group._id);
     if (ok && !isUnmounting) {
       setGroupMessages(data.messages);
@@ -74,23 +119,58 @@ function GroupChatScreen({ navigation, route }) {
       setIsReady(true);
       tackleProblem(problem, data, setInfoAlert);
     }
-  };
+  }, [groupMessages, isUnmounting]);
 
   useEffect(() => {
-    const listener = (data) => {
-      if (data.newMessage.createdBy != user._id) {
+    const listener1 = (data) => {
+      if (data.newMessage.createdBy._id != user._id) {
         groupMessages.push(data.newMessage);
-        setGroupMessages([...groupMessages]);
+        if (!isUnmounting) {
+          setGroupMessages([...groupMessages]);
+        }
       }
     };
-    socket.on(`newGroupMessage${group._id}`, listener);
+    socket.on(`newGroupMessage${group._id}`, listener1);
+
+    const listener2 = (data) => {
+      if (activeUsers.filter((u) => u._id == data.activeUser._id).length < 1) {
+        if (!isUnmounting) {
+          setActiveUsers([...activeUsers, data.activeUser]);
+        }
+      }
+    };
+
+    socket.on(`addActive${group._id}`, listener2);
+
+    const listener3 = (data) => {
+      if (activeUsers.filter((u) => u._id == data.activeUser._id).length) {
+        let newActiveUsers = activeUsers.filter(
+          (u) => u._id != data.activeUser
+        );
+        if (!isUnmounting) {
+          setActiveUsers(newActiveUsers);
+        }
+      }
+    };
+
+    socket.on(`removeActive${group._id}`, listener3);
 
     return () => {
-      socket.off(`newGroupMessage${group._id}`, listener);
+      socket.off(`newGroupMessage${group._id}`, listener1);
+      socket.off(`addActive${group._id}`, listener2);
+      socket.off(`removeActive${group._id}`, listener3);
     };
-  }, [groupMessages, group._id]);
+  }, [groupMessages, group._id, activeUsers]);
 
-  const addMeToActiveList = async () => {
+  useEffect(() => {
+    if (!isFocused) {
+      removeMeFromActiveList();
+    }
+
+    return () => removeMeFromActiveList();
+  }, [isFocused]);
+
+  const addMeToActiveList = useCallback(async () => {
     const { ok, data, problem } = await groupsApi.addActive(
       group._id,
       user._id,
@@ -100,19 +180,21 @@ function GroupChatScreen({ navigation, route }) {
     if (ok) {
       return;
     }
-    if (problem) console.log(problem);
-  };
+    if (problem) return;
+  }, [group._id]);
 
-  useEffect(() => {
-    const listener = (data) => {
-      setActiveUsers(data.activeUsers);
-    };
-    socket.on(group._id, listener);
-
-    return () => {
-      socket.off(group._id, listener);
-    };
-  }, [activeUsers]);
+  const removeMeFromActiveList = useCallback(async () => {
+    const { ok, data, problem } = await groupsApi.removeActive(
+      group._id,
+      user._id,
+      user.name,
+      user.picture
+    );
+    if (ok) {
+      return;
+    }
+    if (problem) return;
+  }, [group._id]);
 
   useEffect(() => {
     addMeToActiveList();
@@ -128,7 +210,7 @@ function GroupChatScreen({ navigation, route }) {
   }, []);
 
   const handleSetTyping = useCallback(async () => {
-    const { ok, problem } = await groupsApi.setTyping(group._id);
+    const { ok, problem } = await groupsApi.setTyping(group._id, user._id);
     if (ok) return;
     if (problem) return;
   }, [group._id]);
@@ -147,12 +229,10 @@ function GroupChatScreen({ navigation, route }) {
 
   const handleSendMessage = useCallback(
     async (textMessage, media) => {
-      // translateX.value = withSpring(800);
-      // listRef.current.scrollToOffset({ offset: -300, animated: true });
+      translateX.value = withSpring(800);
+      listRef.current.scrollToOffset({ offset: -300, animated: true });
       // stopCurrentUserTyping();
-      // if (!isRecipientActive && mounted) {
-      //   return setShowAlert(true);
-      // }
+
       let newId =
         Date.now().toString(36) + Math.random().toString(36).substring(2);
       let newMessage = media
@@ -215,16 +295,47 @@ function GroupChatScreen({ navigation, route }) {
     [groupMessages]
   );
 
-  const handleMessageCreatorImagePress = (recipient) => {
+  const handleMessageCreatorImagePress = useCallback((recipient) => {
     navigation.navigate(NavigationConstants.SEND_THOUGHT_SCREEN, { recipient });
-  };
+  }, []);
+
+  const handleAddEchoPress = useCallback((user) => {
+    navigation.navigate(NavigationConstants.ADD_ECHO_SCREEN, {
+      recipient: user,
+    });
+  }, []);
+
+  const handleSendThoughtsPress = useCallback((user) => {
+    navigation.navigate(NavigationConstants.SEND_THOUGHT_SCREEN, {
+      recipient: user,
+    });
+  }, []);
+
+  // OPTION ACTIONS
+
+  const handleCloseOptions = useCallback(() => {
+    setShowOptions(false);
+  }, []);
+
+  const handleInvitePress = useCallback(() => {
+    setShowInviteModal(true);
+    setShowOptions(false);
+  }, []);
+
+  const handleOpenOptions = useCallback(() => {
+    setShowOptions(true);
+  }, []);
+
   return (
     <>
       <Screen style={styles.container}>
         <GroupChatHeader
+          onAddEchoPress={handleAddEchoPress}
+          onSendThoughtsPress={handleSendThoughtsPress}
           totalActiveUsers={activeUsers}
           group={group}
           onBackPress={handleBackPress}
+          onOptionPress={handleOpenOptions}
         />
         <ScreenSub style={styles.screenSub}>
           {isReady ? (
@@ -232,34 +343,47 @@ function GroupChatScreen({ navigation, route }) {
               onImagePress={handleMessageCreatorImagePress}
               group={group}
               groupMessages={groupMessages}
+              onSelectReply={handleOnSelectReply}
+              listRef={listRef}
             />
           ) : (
             <AppActivityIndicator color={defaultStyles.colors.secondary} />
           )}
-          <ApiContext.Provider value={{ sendingMedia, setSendingMedia }}>
-            {isFocused ? (
-              <GroupMessageInput
-                placeholder="Type your message..."
-                // rStyle={rStyle}
-                // recipient={recipient}
-                // reply={reply}
-                // onRemoveReply={handleRemoveReply}
-                onSendSelectedMedia={handleSendSelectedMedia}
-                // isFocused={isFocused}
-                setTyping={handleSetTyping}
-                message={message}
-                setMessage={setMessage}
-                style={styles.inputBox}
-                submit={handleSendMessage}
-              />
-            ) : null}
-          </ApiContext.Provider>
+          {isFocused ? (
+            <ApiContext.Provider value={{ sendingMedia, setSendingMedia }}>
+              <ImageContext.Provider value={{ mediaImage, setMediaImage }}>
+                <GroupMessageInput
+                  placeholder="Type your message..."
+                  rStyle={rStyle}
+                  reply={reply}
+                  onRemoveReply={handleRemoveReply}
+                  onSendSelectedMedia={handleSendSelectedMedia}
+                  setTyping={handleSetTyping}
+                  message={message}
+                  setMessage={setMessage}
+                  style={styles.inputBox}
+                  submit={handleSendMessage}
+                  onCameraImageSelection={handleSendSelectedMedia}
+                />
+              </ImageContext.Provider>
+            </ApiContext.Provider>
+          ) : null}
         </ScreenSub>
       </Screen>
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
         visible={infoAlert.showInfoAlert}
+      />
+      <GroupChatScreenOptions
+        isVisible={showOptions}
+        handleCloseModal={handleCloseOptions}
+        onInvitePress={handleInvitePress}
+      />
+      <InviteUsersModal
+        openInviteModal={showInviteModal}
+        setOpenInviteModal={setShowInviteModal}
+        groupName={group.name}
       />
     </>
   );

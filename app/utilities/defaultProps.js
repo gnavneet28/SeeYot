@@ -145,19 +145,18 @@ export default {
     { type: "All", alias: "All" },
   ],
   defaultGroup: {
-    _id: "random",
-    name: "HotShot",
+    _id: "",
+    name: "",
     qrCode: "",
     picture: "",
     createdBy: {
-      _id: "random",
-      name: "Gaurav Navneet",
+      _id: "",
+      name: "",
       picture: "",
     },
     createdAt: "",
     type: "",
-    information:
-      "This group is all about Great things to explore around yourself and interact as much as you can.",
+    information: "",
     recyclePeriod: "",
     posts: [],
     messages: [],
@@ -165,6 +164,26 @@ export default {
       totalCoinsDistributed: parseInt(""),
       totalCoinsOffered: parseInt(""),
       totalActiveUsers: [],
+    },
+  },
+  defaultGroupChatMessage: {
+    _id: "",
+    message: "",
+    createdBy: {
+      _id: "",
+      name: "",
+      picture: "",
+    },
+    createdAt: "",
+    media: "",
+    reply: {
+      createdBy: {
+        _id: "",
+        name: "",
+        picture: "",
+      },
+      message: "",
+      media: "",
     },
   },
 };

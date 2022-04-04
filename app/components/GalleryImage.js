@@ -17,7 +17,7 @@ const GalleryImage = ({ uri, onPress, selected }) => {
       style={[
         styles.container,
         {
-          padding: selected == uri ? 2 : 0,
+          padding: selected == uri ? 1 : 0,
           backgroundColor:
             selected == uri
               ? defaultStyles.colors.yellow_Variant
@@ -49,8 +49,8 @@ const styles = ScaledSheet.create({
   },
   image: {
     borderRadius: "10@s",
-    height: "95%",
-    width: "95%",
+    height: "98%",
+    width: "98%",
   },
 });
 

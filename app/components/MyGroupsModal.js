@@ -15,7 +15,14 @@ import AppText from "./AppText";
 import AppHeader from "./AppHeader";
 import apiActivity from "../utilities/apiActivity";
 
-function MyGroupsModal({ visible, setVisible, onGroupSelection, groups }) {
+function MyGroupsModal({
+  visible,
+  setVisible,
+  onGroupSelection,
+  groups,
+  onAddEchoPress,
+  onSendThoughtsPress,
+}) {
   const { tackleProblem } = apiActivity;
   const [myGroups, setMyGroups] = useState([]);
   const [isReady, setIsReady] = useState(false);
@@ -62,7 +69,12 @@ function MyGroupsModal({ visible, setVisible, onGroupSelection, groups }) {
         />
         {isReady ? (
           myGroups.length ? (
-            <MyGroupsList groups={myGroups} onPress={onGroupSelection} />
+            <MyGroupsList
+              onAddEchoPress={onAddEchoPress}
+              onSendThoughtsPress={onSendThoughtsPress}
+              groups={myGroups}
+              onPress={onGroupSelection}
+            />
           ) : (
             <AppText style={styles.noGroupsInfo}>No groups to show!</AppText>
           )

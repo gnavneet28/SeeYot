@@ -149,6 +149,20 @@ function QrScannerScreen({ navigation }) {
     enterGroup(group);
   };
 
+  const handleAddEchoPress = (user) => {
+    setShowMyGroupsModal(false);
+    navigation.navigate(NavigationConstants.ADD_ECHO_SCREEN, {
+      recipient: user,
+    });
+  };
+
+  const handleSendThoughtsPress = (user) => {
+    setShowMyGroupsModal(false);
+    navigation.navigate(NavigationConstants.SEND_THOUGHT_SCREEN, {
+      recipient: user,
+    });
+  };
+
   return (
     <>
       <Screen>
@@ -236,6 +250,8 @@ function QrScannerScreen({ navigation }) {
         onCreate={handleVisitGroup}
       />
       <MyGroupsModal
+        onAddEchoPress={handleAddEchoPress}
+        onSendThoughtsPress={handleSendThoughtsPress}
         visible={showMyGroupsModal}
         onGroupSelection={handleOpenMyGroup}
         setVisible={setShowMyGroupsModal}

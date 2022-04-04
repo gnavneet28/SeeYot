@@ -10,19 +10,22 @@ import { SocketContext } from "../api/socketClient";
 import defaultStyles from "../config/styles";
 import TotalActiveUsers from "./TotalActiveUsers";
 
-function MyGroupCard({ onPress, group }) {
+function MyGroupCard({ onPress, group, onAddEchoPress, onSendThoughtsPress }) {
   const socket = useContext(SocketContext);
 
   const [activeUsers, setActiveUsers] = useState([]);
 
   useEffect(() => {
     const listener = (data) => {
-      setActiveUsers(data.activeUsers);
+      if (activeUsers.filter((u) => u._id == data.activeUser._id).length < 1) {
+        setActiveUsers([...activeUsers, data.activeUser]);
+      }
     };
-    socket.on(group._id, listener);
+
+    socket.on(`addActive${group._id}`, listener);
 
     return () => {
-      socket.off(group._id, listener);
+      socket.off(`addActive${group._id}`, listener);
     };
   }, [activeUsers, group._id]);
 
@@ -36,6 +39,8 @@ function MyGroupCard({ onPress, group }) {
       />
       <AppText style={styles.groupName}>{group.name}</AppText>
       <TotalActiveUsers
+        onAddEchoPress={onAddEchoPress}
+        onSendThoughtsPress={onSendThoughtsPress}
         conatinerStyle={styles.totalActiveCount}
         totalActiveUsers={activeUsers}
       />

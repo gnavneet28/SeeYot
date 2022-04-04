@@ -6,6 +6,9 @@ let api_url = __DEV__ ? apiUrl.DEV_API_URL : apiUrl.PROD_API_URL;
 
 export const socket = io(api_url, {
   transports: ["websocket", "polling"],
+  autoConnect: true,
+  reconnection: true,
+  reconnectionDelay: 100,
 });
 
 export const SocketContext = React.createContext();

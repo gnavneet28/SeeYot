@@ -18,13 +18,8 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import CameraRoll from "@react-native-community/cameraroll";
 import Animated from "react-native-reanimated";
-import Tooltip from "react-native-walkthrough-tooltip";
 
-import AppActivityIndicator from "./ActivityIndicator";
 import Alert from "./Alert";
-import AppHeader from "./AppHeader";
-import AppModal from "./AppModal";
-import AppText from "./AppText";
 import Icon from "./Icon";
 
 import debounce from "../utilities/debounce";
@@ -37,7 +32,7 @@ import defaultStyles from "../config/styles";
 import MediaGalleryModal from "./MediaGalleryModal";
 import ApiContext from "../utilities/apiContext";
 import ApiProcessingContainer from "./ApiProcessingContainer";
-import ActiveChatReply from "./ActiveChatReply";
+import GroupChatReplyBubble from "./GroupChatReplyBubble";
 
 function GroupMessageInput({
   isFocused,
@@ -47,15 +42,14 @@ function GroupMessageInput({
   style,
   submit,
   reply,
-  recipient,
   onRemoveReply,
   onLayout,
   rStyle,
   message,
   setMessage,
+  onCameraImageSelection,
 }) {
   dayjs.extend(relativeTime);
-  let currentDate = new Date();
   const { user } = useAuth();
   let isUnmounting = false;
 
@@ -195,17 +189,19 @@ function GroupMessageInput({
 
   return (
     <>
-      {/* <Animated.View style={[styles.animatedContainer, rStyle]}>
-          <ActiveChatReply
-            onLayout={onLayout}
-            style={styles.activeChatReplyContainer}
-            messageContainerStyle={{ width: "100%" }}
-            media={reply.media}
-            message={reply.message}
-            creator={reply.createdBy == user._id ? user.name : recipient.name}
-            onClose={onRemoveReply}
-          />
-        </Animated.View> */}
+      <Animated.View style={[styles.animatedContainer, rStyle]}>
+        <GroupChatReplyBubble
+          onLayout={onLayout}
+          style={styles.activeChatReplyContainer}
+          messageContainerStyle={styles.groupChatReplyMessageContainerStyle}
+          media={reply.media}
+          message={reply.message}
+          creator={
+            reply.createdBy._id == user._id ? user.name : reply.createdBy.name
+          }
+          onClose={onRemoveReply}
+        />
+      </Animated.View>
 
       <View style={[styles.contentContainer, style]}>
         <TouchableOpacity onPress={openMediaModal} style={styles.addMedia}>
@@ -236,8 +232,6 @@ function GroupMessageInput({
             style={[
               styles.inputBox,
               {
-                fontFamily: "ComicNeue-Bold",
-                fontWeight: "normal",
                 height: Math.min(100, Math.max(35, height)),
               },
             ]}
@@ -288,6 +282,7 @@ function GroupMessageInput({
         handleAlbumChange={handleAlbumChange}
         albumName={mediaImagesModal.albumName}
         onSelectImageFromGallery={handleSendSelectedImage}
+        onCameraImageSelection={onCameraImageSelection}
       />
     </>
   );
@@ -341,10 +336,15 @@ const styles = ScaledSheet.create({
   inputBox: {
     borderRadius: "30@s",
     flex: 1,
+    fontFamily: "ComicNeue-Bold",
     fontSize: "14@s",
+    fontWeight: "normal",
     height: "100%",
     marginRight: "5@s",
     paddingHorizontal: "10@s",
+    width: "100%",
+  },
+  groupChatReplyMessageContainerStyle: {
     width: "100%",
   },
   mainContainer: {

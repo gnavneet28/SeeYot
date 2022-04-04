@@ -1,4 +1,4 @@
-import React, { memo, useContext, useEffect, useState } from "react";
+import React, { memo } from "react";
 import { StyleSheet, View, TouchableWithoutFeedback } from "react-native";
 import { moderateScale, scale } from "react-native-size-matters";
 import Autolink from "react-native-autolink";
@@ -7,36 +7,14 @@ import ActiveChatImage from "./ActiveChatImage";
 import AppImage from "../components/AppImage";
 
 import defaultStyles from "../config/styles";
-import ActiveChatReply from "./ActiveChatReply";
-import AppText from "./AppText";
 
-let defaultMessage = {
-  message: "",
-  createdBy: {
-    _id: "Gaurav Navneet",
-    name: "Gaurav Navneet",
-    picture:
-      "https://seeyot-photos.s3.amazonaws.com/64026bca-a40e-4b72-a291-8ab8a861d3ae.jpg-user-1647584463567.jpg",
-  },
-  createdAt: Date.now(),
-  secondaryId: "",
-  media:
-    "https://seeyot-photos.s3.amazonaws.com/64026bca-a40e-4b72-a291-8ab8a861d3ae.jpg-user-1647584463567.jpg",
-  reply: {
-    createdBy: {
-      _id: "",
-      name: "",
-      picture: "",
-    },
-    message: "",
-    media: "",
-  },
-};
+import GroupChatReplyBubble from "./GroupChatReplyBubble";
+
+import defaultProps from "../utilities/defaultProps";
 
 function GroupChatBubble({
-  groupMessage = defaultMessage,
+  groupMessage = defaultProps.defaultGroupChatMessage,
   mine,
-  onLongPress,
   onSelectReply,
   user = { _id: "" },
   onImagePress,
@@ -46,88 +24,94 @@ function GroupChatBubble({
       <>
         <View
           style={[
-            styles.message,
+            styles.mainContainer,
             mine ? styles.myMessageContainer : styles.notMyMessageContainer,
           ]}
         >
-          {/* {groupMessage.reply.message || groupMessage.reply.media ? (
-          <ActiveChatReply
-            style={{
-              minWidth: "20%",
-              maxWidth: "50%",
-            }}
-            media={groupMessage.reply.media}
-            message={groupMessage.reply.message}
-            creator={
-              groupMessage.reply.createdBy == user._id ? "You" : recipient.name
-            }
-            show={false}
-          />
-        ) : null} */}
-          <AppImage
-            onPress={onImagePress}
-            imageUrl={groupMessage.createdBy.picture}
-            style={
-              user._id == groupMessage.createdBy._id
-                ? styles.imageMine
-                : styles.imageNotMine
-            }
-            subStyle={
-              user._id == groupMessage.createdBy._id
-                ? styles.imageSubMine
-                : styles.imageSubNotMine
-            }
-          />
+          {groupMessage.reply.message || groupMessage.reply.media ? (
+            <GroupChatReplyBubble
+              style={{
+                minWidth: "20%",
+                maxWidth: "50%",
+                alignSelf: mine ? "flex-end" : "flex-start",
+                borderBottomRightRadius: !mine ? scale(10) : 0,
+                borderBottomLeftRadius: !mine ? 0 : scale(10),
+              }}
+              media={groupMessage.reply.media}
+              message={groupMessage.reply.message}
+              creator={
+                groupMessage.reply.createdBy._id == user._id
+                  ? "You"
+                  : groupMessage.reply.createdBy.name
+              }
+              show={false}
+            />
+          ) : null}
           <View
             style={[
-              styles.cloud,
-              mine ? styles.myMessage : styles.notMyMessage,
-              {
-                paddingHorizontal: groupMessage.media ? 0 : scale(10),
-                paddingVertical: groupMessage.media ? 0 : scale(6),
-              },
+              styles.message,
+              mine
+                ? { flexDirection: "row-reverse" }
+                : { flexDirection: "row" },
             ]}
           >
-            {groupMessage.media ? (
-              <ActiveChatImage
-                containerStyle={
-                  {
-                    // borderTopLeftRadius: mine ? scale(15) : 0,
-                    // borderTopRightRadius: mine ? 0 : scale(15),
-                  }
-                }
-                mine={mine}
-                onLongPress={onSelectReply}
-                uri={groupMessage.media}
-              />
-            ) : (
-              <Autolink
-                showAlert={true}
-                text={groupMessage.message}
-                linkProps={{
-                  suppressHighlighting: true,
-                  testID: "link",
-                }}
-                linkStyle={{
-                  ...styles.text,
-                  color: defaultStyles.colors.blue,
-                }}
-                textProps={{
-                  selectable: true,
-                  style: [
-                    styles.text,
-                    {
-                      color: !mine
-                        ? defaultStyles.colors.white
-                        : defaultStyles.colors.dark,
-                    },
-                  ],
-                  onLongPress,
-                }}
-                email={true}
-                phone="sms"
-              />
-            )}
+            <AppImage
+              onPress={onImagePress}
+              imageUrl={groupMessage.createdBy.picture}
+              style={styles.image}
+              subStyle={styles.image}
+            />
+            <View
+              style={[
+                styles.cloud,
+                mine ? styles.myMessage : styles.notMyMessage,
+                {
+                  paddingHorizontal: groupMessage.media ? 0 : scale(10),
+                  paddingVertical: groupMessage.media ? 0 : scale(6),
+                },
+              ]}
+            >
+              {groupMessage.media ? (
+                <ActiveChatImage
+                  containerStyle={{
+                    borderTopLeftRadius: mine ? scale(15) : 0,
+                    borderTopRightRadius: mine ? 0 : scale(15),
+                    height: defaultStyles.width * 0.7,
+                    width: defaultStyles.width * 0.7,
+                  }}
+                  mine={mine}
+                  onLongPress={onSelectReply}
+                  uri={groupMessage.media}
+                />
+              ) : (
+                <Autolink
+                  showAlert={true}
+                  text={groupMessage.message}
+                  linkProps={{
+                    suppressHighlighting: true,
+                    testID: "link",
+                  }}
+                  linkStyle={{
+                    ...styles.text,
+                    color: defaultStyles.colors.blue,
+                  }}
+                  textProps={{
+                    selectable: true,
+                    style: [
+                      styles.text,
+                      {
+                        color: !mine
+                          ? defaultStyles.colors.white
+                          : defaultStyles.colors.dark,
+                      },
+                    ],
+                    onLongPress: onSelectReply,
+                  }}
+                  email={true}
+                  phone="sms"
+                />
+              )}
+            </View>
           </View>
         </View>
       </>
@@ -139,47 +123,36 @@ const styles = StyleSheet.create({
   cloud: {
     borderRadius: scale(15),
     maxWidth: moderateScale(250, 2),
+    overflow: "hidden",
     paddingHorizontal: scale(10),
     paddingVertical: scale(6),
-    overflow: "hidden",
   },
-  imageMine: {
-    borderWidth: scale(2),
-    borderColor: defaultStyles.colors.yellow_Variant,
-    height: scale(22),
-    width: scale(22),
-    borderRadius: scale(5),
-  },
-  imageNotMine: {
-    height: scale(20),
-    width: scale(20),
+  image: {
     borderRadius: scale(10),
-  },
-  imageSubMine: {
     height: scale(20),
     width: scale(20),
+  },
+  imageSub: {
     borderRadius: scale(4),
-  },
-  imageSubNotMine: {
     height: scale(20),
     width: scale(20),
-    borderRadius: scale(10),
   },
-  message: {
+  mainContainer: {
+    justifyContent: "center",
     marginVertical: scale(5),
     overflow: "hidden",
-    width: "100%",
-    paddingLeft: scale(15),
+  },
+  message: {
+    alignItems: "flex-start",
     flexDirection: "row",
-    // backgroundColor: "blue",
+    overflow: "hidden",
+    width: "100%",
   },
   myMessageContainer: {
-    alignItems: "flex-start",
-    paddingRight: scale(20),
-    flexDirection: "row-reverse",
+    paddingRight: scale(15),
   },
   notMyMessageContainer: {
-    alignItems: "flex-start",
+    paddingLeft: scale(15),
   },
   myMessage: {
     backgroundColor: defaultStyles.colors.yellow_Variant,

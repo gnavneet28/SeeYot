@@ -46,6 +46,7 @@ import defaultProps from "../utilities/defaultProps";
 import localThoughts from "../utilities/localThoughts";
 import storeDetails from "../utilities/storeDetails";
 import filterMessages from "../utilities/filterThoughts";
+import ImageContext from "../utilities/ImageContext";
 
 import defaultStyles from "../config/styles";
 
@@ -79,8 +80,10 @@ function SendThoughtsScreen({ navigation, route }) {
   const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
 
   // STATES
+
   const [showHelp, setShowHelp] = useState(false);
   const [sendingMedia, setSendingMedia] = useState(false);
+  const [mediaImage, setMediaImage] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const [unfriendProcessing, setUnfriendProcessing] = useState(false);
   const [favoriteProcessing, setFavoriteProcessing] = useState(false);
@@ -455,6 +458,7 @@ function SendThoughtsScreen({ navigation, route }) {
       mounted,
       isRecipientActive,
       reply,
+      mediaImage,
     ]
   );
 
@@ -695,7 +699,7 @@ function SendThoughtsScreen({ navigation, route }) {
       setSendingMedia(false);
       if (problem) tackleProblem(problem, data, setInfoAlert);
     },
-    [activeMessages]
+    [activeMessages, mediaImage]
   );
 
   return (
@@ -759,30 +763,33 @@ function SendThoughtsScreen({ navigation, route }) {
               ) : null}
               {isFocused ? (
                 <ApiContext.Provider value={{ sendingMedia, setSendingMedia }}>
-                  <SendThoughtsInput
-                    rStyle={rStyle}
-                    recipient={recipient}
-                    reply={reply}
-                    onRemoveReply={handleRemoveReply}
-                    onSendSelectedMedia={handleSendSelectedMedia}
-                    isFocused={isFocused}
-                    setTyping={handleSetTyping}
-                    message={message}
-                    setMessage={setMessage}
-                    placeholder={placeholder}
-                    activeChat={activeChat}
-                    isRecipientActive={isRecipientActive}
-                    onActiveChatSelection={
-                      activeChat ? handleSetChatInActive : handleSetChatActive
-                    }
-                    style={[styles.inputBox]}
-                    submit={
-                      activeChat ? handleSendActiveMessage : handleSendThought
-                    }
-                    historyTip="See sent thoughts that did not match or delete before getting matched."
-                    showTip={showHelp}
-                    setShowTip={setShowHelp}
-                  />
+                  <ImageContext.Provider value={{ mediaImage, setMediaImage }}>
+                    <SendThoughtsInput
+                      rStyle={rStyle}
+                      recipient={recipient}
+                      reply={reply}
+                      onRemoveReply={handleRemoveReply}
+                      onSendSelectedMedia={handleSendSelectedMedia}
+                      isFocused={isFocused}
+                      setTyping={handleSetTyping}
+                      message={message}
+                      setMessage={setMessage}
+                      placeholder={placeholder}
+                      activeChat={activeChat}
+                      isRecipientActive={isRecipientActive}
+                      onActiveChatSelection={
+                        activeChat ? handleSetChatInActive : handleSetChatActive
+                      }
+                      style={[styles.inputBox]}
+                      submit={
+                        activeChat ? handleSendActiveMessage : handleSendThought
+                      }
+                      historyTip="See sent thoughts that did not match or delete before getting matched."
+                      showTip={showHelp}
+                      setShowTip={setShowHelp}
+                      onCameraImageSelection={handleSendSelectedMedia}
+                    />
+                  </ImageContext.Provider>
                 </ApiContext.Provider>
               ) : null}
             </ChatBackgroundSelector>

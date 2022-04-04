@@ -12,7 +12,7 @@ function ScannerBottomContent({ handleCameraChange, handleFlashmode, front }) {
         <Ionicons
           name="camera-reverse"
           size={scale(16)}
-          color={defaultStyles.colors.secondary}
+          color={defaultStyles.colors.white}
         />
       </Pressable>
       {!front ? (
@@ -20,7 +20,7 @@ function ScannerBottomContent({ handleCameraChange, handleFlashmode, front }) {
           <Ionicons
             name="flash"
             size={scale(16)}
-            color={defaultStyles.colors.secondary}
+            color={defaultStyles.colors.white}
           />
         </Pressable>
       ) : null}
@@ -39,7 +39,7 @@ const styles = ScaledSheet.create({
   },
   cameraActionIcon: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: "rgba(255,255,255,0.5)",
     borderRadius: "8@s",
     height: "35@s",
     justifyContent: "center",

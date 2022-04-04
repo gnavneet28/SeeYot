@@ -8,7 +8,6 @@ import useAuth from "../auth/useAuth";
 function GroupMessagesList({
   groupMessages = [],
   group,
-  onLongPress = () => null,
   onSelectReply,
   listRef,
   onImagePress,
@@ -24,6 +23,13 @@ function GroupMessagesList({
         groupMessage={item}
         user={user}
         onImagePress={() => onImagePress(item.createdBy)}
+        onSelectReply={() =>
+          onSelectReply({
+            createdBy: item.createdBy,
+            message: item.message ? item.message : "",
+            media: item.media ? item.media : "",
+          })
+        }
       />
     ),
     [group._id]
@@ -34,7 +40,7 @@ function GroupMessagesList({
       <FlatList
         ref={listRef}
         bounces={false}
-        keyboardShouldPersistTaps="never"
+        keyboardShouldPersistTaps="handled"
         data={[...groupMessages].reverse()}
         keyExtractor={keyExtractor}
         inverted={true}

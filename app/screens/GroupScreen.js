@@ -48,6 +48,7 @@ import useAuth from "../auth/useAuth";
 
 import groupsApi from "../api/groups";
 import usersApi from "../api/users";
+import EditGroupInfoModal from "../components/EditGroupInfoModal";
 
 function GroupScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
@@ -56,6 +57,8 @@ function GroupScreen({ navigation, route }) {
   const socket = useContext(SocketContext);
 
   const [group, setGroup] = useState(defaultProps.defaultGroup);
+  const [openGroupInfo, setOpenGroupInfo] = useState(false);
+  const [groupInfo, setGroupInfo] = useState(group.information);
   const [isLoading, setIsLoading] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -243,6 +246,23 @@ function GroupScreen({ navigation, route }) {
     tackleProblem(problem, data, setInfoAlert);
   };
 
+  const handleOpenGroupInfoEditModal = () => setOpenGroupInfo(true);
+
+  const handleUpdateGroupInfo = async () => {
+    setIsLoading(true);
+    const { ok, data, problem } = await groupsApi.updateGroupInformation(
+      groupInfo,
+      group._id
+    );
+    if (ok) {
+      setGroup(data.group);
+      setOpenGroupInfo(false);
+      return setIsLoading(false);
+    }
+    setIsLoading(false);
+    tackleProblem(problem, data, setInfoAlert);
+  };
+
   return (
     <>
       <Screen style={styles.container}>
@@ -284,17 +304,6 @@ function GroupScreen({ navigation, route }) {
                             />
                           </TouchableOpacity>
                         ) : null}
-                        {/* <TouchableOpacity
-                          activeOpacity={0.7}
-                          style={styles.totalActivePeople}
-                        >
-                          <AppText>{totalActiveUsers.length}</AppText>
-                          <MaterialIcons
-                            name="remove-red-eye"
-                            size={scale(15)}
-                            color={defaultStyles.colors.yellow_Variant}
-                          />
-                        </TouchableOpacity> */}
                       </View>
                     </ImageBackground>
                     <View style={styles.creatorDisplayPictureContainer}>
@@ -314,6 +323,18 @@ function GroupScreen({ navigation, route }) {
                   </AppText>
 
                   <View style={styles.groupInfoContainer}>
+                    {group.createdBy._id == user._id ? (
+                      <TouchableOpacity
+                        style={styles.editInfoIcon}
+                        onPress={handleOpenGroupInfoEditModal}
+                      >
+                        <MaterialIcons
+                          size={scale(12)}
+                          color={defaultStyles.colors.white}
+                          name="edit"
+                        />
+                      </TouchableOpacity>
+                    ) : null}
                     {group.information ? (
                       <AppText style={styles.groupInfo}>
                         {group.information ? group.information : ""}
@@ -363,10 +384,7 @@ function GroupScreen({ navigation, route }) {
         onRemovePress={handleRemoveFromMyGroupHistory}
       />
       <EditImageOptionSelecter
-        style={{
-          backgroundColor: defaultStyles.colors.primary,
-          borderTopWidth: 0,
-        }}
+        style={styles.imageEditOptionSelector}
         showImageEdit={showImageEdit}
         setShowImageEdit={setShowImageEdit}
         handleHideImageEditOptions={handleHideImageEditOptions}
@@ -390,7 +408,9 @@ function GroupScreen({ navigation, route }) {
         description={infoAlert.infoAlertMessage}
         visible={infoAlert.showInfoAlert}
       />
-      {openReportModal || showImageEdit ? <ModalFallback /> : null}
+      {openReportModal || showImageEdit || openGroupInfo ? (
+        <ModalFallback />
+      ) : null}
       <ReportModal
         handleProblemSubmitPress={handleReportGroup}
         isLoading={isLoading}
@@ -399,6 +419,15 @@ function GroupScreen({ navigation, route }) {
         problemDescription={problemDescription}
         setProblemDescription={setProblemDescription}
         isConnected={isConnected}
+      />
+      <EditGroupInfoModal
+        isConnected={isConnected}
+        handleSubmitInfoChange={handleUpdateGroupInfo}
+        openGroupInfo={openGroupInfo}
+        setOpenGroupInfo={setOpenGroupInfo}
+        groupInfo={groupInfo}
+        setGroupInfo={setGroupInfo}
+        isLoading={isLoading}
       />
     </>
   );
@@ -439,6 +468,15 @@ const styles = ScaledSheet.create({
     height: "90@s",
     width: "90@s",
   },
+  editInfoIcon: {
+    alignItems: "center",
+    alignSelf: "flex-end",
+    backgroundColor: defaultStyles.colors.secondary,
+    borderRadius: "5@s",
+    height: "20@s",
+    justifyContent: "center",
+    width: "20@s",
+  },
   editPhoto: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
@@ -478,6 +516,10 @@ const styles = ScaledSheet.create({
     right: "10@s",
     top: "10@s",
   },
+  imageEditOptionSelector: {
+    backgroundColor: defaultStyles.colors.primary,
+    borderTopWidth: 0,
+  },
   qrImage: {
     height: "150@s",
     width: "150@s",
@@ -487,15 +529,6 @@ const styles = ScaledSheet.create({
     flex: 1,
     width: "100%",
   },
-  // totalActivePeople: {
-  //   alignItems: "center",
-  //   backgroundColor: defaultStyles.colors.white,
-  //   borderRadius: "15@s",
-  //   flexDirection: "row",
-  //   height: "30@s",
-  //   justifyContent: "center",
-  //   paddingHorizontal: "5@s",
-  // },
 });
 
 export default GroupScreen;

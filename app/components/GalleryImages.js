@@ -16,19 +16,21 @@ function GalleryImages({ data, onImageSelection, selectedImage }) {
   );
   const keyExtractor = (item, index) => item.toString();
   return (
-    <View style={styles.container}>
-      <FlatList
-        keyboardShouldPersistTaps="handled"
-        data={data}
-        renderItem={renderItem}
-        numColumns={3}
-        keyExtractor={keyExtractor}
-        showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={20}
-        windowSize={10}
-      />
-    </View>
+    <>
+      <View style={styles.container}>
+        <FlatList
+          keyboardShouldPersistTaps="handled"
+          data={data}
+          renderItem={renderItem}
+          numColumns={3}
+          keyExtractor={keyExtractor}
+          showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={20}
+          windowSize={10}
+        />
+      </View>
+    </>
   );
 }
 const styles = ScaledSheet.create({

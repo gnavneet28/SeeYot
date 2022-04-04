@@ -1,16 +1,24 @@
 import React, { useState, useContext, useCallback } from "react";
-import { TouchableWithoutFeedback, View, ScrollView } from "react-native";
+import {
+  TouchableWithoutFeedback,
+  View,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import ApiProcessingContainer from "./ApiProcessingContainer";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
+import Ionicons from "../../node_modules/react-native-vector-icons/Ionicons";
 
 import AppModal from "./AppModal";
 import GalleryImages from "./GalleryImages";
+import Camera from "./Camera";
 
 import defaultStyles from "../config/styles";
 import AppText from "./AppText";
 
 import ApiContext from "../utilities/apiContext";
+import ImageContext from "../utilities/ImageContext";
 
 function MediaGalleryModal({
   images = [],
@@ -20,19 +28,23 @@ function MediaGalleryModal({
   albums = [],
   handleAlbumChange,
   albumName,
+  onCameraImageSelection,
 }) {
   const [selected, setSelected] = useState("");
+  const { setMediaImage, mediaImage } = useContext(ImageContext);
+  const [showCamera, setShowCamera] = useState(false);
 
   const { sendingMedia } = useContext(ApiContext);
 
   const handleImageSelection = useCallback(
     (uri) => {
+      setMediaImage(uri);
       if (selected == uri) {
         return setSelected("");
       }
       setSelected(uri);
     },
-    [selected]
+    [selected, mediaImage]
   );
 
   const doNull = () => null;
@@ -40,8 +52,17 @@ function MediaGalleryModal({
   const handleSelectedImage = useCallback(() => {
     onRequestClose();
     onSelectImageFromGallery(selected);
+
     setSelected("");
-  }, [selected]);
+  }, [selected, mediaImage]);
+
+  const handleSelectedImageFromCamera = (picture) => {
+    onRequestClose();
+    onCameraImageSelection(picture);
+    setSelected("");
+  };
+
+  const handleOpenCamera = () => setShowCamera(true);
 
   return (
     <AppModal
@@ -55,6 +76,18 @@ function MediaGalleryModal({
           horizontal
           contentContainerStyle={styles.contentContainerStyle}
         >
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={handleOpenCamera}
+            style={styles.cameraIcon}
+          >
+            <Ionicons
+              onPress={handleOpenCamera}
+              name="camera"
+              size={scale(18)}
+              color={defaultStyles.colors.secondary}
+            />
+          </TouchableOpacity>
           {albums.map((a) => (
             <AppText
               style={[
@@ -62,12 +95,12 @@ function MediaGalleryModal({
                 {
                   backgroundColor:
                     albumName == a.title
-                      ? defaultStyles.colors.tomato
+                      ? defaultStyles.colors.secondary
                       : defaultStyles.colors.white,
                   color:
                     albumName == a.title
                       ? defaultStyles.colors.white
-                      : defaultStyles.colors.tomato,
+                      : defaultStyles.colors.secondary,
                 },
               ]}
               onPress={() => {
@@ -85,6 +118,11 @@ function MediaGalleryModal({
         selectedImage={selected}
         data={images}
         onImageSelection={handleImageSelection}
+      />
+      <Camera
+        setVisible={setShowCamera}
+        visible={showCamera}
+        onPhotoSelect={handleSelectedImageFromCamera}
       />
       {selected ? (
         <ApiProcessingContainer
@@ -116,6 +154,7 @@ const styles = ScaledSheet.create({
     marginRight: "5@s",
     marginVertical: "6@s",
     paddingHorizontal: "10@s",
+    height: "35@s",
     textAlign: "center",
     textAlignVertical: "center",
   },
@@ -132,6 +171,16 @@ const styles = ScaledSheet.create({
     right: "20@s",
     width: "50@s",
   },
+  cameraIcon: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "20@s",
+    height: "40@s",
+    justifyContent: "center",
+    marginHorizontal: "5@s",
+    width: "40@s",
+  },
   container: {
     backgroundColor: defaultStyles.colors.primary,
     flex: 1,
@@ -142,6 +191,7 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.primary,
     height: "48@s",
     paddingLeft: "5@s",
+    alignItems: "center",
   },
   scrollViewContainer: {
     width: "100%",

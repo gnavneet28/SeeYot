@@ -1,8 +1,8 @@
-import React from "react";
+import React, { memo } from "react";
 import { View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
-import Ionicons from "../../node_modules/react-native-vector-icons/Ionicons";
-import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
 import defaultStyles from "../config/styles";
 import ActiveChatImage from "./ActiveChatImage";
@@ -17,7 +17,7 @@ function GroupChatReplyBubble({
   style,
   messageContainerStyle,
   onLayout,
-  onShowInfo,
+  onShowInfo = () => alert("hi"),
 }) {
   return (
     <View onLayout={onLayout} style={[styles.container, style]}>
@@ -95,4 +95,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default GroupChatReplyBubble;
+export default memo(GroupChatReplyBubble);

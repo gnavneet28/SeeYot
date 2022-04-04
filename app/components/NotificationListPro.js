@@ -69,6 +69,7 @@ class NotificationListPro extends React.Component {
             notification={data}
             tapToSendMessage={this.props.onTapToSendMessage}
             tapToSeeMatchedThought={this.props.onTapToSeeMatchedThought}
+            tapToVisitGroup={this.props.tapToVisitGroup}
           />
         );
       default:

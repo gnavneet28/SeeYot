@@ -6,12 +6,22 @@ import MyGroupCard from "./MyGroupCard";
 
 import defaultStyles from "../config/styles";
 
-function MyGroupsList({ groups, onPress }) {
+function MyGroupsList({
+  groups,
+  onPress,
+  onAddEchoPress,
+  onSendThoughtsPress,
+}) {
   const keyExtractor = useCallback((item) => item._id.toString(), []);
 
   const renderItem = useCallback(
     ({ item }) => (
-      <MyGroupCard onPress={() => onPress(item.name)} group={item} />
+      <MyGroupCard
+        onAddEchoPress={onAddEchoPress}
+        onSendThoughtsPress={onSendThoughtsPress}
+        onPress={() => onPress(item.name)}
+        group={item}
+      />
     ),
     []
   );

@@ -206,6 +206,14 @@ function NotificationScreen({ navigation }) {
     setVisible(true);
   }, []);
 
+  const handleNotificationTapToVisitGroup = useCallback((notification) => {
+    console.log(notification);
+    navigation.navigate(Constant.GROUP_NAVIGATOR, {
+      screen: Constant.GROUP_INFO_SCREEN,
+      params: { groupName: notification.data.name },
+    });
+  }, []);
+
   const handleCloseThoughtModal = useCallback(() => {
     setThought({ message: "", hint: "" });
     setVisible(false);
@@ -286,6 +294,7 @@ function NotificationScreen({ navigation }) {
               notifications={data}
               onRefresh={handleRefresh}
               refreshing={refreshing}
+              tapToVisitGroup={handleNotificationTapToVisitGroup}
               //style={styles.list}
             />
           </ApiContext.Provider>

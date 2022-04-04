@@ -53,7 +53,7 @@ function ThoughtsList({
       <FlatList
         ref={listRef}
         bounces={false}
-        keyboardShouldPersistTaps="never"
+        keyboardShouldPersistTaps="handled"
         data={[...thoughts].reverse()}
         keyExtractor={keyExtractor}
         inverted={true}

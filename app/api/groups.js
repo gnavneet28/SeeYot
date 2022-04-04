@@ -62,13 +62,25 @@ const reportGroup = (description, groupId) =>
 const addActive = (id, userId, name, picture) =>
   apiClient.put(endPoint + "/add/Active/" + id, { userId, name, picture });
 
-const setTyping = (id) => apiClient.put(endPoint + "/setTyping/" + id, {});
-const stopTyping = (id) => apiClient.put(endPoint + "/stopTyping/" + id, {});
+const removeActive = (id, userId, name, picture) =>
+  apiClient.put(endPoint + "/add/removeActive/" + id, {
+    userId,
+    name,
+    picture,
+  });
+
+const setTyping = (id, userId) =>
+  apiClient.put(endPoint + "/setTyping/" + id, { userId });
+const stopTyping = (id, userId) =>
+  apiClient.put(endPoint + "/stopTyping/" + id, { userId });
 
 const sendNewGroupMessage = (newMessage) =>
   apiClient.put(endPoint + "/newGroupMessage", { newMessage });
 
 const getMessages = (id) => apiClient.get(endPoint + "/messages/" + id, {});
+
+const inviteUser = (userId, name) =>
+  apiClient.put(endPoint + "/invite/" + userId, { name });
 
 export default {
   addActive,
@@ -79,6 +91,8 @@ export default {
   getGroupByName,
   getMessages,
   getMyGroups,
+  inviteUser,
+  removeActive,
   removeGroupPicture,
   reportGroup,
   sendNewGroupMessage,

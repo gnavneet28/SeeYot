@@ -47,6 +47,7 @@ function NotificationCard({
   onLongPress,
   index,
   isConnected,
+  tapToVisitGroup,
 }) {
   dayjs.extend(relativeTime);
   let currentDate = new Date();
@@ -178,6 +179,9 @@ function NotificationCard({
 
     if (notification.type == "Matched") {
       return () => tapToSeeMatchedThought(notification);
+    }
+    if (notification.type == "GroupChatInvite") {
+      return () => tapToVisitGroup(notification);
     }
 
     return () => null;
