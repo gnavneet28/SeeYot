@@ -39,4 +39,12 @@ export default [
     subDescription:
       "Whenever you feel like having a quick chat with someone, active for you, without storing the messages anywhere, go for active chatting.",
   },
+  {
+    _id: "groupChat",
+    imageUri: { uri: "groupchatposter" },
+    title: "Active Group Conversation",
+    description: `Group chat with active people`,
+    subDescription:
+      "Connect and have live conversation with active people in group of your interest.",
+  },
 ];
