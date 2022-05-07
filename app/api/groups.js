@@ -2,22 +2,21 @@ import apiClient from "./apiClient";
 
 const endPoint = "/groups";
 
-const createGroup = (name, picture, info) => {
-  const formData = new FormData();
-  if (picture) {
-    formData.append("picture", {
-      name: picture.split("/").pop(),
-      uri: picture,
-      type: "image/jpg",
-    });
-  }
-  formData.append("information", info);
-  formData.append("name", name);
-
-  return apiClient.post(endPoint + "/newGroup", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+const createGroup = (
+  name,
+  qrCodeLink,
+  information,
+  category,
+  subCategory,
+  type
+) => {
+  return apiClient.post(endPoint + "/newGroup", {
+    name,
+    qrCodeLink,
+    information,
+    category,
+    subCategory,
+    type,
   });
 };
 
@@ -82,22 +81,45 @@ const getMessages = (id) => apiClient.get(endPoint + "/messages/" + id, {});
 const inviteUser = (userId, name) =>
   apiClient.put(endPoint + "/invite/" + userId, { name });
 
+const blockUser = (id, userId) =>
+  apiClient.put(endPoint + "/block/" + id, { userId });
+const unBlockUser = (id, userId) =>
+  apiClient.put(endPoint + "/unblock/" + id, { userId });
+
+const exploreGroups = (category) =>
+  apiClient.get(endPoint + "/explore", { category });
+
+const modifyInvitePermission = (id) =>
+  apiClient.put(endPoint + "/modify/canInvite/" + id, {});
+
+const updatePassword = (id, password, qrCodeLink) =>
+  apiClient.put(endPoint + "/update/password/" + id, { password, qrCodeLink });
+
+const deleteMessage = (id, _id) =>
+  apiClient.delete(endPoint + "/deleteMessage/" + id, { _id });
+
 export default {
   addActive,
+  blockUser,
   checkGroupName,
   createGroup,
   deleteGroup,
+  deleteMessage,
+  exploreGroups,
   getGroupById,
   getGroupByName,
   getMessages,
   getMyGroups,
   inviteUser,
+  modifyInvitePermission,
   removeActive,
   removeGroupPicture,
   reportGroup,
   sendNewGroupMessage,
   setTyping,
   stopTyping,
+  unBlockUser,
   updateGroupInformation,
   updateGroupPicture,
+  updatePassword,
 };
