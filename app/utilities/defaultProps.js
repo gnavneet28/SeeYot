@@ -147,7 +147,7 @@ export default {
   defaultGroup: {
     _id: "",
     name: "",
-    qrCode: "",
+    qrCodeLink: "",
     picture: "",
     createdBy: {
       _id: "",
@@ -165,6 +165,7 @@ export default {
       totalCoinsOffered: parseInt(""),
       totalActiveUsers: [],
     },
+    password: "",
   },
   defaultGroupChatMessage: {
     _id: "",
@@ -185,5 +186,48 @@ export default {
       message: "",
       media: "",
     },
+  },
+
+  categoriesData: {
+    categories: [
+      "Art",
+      "Entertainment",
+      "Relationship",
+      "Food",
+      "Wellness and Care",
+      "Jobs",
+    ],
+    artCategory: ["Poetry", "Drama", "Story", "Painting", "Drawing", "Others"],
+    entertainmentCategory: [
+      "Online Games",
+      "Sports",
+      "Movies",
+      "Night Life",
+      "Social",
+      "Tv Series",
+      "Others",
+    ],
+    relationShipCategory: [
+      "Dating",
+      "Family",
+      "Friends",
+      "Romance",
+      "Marriage",
+      "Others",
+    ],
+    foodCategory: [
+      "Fast Food",
+      "Healty Food",
+      "Vegetarian",
+      "Non-Vegetarian",
+      "Others",
+    ],
+    wellnessCategory: [
+      "Health And Fitness",
+      "Hospitals",
+      "Spa and Massage",
+      "Others",
+    ],
+    jobsCategory: ["Online", "Offline", "Others"],
   },
 };
