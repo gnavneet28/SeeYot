@@ -9,11 +9,12 @@ function ApiProcessingContainer({
   processing,
   style,
   color = defaultStyles.colors.tomato,
+  size= scale(16)
 }) {
   if (processing)
     return (
       <View style={[styles.container, style]}>
-        <ActivityIndicator size={scale(16)} color={color} />
+        <ActivityIndicator size={size} color={color} />
       </View>
     );
 

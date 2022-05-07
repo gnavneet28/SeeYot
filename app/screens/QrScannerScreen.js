@@ -25,17 +25,23 @@ import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
 import useAuth from "../auth/useAuth";
 import MyGroupsModal from "../components/MyGroupsModal";
+import usersApi from "../api/users";
+import storeDetails from "../utilities/storeDetails";
 
 function QrScannerScreen({ navigation }) {
   const isFocused = useIsFocused();
   const cameraRef = useRef(null);
   const { tackleProblem } = apiActivity;
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
+
+
+  let isUnmounting = false;
 
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
   let svg = useRef();
 
   const [permitted, setPermitted] = useState(false);
+  const [deletingGroupFromHistory, setDeletingGroupFromHistory] = useState(false);
   const [flash, setFlash] = useState(false);
   const [front, setFront] = useState(false);
   const [
@@ -103,6 +109,11 @@ function QrScannerScreen({ navigation }) {
     }
   }, [isFocused]);
 
+  useEffect ( () => {
+   
+     return () => isUnmounting = true
+  },[])
+
   const onSuccess = async (e) => {
     await enterGroup(e.data);
   };
@@ -120,10 +131,11 @@ function QrScannerScreen({ navigation }) {
     []
   );
 
-  const handleVisitGroup = (name) => {
+  const handleVisitGroup = (name, password) => {
     setShowCreateGroupModal(false);
     navigation.navigate(NavigationConstants.GROUP_INFO_SCREEN, {
       groupName: name,
+      password: password
     });
   };
 
@@ -163,6 +175,25 @@ function QrScannerScreen({ navigation }) {
     });
   };
 
+  const removeFromGroupHistory = async(h) => {
+    if(!isUnmounting) {
+      setDeletingGroupFromHistory(true)
+    }
+
+    const { ok, data, problem } = await usersApi.removeGroupFromHistory(h._id);
+    if(ok && !isUnmounting) {
+    await storeDetails(data.user)
+    setUser(data.user);
+    return setDeletingGroupFromHistory(false);
+    }
+   
+    if(!isUnmounting) {
+
+      setDeletingGroupFromHistory(false);
+      tackleProblem(problem, data, setInfoAlert)
+    }
+  }
+
   return (
     <>
       <Screen>
@@ -178,6 +209,8 @@ function QrScannerScreen({ navigation }) {
           checkingGroupName={checkingGroupName}
           onEnterGroupButtonPress={enterGroup}
           onMyGroupsButtonPress={handleShowMyGroupsModal}
+          deletingGroupFromHistory={deletingGroupFromHistory}
+          onDeleteFromGroupHistoryPress={removeFromGroupHistory}
           user={user}
         />
         <ScreenSub style={styles.screenSub}>

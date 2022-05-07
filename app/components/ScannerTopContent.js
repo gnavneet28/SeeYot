@@ -15,6 +15,8 @@ function ScannerTopContent({
   user,
   onSelectGroupFromHistory,
   onMyGroupsButtonPress,
+  onDeleteFromGroupHistoryPress,
+  deletingGroupFromHistory
 }) {
   const [searchText, setSearchText] = useState("");
 
@@ -64,6 +66,8 @@ function ScannerTopContent({
           >
             {user.groupHistory.map((h, index) => (
               <GroupHistoryCard
+               deletingGroup={deletingGroupFromHistory}
+                onDeletePress={ () => onDeleteFromGroupHistoryPress(h)}
                 key={h._id}
                 group={h}
                 onPress={() => onSelectGroupFromHistory(h.name)}
