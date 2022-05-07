@@ -183,6 +183,9 @@ const addToGroupHistory = (id) =>
 const removeGroupFromHistory = (id) =>
   apiClient.put(endPoint + "/groups/removeFromGroupHistory/" + id, {});
 
+const reportUser = (id, report) =>
+  apiClient.put(endPoint + "/reportUser/" + id, { report });
+
 export default {
   addContact,
   addFavorite,
@@ -205,6 +208,7 @@ export default {
   removeFromSearchHstory,
   removeGroupFromHistory,
   removeUserPhoneContacts,
+  reportUser,
   searchUser,
   sendNewActiveMessage,
   setPrivacyMessage,
