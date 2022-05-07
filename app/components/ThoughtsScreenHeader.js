@@ -133,11 +133,13 @@ function ThoughtsScreenHeader({
             style={[
               styles.thoughtMode,
               {
-                backgroundColor: defaultStyles.colors.white,
+                backgroundColor: activeChat
+                  ? defaultStyles.colors.white
+                  : defaultStyles.colors.green,
 
                 color: activeChat
                   ? defaultStyles.colors.dark
-                  : defaultStyles.colors.dark,
+                  : defaultStyles.colors.white,
               },
             ]}
             onPress={onThoughtsModePress}
@@ -148,9 +150,11 @@ function ThoughtsScreenHeader({
             style={[
               styles.activeMode,
               {
-                backgroundColor: defaultStyles.colors.lightGrey,
-                color: !activeChat
-                  ? defaultStyles.colors.dark
+                backgroundColor: activeChat
+                  ? defaultStyles.colors.green
+                  : defaultStyles.colors.white,
+                color: activeChat
+                  ? defaultStyles.colors.white
                   : defaultStyles.colors.dark,
               },
             ]}
