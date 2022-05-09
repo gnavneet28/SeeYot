@@ -10,7 +10,8 @@ function ScreenSub({ children, style }) {
 const styles = ScaledSheet.create({
   container: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "10@s",
+    borderTopLeftRadius: "5@s",
+    borderTopRightRadius: "5@s",
     flex: 1,
     overflow: "hidden",
     width: "100%",

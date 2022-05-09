@@ -34,8 +34,8 @@ const DropdownSelect = ({
   return (
     <>
       <AppText
-        onPress={handleOpenModal}
         style={[styles.container, containerStyle]}
+        onPress={handleOpenModal}
       >
         {selected ? selected : defaultPlaceholder}
       </AppText>
@@ -59,19 +59,22 @@ const DropdownSelect = ({
 
 const styles = ScaledSheet.create({
   container: {
+    alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.lightGrey,
     borderRadius: "5@s",
     borderWidth: 1,
+    flexDirection: "row",
     flexShrink: 1,
     fontSize: "12@s",
+    justifyContent: "space-between",
     paddingVertical: "8@s",
     textAlign: "center",
     width: "100%",
   },
   listContainer: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "10@s",
+    borderRadius: "15@s",
     maxHeight: "60%",
     overflow: "hidden",
     width: "60%",
@@ -79,8 +82,8 @@ const styles = ScaledSheet.create({
   optionClose: {
     backgroundColor: defaultStyles.colors.dark_Variant,
     borderColor: defaultStyles.colors.white,
-    borderTopLeftRadius: "10@s",
-    borderTopRightRadius: "10@s",
+    borderTopLeftRadius: "15@s",
+    borderTopRightRadius: "15@s",
     borderWidth: 1,
     color: defaultStyles.colors.white,
     opacity: 1,

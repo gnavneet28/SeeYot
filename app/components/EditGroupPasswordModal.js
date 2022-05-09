@@ -15,68 +15,58 @@ import AppText from "./AppText";
 import AppButton from "./AppButton";
 import Backdrop from "./Backdrop";
 
-function EditGroupInfoModal({
-  handleSubmitInfoChange,
+function EditGroupPasswordModal({
+  handleSubmitPassword,
   isConnected,
   isLoading,
-  openGroupInfo,
-  setOpenGroupInfo,
-  group = { information: "" },
+  openPasswordModal,
+  setOpenPasswordModal,
+  group = { password: "" },
 }) {
-  const [groupInfo, setGroupInfo] = useState(group.information);
+  const [password, setPassword] = useState(group.password);
   const handleDismissKeyboard = () => Keyboard.dismiss();
-  const [height, setHeight] = useState(0);
 
   const onSubmit = () => {
-    handleSubmitInfoChange(groupInfo);
+    handleSubmitPassword(password);
   };
 
-  const handleCloseGroupInfo = () => setOpenGroupInfo(false);
+  const handleClosePasswordModal = () => setOpenPasswordModal(false);
 
   return (
     <Modal
       animationType="slide"
-      onRequestClose={handleCloseGroupInfo}
+      onRequestClose={handleClosePasswordModal}
       transparent={true}
-      visible={openGroupInfo}
+      visible={openPasswordModal}
     >
       <TouchableWithoutFeedback onPress={handleDismissKeyboard}>
         <View style={styles.groupInfoModal}>
-          <Backdrop onPress={handleCloseGroupInfo} />
+          <Backdrop onPress={handleClosePasswordModal} />
           <View style={styles.closeMessageIconContainer}>
             <AntDesign
-              onPress={handleCloseGroupInfo}
+              onPress={handleClosePasswordModal}
               name="downcircle"
               color={defaultStyles.colors.secondary_Variant}
               size={scale(28)}
             />
           </View>
           <View style={styles.optionsContainerReport}>
-            <AppText style={styles.reportProblemTitle}>
-              Edit Group Information
-            </AppText>
+            <AppText style={styles.reportProblemTitle}>Edit Password</AppText>
             <TextInput
               editable={!isLoading}
-              maxLength={500}
-              multiline={true}
-              onChangeText={setGroupInfo}
-              placeholder="A short description of group..."
-              value={groupInfo}
-              style={[
-                styles.groupInfoInput,
-                { height: Math.min(100, Math.max(60, height)) },
-              ]}
-              onContentSizeChange={(event) =>
-                setHeight(event.nativeEvent.contentSize.height)
-              }
+              maxLength={30}
+              onChangeText={setPassword}
+              placeholder="Set Password"
+              value={password}
+              style={styles.groupInfoInput}
             />
             <View style={styles.actionContainer}>
               <AppText style={styles.groupInfoLength}>
-                {groupInfo.length}/500
+                {password.length}/30
               </AppText>
               <AppButton
                 disabled={
-                  groupInfo.replace(/\s/g, "").length >= 1 &&
+                  password.replace(/\s/g, "").length >= 8 &&
                   isConnected &&
                   !isLoading
                     ? false
@@ -87,7 +77,7 @@ function EditGroupInfoModal({
                   styles.submitGroupInfoButton,
                   {
                     backgroundColor:
-                      groupInfo.replace(/\s/g, "").length >= 1 &&
+                      password.replace(/\s/g, "").length >= 1 &&
                       isConnected &&
                       !isLoading
                         ? defaultStyles.colors.yellow_Variant
@@ -154,6 +144,7 @@ const styles = ScaledSheet.create({
     marginBottom: "10@s",
     padding: "5@s",
     width: "95%",
+    height: "40@s",
   },
   groupInfoLength: {
     fontSize: "12@s",
@@ -179,4 +170,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default memo(EditGroupInfoModal);
+export default memo(EditGroupPasswordModal);

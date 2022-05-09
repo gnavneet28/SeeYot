@@ -24,8 +24,8 @@ const checkGroupName = (name) => {
   return apiClient.get(endPoint + "/checkNameAvailablity", { name: name });
 };
 
-const getGroupByName = (name) =>
-  apiClient.get(endPoint + "/groupByName", { name });
+const getGroupByName = (name, password) =>
+  apiClient.get(endPoint + "/groupByName", { name, password });
 const getGroupById = (id) => apiClient.get(endPoint + "/groupById/" + id, {});
 
 const getMyGroups = () => apiClient.get(endPoint + "/myGroups", {});

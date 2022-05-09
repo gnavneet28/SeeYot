@@ -27,13 +27,14 @@ import useAuth from "../auth/useAuth";
 import MyGroupsModal from "../components/MyGroupsModal";
 import usersApi from "../api/users";
 import storeDetails from "../utilities/storeDetails";
+import LoadingIndicator from "../components/LoadingIndicator";
+import ExploreGroupsModal from "../components/ExploreGroupsModal";
 
-function QrScannerScreen({ navigation }) {
+function QrScannerScreen({ navigation, route }) {
   const isFocused = useIsFocused();
   const cameraRef = useRef(null);
   const { tackleProblem } = apiActivity;
   const { user, setUser } = useAuth();
-
 
   let isUnmounting = false;
 
@@ -41,7 +42,8 @@ function QrScannerScreen({ navigation }) {
   let svg = useRef();
 
   const [permitted, setPermitted] = useState(false);
-  const [deletingGroupFromHistory, setDeletingGroupFromHistory] = useState(false);
+  const [deletingGroupFromHistory, setDeletingGroupFromHistory] =
+    useState(false);
   const [flash, setFlash] = useState(false);
   const [front, setFront] = useState(false);
   const [
@@ -57,6 +59,9 @@ function QrScannerScreen({ navigation }) {
   const [checkingGroupName, setCheckingGroupName] = useState(false);
 
   const [showMyGroupsModal, setShowMyGroupsModal] = useState(false);
+  const [showExplore, setShowExplore] = useState(false);
+
+  const handleCloseExploreModal = () => setShowExplore(false);
 
   // INFO ALERT ACTIONS
   const handleCloseInfoAlert = useCallback(async () => {
@@ -109,13 +114,21 @@ function QrScannerScreen({ navigation }) {
     }
   }, [isFocused]);
 
-  useEffect ( () => {
-   
-     return () => isUnmounting = true
-  },[])
+  useEffect(() => {
+    if (route.params && isFocused) {
+      enterGroup(route.params.name, route.params.password);
+    }
+    if (!isFocused) {
+      route.params = null;
+    }
+  }, [route.params, isFocused]);
+
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
 
   const onSuccess = async (e) => {
-    await enterGroup(e.data);
+    Linking.openURL(e.data);
   };
 
   const handleCameraChange = useCallback(() => {
@@ -135,17 +148,21 @@ function QrScannerScreen({ navigation }) {
     setShowCreateGroupModal(false);
     navigation.navigate(NavigationConstants.GROUP_INFO_SCREEN, {
       groupName: name,
-      password: password
+      password: password,
     });
   };
 
-  const enterGroup = async (name) => {
+  const enterGroup = async (name, password) => {
     setCheckingGroupName(true);
-    const { ok, data, problem } = await groupsApi.getGroupByName(name);
+    const { ok, data, problem } = await groupsApi.getGroupByName(
+      name,
+      password
+    );
     if (ok) {
       setCheckingGroupName(false);
       return navigation.navigate(NavigationConstants.GROUP_INFO_SCREEN, {
         groupName: data.group.name,
+        password: data.group.password ? data.group.password : "",
       });
     }
     setCheckingGroupName(false);
@@ -157,42 +174,55 @@ function QrScannerScreen({ navigation }) {
   };
 
   const handleOpenMyGroup = (group) => {
-    setShowMyGroupsModal(false);
-    enterGroup(group);
+    if (showMyGroupsModal) {
+      setShowMyGroupsModal(false);
+    } else if (showExplore) {
+      setShowExplore(false);
+    }
+    enterGroup(group.name, group.password);
   };
 
   const handleAddEchoPress = (user) => {
-    setShowMyGroupsModal(false);
+    if (showMyGroupsModal) {
+      setShowMyGroupsModal(false);
+    } else if (showExplore) {
+      setShowExplore(false);
+    }
     navigation.navigate(NavigationConstants.ADD_ECHO_SCREEN, {
       recipient: user,
     });
   };
 
   const handleSendThoughtsPress = (user) => {
-    setShowMyGroupsModal(false);
+    if (showMyGroupsModal) {
+      setShowMyGroupsModal(false);
+    } else if (showExplore) {
+      setShowExplore(false);
+    }
     navigation.navigate(NavigationConstants.SEND_THOUGHT_SCREEN, {
       recipient: user,
     });
   };
 
-  const removeFromGroupHistory = async(h) => {
-    if(!isUnmounting) {
-      setDeletingGroupFromHistory(true)
+  const removeFromGroupHistory = async (h) => {
+    if (!isUnmounting) {
+      setDeletingGroupFromHistory(true);
     }
 
     const { ok, data, problem } = await usersApi.removeGroupFromHistory(h._id);
-    if(ok && !isUnmounting) {
-    await storeDetails(data.user)
-    setUser(data.user);
-    return setDeletingGroupFromHistory(false);
+    if (ok && !isUnmounting) {
+      await storeDetails(data.user);
+      setUser(data.user);
+      return setDeletingGroupFromHistory(false);
     }
-   
-    if(!isUnmounting) {
 
+    if (!isUnmounting) {
       setDeletingGroupFromHistory(false);
-      tackleProblem(problem, data, setInfoAlert)
+      tackleProblem(problem, data, setInfoAlert);
     }
-  }
+  };
+
+  const handleExplorePress = () => setShowExplore(true);
 
   return (
     <>
@@ -252,14 +282,15 @@ function QrScannerScreen({ navigation }) {
               </AppText>
             </View>
           )}
-          {permitted ? (
-            <ScannerBottomContent
-              front={front}
-              flash={flash}
-              handleCameraChange={handleCameraChange}
-              handleFlashmode={handleFlashmode}
-            />
-          ) : null}
+
+          <ScannerBottomContent
+            onExplorePress={handleExplorePress}
+            permitted={permitted}
+            front={front}
+            flash={flash}
+            handleCameraChange={handleCameraChange}
+            handleFlashmode={handleFlashmode}
+          />
         </ScreenSub>
       </Screen>
       <Alert
@@ -272,6 +303,7 @@ function QrScannerScreen({ navigation }) {
         leftPress={handleCameraAccessDeniedAlertVisibility}
         rightPress={openPermissionSettings}
       />
+      <LoadingIndicator visible={checkingGroupName} />
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
@@ -288,6 +320,13 @@ function QrScannerScreen({ navigation }) {
         visible={showMyGroupsModal}
         onGroupSelection={handleOpenMyGroup}
         setVisible={setShowMyGroupsModal}
+      />
+      <ExploreGroupsModal
+        visible={showExplore}
+        handleCloseModal={handleCloseExploreModal}
+        onAddEchoPress={handleAddEchoPress}
+        onGroupSelection={handleOpenMyGroup}
+        onSendThoughtsPress={handleSendThoughtsPress}
       />
     </>
   );

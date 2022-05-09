@@ -10,17 +10,17 @@ import {
   TouchableOpacity,
   ScrollView,
   ImageBackground,
-  Text,
+  Share,
 } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import ImagePicker from "react-native-image-crop-picker";
 import QRCode from "react-native-qrcode-svg";
+import dynamicLinks from "@react-native-firebase/dynamic-links";
 
 import Alert from "../components/Alert";
 import AppActivityIndicator from "../components/ActivityIndicator";
 import AppHeader from "../components/AppHeader";
-import AppImage from "../components/AppImage";
 import AppText from "../components/AppText";
 import EditImageOptionSelecter from "../components/EditImageOptionSelecter";
 import GroupScreenOptions from "../components/GroupScreenOptions";
@@ -40,8 +40,6 @@ import apiActivity from "../utilities/apiActivity";
 import defaultProps from "../utilities/defaultProps";
 import storeDetails from "../utilities/storeDetails";
 
-import { SocketContext } from "../api/socketClient";
-
 import useConnection from "../hooks/useConnection";
 
 import useAuth from "../auth/useAuth";
@@ -49,12 +47,13 @@ import useAuth from "../auth/useAuth";
 import groupsApi from "../api/groups";
 import usersApi from "../api/users";
 import EditGroupInfoModal from "../components/EditGroupInfoModal";
+import EditGroupPasswordModal from "../components/EditGroupPasswordModal";
 
 function GroupScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
   const { tackleProblem } = apiActivity;
   const isConnected = useConnection();
-  const socket = useContext(SocketContext);
+  let isUnmounting = false;
 
   const [group, setGroup] = useState(defaultProps.defaultGroup);
   const [openGroupInfo, setOpenGroupInfo] = useState(false);
@@ -73,6 +72,8 @@ function GroupScreen({ navigation, route }) {
   const [problemDescription, setProblemDescription] = useState("");
   const [removingFromHistory, setRemovingFromHistory] = useState(false);
 
+  const [openPasswordModal, setOpenPasswordModal] = useState(false);
+
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
     () => setInfoAlert({ ...infoAlert, showInfoAlert: false }),
@@ -87,15 +88,22 @@ function GroupScreen({ navigation, route }) {
     return 0;
   }, [user, group._id]);
 
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
   // ON PAGE LOAD
   const getGroupDetails = async () => {
     setIsReady(false);
     const { ok, data, problem } = await groupsApi.getGroupByName(
-      route.params.groupName
+      route.params.groupName,
+      route.params.password
     );
     if (ok) {
       setGroup(data.group);
-      await addToMyGroupHistory(data.group._id);
+      if (data.group.createdBy._id != user._id) {
+        addToMyGroupHistory(data.group._id);
+      }
       return setIsReady(true);
     }
     setIsReady(true);
@@ -211,6 +219,10 @@ function GroupScreen({ navigation, route }) {
     setShowOptions(false);
     setOpenReportModal(true);
   };
+  const handleOnChangePasswordOptionPress = () => {
+    setShowOptions(false);
+    setOpenPasswordModal(true);
+  };
 
   const handleReportGroup = async () => {
     setIsLoading(true);
@@ -248,7 +260,7 @@ function GroupScreen({ navigation, route }) {
 
   const handleOpenGroupInfoEditModal = () => setOpenGroupInfo(true);
 
-  const handleUpdateGroupInfo = async () => {
+  const handleUpdateGroupInfo = async (groupInfo) => {
     setIsLoading(true);
     const { ok, data, problem } = await groupsApi.updateGroupInformation(
       groupInfo,
@@ -263,6 +275,70 @@ function GroupScreen({ navigation, route }) {
     tackleProblem(problem, data, setInfoAlert);
   };
 
+  const handleSubmitPassword = async (password) => {
+    if (!isUnmounting) {
+      setIsLoading(true);
+    }
+    const { ok, data, problem } = await groupsApi.updatePassword(
+      group._id,
+      password,
+      ""
+    );
+    if (ok && !isUnmounting) {
+      setGroup(data);
+      return setIsLoading(false);
+    }
+    if (!isUnmounting) {
+      setIsLoading(false);
+      tackleProblem(problem, data, setInfoAlert);
+    }
+  };
+
+  const createGroupInviteLink = (group) => {
+    return dynamicLinks().buildShortLink({
+      domainUriPrefix: "https://seeyot.page.link",
+      android: {
+        packageName: "com.seeyot",
+        fallbackUrl: "https://play.google.com/store/apps/details?id=com.seeyot",
+      },
+      link: `https://seeyot.page.link/groupInvite?a=${group.name}&b=${
+        group.password ? group.password : ""
+      }`,
+      navigation: {
+        forcedRedirectEnabled: false,
+      },
+    });
+  };
+
+  const handleInvitePress = useCallback(
+    debounce(
+      async () => {
+        try {
+          setIsLoading(true);
+          let link = await createGroupInviteLink(group);
+          setIsLoading(false);
+          const result = await Share.share({
+            message: `Join this group and have live conversation with active people.[Group : ${group.name}]:${link}`,
+          });
+          if (result.action === Share.sharedAction) {
+            if (result.activityType) {
+              // shared with activity type of result.activityType
+            } else {
+              // shared
+            }
+          } else if (result.action === Share.dismissedAction) {
+            // dismissed
+          }
+        } catch (error) {
+          setIsLoading(false);
+        }
+      },
+      5000,
+      true
+    ),
+    [group]
+  );
+
   return (
     <>
       <Screen style={styles.container}>
@@ -273,22 +349,21 @@ function GroupScreen({ navigation, route }) {
           rightIcon="more-vert"
           onPressRight={() => setShowOptions(true)}
         />
-        <ScreenSub style={styles.container}>
+        <ScreenSub style={styles.screenSub}>
           {isReady ? (
             <>
               <ScrollView
-                contentContainerStyle={{
-                  alignItems: "center",
-                  flexGrow: 1,
-                }}
+                contentContainerStyle={styles.scrollViewContentContainer}
                 keyboardShouldPersistTaps="handled"
               >
                 <View style={styles.scrollView}>
                   <View style={styles.groupDisplayPicture}>
                     <ImageBackground
-                      resizeMode="cover"
-                      source={{ uri: group.picture ? group.picture : "user" }}
-                      style={{ width: "100%", flex: 1 }}
+                      resizeMode={group.picture ? "cover" : "contain"}
+                      source={{
+                        uri: group.picture ? group.picture : "defaultgroupdp",
+                      }}
+                      style={styles.imageBackground}
                     >
                       <View style={styles.groupWallActionContainer}>
                         {group.createdBy._id == user._id ? (
@@ -306,21 +381,30 @@ function GroupScreen({ navigation, route }) {
                         ) : null}
                       </View>
                     </ImageBackground>
-                    <View style={styles.creatorDisplayPictureContainer}>
-                      <AppImage
-                        imageUrl={group.createdBy.picture}
-                        style={styles.creatorPicture}
-                        subStyle={styles.creatorPicture}
+                    <View style={styles.groupQrCodeContainer}>
+                      <QRCode
+                        value={group.qrCodeLink}
+                        enableLinearGradient={true}
+                        quietZone={10}
+                        size={scale(95)}
                       />
                     </View>
                   </View>
+
                   <AppText style={styles.groupName}>{group.name}</AppText>
-                  <AppText style={styles.creatorName}>
-                    <Text style={{ color: defaultStyles.colors.blue }}>
-                      Admin:
-                    </Text>{" "}
-                    {group.createdBy.name}
-                  </AppText>
+
+                  <TouchableOpacity
+                    onPress={handleInvitePress}
+                    activeOpacity={0.8}
+                    style={styles.shareIconContainer}
+                  >
+                    <AppText style={styles.shareText}>Share</AppText>
+                    <MaterialIcons
+                      name="share"
+                      color={defaultStyles.colors.white}
+                      size={scale(12)}
+                    />
+                  </TouchableOpacity>
 
                   <View style={styles.groupInfoContainer}>
                     {group.createdBy._id == user._id ? (
@@ -330,27 +414,40 @@ function GroupScreen({ navigation, route }) {
                       >
                         <MaterialIcons
                           size={scale(12)}
-                          color={defaultStyles.colors.white}
+                          color={defaultStyles.colors.lightGrey}
                           name="edit"
                         />
                       </TouchableOpacity>
                     ) : null}
-                    {group.information ? (
-                      <AppText style={styles.groupInfo}>
-                        {group.information ? group.information : ""}
-                      </AppText>
-                    ) : null}
 
-                    <QRCode
-                      value={group.name}
-                      enableLinearGradient={true}
-                      quietZone={10}
-                      size={scale(150)}
-                    />
+                    <AppText style={styles.groupInfo}>
+                      {group.information
+                        ? group.information
+                        : "Welcome to this Group."}
+                    </AppText>
                   </View>
                 </View>
               </ScrollView>
 
+              {user.vip.subscription ? (
+                <AppText
+                  style={styles.chatButtonIncognito}
+                  onPress={() =>
+                    navigation.navigate(NavigationConstants.GROUP_CHAT_SCREEN, {
+                      group: {
+                        _id: group._id,
+                        name: group.name,
+                        picture: group.picture,
+                        type: group.type,
+                        canInvite: group.canInvite,
+                      },
+                      incognito: true,
+                    })
+                  }
+                >
+                  Join Conversation ( Incognito )
+                </AppText>
+              ) : null}
               <AppText
                 style={styles.chatButton}
                 onPress={() =>
@@ -359,11 +456,14 @@ function GroupScreen({ navigation, route }) {
                       _id: group._id,
                       name: group.name,
                       picture: group.picture,
+                      type: group.type,
+                      canInvite: group.canInvite,
                     },
+                    incognito: false,
                   })
                 }
               >
-                Chat
+                Join Conversation
               </AppText>
             </>
           ) : (
@@ -382,6 +482,7 @@ function GroupScreen({ navigation, route }) {
         inHistory={inHistory}
         removingFromHistory={removingFromHistory}
         onRemovePress={handleRemoveFromMyGroupHistory}
+        onChangePasswordOptionPress={handleOnChangePasswordOptionPress}
       />
       <EditImageOptionSelecter
         style={styles.imageEditOptionSelector}
@@ -408,7 +509,10 @@ function GroupScreen({ navigation, route }) {
         description={infoAlert.infoAlertMessage}
         visible={infoAlert.showInfoAlert}
       />
-      {openReportModal || showImageEdit || openGroupInfo ? (
+      {openReportModal ||
+      showImageEdit ||
+      openGroupInfo ||
+      openPasswordModal ? (
         <ModalFallback />
       ) : null}
       <ReportModal
@@ -421,13 +525,22 @@ function GroupScreen({ navigation, route }) {
         isConnected={isConnected}
       />
       <EditGroupInfoModal
+        key={group.information + new Date().toString()}
         isConnected={isConnected}
         handleSubmitInfoChange={handleUpdateGroupInfo}
         openGroupInfo={openGroupInfo}
         setOpenGroupInfo={setOpenGroupInfo}
-        groupInfo={groupInfo}
-        setGroupInfo={setGroupInfo}
         isLoading={isLoading}
+        group={group}
+      />
+      <EditGroupPasswordModal
+        key={group.password ? group.password : ""}
+        isConnected={isConnected}
+        isLoading={isLoading}
+        handleSubmitPassword={handleSubmitPassword}
+        group={group}
+        openPasswordModal={openPasswordModal}
+        setOpenPasswordModal={setOpenPasswordModal}
       />
     </>
   );
@@ -435,33 +548,44 @@ function GroupScreen({ navigation, route }) {
 const styles = ScaledSheet.create({
   container: {},
   chatButton: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
-    borderTopLeftRadius: "5@s",
-    borderTopRightRadius: "5@s",
-    bottom: 0,
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.secondary,
+    borderRadius: "8@s",
+    color: defaultStyles.colors.white,
     elevation: 5,
-    fontSize: "15@s",
+    fontSize: "14@s",
+    marginBottom: "15@s",
     paddingVertical: "10@s",
     textAlign: "center",
     textAlignVertical: "center",
-    width: "100%",
+    width: "90%",
   },
-  creatorDisplayPictureContainer: {
+  chatButtonIncognito: {
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.dark,
+    borderRadius: "8@s",
+    color: defaultStyles.colors.white,
+    elevation: 5,
+    fontSize: "14@s",
+    marginBottom: "5@s",
+    paddingVertical: "10@s",
+    textAlign: "center",
+    textAlignVertical: "center",
+    width: "90%",
+  },
+  groupQrCodeContainer: {
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.secondary_Variant,
     borderColor: defaultStyles.colors.white,
-    borderRadius: "50@s",
+    borderRadius: "5@s",
     borderWidth: "4@s",
-    bottom: "-50@s",
+    bottom: 0,
+    elevation: 5,
     height: "100@s",
     justifyContent: "center",
     position: "absolute",
     width: "100@s",
-  },
-  creatorName: {
-    fontSize: "12@s",
-    textAlign: "center",
   },
   creatorPicture: {
     borderRadius: "45@s",
@@ -471,7 +595,7 @@ const styles = ScaledSheet.create({
   editInfoIcon: {
     alignItems: "center",
     alignSelf: "flex-end",
-    backgroundColor: defaultStyles.colors.secondary,
+    backgroundColor: defaultStyles.colors.light,
     borderRadius: "5@s",
     height: "20@s",
     justifyContent: "center",
@@ -488,21 +612,24 @@ const styles = ScaledSheet.create({
   },
   groupName: {
     fontSize: "16@s",
-    marginTop: "48@s",
+    marginTop: "5@s",
     textAlign: "center",
   },
   groupInfoContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    backgroundColor: defaultStyles.colors.white,
     borderRadius: "8@s",
     marginTop: "10@s",
     paddingHorizontal: "10@s",
     paddingVertical: "10@s",
     width: "90%",
+    borderWidth: 1,
+    elevation: 1,
+    borderColor: defaultStyles.colors.light,
   },
   groupDisplayPicture: {
-    backgroundColor: defaultStyles.colors.secondary_Variant,
-    height: 250,
+    backgroundColor: defaultStyles.colors.white,
+    height: "300@s",
     width: "100%",
   },
   groupInfo: {
@@ -520,6 +647,11 @@ const styles = ScaledSheet.create({
     backgroundColor: defaultStyles.colors.primary,
     borderTopWidth: 0,
   },
+  imageBackground: {
+    width: "100%",
+    height: "250@s",
+    backgroundColor: defaultStyles.colors.dark,
+  },
   qrImage: {
     height: "150@s",
     width: "150@s",
@@ -528,6 +660,26 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     flex: 1,
     width: "100%",
+  },
+  scrollViewContentContainer: {
+    alignItems: "center",
+    flexGrow: 1,
+  },
+  screenSub: {
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+  },
+  shareIconContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.secondary,
+    borderRadius: "5@s",
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingHorizontal: "5@s",
+  },
+  shareText: {
+    color: defaultStyles.colors.white,
+    fontSize: "10@s",
   },
 });
 

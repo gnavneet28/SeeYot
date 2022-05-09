@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as IAP from "expo-in-app-purchases";
+import dynamicLinks from "@react-native-firebase/dynamic-links";
 
 import IndexNavigator from "./IndexNavigator";
 import ProfileNavigator from "./ProfileNavigator";
@@ -196,6 +197,78 @@ function AppNavigator(props) {
       socket.off(`setInActiveFor${user._id}`, listener6);
     };
   }, [user, activeFor, typing]);
+
+  const handleDynamicLink = (link) => {
+    // Handle dynamic link inside your own application
+    if (link) {
+      if (link.url) {
+        let name;
+        let password;
+        var regex = /[?&]([^=#]+)=([^&#]*)/g,
+          params = {},
+          match;
+        while ((match = regex.exec(link.url))) {
+          params[match[1]] = match[2];
+        }
+
+        for (key in params) {
+          if (key == "a") {
+            name = params[key];
+          } else if (key == "b") {
+            password = params[key];
+          }
+        }
+
+        return navigation.navigate(Constant.GROUP_NAVIGATOR, {
+          screen: Constant.FIND_GROUP_SCREEN,
+          params: {
+            name,
+            password: password ? password : "",
+          },
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    dynamicLinks()
+      .getInitialLink()
+      .then((link) => {
+        if (link) {
+          if (link.url) {
+            let name;
+            let password;
+            var regex = /[?&]([^=#]+)=([^&#]*)/g,
+              params = {},
+              match;
+            while ((match = regex.exec(link.url))) {
+              params[match[1]] = match[2];
+            }
+
+            for (key in params) {
+              if (key == "a") {
+                name = params[key];
+              } else if (key == "b") {
+                password = params[key];
+              }
+            }
+
+            return navigation.navigate(Constant.GROUP_NAVIGATOR, {
+              screen: Constant.FIND_GROUP_SCREEN,
+              params: {
+                name,
+                password: password ? password : "",
+              },
+            });
+          }
+        }
+      });
+  }, []);
 
   useNotifications((data) => {
     if (data.notification.request.content.title == "Echo") {

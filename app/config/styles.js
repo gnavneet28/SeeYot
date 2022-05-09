@@ -20,4 +20,13 @@ export default {
     fontSize: scale(14),
     fontFamily: Platform.OS === "android" ? "Roboto" : "Avenir",
   },
+  closeIcon: {
+    backgroundColor: colors.dark_Variant,
+    borderColor: colors.white,
+    borderTopLeftRadius: "15@s",
+    borderTopRightRadius: "15@s",
+    borderWidth: 1,
+    color: colors.white,
+    opacity: 1,
+  },
 };

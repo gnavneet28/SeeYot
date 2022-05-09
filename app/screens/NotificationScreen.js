@@ -207,10 +207,12 @@ function NotificationScreen({ navigation }) {
   }, []);
 
   const handleNotificationTapToVisitGroup = useCallback((notification) => {
-    console.log(notification);
     navigation.navigate(Constant.GROUP_NAVIGATOR, {
-      screen: Constant.GROUP_INFO_SCREEN,
-      params: { groupName: notification.data.name },
+      screen: Constant.FIND_GROUP_SCREEN,
+      params: {
+        name: notification.data.name,
+        password: notification.data.password ? notification.data.password : "",
+      },
     });
   }, []);
 

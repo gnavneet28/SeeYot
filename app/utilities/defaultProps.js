@@ -148,6 +148,7 @@ export default {
     _id: "",
     name: "",
     qrCodeLink: "",
+    canInvite: false,
     picture: "",
     createdBy: {
       _id: "",

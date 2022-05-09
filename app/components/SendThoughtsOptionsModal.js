@@ -70,6 +70,10 @@ function SendThoughtsOptionsModal({
 const styles = ScaledSheet.create({
   closeOption: {
     backgroundColor: defaultStyles.colors.dark_Variant,
+    borderColor: defaultStyles.colors.white,
+    borderTopLeftRadius: "15@s",
+    borderTopRightRadius: "15@s",
+    borderWidth: 1,
     color: defaultStyles.colors.white,
     opacity: 1,
   },
@@ -83,9 +87,7 @@ const styles = ScaledSheet.create({
   optionsContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: "20@s",
-    borderWidth: 1,
+    borderRadius: "15@s",
     overflow: "hidden",
     width: "60%",
   },

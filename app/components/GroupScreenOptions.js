@@ -9,16 +9,17 @@ import ApiOption from "./ApiOption";
 import defaultStyles from "../config/styles";
 
 function GroupScreenOptions({
-  handleCloseModal,
+  handleCloseModal = () => {},
   isVisible,
-  onDeletePress,
-  onReportPress,
+  onDeletePress = () => {},
+  onReportPress = () => {},
   user,
   group,
   deletingGroup,
   inHistory,
   removingFromHistory,
-  onRemovePress,
+  onRemovePress = () => {},
+  onChangePasswordOptionPress = () => {},
 }) {
   return (
     <Modal
@@ -58,6 +59,12 @@ function GroupScreenOptions({
           {group.createdBy._id != user._id ? (
             <ApiOption onPress={onReportPress} title="Report this Group" />
           ) : null}
+          {group.type == "Private" && group.createdBy._id == user._id ? (
+            <ApiOption
+              onPress={onChangePasswordOptionPress}
+              title="Change Password"
+            />
+          ) : null}
         </Animatable.View>
       </View>
     </Modal>
@@ -75,15 +82,13 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: "20@s",
+    borderRadius: "15@s",
     borderWidth: 1,
     overflow: "hidden",
     width: "60%",
   },
   optionClose: {
-    backgroundColor: defaultStyles.colors.dark_Variant,
-    color: defaultStyles.colors.white,
-    opacity: 1,
+    ...defaultStyles.closeIcon,
   },
 });
 

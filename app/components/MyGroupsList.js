@@ -37,10 +37,8 @@ function MyGroupsList({
         removeClippedSubviews={true}
         maxToRenderPerBatch={15}
         windowSize={10}
-        numColumns={2}
         contentContainerStyle={{
           width: defaultStyles.width,
-          //backgroundColor: "tomato",
           flexGrow: 1,
         }}
       />

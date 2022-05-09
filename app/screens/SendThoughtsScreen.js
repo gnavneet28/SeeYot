@@ -70,6 +70,8 @@ function SendThoughtsScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
   const { recipient, from } = route.params;
 
+  let isUnmounting = false;
+
   const { activeFor, setActiveFor } = useContext(ActiveForContext);
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
@@ -235,6 +237,10 @@ function SendThoughtsScreen({ navigation, route }) {
       });
     }
   }, [isFocused, mounted]);
+
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
 
   useEffect(() => {
     if (!isFocused && mounted && isVisible === true) {
@@ -689,10 +695,12 @@ function SendThoughtsScreen({ navigation, route }) {
 
   const handleSendSelectedMedia = useCallback(
     async (uri) => {
-      setSendingMedia(true);
+      if (!isUnmounting) {
+        setSendingMedia(true);
+      }
 
       const { ok, data, problem } = await usersApi.getUploadedPhoto(uri);
-      if (ok) {
+      if (ok && !isUnmounting) {
         handleSendActiveMessage("", data);
         return setSendingMedia(false);
       }
@@ -855,6 +863,7 @@ function SendThoughtsScreen({ navigation, route }) {
 const styles = ScaledSheet.create({
   activeChatInfoText: {
     alignSelf: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
     color: defaultStyles.colors.white,
     fontSize: "13@s",
     marginTop: "20@s",
@@ -863,9 +872,9 @@ const styles = ScaledSheet.create({
   },
   thoughtInfoText: {
     alignSelf: "center",
-    backgroundColor: "rgba(255,255,255,0.8)",
+    backgroundColor: "rgba(0,0,0,0.3)",
     borderRadius: "5@s",
-    color: defaultStyles.colors.dark,
+    color: defaultStyles.colors.white,
     fontSize: "13@s",
     marginTop: "20@s",
     textAlign: "center",
@@ -883,7 +892,7 @@ const styles = ScaledSheet.create({
   },
   hintContainer: {
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.8)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: "5@s",
     justifyContent: "center",
     marginBottom: "2@s",
@@ -930,6 +939,7 @@ const styles = ScaledSheet.create({
   },
   screenSub: {
     borderTopRightRadius: 0,
+    borderTopLeftRadius: 0,
     flex: 1,
     backgroundColor: "red",
   },

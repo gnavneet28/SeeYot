@@ -14,6 +14,8 @@ import AppActivityIndicator from "./ActivityIndicator";
 import AppText from "./AppText";
 import AppHeader from "./AppHeader";
 import apiActivity from "../utilities/apiActivity";
+import MyGroupsListPro from "./MyGroupsListPro";
+import useAuth from "../auth/useAuth";
 
 function MyGroupsModal({
   visible,
@@ -24,6 +26,7 @@ function MyGroupsModal({
   onSendThoughtsPress,
 }) {
   const { tackleProblem } = apiActivity;
+  const { user } = useAuth();
   const [myGroups, setMyGroups] = useState([]);
   const [isReady, setIsReady] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
@@ -69,11 +72,12 @@ function MyGroupsModal({
         />
         {isReady ? (
           myGroups.length ? (
-            <MyGroupsList
+            <MyGroupsListPro
               onAddEchoPress={onAddEchoPress}
               onSendThoughtsPress={onSendThoughtsPress}
               groups={myGroups}
-              onPress={onGroupSelection}
+              user={user}
+              onVisitGroupPress={onGroupSelection}
             />
           ) : (
             <AppText style={styles.noGroupsInfo}>No groups to show!</AppText>

@@ -16,7 +16,7 @@ function ScannerTopContent({
   onSelectGroupFromHistory,
   onMyGroupsButtonPress,
   onDeleteFromGroupHistoryPress,
-  deletingGroupFromHistory
+  deletingGroupFromHistory,
 }) {
   const [searchText, setSearchText] = useState("");
 
@@ -66,8 +66,8 @@ function ScannerTopContent({
           >
             {user.groupHistory.map((h, index) => (
               <GroupHistoryCard
-               deletingGroup={deletingGroupFromHistory}
-                onDeletePress={ () => onDeleteFromGroupHistoryPress(h)}
+                deletingGroup={deletingGroupFromHistory}
+                onDeletePress={() => onDeleteFromGroupHistoryPress(h)}
                 key={h._id}
                 group={h}
                 onPress={() => onSelectGroupFromHistory(h.name)}
@@ -100,12 +100,10 @@ const styles = ScaledSheet.create({
     height: "50@s",
   },
   groupsContainer: {
-    //backgroundColor: defaultStyles.colors.white,
-    width: "100%",
-    flexDirection: "row",
-    paddingLeft: "5@s",
-    paddingVertical: "8@s",
     alignItems: "center",
+    flexDirection: "row",
+    paddingVertical: "8@s",
+    width: "100%",
   },
   inputBox: {
     backgroundColor: defaultStyles.colors.white,
@@ -121,11 +119,13 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   myGroupButton: {
-    width: "80@s",
-    height: "35@s",
-    borderTopRightRadius: "20@s",
+    borderBottomLeftRadius: 0,
     borderBottomRightRadius: "20@s",
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: "20@s",
+    height: "35@s",
     marginRight: "5@s",
+    width: "80@s",
   },
   myGroupButtonSub: {
     fontSize: "12@s",
