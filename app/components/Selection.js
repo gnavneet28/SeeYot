@@ -4,6 +4,7 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 import Feather from "../../node_modules/react-native-vector-icons/Feather";
 
 import AppText from "./AppText";
+import ApiProcessingContainer from "./ApiProcessingContainer";
 
 import useConnection from "../hooks/useConnection";
 
@@ -17,27 +18,31 @@ function Selection({
   value = "",
   iconSize = scale(14),
   fontStyle,
+  processing,
 }) {
   const isConnected = useConnection();
+  const doNull = () => {};
   return (
     <View style={[styles.container, style]}>
       <TouchableOpacity
         disabled={!isConnected}
-        onPress={onPress}
+        onPress={isConnected ? onPress : doNull}
         style={[[styles.checkBox, containerStyle]]}
       >
-        {opted ? (
-          <Feather
-            size={iconSize}
-            color={defaultStyles.colors.secondary_Variant}
-            name="check"
-          />
-        ) : null}
+        <ApiProcessingContainer processing={processing}>
+          {opted ? (
+            <Feather
+              size={iconSize}
+              color={defaultStyles.colors.secondary_Variant}
+              name="check"
+            />
+          ) : null}
+        </ApiProcessingContainer>
       </TouchableOpacity>
       {value ? (
         <AppText
           style={[styles.value, fontStyle]}
-          onPress={isConnected ? onPress : null}
+          onPress={isConnected ? onPress : doNull}
         >
           {value}
         </AppText>
@@ -60,11 +65,10 @@ const styles = ScaledSheet.create({
     borderColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "8@s",
     borderWidth: 2,
-    height: "28@s",
+    height: "25@s",
     justifyContent: "center",
     marginHorizontal: "5@s",
-    padding: "5@s",
-    width: "28@s",
+    width: "25@s",
   },
   value: {
     flexShrink: 1,
