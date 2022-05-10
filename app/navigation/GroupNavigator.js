@@ -1,5 +1,4 @@
 import React from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import Constant from "./NavigationConstants";
@@ -8,7 +7,6 @@ import QrScannerScreen from "../screens/QrScannerScreen";
 import GroupScreen from "../screens/GroupScreen";
 import GroupChatScreen from "../screens/GroupChatScreen";
 
-//const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function GroupNavigator(props) {

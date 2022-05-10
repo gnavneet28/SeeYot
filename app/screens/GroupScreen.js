@@ -370,6 +370,9 @@ function GroupScreen({ navigation, route }) {
         picture: group.picture,
         type: group.type,
         canInvite: group.canInvite,
+        password: group.password ? group.password : "",
+        createdBy: group.createdBy,
+        blocked: group.blocked,
       },
       incognito: false,
     });
@@ -383,6 +386,9 @@ function GroupScreen({ navigation, route }) {
         picture: group.picture,
         type: group.type,
         canInvite: group.canInvite,
+        password: group.password ? group.password : "",
+        createdBy: group.createdBy,
+        blocked: group.blocked,
       },
       incognito: true,
     });

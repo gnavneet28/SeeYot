@@ -11,6 +11,7 @@ function GroupMessagesList({
   onSelectReply,
   listRef,
   onImagePress,
+  onImageLongPress,
 }) {
   const { user } = useAuth();
 
@@ -19,6 +20,7 @@ function GroupMessagesList({
   const renderItem = useCallback(
     ({ item }) => (
       <GroupChatBubble
+        onImageLongPress={() => onImageLongPress(item.createdBy)}
         mine={item.createdBy._id == user._id ? true : false}
         groupMessage={item}
         user={user}

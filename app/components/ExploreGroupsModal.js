@@ -110,7 +110,7 @@ const ExploreGroupsModal = ({
           onPressLeft={handleCloseModal}
         />
         <View style={styles.container}>
-          <View style={styles.categorySelector}>
+          <View style={styles.categorySelectorContainer}>
             <DropdownSelect
               selected={category}
               containerStyle={styles.categoryDropdownOne}
@@ -133,6 +133,7 @@ const ExploreGroupsModal = ({
               groups={groups}
               user={user}
               onVisitGroupPress={onGroupSelection}
+              placeholder={"Search groups..."}
             />
           )}
         </View>
@@ -148,13 +149,14 @@ const ExploreGroupsModal = ({
 
 const styles = ScaledSheet.create({
   container: {
-    width: defaultStyles.width,
     backgroundColor: defaultStyles.colors.white,
     flex: 1,
+    width: defaultStyles.width,
   },
-  categorySelector: {
+  categorySelectorContainer: {
     backgroundColor: defaultStyles.colors.light,
     flexDirection: "row",
+    paddingBottom: "2@s",
     paddingHorizontal: "10@s",
     paddingTop: "10@s",
   },

@@ -58,6 +58,8 @@ function ProfileScreen({ navigation }) {
     showInfoAlert: false,
   });
   const [showLogOut, setShowLogOut] = useState(false);
+  const [changingEcho, setChangingEcho] = useState(false);
+  const [changingTapEcho, setChangingTapEcho] = useState(false);
 
   useEffect(() => {
     if (!isFocused && mounted && isLoading === true) {
@@ -207,17 +209,17 @@ function ProfileScreen({ navigation }) {
   const handleMessageSelection = useCallback(
     debounce(
       async () => {
-        setIsLoading(true);
+        setChangingEcho(true);
 
         const { data, ok, problem } = await usersApi.updateEchoWhenMessage();
 
         if (ok) {
           await storeDetails(data.user);
           setUser(data.user);
-          return setIsLoading(false);
+          return setChangingEcho(false);
         }
 
-        setIsLoading(false);
+        setChangingEcho(false);
         tackleProblem(problem, data, setInfoAlert);
       },
       1000,
@@ -229,17 +231,17 @@ function ProfileScreen({ navigation }) {
   const handlePhotoTapSelection = useCallback(
     debounce(
       async () => {
-        setIsLoading(true);
+        setChangingTapEcho(true);
 
         const { data, ok, problem } = await usersApi.updateEchoWhenPhotoTap();
 
         if (ok) {
           await storeDetails(data.user);
           setUser(data.user);
-          return setIsLoading(false);
+          return setChangingTapEcho(false);
         }
 
-        setIsLoading(false);
+        setChangingTapEcho(false);
         tackleProblem(problem, data, setInfoAlert);
       },
       2000,
@@ -302,6 +304,8 @@ function ProfileScreen({ navigation }) {
     []
   );
 
+  const doNull = useCallback(() => {}, []);
+
   return (
     <>
       <Screen style={styles.container}>
@@ -346,15 +350,21 @@ function ProfileScreen({ navigation }) {
               <View style={styles.echoBox}>
                 <AppText style={styles.echoWhen}>Echo when?</AppText>
                 <Selection
+                  processing={changingEcho}
                   onPress={
-                    isConnected && !isLoading ? handleMessageSelection : null
+                    isConnected && !changingEcho && !changingTapEcho
+                      ? handleMessageSelection
+                      : doNull
                   }
                   opted={user.echoWhen.message}
                   value="Someone sends you their thoughts."
                 />
                 <Selection
+                  processing={changingTapEcho}
                   onPress={
-                    isConnected && !isLoading ? handlePhotoTapSelection : null
+                    isConnected && !changingTapEcho && !changingEcho
+                      ? handlePhotoTapSelection
+                      : doNull
                   }
                   opted={user.echoWhen.photoTap}
                   value="Someone taps on your profile picture."

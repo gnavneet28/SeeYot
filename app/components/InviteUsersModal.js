@@ -8,10 +8,18 @@ import defaultStyles from "../config/styles";
 import AppText from "./AppText";
 import Backdrop from "./Backdrop";
 import InviteUserList from "./InviteUserList";
+import Selection from "./Selection";
 
 import useAuth from "../auth/useAuth";
+import defaultProps from "../utilities/defaultProps";
 
-function InviteUsersModal({ openInviteModal, setOpenInviteModal, groupName }) {
+function InviteUsersModal({
+  openInviteModal,
+  setOpenInviteModal,
+  group = defaultProps.defaultGroup,
+  onChangeInvitePermission = () => {},
+  changingInvitePermission = false,
+}) {
   const { user } = useAuth();
 
   return (
@@ -33,13 +41,31 @@ function InviteUsersModal({ openInviteModal, setOpenInviteModal, groupName }) {
         </View>
         <View style={styles.inviteModalMainContainer}>
           <AppText style={styles.inviteModalTitle}>Invite Friends</AppText>
-          <InviteUserList users={user.contacts} groupName={groupName} />
+          {group.createdBy._id == user._id ? (
+            <View style={styles.canInviteOptionContainer}>
+              <Selection
+                processing={changingInvitePermission}
+                opted={group.canInvite}
+                onPress={onChangeInvitePermission}
+                value={"Allow active members to invite others."}
+              />
+            </View>
+          ) : null}
+
+          <InviteUserList users={user.contacts} groupName={group.name} />
         </View>
       </View>
     </Modal>
   );
 }
 const styles = ScaledSheet.create({
+  canInviteOptionContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: "8@s",
+    justifyContent: "center",
+    width: "95%",
+  },
   closeMessageIconContainer: {
     alignItems: "center",
     alignSelf: "center",
@@ -58,12 +84,12 @@ const styles = ScaledSheet.create({
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
     bottom: 0,
+    height: "350@s",
     overflow: "hidden",
+    paddingBottom: "15@s",
     paddingHorizontal: "10@s",
     paddingTop: "20@s",
-    paddingBottom: "15@s",
     width: "100%",
-    height: "300@s",
   },
   inviteModal: {
     flex: 1,

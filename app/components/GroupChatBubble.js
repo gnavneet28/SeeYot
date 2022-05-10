@@ -18,6 +18,7 @@ function GroupChatBubble({
   onSelectReply,
   user = { _id: "" },
   onImagePress,
+  onImageLongPress = () => {},
 }) {
   return (
     <TouchableWithoutFeedback onLongPress={onSelectReply}>
@@ -34,8 +35,9 @@ function GroupChatBubble({
                 minWidth: "20%",
                 maxWidth: "50%",
                 alignSelf: mine ? "flex-end" : "flex-start",
-                borderBottomRightRadius: !mine ? scale(10) : 0,
-                borderBottomLeftRadius: !mine ? 0 : scale(10),
+                borderBottomRightRadius: !mine ? scale(8) : scale(3),
+                borderBottomLeftRadius: !mine ? scale(3) : scale(8),
+                marginBottom: scale(2),
               }}
               media={groupMessage.reply.media}
               message={groupMessage.reply.message}
@@ -56,6 +58,8 @@ function GroupChatBubble({
             ]}
           >
             <AppImage
+              delayLongPress={200}
+              onLongPress={onImageLongPress}
               onPress={onImagePress}
               imageUrl={groupMessage.createdBy.picture}
               style={styles.image}
@@ -68,16 +72,16 @@ function GroupChatBubble({
                 {
                   paddingHorizontal: groupMessage.media ? 0 : scale(10),
                   paddingVertical: groupMessage.media ? 0 : scale(6),
+                  borderTopLeftRadius: mine ? scale(10) : scale(3),
+                  borderTopRightRadius: mine ? scale(3) : scale(10),
                 },
               ]}
             >
               {groupMessage.media ? (
                 <ActiveChatImage
                   containerStyle={{
-                    borderTopLeftRadius: mine ? scale(15) : 0,
-                    borderTopRightRadius: mine ? 0 : scale(15),
-                    height: defaultStyles.width * 0.7,
-                    width: defaultStyles.width * 0.7,
+                    height: defaultStyles.width * 0.5,
+                    width: defaultStyles.width * 0.5,
                   }}
                   mine={mine}
                   onLongPress={onSelectReply}
@@ -121,7 +125,7 @@ function GroupChatBubble({
 
 const styles = StyleSheet.create({
   cloud: {
-    borderRadius: scale(15),
+    borderRadius: scale(10),
     maxWidth: moderateScale(250, 2),
     overflow: "hidden",
     paddingHorizontal: scale(10),

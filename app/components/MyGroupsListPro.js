@@ -145,7 +145,11 @@ class MyGroupsListPro extends React.Component {
                 value={this.state.searchTerm}
                 maxLength={10}
                 onChangeText={(text) => this.handleChange(text)}
-                placeholder="Search in your groups..."
+                placeholder={
+                  this.props.placeholder
+                    ? this.props.placeholder
+                    : "Search in your groups..."
+                }
                 style={styles.inputBox}
               />
             </View>

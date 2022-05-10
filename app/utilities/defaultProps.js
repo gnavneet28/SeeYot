@@ -150,6 +150,13 @@ export default {
     qrCodeLink: "",
     canInvite: false,
     picture: "",
+    blocked: [
+      {
+        _id: "",
+        name: "",
+        picture: "",
+      },
+    ],
     createdBy: {
       _id: "",
       name: "",

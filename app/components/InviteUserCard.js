@@ -135,7 +135,7 @@ const styles = ScaledSheet.create({
     width: "95%",
   },
   emptyDataInfo: {
-    color: defaultStyles.colors.white,
+    color: defaultStyles.colors.dark,
     textAlign: "center",
     textAlignVertical: "center",
   },
