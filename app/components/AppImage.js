@@ -11,10 +11,12 @@ function AppImage({
   style,
   subStyle,
   onLongPress = () => null,
+  delayLongPress = 500,
   ...props
 }) {
   return (
     <TouchableHighlight
+      delayLongPress={delayLongPress}
       onLongPress={onLongPress}
       underlayColor={defaultStyles.colors.white}
       activeOpacity={activeOpacity}
