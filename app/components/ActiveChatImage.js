@@ -32,7 +32,7 @@ function ActiveChatImage({
         <View style={[styles.container, containerStyle]}>
           <ProgressiveImage
             onLongPress={onLongPress}
-            style={imageStyle}
+            subStyle={[styles.image, imageStyle]}
             resizeMode="cover"
             imageUrl={uri}
             onPress={canOpen ? handleOpen : () => null}
