@@ -11,7 +11,7 @@ import defaultStyles from "../config/styles";
 const DropdownSelect = ({
   selected,
   defaultPlaceholder = "Select Category",
-  data,
+  data = [],
   onOptionSelection,
   containerStyle,
 }) => {
@@ -30,12 +30,14 @@ const DropdownSelect = ({
     />
   );
 
+  const doNull = () => {};
+
   const keyExtractor = (item, index) => item + index.toString();
   return (
     <>
       <AppText
         style={[styles.container, containerStyle]}
-        onPress={handleOpenModal}
+        onPress={data.length ? handleOpenModal : doNull}
       >
         {selected ? selected : defaultPlaceholder}
       </AppText>

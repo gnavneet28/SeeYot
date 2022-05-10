@@ -15,7 +15,6 @@ function GroupScreenOptions({
   onReportPress = () => {},
   user,
   group,
-  deletingGroup,
   inHistory,
   removingFromHistory,
   onRemovePress = () => {},
@@ -41,11 +40,7 @@ function GroupScreenOptions({
           />
 
           {group.createdBy._id == user._id ? (
-            <ApiOption
-              processing={deletingGroup}
-              onPress={onDeletePress}
-              title="Delete this Group"
-            />
+            <ApiOption onPress={onDeletePress} title="Delete this Group" />
           ) : null}
 
           {inHistory ? (

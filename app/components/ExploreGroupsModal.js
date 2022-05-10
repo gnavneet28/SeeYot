@@ -81,10 +81,10 @@ const ExploreGroupsModal = ({
   };
 
   useEffect(() => {
-    getGroups(category);
-    setSubCategories(filterSubCategory(category));
-    if (subCategory) {
-      setSubCategory("");
+    if (!isUnmounting) {
+      getGroups(category);
+      setSubCategories(filterSubCategory(category));
+      setSubCategory("All");
     }
   }, [category]);
 
@@ -153,10 +153,10 @@ const styles = ScaledSheet.create({
     flex: 1,
   },
   categorySelector: {
+    backgroundColor: defaultStyles.colors.light,
     flexDirection: "row",
     paddingHorizontal: "10@s",
-    paddingVertical: "10@s",
-    backgroundColor: defaultStyles.colors.light,
+    paddingTop: "10@s",
   },
   categoryDropdownOne: {
     marginRight: "10@s",

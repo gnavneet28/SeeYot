@@ -54,7 +54,7 @@ const styles = ScaledSheet.create({
   },
   inviteModalMainContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.primary,
+    backgroundColor: defaultStyles.colors.light,
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
     bottom: 0,
@@ -72,7 +72,7 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   inviteModalTitle: {
-    color: defaultStyles.colors.white,
+    color: defaultStyles.colors.dark,
     marginBottom: "10@s",
     marginTop: "5@s",
     textAlign: "center",

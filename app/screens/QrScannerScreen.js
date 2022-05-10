@@ -9,7 +9,10 @@ import Alert from "../components/Alert";
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
 import CreateGroupModal from "../components/CreateGroupModal";
+import ExploreGroupsModal from "../components/ExploreGroupsModal";
 import InfoAlert from "../components/InfoAlert";
+import LoadingIndicator from "../components/LoadingIndicator";
+import MyGroupsModal from "../components/MyGroupsModal";
 import ScannerBottomContent from "../components/ScannerBottomContent";
 import ScannerTopContent from "../components/ScannerTopContent";
 import Screen from "../components/Screen";
@@ -24,11 +27,8 @@ import groupsApi from "../api/groups";
 import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
 import useAuth from "../auth/useAuth";
-import MyGroupsModal from "../components/MyGroupsModal";
 import usersApi from "../api/users";
 import storeDetails from "../utilities/storeDetails";
-import LoadingIndicator from "../components/LoadingIndicator";
-import ExploreGroupsModal from "../components/ExploreGroupsModal";
 
 function QrScannerScreen({ navigation, route }) {
   const isFocused = useIsFocused();
@@ -128,7 +128,9 @@ function QrScannerScreen({ navigation, route }) {
   }, []);
 
   const onSuccess = async (e) => {
-    Linking.openURL(e.data);
+    if (!checkingGroupName) {
+      Linking.openURL(e.data);
+    }
   };
 
   const handleCameraChange = useCallback(() => {

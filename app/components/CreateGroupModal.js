@@ -1,9 +1,7 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { TextInput, View, ScrollView } from "react-native";
-import QRCode from "react-native-qrcode-svg";
-import { ScaledSheet, scale } from "react-native-size-matters";
-import RNFS from "react-native-fs";
-import CameraRoll from "@react-native-community/cameraroll";
+import { ScaledSheet } from "react-native-size-matters";
+import dynamicLinks from "@react-native-firebase/dynamic-links";
 
 import AppModal from "./AppModal";
 import AppText from "./AppText";
@@ -11,16 +9,32 @@ import ApiProcessingContainer from "./ApiProcessingContainer";
 import AppButton from "./AppButton";
 import AppHeader from "./AppHeader";
 import InfoAlert from "./InfoAlert";
+import DropdownSelect from "./DropdownSelect";
 
 import defaultStyles from "../config/styles";
 
 import groupsApi from "../api/groups";
 
 import apiActivity from "../utilities/apiActivity";
+import useAuth from "../auth/useAuth";
+import defaultProps from "../utilities/defaultProps";
+
+const filterSubCategory = (category) => {
+  if (category == "Entertainment")
+    return defaultProps.categoriesData.entertainmentCategory;
+  else if (category == "Art") return defaultProps.categoriesData.artCategory;
+  else if (category == "Food") return defaultProps.categoriesData.foodCategory;
+  else if (category == "Relationship")
+    return defaultProps.categoriesData.relationShipCategory;
+  else if (category == "Wellness and Care")
+    return defaultProps.categoriesData.wellnessCategory;
+  else if (category == "Jobs") return defaultProps.categoriesData.jobsCategory;
+};
 
 function CreateGroupModal({ visible, onRequestClose, onCreate }) {
   const { tackleProblem } = apiActivity;
-  let svg = useRef(null);
+  let isUnmounting = false;
+  const { user } = useAuth();
 
   const [nameInput, setNameInput] = useState("");
   const [nameAvailable, setNameAvailable] = useState({
@@ -31,6 +45,12 @@ function CreateGroupModal({ visible, onRequestClose, onCreate }) {
   const [nameRequestInfo, setNameRequestInfo] = useState("");
 
   const [creatingGroup, setCreatingGroup] = useState(false);
+  const [category, setCategory] = useState("");
+  const [subCategory, setSubCategory] = useState("");
+  const [subCategories, setSubCategories] = useState([]);
+  const [type, setType] = useState("Public");
+
+  const [height, setHeight] = useState(0);
 
   const [infoAlert, setInfoAlert] = useState({
     showInfoAlert: false,
@@ -75,35 +95,58 @@ function CreateGroupModal({ visible, onRequestClose, onCreate }) {
     setNameInput(text);
   };
 
-  const createGroup = async () => {
-    setCreatingGroup(true);
-    svg.toDataURL((data) => {
-      RNFS.writeFile(
-        RNFS.CachesDirectoryPath + `/${nameAvailable.name}.png`,
-        data,
-        "base64"
-      ).then(() =>
-        CameraRoll.save(
-          RNFS.CachesDirectoryPath + `/${nameAvailable.name}.png`,
-          "photo"
-        ).then(async (picture) => {
-          const { ok, data, problem } = await groupsApi.createGroup(
-            nameAvailable.name.trim(),
-            picture,
-            groupInfo.trim()
-          );
-          if (ok) {
-            setCreatingGroup(false);
-            setNameAvailable({ name: "" });
-            setNameInput("");
-            setGroupInfo("");
-            return onCreate(data.groupName);
-          }
-          setCreatingGroup(false);
-          tackleProblem(problem, data, setInfoAlert);
-        })
-      );
+  useEffect(() => {
+    if (!isUnmounting) {
+      setSubCategories(filterSubCategory(category));
+    }
+
+    return () => (isUnmounting = true);
+  }, [category]);
+
+  const createGroupInviteLink = () => {
+    let name = nameAvailable.name.trim();
+    let password = type == "Private" ? user._id.substring(0, 8) : "";
+    return dynamicLinks().buildShortLink({
+      domainUriPrefix: "https://seeyot.page.link",
+      android: {
+        packageName: "com.seeyot",
+        fallbackUrl: "https://play.google.com/store/apps/details?id=com.seeyot",
+      },
+      link: `https://seeyot.page.link/groupInvite?a=${name}&b=${password}`,
+      navigation: {
+        forcedRedirectEnabled: false,
+      },
     });
+  };
+
+  const createGroup = async () => {
+    if (!isUnmounting) {
+      setCreatingGroup(true);
+    }
+    let qrCodeLink = await createGroupInviteLink();
+    const { ok, data, problem } = await groupsApi.createGroup(
+      nameAvailable.name.trim(),
+      qrCodeLink,
+      groupInfo.trim(),
+      category,
+      subCategory,
+      type
+    );
+    if (ok && !isUnmounting) {
+      setCreatingGroup(false);
+      setNameAvailable({ name: "" });
+      setNameInput("");
+      setGroupInfo("");
+      setCategory("");
+      setSubCategories([]);
+      setSubCategory("");
+      return onCreate(data.groupName, data.password);
+    }
+
+    if (!isUnmounting) {
+      setCreatingGroup(false);
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   return (
@@ -128,13 +171,13 @@ function CreateGroupModal({ visible, onRequestClose, onCreate }) {
           >
             <View style={styles.scrollViewContainer}>
               <AppText style={styles.groupInfo}>
-                Group is a place where you connect with people around you. Scan
-                Qr code or enter name of group you want to interact within.
-                Groups are by default public and anyone can join the group.
-                Joining any group will share your name and display picture with
-                people in that group. Every group has a recycle period of 24
-                hours, means anything shared within the group will be auto
-                deleted after every 24 hours.
+                Group is a place where you can have active conversation with
+                active people. Scan Qr code or enter name of group you want to
+                interact within. You can create public as well as private
+                groups. Joining any group will share your name and display
+                picture with people in that group. Every group has a recycle
+                period of 24 hours, means anything shared within the group will
+                be auto deleted after every 24 hours.
               </AppText>
               <View style={styles.selectNameContainer}>
                 <TextInput
@@ -151,6 +194,7 @@ function CreateGroupModal({ visible, onRequestClose, onCreate }) {
                     {nameRequestInfo}
                   </AppText>
                 ) : null}
+
                 <ApiProcessingContainer
                   color={defaultStyles.colors.white}
                   processing={checkingName}
@@ -173,30 +217,46 @@ function CreateGroupModal({ visible, onRequestClose, onCreate }) {
                 </ApiProcessingContainer>
               </View>
 
+              <View style={styles.optionSelectionContainer}>
+                <DropdownSelect
+                  selected={category}
+                  containerStyle={styles.selectorStyle}
+                  data={defaultProps.categoriesData.categories}
+                  onOptionSelection={setCategory}
+                />
+                <DropdownSelect
+                  defaultPlaceholder={"Select Subcategory"}
+                  selected={subCategory}
+                  containerStyle={styles.selectorStyle}
+                  data={subCategories}
+                  onOptionSelection={setSubCategory}
+                />
+                <DropdownSelect
+                  defaultPlaceholder={"Select Type"}
+                  selected={type}
+                  data={["Public", "Private"]}
+                  onOptionSelection={setType}
+                />
+              </View>
+
               {nameAvailable.name ? (
                 <View style={styles.qrCodeContainer}>
-                  <QRCode
-                    value={nameAvailable.name}
-                    size={150}
-                    getRef={(c) => (svg = c)}
-                    linearGradient={["rgb(255,0,0)", "rgb(0,255,255)"]}
-                    enableLinearGradient={true}
-                    quietZone={10}
-                  />
-
                   <TextInput
                     editable={!creatingGroup}
                     multiline={true}
                     numberOfLines={4}
                     style={[
                       styles.textInputGroupDescription,
-                      { marginTop: scale(10), width: "90%" },
+                      { height: Math.min(100, Math.max(60, height)) },
                     ]}
                     placeholder="Short description of group..."
                     placeholderTextColor={defaultStyles.colors.placeholder}
                     onChangeText={setGroupInfo}
                     maxLength={5000}
                     value={groupInfo}
+                    onContentSizeChange={(event) =>
+                      setHeight(event.nativeEvent.contentSize.height)
+                    }
                   />
                 </View>
               ) : null}
@@ -210,16 +270,24 @@ function CreateGroupModal({ visible, onRequestClose, onCreate }) {
             <AppButton
               disabled={
                 nameAvailable.name.replace(/\s/g, "").length >= 3 &&
-                !creatingGroup
+                !creatingGroup &&
+                type &&
+                category &&
+                subCategory
                   ? false
                   : true
               }
               style={[
                 styles.createGroupButton,
                 {
-                  backgroundColor: !nameAvailable.name.replace(/\s/g, "").length
-                    ? defaultStyles.colors.secondary_Variant
-                    : defaultStyles.colors.secondary,
+                  backgroundColor:
+                    nameAvailable.name.replace(/\s/g, "").length >= 3 &&
+                    !creatingGroup &&
+                    type &&
+                    category &&
+                    subCategory
+                      ? defaultStyles.colors.secondary
+                      : defaultStyles.colors.lightGrey,
                 },
               ]}
               onPress={createGroup}
@@ -270,9 +338,14 @@ const styles = ScaledSheet.create({
     height: "40@s",
   },
   groupInfo: {
+    borderColor: defaultStyles.colors.light,
+    borderRadius: "5@s",
+    borderWidth: 1,
     color: defaultStyles.colors.dark_Variant,
+    elevation: 1,
     fontSize: "13@s",
     marginTop: "5@s",
+    padding: "5@s",
     textAlign: "left",
     width: "90%",
   },
@@ -285,14 +358,21 @@ const styles = ScaledSheet.create({
     textAlign: "left",
     width: "95%",
   },
+  optionSelectionContainer: {
+    flexDirection: "row",
+    width: "90%",
+  },
   qrCodeContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
     borderRadius: "5@s",
     justifyContent: "center",
     marginTop: "20@s",
-    paddingVertical: "10@s",
+    padding: "5@s",
     width: "90%",
+  },
+  selectorStyle: {
+    marginRight: "5@s",
   },
   scrollViewContainer: {
     alignItems: "center",
@@ -320,17 +400,14 @@ const styles = ScaledSheet.create({
     width: "95%",
   },
   textInputGroupDescription: {
-    borderLeftColor: defaultStyles.colors.yellow_Variant,
-    borderLeftWidth: 2,
     borderRadius: "3@s",
     fontFamily: "ComicNeue-Bold",
     fontSize: "14@s",
     fontStyle: "normal",
     fontWeight: "normal",
-    marginTop: "10@s",
     paddingHorizontal: "10@s",
     paddingVertical: "5@s",
-    width: "90%",
+    width: "98%",
   },
 });
 

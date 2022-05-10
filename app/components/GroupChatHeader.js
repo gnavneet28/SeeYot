@@ -1,5 +1,5 @@
 import React, { memo, useContext, useState, useEffect } from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View, Text } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import LottieView from "lottie-react-native";
@@ -102,7 +102,12 @@ function GroupChatHeader({
         </View>
       </View>
       <View style={styles.middleSectionContainer}>
-        <AppText style={styles.name}>{group.name}</AppText>
+        <AppText style={styles.name}>
+          {group.name}{" "}
+          <Text style={styles.groupTypeTextStyle}>
+            {group.type == "Private" ? "Private" : "Public"}
+          </Text>
+        </AppText>
       </View>
       <TotalActiveUsers
         onAddEchoPress={onAddEchoPress}
@@ -110,7 +115,7 @@ function GroupChatHeader({
         totalActiveUsers={totalActiveUsers}
       />
       <MaterialIcons
-        name="more-vert"
+        name="group-add"
         size={scale(23)}
         color={defaultStyles.colors.white}
         Back
@@ -189,7 +194,11 @@ const styles = ScaledSheet.create({
     paddingTop: "5@s",
   },
   optionIcon: {
-    marginHorizontal: "10@s",
+    marginHorizontal: "15@s",
+  },
+  groupTypeTextStyle: {
+    color: defaultStyles.colors.blue,
+    fontSize: "10@s",
   },
 });
 

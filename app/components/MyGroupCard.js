@@ -136,7 +136,7 @@ const styles = ScaledSheet.create({
   categoryText: {
     backgroundColor: defaultStyles.colors.secondary_Variant,
     borderRadius: "5@s",
-    color: defaultStyles.colors.yellow_Variant,
+    color: defaultStyles.colors.white,
     fontSize: "12@s",
     marginBottom: "2@s",
     paddingHorizontal: "5@s",

@@ -72,14 +72,16 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   image: {
-    borderRadius: "20@s",
-    height: "35@s",
-    width: "35@s",
+    borderRadius: "15@s",
+    height: "30@s",
+    width: "30@s",
+    borderWidth: "2@s",
+    borderColor: defaultStyles.colors.white,
   },
   imageSub: {
-    borderRadius: "19@s",
-    height: "35@s",
-    width: "35@s",
+    borderRadius: "14@s",
+    height: "28@s",
+    width: "28@s",
   },
   leftOption: {
     alignItems: "center",

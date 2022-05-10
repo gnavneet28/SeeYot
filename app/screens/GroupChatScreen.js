@@ -10,7 +10,7 @@ import { useIsFocused } from "@react-navigation/native";
 import {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 
 import Screen from "../components/Screen";
@@ -20,6 +20,7 @@ import GroupChatHeader from "../components/GroupChatHeader";
 import GroupMessageInput from "../components/GroupMessageInput";
 import GroupMessagesList from "../components/GroupMessagesList";
 import AppActivityIndicator from "../components/ActivityIndicator";
+import ChatBackgroundSelector from "../components/ChatBackgroundSelector";
 
 import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
@@ -97,13 +98,13 @@ function GroupChatScreen({ navigation, route }) {
   }, []);
 
   const handleRemoveReply = useCallback(() => {
-    translateX.value = withSpring(800);
+    translateX.value = withTiming(800);
     setReply(defaultReply);
   }, [reply]);
 
   const handleOnSelectReply = useCallback(
     (data) => {
-      translateX.value = withSpring(0);
+      translateX.value = withTiming(0);
       setReply(data);
     },
     [reply]
@@ -124,9 +125,8 @@ function GroupChatScreen({ navigation, route }) {
   useEffect(() => {
     const listener1 = (data) => {
       if (data.newMessage.createdBy._id != user._id) {
-        groupMessages.push(data.newMessage);
         if (!isUnmounting) {
-          setGroupMessages([...groupMessages]);
+          setGroupMessages([...groupMessages, data.newMessage]);
         }
       }
     };
@@ -229,7 +229,7 @@ function GroupChatScreen({ navigation, route }) {
 
   const handleSendMessage = useCallback(
     async (textMessage, media) => {
-      translateX.value = withSpring(800);
+      translateX.value = withTiming(800);
       listRef.current.scrollToOffset({ offset: -300, animated: true });
       // stopCurrentUserTyping();
 
@@ -322,8 +322,8 @@ function GroupChatScreen({ navigation, route }) {
     setShowOptions(false);
   }, []);
 
-  const handleOpenOptions = useCallback(() => {
-    setShowOptions(true);
+  const handleOpenInviteModal = useCallback(() => {
+    setShowInviteModal(true);
   }, []);
 
   return (
@@ -335,39 +335,41 @@ function GroupChatScreen({ navigation, route }) {
           totalActiveUsers={activeUsers}
           group={group}
           onBackPress={handleBackPress}
-          onOptionPress={handleOpenOptions}
+          onOptionPress={handleOpenInviteModal}
         />
         <ScreenSub style={styles.screenSub}>
-          {isReady ? (
-            <GroupMessagesList
-              onImagePress={handleMessageCreatorImagePress}
-              group={group}
-              groupMessages={groupMessages}
-              onSelectReply={handleOnSelectReply}
-              listRef={listRef}
-            />
-          ) : (
-            <AppActivityIndicator color={defaultStyles.colors.secondary} />
-          )}
-          {isFocused ? (
-            <ApiContext.Provider value={{ sendingMedia, setSendingMedia }}>
-              <ImageContext.Provider value={{ mediaImage, setMediaImage }}>
-                <GroupMessageInput
-                  placeholder="Type your message..."
-                  rStyle={rStyle}
-                  reply={reply}
-                  onRemoveReply={handleRemoveReply}
-                  onSendSelectedMedia={handleSendSelectedMedia}
-                  setTyping={handleSetTyping}
-                  message={message}
-                  setMessage={setMessage}
-                  style={styles.inputBox}
-                  submit={handleSendMessage}
-                  onCameraImageSelection={handleSendSelectedMedia}
-                />
-              </ImageContext.Provider>
-            </ApiContext.Provider>
-          ) : null}
+          <ChatBackgroundSelector>
+            {isReady ? (
+              <GroupMessagesList
+                onImagePress={handleMessageCreatorImagePress}
+                group={group}
+                groupMessages={groupMessages}
+                onSelectReply={handleOnSelectReply}
+                listRef={listRef}
+              />
+            ) : (
+              <AppActivityIndicator color={defaultStyles.colors.secondary} />
+            )}
+            {isFocused ? (
+              <ApiContext.Provider value={{ sendingMedia, setSendingMedia }}>
+                <ImageContext.Provider value={{ mediaImage, setMediaImage }}>
+                  <GroupMessageInput
+                    placeholder="Type your message..."
+                    rStyle={rStyle}
+                    reply={reply}
+                    onRemoveReply={handleRemoveReply}
+                    onSendSelectedMedia={handleSendSelectedMedia}
+                    setTyping={handleSetTyping}
+                    message={message}
+                    setMessage={setMessage}
+                    style={styles.inputBox}
+                    submit={handleSendMessage}
+                    onCameraImageSelection={handleSendSelectedMedia}
+                  />
+                </ImageContext.Provider>
+              </ApiContext.Provider>
+            ) : null}
+          </ChatBackgroundSelector>
         </ScreenSub>
       </Screen>
       <InfoAlert

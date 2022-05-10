@@ -149,6 +149,10 @@ function SubscriptionScreen({ navigation, route }) {
                 description="Get insights on the number of people who tapped on your Display Picture, sent you Thoughts and Messages."
                 name="information-outline"
               />
+              <DescriptionItem
+                description="You can join any group in incognito mode. (You will not be visible in active users list)."
+                name="incognito-circle"
+              />
               <AppText style={styles.selectPlanText}>Select a Plan</AppText>
               <ScrollView
                 keyboardShouldPersistTaps="handled"

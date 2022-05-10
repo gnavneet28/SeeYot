@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useState,
-  useEffect,
-  useMemo,
-  useContext,
-} from "react";
+import React, { useCallback, useState, useEffect, useMemo } from "react";
 import {
   View,
   TouchableOpacity,
@@ -17,11 +11,15 @@ import MaterialIcons from "../../node_modules/react-native-vector-icons/Material
 import ImagePicker from "react-native-image-crop-picker";
 import QRCode from "react-native-qrcode-svg";
 import dynamicLinks from "@react-native-firebase/dynamic-links";
+import * as Animatable from "react-native-animatable";
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 
 import Alert from "../components/Alert";
 import AppActivityIndicator from "../components/ActivityIndicator";
 import AppHeader from "../components/AppHeader";
 import AppText from "../components/AppText";
+import EditGroupInfoModal from "../components/EditGroupInfoModal";
+import EditGroupPasswordModal from "../components/EditGroupPasswordModal";
 import EditImageOptionSelecter from "../components/EditImageOptionSelecter";
 import GroupScreenOptions from "../components/GroupScreenOptions";
 import InfoAlert from "../components/InfoAlert";
@@ -46,8 +44,11 @@ import useAuth from "../auth/useAuth";
 
 import groupsApi from "../api/groups";
 import usersApi from "../api/users";
-import EditGroupInfoModal from "../components/EditGroupInfoModal";
-import EditGroupPasswordModal from "../components/EditGroupPasswordModal";
+
+const optionsVibrate = {
+  enableVibrateFallback: true,
+  ignoreAndroidSystemSettings: true,
+};
 
 function GroupScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
@@ -57,7 +58,6 @@ function GroupScreen({ navigation, route }) {
 
   const [group, setGroup] = useState(defaultProps.defaultGroup);
   const [openGroupInfo, setOpenGroupInfo] = useState(false);
-  const [groupInfo, setGroupInfo] = useState(group.information);
   const [isLoading, setIsLoading] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -72,7 +72,18 @@ function GroupScreen({ navigation, route }) {
   const [problemDescription, setProblemDescription] = useState("");
   const [removingFromHistory, setRemovingFromHistory] = useState(false);
 
+  const [showDeleteGroupAlert, setShowDeleteGroupAlert] = useState(false);
+
   const [openPasswordModal, setOpenPasswordModal] = useState(false);
+
+  const handleHideDeleteGroupAlert = useCallback(() => {
+    setShowDeleteGroupAlert(false);
+  }, []);
+
+  const handleShowDeleteGroupAlert = useCallback(() => {
+    setShowOptions(false);
+    setShowDeleteGroupAlert(true);
+  }, []);
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
@@ -94,20 +105,24 @@ function GroupScreen({ navigation, route }) {
 
   // ON PAGE LOAD
   const getGroupDetails = async () => {
-    setIsReady(false);
+    if (!isUnmounting) {
+      setIsReady(false);
+    }
     const { ok, data, problem } = await groupsApi.getGroupByName(
       route.params.groupName,
       route.params.password
     );
-    if (ok) {
+    if (ok && !isUnmounting) {
       setGroup(data.group);
       if (data.group.createdBy._id != user._id) {
         addToMyGroupHistory(data.group._id);
       }
       return setIsReady(true);
     }
-    setIsReady(true);
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isUnmounting) {
+      setIsReady(true);
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   const addToMyGroupHistory = async (groupId) => {
@@ -245,17 +260,21 @@ function GroupScreen({ navigation, route }) {
   };
 
   const handleDeleteGroup = async () => {
-    setDeletingGroup(true);
+    if (!isUnmounting) {
+      setDeletingGroup(true);
+    }
     const { ok, data, problem } = await groupsApi.deleteGroup(group._id);
-    if (ok) {
+    if (ok && !isUnmounting) {
       setDeletingGroup(false);
-      setShowOptions(false);
+      setShowDeleteGroupAlert(false);
       return navigation.goBack();
     }
 
-    setDeletingGroup(false);
-    setShowOptions(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isUnmounting) {
+      setDeletingGroup(false);
+      setShowDeleteGroupAlert(false);
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   const handleOpenGroupInfoEditModal = () => setOpenGroupInfo(true);
@@ -275,25 +294,6 @@ function GroupScreen({ navigation, route }) {
     tackleProblem(problem, data, setInfoAlert);
   };
 
-  const handleSubmitPassword = async (password) => {
-    if (!isUnmounting) {
-      setIsLoading(true);
-    }
-    const { ok, data, problem } = await groupsApi.updatePassword(
-      group._id,
-      password,
-      ""
-    );
-    if (ok && !isUnmounting) {
-      setGroup(data);
-      return setIsLoading(false);
-    }
-    if (!isUnmounting) {
-      setIsLoading(false);
-      tackleProblem(problem, data, setInfoAlert);
-    }
-  };
-
   const createGroupInviteLink = (group) => {
     return dynamicLinks().buildShortLink({
       domainUriPrefix: "https://seeyot.page.link",
@@ -310,15 +310,37 @@ function GroupScreen({ navigation, route }) {
     });
   };
 
+  const handleSubmitPassword = async (password) => {
+    if (!isUnmounting) {
+      setIsLoading(true);
+    }
+    let qrCodeLink = await createGroupInviteLink(group);
+    const { ok, data, problem } = await groupsApi.updatePassword(
+      group._id,
+      password,
+      qrCodeLink
+    );
+    if (ok && !isUnmounting) {
+      setGroup(data);
+      setOpenPasswordModal(false);
+      return setIsLoading(false);
+    }
+    if (!isUnmounting) {
+      setOpenPasswordModal(false);
+      setIsLoading(false);
+      tackleProblem(problem, data, setInfoAlert);
+    }
+  };
+
   const handleInvitePress = useCallback(
     debounce(
       async () => {
         try {
           setIsLoading(true);
-          let link = await createGroupInviteLink(group);
+          let link = group.qrCodeLink;
           setIsLoading(false);
           const result = await Share.share({
-            message: `Join this group and have live conversation with active people.[Group : ${group.name}]:${link}`,
+            message: `Join this group and have live conversation with active people.[Group : ${group.name}] : ${link}`,
           });
           if (result.action === Share.sharedAction) {
             if (result.activityType) {
@@ -338,6 +360,56 @@ function GroupScreen({ navigation, route }) {
     ),
     [group]
   );
+
+  const handleJoinNormal = () => {
+    ReactNativeHapticFeedback.trigger("impactMedium", optionsVibrate);
+    navigation.navigate(NavigationConstants.GROUP_CHAT_SCREEN, {
+      group: {
+        _id: group._id,
+        name: group.name,
+        picture: group.picture,
+        type: group.type,
+        canInvite: group.canInvite,
+      },
+      incognito: false,
+    });
+  };
+  const handleJoinIncognito = () => {
+    ReactNativeHapticFeedback.trigger("impactMedium", optionsVibrate);
+    navigation.navigate(NavigationConstants.GROUP_CHAT_SCREEN, {
+      group: {
+        _id: group._id,
+        name: group.name,
+        picture: group.picture,
+        type: group.type,
+        canInvite: group.canInvite,
+      },
+      incognito: true,
+    });
+  };
+
+  if (!group._id && isReady)
+    return (
+      <Screen style={styles.noGroupInfoContainerMain}>
+        <AppHeader
+          title="Group"
+          leftIcon="arrow-back"
+          onPressLeft={handleBackPress}
+        />
+        <View style={styles.noGroupInfoContainer}>
+          <AppText style={styles.noGroupInfoTextHeader}>
+            Cannot view group! This can be due to following reasons:
+          </AppText>
+          <AppText style={styles.noGroupInfoBody}>
+            {`
+Network error.
+Group might be deleted.
+Do not have permission to view group.
+        `}
+          </AppText>
+        </View>
+      </Screen>
+    );
 
   return (
     <>
@@ -430,41 +502,20 @@ function GroupScreen({ navigation, route }) {
               </ScrollView>
 
               {user.vip.subscription ? (
-                <AppText
-                  style={styles.chatButtonIncognito}
-                  onPress={() =>
-                    navigation.navigate(NavigationConstants.GROUP_CHAT_SCREEN, {
-                      group: {
-                        _id: group._id,
-                        name: group.name,
-                        picture: group.picture,
-                        type: group.type,
-                        canInvite: group.canInvite,
-                      },
-                      incognito: true,
-                    })
-                  }
-                >
-                  Join Conversation ( Incognito )
-                </AppText>
+                <Animatable.View animation="rubberBand">
+                  <AppText
+                    style={styles.chatButtonIncognito}
+                    onPress={handleJoinIncognito}
+                  >
+                    Join Conversation ( Incognito )
+                  </AppText>
+                </Animatable.View>
               ) : null}
-              <AppText
-                style={styles.chatButton}
-                onPress={() =>
-                  navigation.navigate(NavigationConstants.GROUP_CHAT_SCREEN, {
-                    group: {
-                      _id: group._id,
-                      name: group.name,
-                      picture: group.picture,
-                      type: group.type,
-                      canInvite: group.canInvite,
-                    },
-                    incognito: false,
-                  })
-                }
-              >
-                Join Conversation
-              </AppText>
+              <Animatable.View animation="rubberBand">
+                <AppText style={styles.chatButton} onPress={handleJoinNormal}>
+                  Join Conversation
+                </AppText>
+              </Animatable.View>
             </>
           ) : (
             <AppActivityIndicator />
@@ -472,8 +523,7 @@ function GroupScreen({ navigation, route }) {
         </ScreenSub>
       </Screen>
       <GroupScreenOptions
-        deletingGroup={deletingGroup}
-        onDeletePress={handleDeleteGroup}
+        onDeletePress={handleShowDeleteGroupAlert}
         onReportPress={handleReportGroupOptionPress}
         user={user}
         group={group}
@@ -502,6 +552,18 @@ function GroupScreen({ navigation, route }) {
         setVisible={setShowAlert}
         title="Remove"
         visible={showAlert}
+      />
+      <Alert
+        apiProcessing={deletingGroup}
+        onRequestClose={handleHideDeleteGroupAlert}
+        description="Are you sure you want to delete this group?"
+        leftPress={handleHideDeleteGroupAlert}
+        leftOption="Cancel"
+        rightOption="Ok"
+        rightPress={handleDeleteGroup}
+        setVisible={setShowDeleteGroupAlert}
+        title="Delete"
+        visible={showDeleteGroupAlert}
       />
       <LoadingIndicator visible={isLoading} />
       <InfoAlert
@@ -596,7 +658,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     alignSelf: "flex-end",
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: "5@s",
+    borderRadius: "10@s",
     height: "20@s",
     justifyContent: "center",
     width: "20@s",
@@ -604,11 +666,11 @@ const styles = ScaledSheet.create({
   editPhoto: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "15@s",
-    height: "30@s",
+    borderRadius: "13@s",
+    height: "25@s",
     justifyContent: "center",
     marginBottom: "5@s",
-    width: "30@s",
+    width: "25@s",
   },
   groupName: {
     fontSize: "16@s",
@@ -680,6 +742,36 @@ const styles = ScaledSheet.create({
   shareText: {
     color: defaultStyles.colors.white,
     fontSize: "10@s",
+  },
+  noGroupInfoContainerMain: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.white,
+    flex: 1,
+    width: "100%",
+  },
+  noGroupInfoContainer: {
+    alignItems: "flex-start",
+    backgroundColor: defaultStyles.colors.dark_Variant,
+    borderTopLeftRadius: "5@s",
+    borderTopRightRadius: "5@s",
+    flex: 1,
+    justifyContent: "center",
+    marginTop: "20@s",
+    width: "90%",
+  },
+  noGroupInfoTextHeader: {
+    color: defaultStyles.colors.white,
+    marginBottom: "20@s",
+    paddingHorizontal: "10@s",
+    textAlign: "left",
+    width: "80%",
+  },
+  noGroupInfoBody: {
+    backgroundColor: defaultStyles.colors.light,
+    color: defaultStyles.colors.dark,
+    paddingLeft: "10@s",
+    textAlign: "left",
+    width: "100%",
   },
 });
 

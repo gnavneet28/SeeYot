@@ -4,17 +4,13 @@ import { RNCamera } from "react-native-camera";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import Ionicons from "../../node_modules/react-native-vector-icons/Ionicons";
 import Feather from "../../node_modules/react-native-vector-icons/Feather";
-import RNFS from "react-native-fs";
-import CameraRoll from "@react-native-community/cameraroll";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
-import ImageResizer from "react-native-image-resizer";
 
 import debounce from "../utilities/debounce";
 
 import AppModal from "./AppModal";
 
 import defaultStyles from "../config/styles";
-import useAuth from "../auth/useAuth";
 import ImageContext from "../utilities/ImageContext";
 
 const optionsVibrate = {
@@ -24,7 +20,6 @@ const optionsVibrate = {
 
 function Camera({ visible, setVisible, onPhotoSelect }) {
   const { setMediaImage } = useContext(ImageContext);
-  const { user } = useAuth();
   let cameraRef = useRef(null);
   const [frontCamera, setFrontCamera] = useState(false);
   const [flashMode, setFlashMode] = useState(false);
@@ -56,23 +51,6 @@ function Camera({ visible, setVisible, onPhotoSelect }) {
         const data = await cameraRef.takePictureAsync(options);
         setMediaImage(data.uri);
         return setPicture(data.uri);
-        RNFS.writeFile(
-          RNFS.CachesDirectoryPath + `/${user.name}.png`,
-          data.base64,
-          "base64"
-        ).then(() => {
-          CameraRoll.save(
-            RNFS.CachesDirectoryPath + `/${user.name}.png`,
-            "photo"
-          ).then((picture) => {
-            ImageResizer.createResizedImage(picture, 700, 2100, "JPEG", 80)
-              .then((res) => {
-                setMediaImage(res.uri);
-                setPicture(res.uri);
-              })
-              .catch((err) => console.log(err));
-          });
-        });
       }
     },
     4000,
