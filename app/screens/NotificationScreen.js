@@ -87,6 +87,8 @@ function NotificationScreen({ navigation }) {
       return user.notifications.filter((n) => n.type == "Add");
     } else if (category == "Replies") {
       return user.notifications.filter((n) => n.type == "Replied");
+    } else if (category == "Group Invites") {
+      return user.notifications.filter((n) => n.type == "GroupChatInvite");
     }
   };
 
