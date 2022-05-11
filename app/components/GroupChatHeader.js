@@ -29,6 +29,7 @@ function GroupChatHeader({
   },
   onAddEchoPress,
   onSendThoughtsPress,
+  onActiveUserImagePress,
 }) {
   const [typing, setTyping] = useState(false);
   const { user } = useAuth();
@@ -113,6 +114,7 @@ function GroupChatHeader({
         onAddEchoPress={onAddEchoPress}
         onSendThoughtsPress={onSendThoughtsPress}
         totalActiveUsers={totalActiveUsers}
+        onActiveUserImagePress={onActiveUserImagePress}
       />
       <MaterialIcons
         name="group-add"

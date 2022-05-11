@@ -65,7 +65,7 @@ class ActiveUsersList extends React.Component {
             //onAddFriendPress={this.props.onAddFriendPress}
             onAddEchoPress={() => this.props.onAddEchoPress(data)}
             onSendThoughtsPress={() => this.props.onSendThoughtsPress(data)}
-            // onImagePress={() => this.props.onImagePress(data)}
+            onImagePress={() => this.props.onImagePress(data)}
             user={data}
           />
         );

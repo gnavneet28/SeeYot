@@ -15,6 +15,7 @@ function TotalActiveUsers({
   conatinerStyle,
   onSendThoughtsPress,
   onAddEchoPress,
+  onActiveUserImagePress = () => {},
 }) {
   const [showList, setShowList] = useState(false);
 
@@ -60,6 +61,7 @@ function TotalActiveUsers({
           onAddEchoPress={handleEchoPress}
           onSendThoughtsPress={handleSendThoughtsPress}
           users={totalActiveUsers}
+          onImagePress={onActiveUserImagePress}
         />
       </AppModal>
     </>

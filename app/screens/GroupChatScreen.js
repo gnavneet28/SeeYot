@@ -22,6 +22,9 @@ import GroupMessageInput from "../components/GroupMessageInput";
 import GroupMessagesList from "../components/GroupMessagesList";
 import AppActivityIndicator from "../components/ActivityIndicator";
 import ChatBackgroundSelector from "../components/ChatBackgroundSelector";
+import EchoMessageModal from "../components/EchoMessageModal";
+import InviteUsersModal from "../components/InviteUsersModal";
+import GroupChatUserOptions from "../components/GroupChatUserOptions";
 
 import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
@@ -37,9 +40,9 @@ import ImageContext from "../utilities/ImageContext";
 import defaultStyles from "../config/styles";
 import useAuth from "../auth/useAuth";
 import NavigationConstants from "../navigation/NavigationConstants";
-import InviteUsersModal from "../components/InviteUsersModal";
-import GroupChatUserOptions from "../components/GroupChatUserOptions";
 import storeDetails from "../utilities/storeDetails";
+import defaultProps from "../utilities/defaultProps";
+import echosApi from "../api/echos";
 
 const optionsVibrate = {
   enableVibrateFallback: true,
@@ -60,6 +63,12 @@ let defaultReply = {
 
 let defaultUser = { name: "", picture: "", _id: "" };
 
+let defaultEchoState = {
+  visible: false,
+  recipient: defaultProps.defaultEchoMessageRecipient,
+  echoMessage: { message: "" },
+};
+
 function GroupChatScreen({ navigation, route }) {
   let incognito = route.params.incognito;
   const { tackleProblem } = apiActivity;
@@ -78,6 +87,14 @@ function GroupChatScreen({ navigation, route }) {
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
+  });
+
+  const [echoState, setEchoState] = useState(defaultEchoState);
+  let showEchoMessage = false;
+
+  const handleCloseEchoModal = useCallback(() => {
+    showEchoMessage = false;
+    setEchoState({ ...defaultEchoState, visible: false });
   });
 
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -374,9 +391,20 @@ function GroupChatScreen({ navigation, route }) {
     [groupMessages]
   );
 
-  const handleMessageCreatorImagePress = useCallback((recipient) => {
-    navigation.navigate(NavigationConstants.SEND_THOUGHT_SCREEN, { recipient });
-  }, []);
+  const getEchoMessage = useCallback(
+    async (recipient) => {
+      showEchoMessage = true;
+      if (user._id != recipient._id) {
+        usersApi.updatePhotoTapsCount(recipient._id);
+      }
+      setEchoState({ ...defaultEchoState, visible: true, recipient });
+      const { data, problem, ok } = await echosApi.getEcho(recipient._id);
+      if (ok && showEchoMessage === true) {
+        setEchoState({ recipient, visible: true, echoMessage: data });
+      }
+    },
+    [interestedUser, echoState]
+  );
 
   const handleMessageCreatorImageLongPress = useCallback(
     (recipient) => {
@@ -434,12 +462,13 @@ function GroupChatScreen({ navigation, route }) {
           group={group}
           onBackPress={handleBackPress}
           onOptionPress={handleOpenInviteModal}
+          onActiveUserImagePress={getEchoMessage}
         />
         <ScreenSub style={styles.screenSub}>
           <ChatBackgroundSelector>
             {isReady ? (
               <GroupMessagesList
-                onImagePress={handleMessageCreatorImagePress}
+                onImagePress={getEchoMessage}
                 group={group}
                 groupMessages={groupMessages}
                 onSelectReply={handleOnSelectReply}
@@ -496,6 +525,10 @@ function GroupChatScreen({ navigation, route }) {
         group={group}
         interestedUser={interestedUser}
         user={user}
+      />
+      <EchoMessageModal
+        handleCloseModal={handleCloseEchoModal}
+        state={echoState}
       />
     </>
   );

@@ -1,5 +1,11 @@
 import React, { memo } from "react";
-import { View, Modal, Image, ImageBackground } from "react-native";
+import {
+  View,
+  Modal,
+  Image,
+  ImageBackground,
+  TouchableWithoutFeedback,
+} from "react-native";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import {
@@ -12,6 +18,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import * as Animatable from "react-native-animatable";
 
 import AppText from "./AppText";
 import EchoMessage from "./EchoMessage";
@@ -29,7 +36,7 @@ function EchoMessageModal({
   state = {
     visible: false,
     recipient: defaultProps.defaultEchoMessageRecipient,
-    echoMessage: { message },
+    echoMessage: { message: "" },
   },
 }) {
   let imageUri = state.recipient.picture;
@@ -74,43 +81,48 @@ function EchoMessageModal({
       visible={state.visible}
       animationType="fade"
     >
-      <ImageBackground
-        blurRadius={4}
-        source={imageUri ? { uri: imageUri } : { uri: "user" }}
-        style={styles.largeImageModalFallback}
-      >
-        <View style={styles.contentContainer}>
-          <View style={styles.inlargedHeader}>
-            <MaterialIcons
-              onPress={handleCloseModal}
-              name="arrow-back"
-              size={scale(23)}
-              color={defaultStyles.colors.secondary}
-              style={styles.closeIcon}
-            />
+      <TouchableWithoutFeedback onPress={handleCloseModal}>
+        <ImageBackground
+          blurRadius={4}
+          source={imageUri ? { uri: imageUri } : { uri: "user" }}
+          style={styles.largeImageModalFallback}
+        >
+          <Animatable.View animation="zoomIn">
+            <View style={styles.contentContainer}>
+              <View style={styles.inlargedHeader}>
+                <MaterialIcons
+                  onPress={handleCloseModal}
+                  name="arrow-back"
+                  size={scale(23)}
+                  color={defaultStyles.colors.secondary}
+                  style={styles.closeIcon}
+                />
 
-            <AppText style={{ zIndex: 222, fontSize: scale(15) }}>
-              {state.recipient.name}
-            </AppText>
-          </View>
-          <GestureHandlerRootView>
-            <PinchGestureHandler onGestureEvent={pinchHandler}>
-              <AnimatedImage
-                activeOpacity={1}
-                source={
-                  state.recipient.picture
-                    ? { uri: state.recipient.picture }
-                    : { uri: "user" }
-                }
-                style={[styles.inlargedImage, rStyle]}
+                <AppText style={{ zIndex: 222, fontSize: scale(15) }}>
+                  {state.recipient.name}
+                </AppText>
+              </View>
+              <GestureHandlerRootView>
+                <PinchGestureHandler onGestureEvent={pinchHandler}>
+                  <AnimatedImage
+                    activeOpacity={1}
+                    source={
+                      state.recipient.picture
+                        ? { uri: state.recipient.picture }
+                        : { uri: "user" }
+                    }
+                    style={[styles.inlargedImage, rStyle]}
+                  />
+                </PinchGestureHandler>
+              </GestureHandlerRootView>
+              <EchoMessage
+                style={styles.echoMessage}
+                echoMessage={state.echoMessage.message}
               />
-            </PinchGestureHandler>
-          </GestureHandlerRootView>
-          {state.echoMessage ? (
-            <EchoMessage echoMessage={state.echoMessage.message} />
-          ) : null}
-        </View>
-      </ImageBackground>
+            </View>
+          </Animatable.View>
+        </ImageBackground>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }
@@ -128,6 +140,7 @@ const styles = ScaledSheet.create({
     overflow: "hidden",
     width: width < height ? width - GAP : height - GAP,
   },
+  echoMessage: { marginTop: "5@s", marginBottom: "10@s" },
   inlargedImage: {
     height: width < height ? width - GAP : height - GAP,
     width: width < height ? width - GAP : height - GAP,
