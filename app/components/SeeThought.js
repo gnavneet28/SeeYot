@@ -37,7 +37,7 @@ function SeeThought({
             <AppText style={styles.message}>
               {thought.message
                 ? thought.message
-                : "No thoughts to show. Please subscribe to SeeYot Vip to see thoughts without being matched."}
+                : "Please subscribe to SeeYot Vip to see thoughts without being matched."}
             </AppText>
 
             <AppText style={styles.hint}>

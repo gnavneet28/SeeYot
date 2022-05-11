@@ -30,7 +30,11 @@ function NotificationCategorySelector({ onPress, selected, style }) {
             if (item.alias == "Replies" || item.alias == "Matched Thoughts") {
               listRef.current.scrollToEnd({ animated: true });
             }
-            if (item.alias == "Active Chat" || item.alias == "Add") {
+            if (
+              item.alias == "Active Chat" ||
+              item.alias == "Add" ||
+              item.alias == "All"
+            ) {
               listRef.current.scrollToIndex({ index: 0, animated: true });
             }
             onPress(item);

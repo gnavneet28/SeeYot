@@ -142,6 +142,7 @@ export default {
     { type: "ActiveChat", alias: "Active Chat" },
     { type: "Replied", alias: "Replies" },
     { type: "Matched", alias: "Matched Thoughts" },
+    { type: "GroupChatInvite", alias: "Group Invites" },
     { type: "All", alias: "All" },
   ],
   defaultGroup: {
