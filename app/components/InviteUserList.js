@@ -102,7 +102,11 @@ class InviteUserList extends React.Component {
       case ViewTypes.Full:
         return (
           <TouchableWithoutFeedback onPress={this.props.onPress}>
-            <InviteUserCard groupName={this.props.groupName} contact={data} />
+            <InviteUserCard
+              //onInvitePress={this.props.onInvitePress}
+              groupName={this.props.groupName}
+              contact={data}
+            />
           </TouchableWithoutFeedback>
         );
       default:
@@ -110,10 +114,7 @@ class InviteUserList extends React.Component {
     }
   }
   componentDidUpdate(prevProps) {
-    if (
-      prevProps.users.length != this.props.users.length ||
-      prevProps.groupName != this.props.groupName
-    ) {
+    if (prevProps.users.length != this.props.users.length) {
       return this.setState({
         ...this.state,
         dataProvider: this.props.users.length

@@ -1,18 +1,15 @@
-import React, { memo, useState } from "react";
+import React, { memo, useCallback, useContext } from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
-import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
 import defaultStyles from "../config/styles";
 
-import AppText from "./AppText";
-import Backdrop from "./Backdrop";
 import InviteUserList from "./InviteUserList";
 import Selection from "./Selection";
 
 import useAuth from "../auth/useAuth";
 import defaultProps from "../utilities/defaultProps";
-
+import AppHeader from "./AppHeader";
 import InvitedUsersContext from "../utilities/invitedUsersContext";
 
 function InviteUsersModal({
@@ -23,28 +20,27 @@ function InviteUsersModal({
   changingInvitePermission = false,
 }) {
   const { user } = useAuth();
+  const { setInvitedUsers } = useContext(InvitedUsersContext);
 
-  const [invitedUsers, setInvitedUsers] = useState([]);
+  const handleCloseModal = useCallback(() => {
+    setInvitedUsers([]);
+    setOpenInviteModal(false);
+  }, []);
 
   return (
     <Modal
       animationType="slide"
-      onRequestClose={() => setOpenInviteModal(false)}
+      onRequestClose={handleCloseModal}
       transparent={true}
       visible={openInviteModal}
     >
       <View style={styles.inviteModal}>
-        <Backdrop onPress={() => setOpenInviteModal(false)} />
-        <View style={styles.closeMessageIconContainer}>
-          <AntDesign
-            onPress={() => setOpenInviteModal(false)}
-            name="downcircle"
-            color={defaultStyles.colors.secondary_Variant}
-            size={scale(28)}
-          />
-        </View>
         <View style={styles.inviteModalMainContainer}>
-          <AppText style={styles.inviteModalTitle}>Invite Friends</AppText>
+          <AppHeader
+            title="Invite Friends"
+            leftIcon="arrow-back"
+            onPressLeft={handleCloseModal}
+          />
           {group.createdBy._id == user._id ? (
             <View style={styles.canInviteOptionContainer}>
               <Selection
@@ -52,14 +48,13 @@ function InviteUsersModal({
                 opted={group.canInvite}
                 onPress={onChangeInvitePermission}
                 value={"Allow active members to invite others."}
+                containerStyle={styles.selectionCheckBoxStyle}
+                iconSize={scale(12)}
+                loadingIndicatorSize={scale(10)}
               />
             </View>
           ) : null}
-          <InvitedUsersContext.Provider
-            value={{ invitedUsers, setInvitedUsers }}
-          >
-            <InviteUserList users={user.contacts} groupName={group.name} />
-          </InvitedUsersContext.Provider>
+          <InviteUserList users={user.contacts} groupName={group.name} />
         </View>
       </View>
     </Modal>
@@ -70,8 +65,11 @@ const styles = ScaledSheet.create({
   canInviteOptionContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
+    borderColor: defaultStyles.colors.secondary,
     borderRadius: "8@s",
+    borderWidth: 1,
     justifyContent: "center",
+    marginTop: "5@s",
     width: "95%",
   },
   closeMessageIconContainer: {
@@ -89,19 +87,13 @@ const styles = ScaledSheet.create({
   inviteModalMainContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
-    borderTopLeftRadius: "10@s",
-    borderTopRightRadius: "10@s",
-    bottom: 0,
-    height: "380@s",
+    flex: 1,
     overflow: "hidden",
     paddingBottom: "5@s",
-    paddingHorizontal: "10@s",
-    paddingTop: "20@s",
     width: "100%",
   },
   inviteModal: {
     flex: 1,
-    justifyContent: "space-between",
     overflow: "hidden",
     width: "100%",
   },
@@ -111,6 +103,13 @@ const styles = ScaledSheet.create({
     marginTop: "5@s",
     textAlign: "center",
     width: "100%",
+  },
+  selectionCheckBoxStyle: {
+    alignItems: "center",
+    borderRadius: "5@s",
+    height: "18@s",
+    justifyContent: "center",
+    width: "18@s",
   },
 });
 

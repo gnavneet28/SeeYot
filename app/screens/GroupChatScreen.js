@@ -13,6 +13,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+import { showMessage } from "react-native-flash-message";
 
 import Screen from "../components/Screen";
 import ScreenSub from "../components/ScreenSub";
@@ -26,6 +27,7 @@ import EchoMessageModal from "../components/EchoMessageModal";
 import InviteUsersModal from "../components/InviteUsersModal";
 import GroupChatUserOptions from "../components/GroupChatUserOptions";
 import LoadingIndicator from "../components/LoadingIndicator";
+import InvitedUsersContext from "../utilities/invitedUsersContext";
 
 import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
@@ -45,6 +47,7 @@ import NavigationConstants from "../navigation/NavigationConstants";
 import echosApi from "../api/echos";
 import useAppState from "../hooks/useAppState";
 import ReportUserModal from "../components/ReportUserModal";
+import InvitedUserContext from "../utilities/invitedUserContext";
 
 const optionsVibrate = {
   enableVibrateFallback: true,
@@ -115,6 +118,10 @@ function GroupChatScreen({ navigation, route }) {
     useState(false);
   const [openUserReport, setOpenUserReport] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Inviting users
+  const [invitedUsers, setInvitedUsers] = useState([]);
+  const [invitedUser, setInvitedUser] = useState("");
 
   const handleSubmitUserReport = useCallback(
     async (report) => {
@@ -594,13 +601,17 @@ function GroupChatScreen({ navigation, route }) {
         description={infoAlert.infoAlertMessage}
         visible={infoAlert.showInfoAlert}
       />
-      <InviteUsersModal
-        openInviteModal={showInviteModal}
-        setOpenInviteModal={setShowInviteModal}
-        group={group}
-        onChangeInvitePermission={handleChangeInvitePermission}
-        changingInvitePermission={changingInvitePermission}
-      />
+      <InvitedUsersContext.Provider value={{ invitedUsers, setInvitedUsers }}>
+        <InvitedUserContext.Provider value={{ invitedUser, setInvitedUser }}>
+          <InviteUsersModal
+            openInviteModal={showInviteModal}
+            setOpenInviteModal={setShowInviteModal}
+            onChangeInvitePermission={handleChangeInvitePermission}
+            changingInvitePermission={changingInvitePermission}
+            group={group}
+          />
+        </InvitedUserContext.Provider>
+      </InvitedUsersContext.Provider>
       <LoadingIndicator visible={isLoading} />
       <GroupChatUserOptions
         blockingFromGroup={blockingFromGroup}

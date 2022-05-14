@@ -1,71 +1,52 @@
-import React, { useState, useContext, useMemo, useEffect } from "react";
+import React, { useContext, useCallback, useState } from "react";
 import { View } from "react-native";
-import { ScaledSheet, scale } from "react-native-size-matters";
-import { showMessage } from "react-native-flash-message";
+import { ScaledSheet } from "react-native-size-matters";
 
 import AppButton from "./AppButton";
 import AppImage from "./AppImage";
 import AppText from "./AppText";
 import ApiProcessingContainer from "./ApiProcessingContainer";
+import InvitedUsersContext from "../utilities/invitedUsersContext";
 import InfoAlert from "./InfoAlert";
 
+import groupsApi from "../api/groups";
 import apiActivity from "../utilities/apiActivity";
-import defaultProps from "../utilities/defaultProps";
-import InvitedUsersContext from "../utilities/invitedUsersContext";
+import InvitedUserContext from "../utilities/invitedUserContext";
 
 import defaultStyles from "../config/styles";
-import groupsApi from "../api/groups";
 
 function InviteUserCard({ contact, style, groupName }) {
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { tackleProblem } = apiActivity;
+
+  const { invitedUsers, setInvitedUsers } = useContext(InvitedUsersContext);
+  const { invitedUser, setInvitedUser } = useContext(InvitedUserContext);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
   });
-  const { tackleProblem } = apiActivity;
-  const { invitedUsers, setInvitedUsers } = useContext(InvitedUsersContext);
 
-  let isUnmounting = false;
-
-  useEffect(() => {
-    return () => (isUnmounting = false);
-  }, []);
+  // INFO ALERT ACTION
+  const handleCloseInfoAlert = useCallback(
+    () => setInfoAlert({ ...infoAlert, showInfoAlert: false }),
+    []
+  );
 
   let invited = invitedUsers.filter((u) => u._id == contact._id).length;
 
-  const handleCloseInfoAlert = () => {
-    setInfoAlert({
-      showInfoAlert: false,
-      infoAlertMessage: "",
-    });
-  };
-
-  const handleInviteButtonPress = async () => {
-    setIsProcessing(true);
+  const handleOnInvitePress = useCallback(async () => {
+    setInvitedUser(contact._id);
     const { ok, data, problem } = await groupsApi.inviteUser(
       contact._id,
       groupName
     );
     if (ok) {
-      setIsProcessing(false);
-
+      setInvitedUser("");
       let newList = [...invitedUsers, contact];
-      setInvitedUsers(newList);
-
-      setTimeout(() => {
-        let newList = invitedUsers.filter((u) => u._id != contact._id);
-        setInvitedUsers(newList);
-      }, 10000);
-
-      return showMessage({
-        ...defaultProps.alertMessageConfig,
-        type: "success",
-        message: "Invitation Sent!",
-      });
+      return setInvitedUsers(newList);
     }
-    setIsProcessing(false);
+    setInvitedUser("");
     tackleProblem(problem, data, setInfoAlert);
-  };
+  }, [invitedUsers, invitedUser, contact]);
 
   if (!contact.name)
     return (
@@ -90,10 +71,10 @@ function InviteUserCard({ contact, style, groupName }) {
         </View>
 
         <View style={styles.buttonContainer}>
-          <ApiProcessingContainer processing={isProcessing}>
+          <ApiProcessingContainer processing={invitedUser === contact._id}>
             <AppButton
               title={invited ? "Invited" : "Invite"}
-              disabled={isProcessing || invited ? true : false}
+              disabled={invitedUser === contact._id || invited ? true : false}
               style={[
                 styles.inviteButton,
                 {
@@ -103,7 +84,7 @@ function InviteUserCard({ contact, style, groupName }) {
                 },
               ]}
               subStyle={styles.inviteButtonSub}
-              onPress={handleInviteButtonPress}
+              onPress={handleOnInvitePress}
             />
           </ApiProcessingContainer>
         </View>
@@ -119,14 +100,14 @@ function InviteUserCard({ contact, style, groupName }) {
 const styles = ScaledSheet.create({
   buttonContainer: {
     alignItems: "center",
-    justifyContent: "center",
-    borderRadius: "8@s",
-    height: "28@s",
-    marginRight: "4@s",
-    width: "55@s",
-    borderWidth: 1,
     borderColor: defaultStyles.colors.light,
+    borderRadius: "8@s",
+    borderWidth: 1,
+    height: "28@s",
+    justifyContent: "center",
+    marginRight: "4@s",
     overflow: "hidden",
+    width: "55@s",
   },
   inviteButton: {
     backgroundColor: defaultStyles.colors.secondary,
