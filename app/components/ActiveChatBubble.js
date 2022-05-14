@@ -73,31 +73,32 @@ function ActiveChatBubble({
   }, [thought]);
 
   return (
-    <TouchableWithoutFeedback onLongPress={onSelectReply}>
-      <Animated.View
-        style={[
-          styles.message,
-          !mine ? styles.mine : styles.not_mine,
-          mine ? rStyle : {},
-        ]}
+    <Animated.View
+      style={[
+        styles.message,
+        !mine ? styles.mine : styles.not_mine,
+        mine ? rStyle : {},
+      ]}
+    >
+      {thought.reply.message || thought.reply.media ? (
+        <ActiveChatReply
+          style={{
+            minWidth: "20%",
+            maxWidth: "50%",
+            alignSelf: mine ? "flex-end" : "flex-start",
+            borderBottomRightRadius: !mine ? scale(10) : 0,
+            borderBottomLeftRadius: !mine ? 0 : scale(10),
+          }}
+          media={thought.reply.media}
+          message={thought.reply.message}
+          creator={thought.reply.createdBy == user._id ? "You" : recipient.name}
+          show={false}
+        />
+      ) : null}
+      <TouchableWithoutFeedback
+        delayLongPress={200}
+        onLongPress={onSelectReply}
       >
-        {thought.reply.message || thought.reply.media ? (
-          <ActiveChatReply
-            style={{
-              minWidth: "20%",
-              maxWidth: "50%",
-              alignSelf: mine ? "flex-end" : "flex-start",
-              borderBottomRightRadius: !mine ? scale(10) : 0,
-              borderBottomLeftRadius: !mine ? 0 : scale(10),
-            }}
-            media={thought.reply.media}
-            message={thought.reply.message}
-            creator={
-              thought.reply.createdBy == user._id ? "You" : recipient.name
-            }
-            show={false}
-          />
-        ) : null}
         <View
           style={[
             styles.cloud,
@@ -129,6 +130,7 @@ function ActiveChatBubble({
               }}
               mine={mine}
               onLongPress={onSelectReply}
+              delayLongPress={200}
               uri={thought.media}
             />
           ) : (
@@ -160,8 +162,8 @@ function ActiveChatBubble({
             />
           )}
         </View>
-      </Animated.View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </Animated.View>
   );
 }
 

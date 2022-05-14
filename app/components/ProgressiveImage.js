@@ -13,6 +13,7 @@ function ProgressiveImage({
   subStyle,
   resizeMode = "cover",
   onLongPress,
+  ...props
 }) {
   const defaultImageAnimated = new Animated.Value(1);
   const imageAnimated = new Animated.Value(0);
@@ -32,6 +33,7 @@ function ProgressiveImage({
   };
   return (
     <TouchableHighlight
+      {...props}
       onLongPress={onLongPress}
       disabled={disabled}
       underlayColor={defaultStyles.colors.white}

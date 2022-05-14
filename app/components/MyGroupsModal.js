@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import AppModal from "./AppModal";
-import MyGroupsList from "./MyGroupsList";
 import InfoAlert from "./InfoAlert";
 
 import defaultStyles from "../config/styles";

@@ -5,7 +5,7 @@ import React, {
   useContext,
   useRef,
 } from "react";
-import { ScaledSheet } from "react-native-size-matters";
+import { scale, ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 import {
   useAnimatedStyle,
@@ -25,30 +25,35 @@ import ChatBackgroundSelector from "../components/ChatBackgroundSelector";
 import EchoMessageModal from "../components/EchoMessageModal";
 import InviteUsersModal from "../components/InviteUsersModal";
 import GroupChatUserOptions from "../components/GroupChatUserOptions";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
 import ApiContext from "../utilities/apiContext";
 
 import { SocketContext } from "../api/socketClient";
-
 import groupsApi from "../api/groups";
 import usersApi from "../api/users";
 
+import storeDetails from "../utilities/storeDetails";
+import defaultProps from "../utilities/defaultProps";
 import ImageContext from "../utilities/ImageContext";
 
 import defaultStyles from "../config/styles";
 import useAuth from "../auth/useAuth";
 import NavigationConstants from "../navigation/NavigationConstants";
-import storeDetails from "../utilities/storeDetails";
-import defaultProps from "../utilities/defaultProps";
 import echosApi from "../api/echos";
+import useAppState from "../hooks/useAppState";
+import ReportUserModal from "../components/ReportUserModal";
 
 const optionsVibrate = {
   enableVibrateFallback: true,
   ignoreAndroidSystemSettings: true,
 };
 
+// Some default values
+
+// for reply
 let defaultReply = {
   _id: "",
   message: "",
@@ -61,8 +66,10 @@ let defaultReply = {
   createdFor: "",
 };
 
+// for user
 let defaultUser = { name: "", picture: "", _id: "" };
 
+// for echo Message Modal
 let defaultEchoState = {
   visible: false,
   recipient: defaultProps.defaultEchoMessageRecipient,
@@ -71,12 +78,17 @@ let defaultEchoState = {
 
 function GroupChatScreen({ navigation, route }) {
   let incognito = route.params.incognito;
-  const { tackleProblem } = apiActivity;
-  let isUnmounting = false;
+
+  // hooks used
   const { user, setUser } = useAuth();
   const socket = useContext(SocketContext);
+  const appStateVisible = useAppState();
   const isFocused = useIsFocused();
   const listRef = useRef(null);
+
+  const { tackleProblem } = apiActivity;
+
+  let isUnmounting = false;
 
   const [isReady, setIsReady] = useState(false);
   const [group, setGroup] = useState(route.params.group);
@@ -89,7 +101,49 @@ function GroupChatScreen({ navigation, route }) {
     showInfoAlert: false,
   });
 
+  // States
+  const [deletingMessage, setDeletingMessage] = useState("");
   const [echoState, setEchoState] = useState(defaultEchoState);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [groupMessages, setGroupMessages] = useState([]);
+  const [reply, setReply] = useState(defaultReply);
+  const [blockingFromGroup, setBlockingFromGroup] = useState(false);
+  const [blockingPersonally, setBlockingPersonally] = useState(false);
+  const [showUserOptions, setShowUserOptions] = useState(false);
+  const [interestedUser, setInterestedUser] = useState(defaultUser);
+  const [changingInvitePermission, setChangingInvitePermission] =
+    useState(false);
+  const [openUserReport, setOpenUserReport] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmitUserReport = useCallback(
+    async (report) => {
+      if (!isUnmounting) {
+        setIsLoading(true);
+      }
+
+      const { ok, data, problem } = await usersApi.reportUser(
+        interestedUser._id,
+        report
+      );
+      if (ok && !isUnmounting) {
+        setIsLoading(false);
+        setOpenUserReport(false);
+        return setInfoAlert({
+          infoAlertMessage:
+            "Thank you for reporting the profile. We will look into this as soon as possible.",
+          showInfoAlert: true,
+        });
+      }
+
+      if (!isUnmounting) {
+        setIsLoading(false);
+        tackleProblem(problem, data, setInfoAlert);
+      }
+    },
+    [interestedUser._id]
+  );
+
   let showEchoMessage = false;
 
   const handleCloseEchoModal = useCallback(() => {
@@ -97,31 +151,12 @@ function GroupChatScreen({ navigation, route }) {
     setEchoState({ ...defaultEchoState, visible: false });
   });
 
-  const [showInviteModal, setShowInviteModal] = useState(false);
-
-  const [groupMessages, setGroupMessages] = useState([]);
-  const [reply, setReply] = useState({
-    message: "",
-    media: "",
-    createdBy: {
-      _id: "",
-      name: "",
-      picture: "",
-    },
-    createdFor: "",
-  });
-
-  const [blockingFromGroup, setBlockingFromGroup] = useState(false);
-  const [blockingPersonally, setBlockingPersonally] = useState(false);
-  const [showUserOptions, setShowUserOptions] = useState(false);
-  const [interestedUser, setInterestedUser] = useState(defaultUser);
-  const [changingInvitePermission, setChangingInvitePermission] =
-    useState(false);
-
   const handleCloseUserOptionsModal = useCallback(() => {
     setInterestedUser(defaultUser);
     setShowUserOptions(false);
   }, []);
+
+  // Chat message creator, user actions
 
   const handleAddEchoOptionPress = useCallback(() => {
     setShowUserOptions(false);
@@ -177,7 +212,10 @@ function GroupChatScreen({ navigation, route }) {
     }
   }, [interestedUser, group]);
 
-  const handleOpenReportUserModal = () => {};
+  const handleOpenReportUserModal = () => {
+    setOpenUserReport(true);
+    setShowUserOptions(false);
+  };
 
   // // REPLY ACTIONS
 
@@ -205,6 +243,26 @@ function GroupChatScreen({ navigation, route }) {
     },
     [reply]
   );
+
+  const deleteMessage = useCallback(async () => {
+    if (!isUnmounting) {
+      setDeletingMessage(reply._id);
+    }
+    const { ok, problem, data } = await groupsApi.deleteMessage(
+      group._id,
+      reply._id
+    );
+    if (ok && !isUnmounting) {
+      translateX.value = withTiming(800);
+      getCurrentMessages();
+      return setDeletingMessage("");
+    }
+
+    if (!isUnmounting) {
+      setDeletingMessage("");
+      tackleProblem(problem, data, setInfoAlert);
+    }
+  }, [reply]);
 
   const getCurrentMessages = useCallback(async () => {
     const { ok, data, problem } = await groupsApi.getMessages(group._id);
@@ -239,13 +297,11 @@ function GroupChatScreen({ navigation, route }) {
     socket.on(`addActive${group._id}`, listener2);
 
     const listener3 = (data) => {
-      if (activeUsers.filter((u) => u._id == data.activeUser._id).length) {
-        let newActiveUsers = activeUsers.filter(
-          (u) => u._id != data.activeUser
-        );
-        if (!isUnmounting) {
-          setActiveUsers(newActiveUsers);
-        }
+      let newActiveUsers = activeUsers.filter(
+        (u) => u._id != data.activeUser._id
+      );
+      if (!isUnmounting) {
+        setActiveUsers(newActiveUsers);
       }
     };
 
@@ -258,13 +314,20 @@ function GroupChatScreen({ navigation, route }) {
     };
   }, [groupMessages, group._id, activeUsers]);
 
+  // Update group messages when someone deletes any message
   useEffect(() => {
-    if (!isFocused) {
-      removeMeFromActiveList();
-    }
+    const listener = (data) => {
+      if (data.updatedBy != user._id) {
+        getCurrentMessages();
+      }
+    };
 
-    return () => removeMeFromActiveList();
-  }, [isFocused]);
+    socket.on(`updateGroupMessages${group._id}`, listener);
+
+    return () => {
+      socket.off(`updateGroupMessages${group._id}`, listener);
+    };
+  }, [group._id]);
 
   const addMeToActiveList = useCallback(async () => {
     const { ok, data, problem } = await groupsApi.addActive(
@@ -277,7 +340,7 @@ function GroupChatScreen({ navigation, route }) {
       return;
     }
     if (problem) return;
-  }, [group._id]);
+  }, [group._id, user]);
 
   const removeMeFromActiveList = useCallback(async () => {
     const { ok, data, problem } = await groupsApi.removeActive(
@@ -290,20 +353,36 @@ function GroupChatScreen({ navigation, route }) {
       return;
     }
     if (problem) return;
-  }, [group._id]);
+  }, [group._id, user]);
 
+  // On page mount, focused, unfocused and unmount actions
   useEffect(() => {
-    addMeToActiveList();
-    getCurrentMessages();
-    let intervalId = setInterval(() => {
-      addMeToActiveList();
-    }, 10000);
+    let intervalId;
+    if (!isUnmounting && isFocused) {
+      setReply(defaultReply);
+      getCurrentMessages();
+      if (!incognito) {
+        addMeToActiveList();
+        intervalId = setInterval(() => {
+          addMeToActiveList();
+        }, 20000);
+      }
+    }
+
+    if (!isFocused || appStateVisible !== "active") {
+      if (!isUnmounting && !incognito) {
+        removeMeFromActiveList();
+      }
+    }
 
     return () => {
       isUnmounting = true;
-      clearInterval(intervalId);
+      removeMeFromActiveList();
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
     };
-  }, []);
+  }, [isFocused, appStateVisible]);
 
   const handleSetTyping = useCallback(async () => {
     const { ok, problem } = await groupsApi.setTyping(group._id, user._id);
@@ -323,11 +402,24 @@ function GroupChatScreen({ navigation, route }) {
     []
   );
 
+  const handleAddEchoPress = useCallback((user) => {
+    navigation.navigate(NavigationConstants.ADD_ECHO_SCREEN, {
+      recipient: user,
+    });
+  }, []);
+
+  const handleSendThoughtsPress = useCallback((user) => {
+    navigation.navigate(NavigationConstants.SEND_THOUGHT_SCREEN, {
+      recipient: user,
+    });
+  }, []);
+
   const handleSendMessage = useCallback(
     async (textMessage, media) => {
-      translateX.value = withTiming(800);
-      listRef.current.scrollToOffset({ offset: -300, animated: true });
-      // stopCurrentUserTyping();
+      if (!isUnmounting && listRef.current) {
+        translateX.value = withTiming(800);
+        listRef.current.scrollToOffset({ offset: -300, animated: true });
+      }
 
       let newId =
         Date.now().toString(36) + Math.random().toString(36).substring(2);
@@ -374,19 +466,26 @@ function GroupChatScreen({ navigation, route }) {
     [group._id, groupMessages, reply]
   );
 
-  // MEDIA SEND ACTIVE CHAT
+  const handleOpenInviteModal = useCallback(() => {
+    setShowInviteModal(true);
+  }, []);
 
+  // MEDIA SEND ACTIVE CHAT
   const handleSendSelectedMedia = useCallback(
     async (uri) => {
-      setSendingMedia(true);
+      if (!isUnmounting) {
+        setSendingMedia(true);
+      }
 
       const { ok, data, problem } = await usersApi.getUploadedPhoto(uri);
-      if (ok) {
+      if (ok && !isUnmounting) {
         handleSendMessage("", data);
         return setSendingMedia(false);
       }
-      setSendingMedia(false);
-      if (problem) tackleProblem(problem, data, setInfoAlert);
+      if (!isUnmounting) {
+        setSendingMedia(false);
+        tackleProblem(problem, data, setInfoAlert);
+      }
     },
     [groupMessages]
   );
@@ -414,23 +513,6 @@ function GroupChatScreen({ navigation, route }) {
     },
     [interestedUser]
   );
-
-  const handleAddEchoPress = useCallback((user) => {
-    navigation.navigate(NavigationConstants.ADD_ECHO_SCREEN, {
-      recipient: user,
-    });
-  }, []);
-
-  const handleSendThoughtsPress = useCallback((user) => {
-    navigation.navigate(NavigationConstants.SEND_THOUGHT_SCREEN, {
-      recipient: user,
-    });
-  }, []);
-
-  // OPTION ACTIONS
-  const handleOpenInviteModal = useCallback(() => {
-    setShowInviteModal(true);
-  }, []);
 
   const handleChangeInvitePermission = useCallback(async () => {
     if (!isUnmounting) {
@@ -462,7 +544,6 @@ function GroupChatScreen({ navigation, route }) {
           group={group}
           onBackPress={handleBackPress}
           onOptionPress={handleOpenInviteModal}
-          onActiveUserImagePress={getEchoMessage}
         />
         <ScreenSub style={styles.screenSub}>
           <ChatBackgroundSelector>
@@ -476,7 +557,10 @@ function GroupChatScreen({ navigation, route }) {
                 onImageLongPress={handleMessageCreatorImageLongPress}
               />
             ) : (
-              <AppActivityIndicator color={defaultStyles.colors.secondary} />
+              <AppActivityIndicator
+                size={scale(35)}
+                color={defaultStyles.colors.white}
+              />
             )}
             {isFocused ? (
               <ApiContext.Provider value={{ sendingMedia, setSendingMedia }}>
@@ -493,6 +577,11 @@ function GroupChatScreen({ navigation, route }) {
                     style={styles.inputBox}
                     submit={handleSendMessage}
                     onCameraImageSelection={handleSendSelectedMedia}
+                    group={group}
+                    user={user}
+                    deleting={deletingMessage}
+                    onDeletePress={deleteMessage}
+                    messageLoading={!isReady}
                   />
                 </ImageContext.Provider>
               </ApiContext.Provider>
@@ -512,6 +601,7 @@ function GroupChatScreen({ navigation, route }) {
         onChangeInvitePermission={handleChangeInvitePermission}
         changingInvitePermission={changingInvitePermission}
       />
+      <LoadingIndicator visible={isLoading} />
       <GroupChatUserOptions
         blockingFromGroup={blockingFromGroup}
         blockingPersonally={blockingPersonally}
@@ -529,6 +619,12 @@ function GroupChatScreen({ navigation, route }) {
       <EchoMessageModal
         handleCloseModal={handleCloseEchoModal}
         state={echoState}
+      />
+      <ReportUserModal
+        handleSubmitUserReport={handleSubmitUserReport}
+        isLoading={isLoading}
+        openUserReport={openUserReport}
+        setOpenUserReport={setOpenUserReport}
       />
     </>
   );

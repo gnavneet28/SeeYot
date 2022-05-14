@@ -48,9 +48,13 @@ function GroupMessageInput({
   message,
   setMessage,
   onCameraImageSelection,
+  group,
+  user,
+  deleting,
+  onDeletePress,
+  messageLoading,
 }) {
   dayjs.extend(relativeTime);
-  const { user } = useAuth();
   let isUnmounting = false;
 
   useEffect(() => {
@@ -77,6 +81,7 @@ function GroupMessageInput({
 
   const handlePress = debounce(
     () => {
+      setHeight(35);
       submit(message, "");
       setMessage("");
     },
@@ -191,6 +196,12 @@ function GroupMessageInput({
     <>
       <Animated.View style={[styles.animatedContainer, rStyle]}>
         <GroupChatReplyBubble
+          deleting={deleting}
+          onDeletePress={onDeletePress}
+          showDelete={true}
+          canDelete={
+            reply.createdBy._id == user._id || user._id == group.createdBy._id
+          }
           onLayout={onLayout}
           style={styles.activeChatReplyContainer}
           messageContainerStyle={styles.groupChatReplyMessageContainerStyle}
@@ -242,7 +253,9 @@ function GroupMessageInput({
           />
           <TouchableOpacity
             disabled={
-              message.replace(/\s/g, "").length >= 1 && isConnected
+              message.replace(/\s/g, "").length >= 1 &&
+              isConnected &&
+              !messageLoading
                 ? false
                 : true
             }
@@ -251,7 +264,9 @@ function GroupMessageInput({
           >
             <Icon
               color={
-                message.replace(/\s/g, "").length >= 1 && isConnected
+                message.replace(/\s/g, "").length >= 1 &&
+                isConnected &&
+                !messageLoading
                   ? defaultStyles.colors.secondary
                   : defaultStyles.colors.lightGrey
               }

@@ -87,7 +87,11 @@ function EchoMessageModal({
           source={imageUri ? { uri: imageUri } : { uri: "user" }}
           style={styles.largeImageModalFallback}
         >
-          <Animatable.View animation="zoomIn">
+          <Animatable.View
+            useNativeDriver={true}
+            duration={500}
+            animation="zoomIn"
+          >
             <View style={styles.contentContainer}>
               <View style={styles.inlargedHeader}>
                 <MaterialIcons

@@ -18,7 +18,7 @@ import { showMessage } from "react-native-flash-message";
 import {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 
 import onBoarding from "../utilities/onBoarding";
@@ -149,13 +149,13 @@ function SendThoughtsScreen({ navigation, route }) {
   }, []);
 
   const handleRemoveReply = useCallback(() => {
-    translateX.value = withSpring(800);
+    translateX.value = withTiming(800);
     setReply(defaultReply);
   }, [reply]);
 
   const handleOnSelectReply = useCallback(
     (data) => {
-      translateX.value = withSpring(0);
+      translateX.value = withTiming(0);
       setReply(data);
     },
     [reply]
@@ -186,7 +186,7 @@ function SendThoughtsScreen({ navigation, route }) {
   );
 
   const stopCurrentUserTyping = useCallback(async () => {
-    await usersApi.stopTyping(recipient._id);
+    usersApi.stopTyping(recipient._id);
   }, [recipient._id, isFocused]);
 
   // ON FOCUS CHECK ADD RECIPIENT TO ACTIVE USERSLIST IF RECIPIENT ACTIVE FOR CURRENT USER AND USER HAS COME FROM NOTIFICATION
@@ -404,8 +404,10 @@ function SendThoughtsScreen({ navigation, route }) {
 
   const handleSendActiveMessage = useCallback(
     async (textMessage, media) => {
-      translateX.value = withSpring(800);
-      listRef.current.scrollToOffset({ offset: -300, animated: true });
+      if (!isUnmounting && listRef.current) {
+        translateX.value = withTiming(800);
+        listRef.current.scrollToOffset({ offset: -300, animated: true });
+      }
       stopCurrentUserTyping();
       if (!isRecipientActive && mounted) {
         return setShowAlert(true);

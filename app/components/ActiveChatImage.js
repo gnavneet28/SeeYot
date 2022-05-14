@@ -15,6 +15,7 @@ function ActiveChatImage({
   containerStyle,
   imageStyle,
   onLongPress,
+  delayLongPress,
 }) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -31,6 +32,7 @@ function ActiveChatImage({
       <TouchableWithoutFeedback onLongPress={onLongPress} onPress={handleOpen}>
         <View style={[styles.container, containerStyle]}>
           <ProgressiveImage
+            delayLongPress={delayLongPress}
             onLongPress={onLongPress}
             subStyle={[styles.image, imageStyle]}
             resizeMode="cover"

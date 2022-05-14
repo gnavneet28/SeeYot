@@ -32,7 +32,7 @@ function GroupChatUserOptions({
 
   let blockedPersonally = useMemo(() => {
     return user.blocked.filter((b) => b._id == interestedUser._id).length;
-  }, [group]);
+  }, [group, user]);
 
   return (
     <Modal
@@ -78,7 +78,7 @@ function GroupChatUserOptions({
               title="Block from Personal account"
             />
           ) : null}
-          {interestedUser._id != user._id ? (
+          {interestedUser._id == user._id ? (
             <ApiOption onPress={onReportUserPress} title="Report profile" />
           ) : null}
         </Animatable.View>

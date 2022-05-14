@@ -44,6 +44,7 @@ function ActiveChatReply({
           name="close"
           onPress={onClose}
           size={scale(15)}
+          style={styles.closeIcon}
         />
       ) : null}
     </View>
@@ -53,36 +54,36 @@ const styles = ScaledSheet.create({
   container: {
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: "10@s",
+    borderRadius: "5@s",
     flexDirection: "row",
     paddingHorizontal: "5@s",
     paddingVertical: "5@s",
-    //width: "90%",
+  },
+  closeIcon: {
+    marginLeft: "5@s",
   },
   messageDetailsContainer: {
     borderColor: defaultStyles.colors.yellow_Variant,
     borderLeftWidth: 2,
-    borderRadius: "5@s",
+    borderRadius: "2@s",
     flexShrink: 1,
     justifyContent: "center",
     paddingLeft: "5@s",
-    // width: "100%",
   },
   message: {
     fontSize: "11@s",
     paddingBottom: 0,
     paddingTop: 0,
-    //backgroundColor: "tomato",
   },
   creator: {
     color: defaultStyles.colors.secondary,
+    fontSize: "13@s",
     paddingBottom: 0,
     paddingTop: 0,
-    fontSize: "13@s",
   },
   imageContainerStyle: {
-    width: "40@s",
     height: "40@s",
+    width: "40@s",
   },
 });
 

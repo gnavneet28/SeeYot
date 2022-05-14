@@ -5,6 +5,7 @@ import {
   ScrollView,
   ImageBackground,
   Share,
+  Pressable,
 } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
@@ -44,6 +45,7 @@ import useAuth from "../auth/useAuth";
 
 import groupsApi from "../api/groups";
 import usersApi from "../api/users";
+import ImageModal from "./ImageModal";
 
 const optionsVibrate = {
   enableVibrateFallback: true,
@@ -75,6 +77,24 @@ function GroupScreen({ navigation, route }) {
   const [showDeleteGroupAlert, setShowDeleteGroupAlert] = useState(false);
 
   const [openPasswordModal, setOpenPasswordModal] = useState(false);
+  const [imageModal, setImageModal] = useState({
+    isVisible: false,
+    image: "",
+  });
+
+  const handleCloseImageModal = () => {
+    setImageModal({
+      isVisible: false,
+      image: "",
+    });
+  };
+
+  const handleShowGroupPicture = () => {
+    setImageModal({
+      image: group.picture,
+      isVisible: true,
+    });
+  };
 
   const handleHideDeleteGroupAlert = useCallback(() => {
     setShowDeleteGroupAlert(false);
@@ -436,32 +456,38 @@ Do not have permission to view group.
               >
                 <View style={styles.scrollView}>
                   <View style={styles.groupDisplayPicture}>
-                    <ImageBackground
-                      resizeMode={group.picture ? "cover" : "contain"}
-                      source={{
-                        uri: group.picture ? group.picture : "defaultgroupdp",
-                      }}
-                      style={styles.imageBackground}
-                    >
-                      <View style={styles.groupWallActionContainer}>
-                        {group.createdBy._id == user._id ? (
-                          <TouchableOpacity
-                            onPress={openGroupPictureEditOptions}
-                            style={styles.editPhoto}
-                            activeOpacity={0.7}
-                          >
-                            <MaterialIcons
-                              name="edit"
-                              size={scale(15)}
-                              color={defaultStyles.colors.yellow_Variant}
-                            />
-                          </TouchableOpacity>
-                        ) : null}
-                      </View>
-                    </ImageBackground>
+                    <Pressable onPress={handleShowGroupPicture}>
+                      <ImageBackground
+                        resizeMode={group.picture ? "cover" : "contain"}
+                        source={{
+                          uri: group.picture ? group.picture : "defaultgroupdp",
+                        }}
+                        style={styles.imageBackground}
+                      >
+                        <View style={styles.groupWallActionContainer}>
+                          {group.createdBy._id == user._id ? (
+                            <TouchableOpacity
+                              onPress={openGroupPictureEditOptions}
+                              style={styles.editPhoto}
+                              activeOpacity={0.7}
+                            >
+                              <MaterialIcons
+                                name="edit"
+                                size={scale(15)}
+                                color={defaultStyles.colors.yellow_Variant}
+                              />
+                            </TouchableOpacity>
+                          ) : null}
+                        </View>
+                      </ImageBackground>
+                    </Pressable>
                     <View style={styles.groupQrCodeContainer}>
                       <QRCode
-                        value={group.qrCodeLink}
+                        value={
+                          group.canInvite || group.createdBy._id == user._id
+                            ? group.qrCodeLink
+                            : "notValid"
+                        }
                         enableLinearGradient={true}
                         quietZone={10}
                         size={scale(95)}
@@ -471,18 +497,20 @@ Do not have permission to view group.
 
                   <AppText style={styles.groupName}>{group.name}</AppText>
 
-                  <TouchableOpacity
-                    onPress={handleInvitePress}
-                    activeOpacity={0.8}
-                    style={styles.shareIconContainer}
-                  >
-                    <AppText style={styles.shareText}>Share</AppText>
-                    <MaterialIcons
-                      name="share"
-                      color={defaultStyles.colors.white}
-                      size={scale(12)}
-                    />
-                  </TouchableOpacity>
+                  {group.canInvite || group.createdBy._id === user._id ? (
+                    <TouchableOpacity
+                      onPress={handleInvitePress}
+                      activeOpacity={0.8}
+                      style={styles.shareIconContainer}
+                    >
+                      <AppText style={styles.shareText}>Share</AppText>
+                      <MaterialIcons
+                        name="share"
+                        color={defaultStyles.colors.white}
+                        size={scale(12)}
+                      />
+                    </TouchableOpacity>
+                  ) : null}
 
                   <View style={styles.groupInfoContainer}>
                     {group.createdBy._id == user._id ? (
@@ -609,6 +637,12 @@ Do not have permission to view group.
         group={group}
         openPasswordModal={openPasswordModal}
         setOpenPasswordModal={setOpenPasswordModal}
+      />
+      <ImageModal
+        handleCloseImageModal={handleCloseImageModal}
+        visible={imageModal.isVisible}
+        image={imageModal.image}
+        title="Group Display Picture"
       />
     </>
   );

@@ -2,10 +2,11 @@ import React, { memo } from "react";
 import { View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 
 import defaultStyles from "../config/styles";
 import ActiveChatImage from "./ActiveChatImage";
+import ApiProcessingContainer from "./ApiProcessingContainer";
 import AppText from "./AppText";
 
 function GroupChatReplyBubble({
@@ -17,7 +18,10 @@ function GroupChatReplyBubble({
   style,
   messageContainerStyle,
   onLayout,
-  onShowInfo = () => alert("hi"),
+  showDelete = false,
+  canDelete = false,
+  deleting = false,
+  onDeletePress = () => {},
 }) {
   return (
     <View onLayout={onLayout} style={[styles.container, style]}>
@@ -47,14 +51,20 @@ function GroupChatReplyBubble({
           onPress={onClose}
           size={scale(15)}
         />
-      ) : (
-        <MaterialIcons
-          name="more-vert"
-          size={scale(15)}
-          color={defaultStyles.colors.dark_Variant}
-          onPress={onShowInfo}
-        />
-      )}
+      ) : null}
+      {canDelete && showDelete ? (
+        <ApiProcessingContainer
+          processing={deleting}
+          style={styles.deleteContainer}
+        >
+          <MaterialIcons
+            name="delete"
+            color={defaultStyles.colors.danger}
+            size={scale(14)}
+            onPress={onDeletePress}
+          />
+        </ApiProcessingContainer>
+      ) : null}
     </View>
   );
 }
@@ -62,36 +72,43 @@ const styles = ScaledSheet.create({
   container: {
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: "10@s",
+    borderRadius: "5@s",
     flexDirection: "row",
     paddingHorizontal: "5@s",
     paddingVertical: "5@s",
-    //width: "90%",
+  },
+  deleteContainer: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.lightGrey,
+    borderRadius: "20@s",
+    height: "25@s",
+    justifyContent: "center",
+    marginLeft: "10@s",
+    width: "25@s",
   },
   messageDetailsContainer: {
     borderColor: defaultStyles.colors.yellow_Variant,
     borderLeftWidth: 2,
-    borderRadius: "5@s",
+    borderRadius: "2@s",
     flexShrink: 1,
     justifyContent: "center",
     paddingLeft: "5@s",
-    // width: "100%",
   },
   message: {
     fontSize: "11@s",
     paddingBottom: 0,
     paddingTop: 0,
-    //backgroundColor: "tomato",
   },
   creator: {
     color: defaultStyles.colors.secondary,
+    fontSize: "13@s",
     paddingBottom: 0,
     paddingTop: 0,
-    fontSize: "13@s",
   },
   imageContainerStyle: {
-    width: "40@s",
     height: "40@s",
+    width: "40@s",
   },
 });
 

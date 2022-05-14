@@ -17,6 +17,7 @@ function MyGroupCard({
   onAddEchoPress,
   onSendThoughtsPress,
   user = { _id: "" },
+  onBlockedButtonPress = () => {},
 }) {
   const socket = useContext(SocketContext);
 
@@ -79,7 +80,9 @@ function MyGroupCard({
 
         <View style={styles.groupFooter}>
           {group.createdBy._id == user._id ? (
-            <AppText style={styles.blocked}>Blocked</AppText>
+            <AppText onPress={onBlockedButtonPress} style={styles.blocked}>
+              {group.blocked.length} Blocked
+            </AppText>
           ) : null}
           <AppText onPress={onPress} style={styles.visitGroupButton}>
             Visit

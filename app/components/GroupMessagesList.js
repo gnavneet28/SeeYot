@@ -27,6 +27,7 @@ function GroupMessagesList({
         onImagePress={() => onImagePress(item.createdBy)}
         onSelectReply={() =>
           onSelectReply({
+            _id: item._id,
             createdBy: item.createdBy,
             message: item.message ? item.message : "",
             media: item.media ? item.media : "",

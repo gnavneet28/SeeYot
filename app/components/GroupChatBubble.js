@@ -21,50 +21,54 @@ function GroupChatBubble({
   onImageLongPress = () => {},
 }) {
   return (
-    <TouchableWithoutFeedback onLongPress={onSelectReply}>
-      <>
+    // <TouchableWithoutFeedback delayLongPress={200} onLongPress={onSelectReply}>
+    <>
+      <View
+        style={[
+          styles.mainContainer,
+          mine ? styles.myMessageContainer : styles.notMyMessageContainer,
+        ]}
+      >
+        {groupMessage.reply.message || groupMessage.reply.media ? (
+          <GroupChatReplyBubble
+            showDelete={false}
+            style={{
+              minWidth: "20%",
+              maxWidth: "50%",
+              alignSelf: mine ? "flex-end" : "flex-start",
+              borderBottomRightRadius: !mine ? scale(8) : scale(3),
+              borderBottomLeftRadius: !mine ? scale(3) : scale(8),
+              marginBottom: scale(2),
+            }}
+            media={groupMessage.reply.media}
+            message={groupMessage.reply.message}
+            creator={
+              groupMessage.reply.createdBy._id == user._id
+                ? "You"
+                : groupMessage.reply.createdBy.name
+            }
+            show={false}
+          />
+        ) : null}
         <View
           style={[
-            styles.mainContainer,
-            mine ? styles.myMessageContainer : styles.notMyMessageContainer,
+            styles.message,
+            mine ? { flexDirection: "row-reverse" } : { flexDirection: "row" },
           ]}
         >
-          {groupMessage.reply.message || groupMessage.reply.media ? (
-            <GroupChatReplyBubble
-              style={{
-                minWidth: "20%",
-                maxWidth: "50%",
-                alignSelf: mine ? "flex-end" : "flex-start",
-                borderBottomRightRadius: !mine ? scale(8) : scale(3),
-                borderBottomLeftRadius: !mine ? scale(3) : scale(8),
-                marginBottom: scale(2),
-              }}
-              media={groupMessage.reply.media}
-              message={groupMessage.reply.message}
-              creator={
-                groupMessage.reply.createdBy._id == user._id
-                  ? "You"
-                  : groupMessage.reply.createdBy.name
-              }
-              show={false}
-            />
-          ) : null}
-          <View
-            style={[
-              styles.message,
-              mine
-                ? { flexDirection: "row-reverse" }
-                : { flexDirection: "row" },
-            ]}
+          <AppImage
+            delayLongPress={200}
+            onLongPress={onImageLongPress}
+            onPress={onImagePress}
+            imageUrl={groupMessage.createdBy.picture}
+            style={styles.image}
+            subStyle={styles.image}
+          />
+
+          <TouchableWithoutFeedback
+            delayLongPress={200}
+            onLongPress={onSelectReply}
           >
-            <AppImage
-              delayLongPress={200}
-              onLongPress={onImageLongPress}
-              onPress={onImagePress}
-              imageUrl={groupMessage.createdBy.picture}
-              style={styles.image}
-              subStyle={styles.image}
-            />
             <View
               style={[
                 styles.cloud,
@@ -85,6 +89,7 @@ function GroupChatBubble({
                   }}
                   mine={mine}
                   onLongPress={onSelectReply}
+                  delayLongPress={200}
                   uri={groupMessage.media}
                 />
               ) : (
@@ -109,17 +114,19 @@ function GroupChatBubble({
                           : defaultStyles.colors.dark,
                       },
                     ],
-                    onLongPress: onSelectReply,
+                    // onLongPress: onSelectReply,
+                    // delayLongPress: 200,
                   }}
                   email={true}
                   phone="sms"
                 />
               )}
             </View>
-          </View>
+          </TouchableWithoutFeedback>
         </View>
-      </>
-    </TouchableWithoutFeedback>
+      </View>
+    </>
+    // </TouchableWithoutFeedback>
   );
 }
 

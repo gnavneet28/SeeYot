@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import { View, Modal } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
@@ -13,6 +13,8 @@ import Selection from "./Selection";
 import useAuth from "../auth/useAuth";
 import defaultProps from "../utilities/defaultProps";
 
+import InvitedUsersContext from "../utilities/invitedUsersContext";
+
 function InviteUsersModal({
   openInviteModal,
   setOpenInviteModal,
@@ -21,6 +23,8 @@ function InviteUsersModal({
   changingInvitePermission = false,
 }) {
   const { user } = useAuth();
+
+  const [invitedUsers, setInvitedUsers] = useState([]);
 
   return (
     <Modal
@@ -51,13 +55,17 @@ function InviteUsersModal({
               />
             </View>
           ) : null}
-
-          <InviteUserList users={user.contacts} groupName={group.name} />
+          <InvitedUsersContext.Provider
+            value={{ invitedUsers, setInvitedUsers }}
+          >
+            <InviteUserList users={user.contacts} groupName={group.name} />
+          </InvitedUsersContext.Provider>
         </View>
       </View>
     </Modal>
   );
 }
+
 const styles = ScaledSheet.create({
   canInviteOptionContainer: {
     alignItems: "center",
@@ -84,9 +92,9 @@ const styles = ScaledSheet.create({
     borderTopLeftRadius: "10@s",
     borderTopRightRadius: "10@s",
     bottom: 0,
-    height: "350@s",
+    height: "380@s",
     overflow: "hidden",
-    paddingBottom: "15@s",
+    paddingBottom: "5@s",
     paddingHorizontal: "10@s",
     paddingTop: "20@s",
     width: "100%",

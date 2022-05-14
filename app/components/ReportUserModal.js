@@ -15,30 +15,29 @@ import AppText from "./AppText";
 import AppButton from "./AppButton";
 import Backdrop from "./Backdrop";
 
-function EditGroupInfoModal({
-  handleSubmitInfoChange,
-  isConnected,
+function ReportUserModal({
+  handleSubmitUserReport,
   isLoading,
-  openGroupInfo,
-  setOpenGroupInfo,
-  group = { information: "" },
+  openUserReport,
+  setOpenUserReport,
 }) {
-  const [groupInfo, setGroupInfo] = useState(group.information);
+  const [userReportInfo, setUserReportInfo] = useState("");
   const handleDismissKeyboard = () => Keyboard.dismiss();
   const [height, setHeight] = useState(0);
 
   const onSubmit = () => {
-    handleSubmitInfoChange(groupInfo);
+    handleSubmitUserReport(userReportInfo);
+    setUserReportInfo("");
   };
 
-  const handleCloseGroupInfo = () => setOpenGroupInfo(false);
+  const handleCloseGroupInfo = () => setOpenUserReport(false);
 
   return (
     <Modal
       animationType="slide"
       onRequestClose={handleCloseGroupInfo}
       transparent={true}
-      visible={openGroupInfo}
+      visible={openUserReport}
     >
       <TouchableWithoutFeedback onPress={handleDismissKeyboard}>
         <View style={styles.groupInfoModal}>
@@ -53,18 +52,18 @@ function EditGroupInfoModal({
           </View>
           <View style={styles.optionsContainerReport}>
             <AppText style={styles.reportProblemTitle}>
-              Edit Group Information
+              Report this user
             </AppText>
             <TextInput
               editable={!isLoading}
               maxLength={500}
               multiline={true}
-              onChangeText={setGroupInfo}
-              placeholder="A short description of group..."
-              value={groupInfo}
+              onChangeText={setUserReportInfo}
+              placeholder="What is this about..."
+              value={userReportInfo}
               style={[
                 styles.groupInfoInput,
-                { height: Math.min(100, Math.max(60, height)) },
+                { height: Math.min(100, Math.max(50, height)) },
               ]}
               onContentSizeChange={(event) =>
                 setHeight(event.nativeEvent.contentSize.height)
@@ -72,18 +71,17 @@ function EditGroupInfoModal({
             />
             <View style={styles.actionContainer}>
               <AppText style={styles.groupInfoLength}>
-                {groupInfo.length}/500
+                {userReportInfo.length}/500
               </AppText>
               <AppButton
-                disabled={isConnected && !isLoading ? false : true}
+                disabled={!isLoading ? false : true}
                 onPress={onSubmit}
                 style={[
                   styles.submitGroupInfoButton,
                   {
-                    backgroundColor:
-                      isConnected && !isLoading
-                        ? defaultStyles.colors.yellow_Variant
-                        : defaultStyles.colors.light,
+                    backgroundColor: !isLoading
+                      ? defaultStyles.colors.yellow_Variant
+                      : defaultStyles.colors.light,
                   },
                 ]}
                 subStyle={styles.submitGroupInfoButtonSub}
@@ -171,4 +169,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default memo(EditGroupInfoModal);
+export default memo(ReportUserModal);

@@ -72,6 +72,7 @@ const styles = ScaledSheet.create({
     justifyContent: "space-between",
     paddingVertical: "8@s",
     textAlign: "center",
+    textAlignVertical: "center",
     width: "100%",
   },
   listContainer: {

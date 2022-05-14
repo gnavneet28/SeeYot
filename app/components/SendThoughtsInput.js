@@ -103,6 +103,7 @@ function SendThoughtsInput({
     () => {
       activeChat ? submit(message, "") : submit(message);
       setMessage("");
+      setHeight(35);
     },
     1000,
     true

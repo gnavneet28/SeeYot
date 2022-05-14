@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useMemo, useEffect } from "react";
 import { View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import { showMessage } from "react-native-flash-message";
@@ -11,6 +11,7 @@ import InfoAlert from "./InfoAlert";
 
 import apiActivity from "../utilities/apiActivity";
 import defaultProps from "../utilities/defaultProps";
+import InvitedUsersContext from "../utilities/invitedUsersContext";
 
 import defaultStyles from "../config/styles";
 import groupsApi from "../api/groups";
@@ -22,6 +23,15 @@ function InviteUserCard({ contact, style, groupName }) {
     showInfoAlert: false,
   });
   const { tackleProblem } = apiActivity;
+  const { invitedUsers, setInvitedUsers } = useContext(InvitedUsersContext);
+
+  let isUnmounting = false;
+
+  useEffect(() => {
+    return () => (isUnmounting = false);
+  }, []);
+
+  let invited = invitedUsers.filter((u) => u._id == contact._id).length;
 
   const handleCloseInfoAlert = () => {
     setInfoAlert({
@@ -38,6 +48,15 @@ function InviteUserCard({ contact, style, groupName }) {
     );
     if (ok) {
       setIsProcessing(false);
+
+      let newList = [...invitedUsers, contact];
+      setInvitedUsers(newList);
+
+      setTimeout(() => {
+        let newList = invitedUsers.filter((u) => u._id != contact._id);
+        setInvitedUsers(newList);
+      }, 10000);
+
       return showMessage({
         ...defaultProps.alertMessageConfig,
         type: "success",
@@ -73,9 +92,16 @@ function InviteUserCard({ contact, style, groupName }) {
         <View style={styles.buttonContainer}>
           <ApiProcessingContainer processing={isProcessing}>
             <AppButton
-              title="Invite"
-              disabled={isProcessing ? true : false}
-              style={styles.inviteButton}
+              title={invited ? "Invited" : "Invite"}
+              disabled={isProcessing || invited ? true : false}
+              style={[
+                styles.inviteButton,
+                {
+                  backgroundColor: invited
+                    ? defaultStyles.colors.green
+                    : defaultStyles.colors.secondary,
+                },
+              ]}
               subStyle={styles.inviteButtonSub}
               onPress={handleInviteButtonPress}
             />

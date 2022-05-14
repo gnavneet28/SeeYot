@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { TouchableOpacity } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
@@ -9,18 +9,39 @@ import ActiveUsersList from "./ActiveUsersList";
 import defaultStyles from "../config/styles";
 import AppModal from "./AppModal";
 import AppHeader from "./AppHeader";
+import EchoMessageModal from "./EchoMessageModal";
+
+import defaultProps from "../utilities/defaultProps";
+
+import usersApi from "../api/users";
+import echosApi from "../api/echos";
+import useAuth from "../auth/useAuth";
+
+let defaultEchoState = {
+  visible: false,
+  recipient: defaultProps.defaultEchoMessageRecipient,
+  echoMessage: { message: "" },
+};
 
 function TotalActiveUsers({
   totalActiveUsers,
   conatinerStyle,
   onSendThoughtsPress,
   onAddEchoPress,
-  onActiveUserImagePress = () => {},
 }) {
   const [showList, setShowList] = useState(false);
+  const { user } = useAuth();
 
   const handleListHeaderLeftPress = () => setShowList(false);
   const handleOpenList = () => setShowList(true);
+
+  const [echoState, setEchoState] = useState(defaultEchoState);
+  let showEchoMessage = false;
+
+  const handleCloseEchoModal = useCallback(() => {
+    showEchoMessage = false;
+    setEchoState({ ...defaultEchoState, visible: false });
+  });
 
   const handleEchoPress = (user) => {
     setShowList(false);
@@ -30,6 +51,22 @@ function TotalActiveUsers({
     setShowList(false);
     onSendThoughtsPress(user);
   };
+
+  const getEchoMessage = useCallback(
+    async (recipient) => {
+      showEchoMessage = true;
+      if (user._id != recipient._id) {
+        usersApi.updatePhotoTapsCount(recipient._id);
+      }
+      setEchoState({ ...defaultEchoState, visible: true, recipient });
+      const { data, problem, ok } = await echosApi.getEcho(recipient._id);
+      if (ok && showEchoMessage === true) {
+        setEchoState({ recipient, visible: true, echoMessage: data });
+      }
+    },
+    [echoState]
+  );
+
   return (
     <>
       <TouchableOpacity
@@ -61,7 +98,11 @@ function TotalActiveUsers({
           onAddEchoPress={handleEchoPress}
           onSendThoughtsPress={handleSendThoughtsPress}
           users={totalActiveUsers}
-          onImagePress={onActiveUserImagePress}
+          onImagePress={getEchoMessage}
+        />
+        <EchoMessageModal
+          handleCloseModal={handleCloseEchoModal}
+          state={echoState}
         />
       </AppModal>
     </>
