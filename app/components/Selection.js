@@ -19,6 +19,7 @@ function Selection({
   iconSize = scale(14),
   fontStyle,
   processing,
+  loadingIndicatorSize = scale(16),
 }) {
   const isConnected = useConnection();
   const doNull = () => {};
@@ -29,7 +30,11 @@ function Selection({
         onPress={isConnected ? onPress : doNull}
         style={[[styles.checkBox, containerStyle]]}
       >
-        <ApiProcessingContainer processing={processing}>
+        <ApiProcessingContainer
+          size={loadingIndicatorSize}
+          style={styles.processingContainer}
+          processing={processing}
+        >
           {opted ? (
             <Feather
               size={iconSize}
@@ -69,6 +74,9 @@ const styles = ScaledSheet.create({
     justifyContent: "center",
     marginHorizontal: "5@s",
     width: "25@s",
+  },
+  processingContainer: {
+    padding: 0,
   },
   value: {
     flexShrink: 1,
