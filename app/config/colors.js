@@ -7,6 +7,7 @@ export default {
   dark: "#000000",
   darkGreen: "#006400",
   green: "#228B22",
+  headerColor: "#343436",
   light: "#F7F4F4",
   lightGrey: "#D3D3D3",
   placeholder: "#6B6B6B",

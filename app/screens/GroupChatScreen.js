@@ -13,7 +13,6 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
-import { showMessage } from "react-native-flash-message";
 
 import Screen from "../components/Screen";
 import ScreenSub from "../components/ScreenSub";
@@ -27,27 +26,26 @@ import EchoMessageModal from "../components/EchoMessageModal";
 import InviteUsersModal from "../components/InviteUsersModal";
 import GroupChatUserOptions from "../components/GroupChatUserOptions";
 import LoadingIndicator from "../components/LoadingIndicator";
-import InvitedUsersContext from "../utilities/invitedUsersContext";
+import ReportUserModal from "../components/ReportUserModal";
 
-import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
 import ApiContext from "../utilities/apiContext";
+import debounce from "../utilities/debounce";
+import defaultProps from "../utilities/defaultProps";
+import ImageContext from "../utilities/ImageContext";
+import InvitedUserContext from "../utilities/invitedUserContext";
+import InvitedUsersContext from "../utilities/invitedUsersContext";
+import storeDetails from "../utilities/storeDetails";
 
 import { SocketContext } from "../api/socketClient";
 import groupsApi from "../api/groups";
 import usersApi from "../api/users";
-
-import storeDetails from "../utilities/storeDetails";
-import defaultProps from "../utilities/defaultProps";
-import ImageContext from "../utilities/ImageContext";
 
 import defaultStyles from "../config/styles";
 import useAuth from "../auth/useAuth";
 import NavigationConstants from "../navigation/NavigationConstants";
 import echosApi from "../api/echos";
 import useAppState from "../hooks/useAppState";
-import ReportUserModal from "../components/ReportUserModal";
-import InvitedUserContext from "../utilities/invitedUserContext";
 
 const optionsVibrate = {
   enableVibrateFallback: true,

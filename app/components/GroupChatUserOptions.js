@@ -78,7 +78,7 @@ function GroupChatUserOptions({
               title="Block from Personal account"
             />
           ) : null}
-          {interestedUser._id == user._id ? (
+          {interestedUser._id != user._id ? (
             <ApiOption onPress={onReportUserPress} title="Report profile" />
           ) : null}
         </Animatable.View>

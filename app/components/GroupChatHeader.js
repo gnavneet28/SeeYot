@@ -13,7 +13,6 @@ import useAuth from "../auth/useAuth";
 import TotalActiveUsers from "./TotalActiveUsers";
 
 const typingIndicator = "typing.json";
-const headerColor = "#343436";
 
 let timeOut;
 let TIMER_LENGTH = 2000;
@@ -86,10 +85,7 @@ function GroupChatHeader({
               autoPlay
               loop
               source={typingIndicator}
-              style={{
-                width: scale(30),
-                height: scale(30),
-              }}
+              style={styles.animatedTyping}
             />
           ) : (
             <AppImage
@@ -133,9 +129,13 @@ const styles = ScaledSheet.create({
     textAlignVertical: "center",
     width: "100%",
   },
+  animatedTyping: {
+    height: "30@s",
+    width: "30@s",
+  },
   container: {
     alignItems: "center",
-    backgroundColor: headerColor,
+    backgroundColor: defaultStyles.colors.primary,
     borderTopRightRadius: "20@s",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -143,48 +143,47 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   leftSectionMainContainer: {
-    alignItems: "flex-end",
+    alignItems: "center",
     backgroundColor: defaultStyles.colors.primary,
-    borderBottomRightRadius: "40@s",
     height: "100%",
-    justifyContent: "flex-end",
-    minHeight: "70@s",
-    width: "100@s",
+    justifyContent: "space-between",
+    minHeight: "55@s",
+    width: "85@s",
+    flexDirection: "row",
+    paddingHorizontal: "10@s",
   },
   imageContainer: {
     alignItems: "center",
-    borderRadius: "25@s",
+    borderRadius: "19@s",
     borderWidth: "1.5@s",
     borderColor: defaultStyles.colors.white,
-    height: "50@s",
+    height: "37@s",
     justifyContent: "center",
-    marginBottom: "15@s",
-    marginRight: "15@s",
     overflow: "hidden",
-    width: "50@s",
+    width: "37@s",
   },
   image: {
-    borderRadius: "24@s",
-    height: "48@s",
-    width: "48@s",
+    borderRadius: "18@s",
+    height: "35@s",
+    width: "35@s",
   },
   imageSub: {
-    borderRadius: "24@s",
-    height: "48@s",
-    width: "48@s",
+    borderRadius: "18@s",
+    height: "35@s",
+    width: "35@s",
   },
   icon: {
-    left: "10@s",
-    position: "absolute",
-    top: "5@s",
+    // left: "10@s",
+    // position: "absolute",
+    // top: "5@s",
   },
   middleSectionContainer: {
     alignItems: "center",
-    backgroundColor: headerColor,
+    backgroundColor: defaultStyles.colors.primary,
     flexShrink: 1,
     justifyContent: "center",
     marginHorizontal: "5@s",
-    minHeight: "70@s",
+    minHeight: "55@s",
     paddingTop: "5@s",
     width: "100%",
   },
