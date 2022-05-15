@@ -201,7 +201,9 @@ function AppNavigator(props) {
   const handleDynamicLink = (link) => {
     // Handle dynamic link inside your own application
     if (link) {
-      if (link.url) {
+      if (
+        link.url !== "https://play.google.com/store/apps/details?id=com.seeyot"
+      ) {
         let name;
         let password;
         var regex = /[?&]([^=#]+)=([^&#]*)/g,
@@ -211,7 +213,7 @@ function AppNavigator(props) {
           params[match[1]] = match[2];
         }
 
-        for (key in params) {
+        for (let key in params) {
           if (key == "a") {
             name = params[key];
           } else if (key == "b") {
@@ -240,7 +242,10 @@ function AppNavigator(props) {
       .getInitialLink()
       .then((link) => {
         if (link) {
-          if (link.url) {
+          if (
+            link.url !==
+            "https://play.google.com/store/apps/details?id=com.seeyot"
+          ) {
             let name;
             let password;
             var regex = /[?&]([^=#]+)=([^&#]*)/g,
@@ -250,7 +255,7 @@ function AppNavigator(props) {
               params[match[1]] = match[2];
             }
 
-            for (key in params) {
+            for (let key in params) {
               if (key == "a") {
                 name = params[key];
               } else if (key == "b") {
