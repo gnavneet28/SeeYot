@@ -54,7 +54,7 @@ function AddContactsScreen({ navigation }) {
   ] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
-  const [apiProcessing, setApiProcessing] = useState(false);
+  const [apiProcessing, setApiProcessing] = useState("");
 
   // Alert Action
 
@@ -272,8 +272,6 @@ function AddContactsScreen({ navigation }) {
           iconRightCategory="MaterialCommunityIcons"
           rightIcon="crown-outline"
           onPressRight={handleHeaderRightPress}
-          //rightOptionContainerStyle={styles.headerRightOptionStyle}
-          // rightIconColor={defaultStyles.colors.secondary}
         />
         <ScreenSub>
           {!isReady ? (

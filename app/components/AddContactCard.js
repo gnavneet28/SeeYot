@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useContext } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View } from "react-native";
 import LottieView from "lottie-react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
@@ -7,6 +7,7 @@ import AppButton from "./AppButton";
 import AppImage from "./AppImage";
 import AppText from "./AppText";
 import InfoAlert from "../components/InfoAlert";
+import ApiProcessingContainer from "./ApiProcessingContainer";
 
 import useAuth from "../auth/useAuth";
 import usersApi from "../api/users";
@@ -21,7 +22,6 @@ import defaultStyles from "../config/styles";
 function AddContactCard({ contact, onInvitePress, style, isConnected }) {
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
   const { user, setUser } = useAuth();
-  const [processing, setProcessing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
@@ -44,8 +44,7 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
   const handleAddPress = useCallback(
     debounce(
       async () => {
-        setApiProcessing(true);
-        setProcessing(true);
+        setApiProcessing(contact._id);
 
         const { ok, data, problem } = await usersApi.addContact(
           contact.phoneNumber,
@@ -55,11 +54,10 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
         if (ok) {
           await storeDetails(data.user);
           setUser(data.user);
-          setApiProcessing(false);
-          return setProcessing(false);
+          return setApiProcessing("");
         }
-        setProcessing(false);
-        setApiProcessing(false);
+
+        setApiProcessing("");
         tackleProblem(problem, data, setInfoAlert);
       },
       1000,
@@ -67,6 +65,15 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
     ),
     [user, contact]
   );
+
+  const showInternetNotConnected = useCallback(() => {
+    setInfoAlert({
+      infoAlertMessage: "No internet connection.",
+      showInfoAlert: true,
+    });
+  });
+
+  console.log(contact.name, isConnected);
 
   if (!contact.name)
     return (
@@ -97,12 +104,10 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
 
       {contact.isRegistered ? (
         <View style={styles.buttonContainer}>
-          {!processing ? (
+          <ApiProcessingContainer processing={apiProcessing === contact._id}>
             <AppButton
               title={inContacts ? "Added" : "Add"}
-              disabled={
-                inContacts || apiProcessing || !isConnected ? true : false
-              }
+              disabled={inContacts || apiProcessing ? true : false}
               style={[
                 styles.addButton,
                 {
@@ -119,25 +124,16 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
                     : defaultStyles.colors.white,
                 },
               ]}
-              onPress={handleAddPress}
+              onPress={isConnected ? handleAddPress : showInternetNotConnected}
             />
-          ) : (
-            <ActivityIndicator
-              size={scale(18)}
-              color={defaultStyles.colors.tomato}
-            />
-          )}
+          </ApiProcessingContainer>
         </View>
       ) : (
         <AppButton
           title="Invite"
           onPress={onInvitePress}
           style={[styles.inviteButton]}
-          subStyle={{
-            color: defaultStyles.colors.blue,
-            fontSize: scale(14),
-            letterSpacing: 1,
-          }}
+          subStyle={styles.inviteButtonSub}
         />
       )}
       <InfoAlert
@@ -227,6 +223,11 @@ const styles = ScaledSheet.create({
     height: "32@s",
     marginRight: "5@s",
     width: "60@s",
+  },
+  inviteButtonSub: {
+    color: defaultStyles.colors.blue,
+    fontSize: "14@s",
+    letterSpacing: 1,
   },
 });
 
