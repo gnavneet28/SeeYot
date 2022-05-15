@@ -64,6 +64,7 @@ function HelpScreen({ navigation }) {
             onDataPress={handleOpenMail}
             size={scale(20)}
             title="Email"
+            iconCategory={"MaterialCommunityIcons"}
           />
         </View>
         <Heading
