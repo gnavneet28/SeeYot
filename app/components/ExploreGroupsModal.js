@@ -128,6 +128,7 @@ const ExploreGroupsModal = ({
             <AppActivityIndicator />
           ) : (
             <MyGroupsListPro
+              inputBoxStyle={styles.inputBoxStyle}
               onAddEchoPress={onAddEchoPress}
               onSendThoughtsPress={onSendThoughtsPress}
               groups={groups}
@@ -162,6 +163,9 @@ const styles = ScaledSheet.create({
   },
   categoryDropdownOne: {
     marginRight: "10@s",
+  },
+  inputBoxStyle: {
+    borderRadius: "7@s",
   },
 });
 

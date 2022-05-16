@@ -41,7 +41,7 @@ class MyGroupsListPro extends React.Component {
         switch (type) {
           case ViewTypes.Full:
             dim.width = width;
-            dim.height = scale(144);
+            dim.height = scale(140);
             break;
           default:
             dim.width = 0;
@@ -134,7 +134,7 @@ class MyGroupsListPro extends React.Component {
     return (
       <>
         <View style={[styles.mainContainer, this.props.style]}>
-          <View style={styles.container}>
+          <View style={[styles.container, this.props.inputBoxStyle]}>
             <View style={styles.inputBoxContainer}>
               <Ionicons
                 color={defaultStyles.colors.yellow_Variant}
@@ -183,7 +183,7 @@ const styles = ScaledSheet.create({
     borderWidth: 1,
     marginVertical: "8@s",
     overflow: "hidden",
-    width: "90%",
+    width: "95%",
   },
   inputBoxContainer: {
     alignItems: "center",
@@ -196,7 +196,7 @@ const styles = ScaledSheet.create({
   },
   inputBox: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "20@s",
+    borderRadius: "10@s",
     flexShrink: 1,
     height: "30@s",
     marginHorizontal: "5@s",

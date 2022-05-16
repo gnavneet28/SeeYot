@@ -65,14 +65,7 @@ function ThoughtsScreenHeader({
   }, [typing]);
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: headerColor,
-        },
-      ]}
-    >
+    <View style={styles.container}>
       <View style={styles.leftSectionMainContainer}>
         <MaterialIcons
           name="arrow-back"
@@ -96,10 +89,7 @@ function ThoughtsScreenHeader({
               autoPlay
               loop
               source={typingIndicator}
-              style={{
-                width: scale(30),
-                height: scale(30),
-              }}
+              style={styles.typingAnimation}
             />
           ) : (
             <AppImage
@@ -111,16 +101,9 @@ function ThoughtsScreenHeader({
           )}
         </View>
       </View>
-      <View
-        style={[
-          styles.middleSectionContainer,
-          {
-            backgroundColor: headerColor,
-          },
-        ]}
-      >
+      <View style={styles.middleSectionContainer}>
         {activeChat ? (
-          <AppText style={[styles.name]}>
+          <AppText style={styles.name}>
             {activeChat && isRecipientActive
               ? `${name} is Active`
               : `${name} is not Active`}
@@ -177,6 +160,7 @@ function ThoughtsScreenHeader({
 const styles = ScaledSheet.create({
   activeMode: {
     flexShrink: 1,
+    fontSize: "13@s",
     height: "100%",
     textAlign: "center",
     textAlignVertical: "center",
@@ -184,10 +168,10 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
-    // backgroundColor: headerColor,
+    backgroundColor: headerColor,
     borderTopRightRadius: "20@s",
-    //elevation: 10,
     flexDirection: "row",
+    height: "66@s",
     justifyContent: "space-between",
     overflow: "hidden",
     width: "100%",
@@ -198,29 +182,28 @@ const styles = ScaledSheet.create({
     borderBottomRightRadius: "40@s",
     height: "100%",
     justifyContent: "flex-end",
-    minHeight: "70@s",
-    width: "100@s",
+    width: "85@s",
   },
   imageContainer: {
     alignItems: "center",
-    borderRadius: "25@s",
+    borderRadius: "20@s",
     borderWidth: "1.5@s",
-    height: "50@s",
+    height: "40@s",
     justifyContent: "center",
-    marginBottom: "15@s",
-    marginRight: "15@s",
+    marginBottom: "18@s",
+    marginRight: "10@s",
     overflow: "hidden",
-    width: "50@s",
+    width: "40@s",
   },
   image: {
-    borderRadius: "24@s",
-    height: "48@s",
-    width: "48@s",
+    borderRadius: "18@s",
+    height: "35@s",
+    width: "35@s",
   },
   imageSub: {
-    borderRadius: "24@s",
-    height: "48@s",
-    width: "48@s",
+    borderRadius: "18@s",
+    height: "35@s",
+    width: "35@s",
   },
   icon: {
     left: "10@s",
@@ -231,39 +214,43 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: headerColor,
     flexShrink: 1,
-    justifyContent: "flex-start",
+    height: "100%",
+    justifyContent: "space-between",
     marginHorizontal: "5@s",
-    minHeight: "70@s",
-    paddingTop: "5@s",
     width: "100%",
   },
   modeChangerContainer: {
     backgroundColor: defaultStyles.colors.white,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     borderRadius: "20@s",
     flexDirection: "row",
-    height: "30@s",
+    height: "25@s",
     overflow: "hidden",
-    width: "100%",
-    //alignSelf: "flex-end",
-    position: "absolute",
-    bottom: 0,
-    borderBottomRightRadius: 0,
-    borderBottomLeftRadius: 0,
+    width: "80%",
   },
   name: {
     color: defaultStyles.colors.white,
+    flex: 1,
     fontSize: "14@s",
-    paddingTop: "5@s",
+    paddingBottom: 0,
+    paddingTop: 0,
+    textAlignVertical: "center",
   },
   optionIcon: {
     marginRight: "10@s",
   },
   thoughtMode: {
     flexShrink: 1,
+    fontSize: "13@s",
     height: "100%",
     textAlign: "center",
     textAlignVertical: "center",
     width: "100%",
+  },
+  typingAnimation: {
+    height: "30@s",
+    width: "30@s",
   },
 });
 

@@ -1,5 +1,5 @@
 import React, { memo, useContext, useEffect, useState } from "react";
-import { ImageBackground, View } from "react-native";
+import { ImageBackground, View, TouchableWithoutFeedback } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import LottieView from "lottie-react-native";
@@ -23,6 +23,8 @@ function MyGroupCard({
 
   const [activeUsers, setActiveUsers] = useState([]);
 
+  let isUnmounting = false;
+
   const handleOnPress = () => {
     onPress(group.name);
   };
@@ -30,14 +32,29 @@ function MyGroupCard({
   useEffect(() => {
     const listener = (data) => {
       if (activeUsers.filter((u) => u._id == data.activeUser._id).length < 1) {
-        setActiveUsers([...activeUsers, data.activeUser]);
+        if (!isUnmounting) {
+          setActiveUsers([...activeUsers, data.activeUser]);
+        }
       }
     };
 
     socket.on(`addActive${group._id}`, listener);
 
+    const listener2 = (data) => {
+      let newActiveUsers = activeUsers.filter(
+        (u) => u._id != data.activeUser._id
+      );
+      if (!isUnmounting) {
+        setActiveUsers(newActiveUsers);
+      }
+    };
+
+    socket.on(`removeActive${group._id}`, listener2);
+
     return () => {
+      isUnmounting = true;
       socket.off(`addActive${group._id}`, listener);
+      socket.off(`removeActive${group._id}`, listener2);
     };
   }, [activeUsers, group._id]);
 
@@ -54,55 +71,56 @@ function MyGroupCard({
     );
 
   return (
-    <View style={styles.container}>
-      <ImageBackground
-        style={styles.imageBackground}
-        blurRadius={4}
-        resizeMode={group.picture ? "cover" : "contain"}
-        source={{ uri: group.picture ? group.picture : "defaultgroupdp" }}
-      >
-        <View style={styles.groupHeader}>
-          <View style={styles.groupIconType}>
-            <MaterialIcons
-              size={scale(15)}
-              name={group.type == "Private" ? "person" : "public"}
-              color={defaultStyles.colors.dark}
+    <TouchableWithoutFeedback onPress={handleOnPress}>
+      <View style={styles.container}>
+        <ImageBackground
+          style={styles.imageBackground}
+          resizeMode={group.picture ? "cover" : "contain"}
+          source={{ uri: group.picture ? group.picture : "defaultgroupdp" }}
+        >
+          <View style={styles.groupHeader}>
+            <View style={styles.groupIconType}>
+              <MaterialIcons
+                size={scale(15)}
+                name={group.type == "Private" ? "person" : "public"}
+                color={defaultStyles.colors.dark}
+              />
+            </View>
+            <AppText style={styles.groupName}>{group.name}</AppText>
+            <TotalActiveUsers
+              onAddEchoPress={onAddEchoPress}
+              onSendThoughtsPress={onSendThoughtsPress}
+              containerStyle={styles.totalActiveCount}
+              totalActiveUsers={activeUsers}
             />
           </View>
-          <AppText style={styles.groupName}>{group.name}</AppText>
-          <TotalActiveUsers
-            onAddEchoPress={onAddEchoPress}
-            onSendThoughtsPress={onSendThoughtsPress}
-            conatinerStyle={styles.totalActiveCount}
-            totalActiveUsers={activeUsers}
-          />
-        </View>
-        <View style={styles.categoryContainer}>
-          <AppText style={styles.categoryText}>{group.category}</AppText>
-          <AppText style={styles.categoryText}>{group.subCategory}</AppText>
-        </View>
+          <View style={styles.categoryContainer}>
+            <AppText style={styles.categoryText}>{group.category}</AppText>
+            <AppText style={styles.categoryText}>{group.subCategory}</AppText>
+          </View>
 
-        <View style={styles.groupFooter}>
-          {group.createdBy._id == user._id ? (
-            <AppText onPress={onBlockedButtonPress} style={styles.blocked}>
-              {group.blocked.length} Blocked
-            </AppText>
-          ) : null}
-          <AppText onPress={handleOnPress} style={styles.visitGroupButton}>
-            Visit
-          </AppText>
-        </View>
-      </ImageBackground>
-    </View>
+          <View style={styles.groupFooter}>
+            {group.createdBy._id == user._id ? (
+              <AppText onPress={onBlockedButtonPress} style={styles.blocked}>
+                {group.blocked.length} Blocked
+              </AppText>
+            ) : null}
+            {/* <AppText onPress={handleOnPress} style={styles.visitGroupButton}>
+              Visit
+            </AppText> */}
+          </View>
+        </ImageBackground>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 const styles = ScaledSheet.create({
   container: {
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "10@s",
+    borderRadius: "5@s",
     height: "135@s",
-    marginBottom: "5@s",
+    marginBottom: "3@s",
     width: "95%",
     overflow: "hidden",
     elevation: 5,
@@ -116,6 +134,9 @@ const styles = ScaledSheet.create({
     fontSize: "13@s",
   },
   totalActiveCount: {
+    backgroundColor: "rgba(0,0,0,0.8)",
+    borderColor: defaultStyles.colors.white,
+    borderWidth: 1,
     position: "absolute",
     right: "5@s",
     top: "5@s",
@@ -141,7 +162,7 @@ const styles = ScaledSheet.create({
     paddingHorizontal: "5@s",
   },
   categoryText: {
-    backgroundColor: defaultStyles.colors.secondary_Variant,
+    backgroundColor: defaultStyles.colors.secondary,
     borderRadius: "5@s",
     color: defaultStyles.colors.white,
     fontSize: "12@s",
@@ -168,8 +189,10 @@ const styles = ScaledSheet.create({
     right: 0,
   },
   blocked: {
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(0,0,0,0.8)",
+    borderColor: defaultStyles.colors.white,
     borderRadius: "5@s",
+    borderWidth: 1,
     color: defaultStyles.colors.white,
     fontSize: "13@s",
     paddingHorizontal: "10@s",

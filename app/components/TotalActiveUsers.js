@@ -25,7 +25,7 @@ let defaultEchoState = {
 
 function TotalActiveUsers({
   totalActiveUsers,
-  conatinerStyle,
+  containerStyle,
   onSendThoughtsPress,
   onAddEchoPress,
 }) {
@@ -72,7 +72,7 @@ function TotalActiveUsers({
       <TouchableOpacity
         onPress={handleOpenList}
         activeOpacity={0.7}
-        style={[styles.totalActivePeople, conatinerStyle]}
+        style={[styles.totalActivePeople, containerStyle]}
       >
         <AppText style={styles.totalActivePeopleCount}>
           {totalActiveUsers.length}
@@ -111,8 +111,10 @@ function TotalActiveUsers({
 const styles = ScaledSheet.create({
   totalActivePeople: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.dark_Variant,
+    backgroundColor: "rgba(0,0,0,0.8)",
+    borderColor: defaultStyles.colors.white,
     borderRadius: "5@s",
+    borderWidth: 1,
     flexDirection: "row",
     height: "30@s",
     justifyContent: "center",

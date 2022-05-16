@@ -82,7 +82,7 @@ const styles = ScaledSheet.create({
     color: defaultStyles.colors.secondary,
     flexDirection: "row",
     flexShrink: 1,
-    fontSize: "12@s",
+    fontSize: "14@s",
     justifyContent: "space-between",
     paddingVertical: "8@s",
     textAlign: "center",

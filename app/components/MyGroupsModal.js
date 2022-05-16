@@ -71,6 +71,7 @@ function MyGroupsModal({
         {isReady ? (
           myGroups.length ? (
             <MyGroupsListPro
+              inputBoxStyle={styles.inputBoxStyle}
               onAddEchoPress={onAddEchoPress}
               onSendThoughtsPress={onSendThoughtsPress}
               groups={myGroups}
@@ -96,6 +97,7 @@ const styles = ScaledSheet.create({
   container: {
     backgroundColor: defaultStyles.colors.white,
   },
+  inputBoxStyle: { borderRadius: "7@s" },
   noGroupsInfo: {
     flex: 1,
     fontSize: "15@s",
