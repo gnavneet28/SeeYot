@@ -12,6 +12,8 @@ import HomeMessagesList from "../components/HomeMessagesList";
 import InfoAlert from "../components/InfoAlert";
 import Screen from "../components/Screen";
 
+import usersData from "../../PeculiarUserData";
+
 import Constant from "../navigation/NavigationConstants";
 
 import useAuth from "../auth/useAuth";
@@ -36,6 +38,7 @@ import defaultStyles from "../config/styles";
 import ScreenSub from "../components/ScreenSub";
 
 function HomeScreen({ navigation }) {
+  // console.log(usersData);
   dayjs.extend(relativeTime);
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;

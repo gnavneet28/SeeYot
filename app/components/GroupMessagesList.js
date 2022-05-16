@@ -1,4 +1,4 @@
-import React, { useCallback, memo } from "react";
+import React, { useCallback, memo, useMemo } from "react";
 import { View, FlatList } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 
@@ -20,19 +20,12 @@ function GroupMessagesList({
   const renderItem = useCallback(
     ({ item }) => (
       <GroupChatBubble
-        onImageLongPress={() => onImageLongPress(item.createdBy)}
-        mine={item.createdBy._id == user._id ? true : false}
+        onImageLongPress={onImageLongPress}
         groupMessage={item}
         user={user}
-        onImagePress={() => onImagePress(item.createdBy)}
-        onSelectReply={() =>
-          onSelectReply({
-            _id: item._id,
-            createdBy: item.createdBy,
-            message: item.message ? item.message : "",
-            media: item.media ? item.media : "",
-          })
-        }
+        group={group}
+        onImagePress={onImagePress}
+        onSelectReply={onSelectReply}
       />
     ),
     [group._id]
@@ -52,6 +45,11 @@ function GroupMessagesList({
         removeClippedSubviews={true}
         maxToRenderPerBatch={15}
         windowSize={7}
+        decelerationRate={0.78}
+        maintainVisibleContentPosition={{
+          autoscrollToTopThreshold: 10,
+          minIndexForVisible: 1,
+        }}
       />
     </View>
   );

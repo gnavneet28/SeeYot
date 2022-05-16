@@ -23,6 +23,10 @@ function MyGroupCard({
 
   const [activeUsers, setActiveUsers] = useState([]);
 
+  const handleOnPress = () => {
+    onPress(group.name);
+  };
+
   useEffect(() => {
     const listener = (data) => {
       if (activeUsers.filter((u) => u._id == data.activeUser._id).length < 1) {
@@ -84,7 +88,7 @@ function MyGroupCard({
               {group.blocked.length} Blocked
             </AppText>
           ) : null}
-          <AppText onPress={onPress} style={styles.visitGroupButton}>
+          <AppText onPress={handleOnPress} style={styles.visitGroupButton}>
             Visit
           </AppText>
         </View>

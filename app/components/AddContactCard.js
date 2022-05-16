@@ -28,6 +28,10 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
   });
   const { tackleProblem } = apiActivity;
 
+  const handleInvitePress = () => {
+    onInvitePress(contact);
+  };
+
   const contacts = user.contacts;
 
   const inContacts =
@@ -71,9 +75,7 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
       infoAlertMessage: "No internet connection.",
       showInfoAlert: true,
     });
-  });
-
-  console.log(contact.name, isConnected);
+  }, []);
 
   if (!contact.name)
     return (
@@ -131,7 +133,7 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
       ) : (
         <AppButton
           title="Invite"
-          onPress={onInvitePress}
+          onPress={handleInvitePress}
           style={[styles.inviteButton]}
           subStyle={styles.inviteButtonSub}
         />

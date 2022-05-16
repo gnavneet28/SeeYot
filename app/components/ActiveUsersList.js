@@ -62,10 +62,9 @@ class ActiveUsersList extends React.Component {
       case ViewTypes.Full:
         return (
           <ContactCard
-            //onAddFriendPress={this.props.onAddFriendPress}
-            onAddEchoPress={() => this.props.onAddEchoPress(data)}
-            onSendThoughtsPress={() => this.props.onSendThoughtsPress(data)}
-            onImagePress={() => this.props.onImagePress(data)}
+            onAddEchoPress={this.props.onAddEchoPress}
+            onSendThoughtsPress={this.props.onSendThoughtsPress}
+            onImagePress={this.props.onImagePress}
             user={data}
           />
         );

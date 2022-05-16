@@ -28,15 +28,24 @@ let defaultThought = {
 
 function ActiveChatBubble({
   thought = defaultThought,
-  mine,
   onLongPress,
-  onSelectReply,
+  onSelectReply = () => {},
   user = { _id: "" },
   recipient = { name: "" },
 }) {
   const socket = useContext(SocketContext);
   const [refresh, setRefresh] = useState(false);
   let isUnmounting = false;
+
+  let mine = thought.createdBy == user._id ? true : false;
+
+  const handleOnSelectReply = () => {
+    onSelectReply({
+      message: thought.message ? thought.message : "",
+      media: thought.media ? thought.media : "",
+      createdBy: thought.createdBy,
+    });
+  };
 
   const translateX = useSharedValue(-20);
 
@@ -97,7 +106,7 @@ function ActiveChatBubble({
       ) : null}
       <TouchableWithoutFeedback
         delayLongPress={200}
-        onLongPress={onSelectReply}
+        onLongPress={handleOnSelectReply}
       >
         <View
           style={[
@@ -129,7 +138,7 @@ function ActiveChatBubble({
                 borderTopRightRadius: mine ? 0 : scale(15),
               }}
               mine={mine}
-              onLongPress={onSelectReply}
+              onLongPress={handleOnSelectReply}
               delayLongPress={200}
               uri={thought.media}
             />

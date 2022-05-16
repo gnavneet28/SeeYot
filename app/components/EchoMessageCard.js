@@ -16,6 +16,9 @@ function EchoMessageCard({
   cardStyle,
   onEchoMessagePress,
 }) {
+  const handleOneEchoMessagePress = () => {
+    onEchoMessagePress(echoMessage);
+  };
   return (
     <>
       <View style={[styles.container, cardStyle]}>
@@ -42,11 +45,11 @@ function EchoMessageCard({
           )}
         </View>
         <TouchableOpacity
-          onPress={onEchoMessagePress}
+          onPress={handleOneEchoMessagePress}
           style={styles.contactsActionConatiner}
         >
           <MaterialIcons
-            onPress={onEchoMessagePress}
+            onPress={handleOneEchoMessagePress}
             color={defaultStyles.colors.secondary}
             name="more-vert"
             size={scale(16)}

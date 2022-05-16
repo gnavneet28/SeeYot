@@ -26,22 +26,15 @@ function ThoughtsList({
           recipient={recipient}
           user={user}
           activeChat={activeChat}
-          mine={item.createdBy == user._id ? true : false}
           thought={item}
-          onSelectReply={() =>
-            onSelectReply({
-              message: item.message ? item.message : "",
-              media: item.media ? item.media : "",
-              createdBy: item.createdBy,
-            })
-          }
+          onSelectReply={onSelectReply}
         />
       ) : (
         <ThoughtBubble
           recipient={recipient}
           activeChat={activeChat}
-          onLongPress={() => onLongPress(item)}
-          mine={item.createdBy == user._id ? true : false}
+          onLongPress={onLongPress}
+          user={user}
           thought={item}
         />
       ),
@@ -62,6 +55,11 @@ function ThoughtsList({
         removeClippedSubviews={true}
         maxToRenderPerBatch={15}
         windowSize={7}
+        decelerationRate={0.78}
+        maintainVisibleContentPosition={{
+          autoscrollToTopThreshold: 10,
+          minIndexForVisible: 1,
+        }}
       />
     </View>
   );

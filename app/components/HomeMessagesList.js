@@ -13,10 +13,11 @@ function HomeMessagesList({ messages = [], onMessagePress, style }) {
     ({ item }) => {
       return (
         <Message
+          message={item}
           seen={item.seen}
           key={item._id}
           mood={item.mood}
-          onPress={() => onMessagePress(item)}
+          onPress={onMessagePress}
         />
       );
     },

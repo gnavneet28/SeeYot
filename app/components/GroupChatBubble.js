@@ -14,14 +14,23 @@ import defaultProps from "../utilities/defaultProps";
 
 function GroupChatBubble({
   groupMessage = defaultProps.defaultGroupChatMessage,
-  mine,
   onSelectReply,
   user = { _id: "" },
   onImagePress,
   onImageLongPress = () => {},
 }) {
+  let mine = groupMessage.createdBy._id == user._id ? true : false;
+
+  const handleOnSelectReply = () => {
+    onSelectReply({
+      _id: groupMessage._id,
+      createdBy: groupMessage.createdBy,
+      message: groupMessage.message ? groupMessage.message : "",
+      media: groupMessage.media ? groupMessage.media : "",
+    });
+  };
+
   return (
-    // <TouchableWithoutFeedback delayLongPress={200} onLongPress={onSelectReply}>
     <>
       <View
         style={[
@@ -58,8 +67,8 @@ function GroupChatBubble({
         >
           <AppImage
             delayLongPress={200}
-            onLongPress={onImageLongPress}
-            onPress={onImagePress}
+            onLongPress={() => onImageLongPress(groupMessage.createdBy)}
+            onPress={() => onImagePress(groupMessage.createdBy)}
             imageUrl={groupMessage.createdBy.picture}
             style={styles.image}
             subStyle={styles.image}
@@ -67,7 +76,7 @@ function GroupChatBubble({
 
           <TouchableWithoutFeedback
             delayLongPress={200}
-            onLongPress={onSelectReply}
+            onLongPress={handleOnSelectReply}
           >
             <View
               style={[
@@ -88,7 +97,7 @@ function GroupChatBubble({
                     width: defaultStyles.width * 0.5,
                   }}
                   mine={mine}
-                  onLongPress={onSelectReply}
+                  onLongPress={handleOnSelectReply}
                   delayLongPress={200}
                   uri={groupMessage.media}
                 />
@@ -114,8 +123,6 @@ function GroupChatBubble({
                           : defaultStyles.colors.dark,
                       },
                     ],
-                    // onLongPress: onSelectReply,
-                    // delayLongPress: 200,
                   }}
                   email={true}
                   phone="sms"
@@ -126,7 +133,6 @@ function GroupChatBubble({
         </View>
       </View>
     </>
-    // </TouchableWithoutFeedback>
   );
 }
 

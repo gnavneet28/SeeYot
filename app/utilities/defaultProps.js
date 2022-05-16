@@ -187,6 +187,7 @@ export default {
     createdAt: "",
     media: "",
     reply: {
+      _id: "",
       createdBy: {
         _id: "",
         name: "",

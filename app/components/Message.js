@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { TouchableHighlight } from "react-native";
 import LottieView from "lottie-react-native";
 import defaultStyles from "../config/styles";
@@ -10,7 +10,10 @@ const Happy = "happy.json";
 const Furious = "angry.json";
 const Confused = "confused.json";
 
-function Message({ mood = "Happy", onPress, seen = false }) {
+function Message({ mood = "Happy", onPress, seen = false, message }) {
+  const handleOnPress = () => {
+    onPress(message);
+  };
   let emoji;
 
   if (mood === "Happy") emoji = Happy;
@@ -22,7 +25,7 @@ function Message({ mood = "Happy", onPress, seen = false }) {
     <TouchableHighlight
       activeOpacity={0.8}
       underlayColor={defaultStyles.colors.lightGrey}
-      onPress={onPress}
+      onPress={handleOnPress}
       style={[
         styles.container,
         {
@@ -57,4 +60,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default Message;
+export default memo(Message);

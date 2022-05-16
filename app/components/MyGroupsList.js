@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
-import { View, StyleSheet, FlatList } from "react-native";
-import { ScaledSheet, scale } from "react-native-size-matters";
+import { View, FlatList } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
 import MyGroupCard from "./MyGroupCard";
 
@@ -19,7 +19,7 @@ function MyGroupsList({
       <MyGroupCard
         onAddEchoPress={onAddEchoPress}
         onSendThoughtsPress={onSendThoughtsPress}
-        onPress={() => onPress(item.name)}
+        onPress={onPress}
         group={item}
       />
     ),
@@ -28,7 +28,6 @@ function MyGroupsList({
   return (
     <View style={[styles.container]}>
       <FlatList
-        //ListEmptyComponent={ListEmptyComponent}
         keyboardShouldPersistTaps="handled"
         data={groups}
         keyExtractor={keyExtractor}
@@ -36,11 +35,8 @@ function MyGroupsList({
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={true}
         maxToRenderPerBatch={15}
-        windowSize={10}
-        contentContainerStyle={{
-          width: defaultStyles.width,
-          flexGrow: 1,
-        }}
+        windowSize={5}
+        contentContainerStyle={styles.contentContainerStyle}
       />
     </View>
   );
@@ -50,7 +46,10 @@ const styles = ScaledSheet.create({
     flex: 1,
     backgroundColor: "white",
     width: "100%",
-    // alignItems: "center",
+  },
+  contentContainerStyle: {
+    width: defaultStyles.width,
+    flexGrow: 1,
   },
 });
 

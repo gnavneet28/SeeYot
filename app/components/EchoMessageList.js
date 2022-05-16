@@ -19,7 +19,7 @@ function EchoMessageList({ echoMessages = [], onEchoMessagePress, style }) {
         <EchoMessageCard
           index={index}
           echoMessage={item}
-          onEchoMessagePress={() => onEchoMessagePress(item)}
+          onEchoMessagePress={onEchoMessagePress}
         />
       </Animated.View>
     );

@@ -65,7 +65,7 @@ class VipSearchResultList extends React.Component {
           <ContactCard
             onAddEchoPress={this.props.onAddEchoPress}
             onSendThoughtsPress={this.props.onSendThoughtsPress}
-            onImagePress={() => this.props.onImagePress(data)}
+            onImagePress={this.props.onImagePress}
             user={data}
           />
         );

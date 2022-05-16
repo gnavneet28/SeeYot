@@ -121,6 +121,34 @@ function GroupChatScreen({ navigation, route }) {
   const [invitedUsers, setInvitedUsers] = useState([]);
   const [invitedUser, setInvitedUser] = useState("");
 
+  // Close All modal on mount or if focused if open
+
+  useEffect(() => {
+    if (isFocused) {
+      if (infoAlert.showInfoAlert) {
+        setInfoAlert({ ...infoAlert, showInfoAlert: false });
+      }
+
+      if (openUserReport) {
+        setOpenUserReport(false);
+      }
+
+      if (showInviteModal) {
+        setShowInviteModal(false);
+      }
+
+      if (echoState.visible) {
+        setEchoState(defaultEchoState);
+      }
+      if (showUserOptions) {
+        setShowUserOptions(false);
+      }
+      if (isLoading) {
+        setIsLoading(false);
+      }
+    }
+  }, [isFocused]);
+
   const handleSubmitUserReport = useCallback(
     async (report) => {
       if (!isUnmounting) {
@@ -154,7 +182,7 @@ function GroupChatScreen({ navigation, route }) {
   const handleCloseEchoModal = useCallback(() => {
     showEchoMessage = false;
     setEchoState({ ...defaultEchoState, visible: false });
-  });
+  }, []);
 
   const handleCloseUserOptionsModal = useCallback(() => {
     setInterestedUser(defaultUser);
@@ -217,10 +245,10 @@ function GroupChatScreen({ navigation, route }) {
     }
   }, [interestedUser, group]);
 
-  const handleOpenReportUserModal = () => {
+  const handleOpenReportUserModal = useCallback(() => {
     setOpenUserReport(true);
     setShowUserOptions(false);
-  };
+  }, []);
 
   // // REPLY ACTIONS
 
@@ -645,6 +673,7 @@ const styles = ScaledSheet.create({
   },
   screenSub: {
     borderTopRightRadius: 0,
+    borderTopLeftRadius: 0,
   },
 });
 

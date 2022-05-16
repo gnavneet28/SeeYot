@@ -19,16 +19,19 @@ let defaultThought = {
 
 function ThoughtBubble({
   thought = defaultThought,
-  mine,
   onLongPress,
   activeChat,
+  user,
 }) {
   dayjs.extend(relativeTime);
+
+  const handleLongPress = () => onLongPress(thought);
+  let mine = thought.createdBy == user._id ? true : false;
 
   return (
     <TouchableOpacity
       activeOpacity={activeChat ? 1 : 0.9}
-      onLongPress={onLongPress}
+      onLongPress={handleLongPress}
       style={[styles.message, !mine ? styles.mine : styles.not_mine]}
     >
       <View
@@ -73,7 +76,7 @@ function ThoughtBubble({
                   : defaultStyles.colors.dark,
               },
             ],
-            onLongPress,
+            handleLongPress,
           }}
           email={true}
           phone="sms"

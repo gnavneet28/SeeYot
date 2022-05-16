@@ -28,6 +28,10 @@ function ContactCard({
     [user]
   );
 
+  const handleImagePress = () => {
+    onImagePress(user);
+  };
+
   const onAddEchoButtonPress = useCallback(() => onAddEchoPress(user), [user]);
 
   if (!user.name) return <View style={styles.emptyContacts} />;
@@ -39,7 +43,7 @@ function ContactCard({
       <SharedElement id={user._id}>
         <AppImage
           imageUrl={user.picture}
-          onPress={onImagePress}
+          onPress={handleImagePress}
           style={styles.image}
           subStyle={styles.imageSub}
         />

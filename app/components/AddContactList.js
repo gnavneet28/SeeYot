@@ -109,7 +109,7 @@ class AddContactList extends React.Component {
           <AddContactCard
             isConnected={this.props.isConnected}
             contact={data}
-            onInvitePress={() => this.props.onInvitePress(data)}
+            onInvitePress={this.props.onInvitePress}
           />
         );
       default:
