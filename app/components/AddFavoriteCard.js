@@ -1,15 +1,20 @@
-import React, { useState, useCallback, useContext } from "react";
+import React, {
+  useState,
+  useCallback,
+  useContext,
+  memo,
+  useEffect,
+} from "react";
 import { View, TouchableOpacity } from "react-native";
 import LottieView from "lottie-react-native";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
+import Ionicons from "../../node_modules/react-native-vector-icons/Ionicons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
-import AppButton from "./AppButton";
 import AppImage from "./AppImage";
 import AppText from "./AppText";
 import InfoAlert from "./InfoAlert";
 import ApiProcessingContainer from "./ApiProcessingContainer";
-import ActionSelector from "./ActionSelector";
 
 import storeDetails from "../utilities/storeDetails";
 
@@ -29,17 +34,23 @@ const defaulFavoriteUser = {
   picture: "",
 };
 
-function AddContactCard({
+function AddFavoriteCard({
   onMessagePress = () => null,
   favoriteUser = defaulFavoriteUser,
   style,
-  isConnected,
 }) {
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
   const { user, setUser } = useAuth();
   const { tackleProblem } = apiActivity;
+  let isUnmounting = false;
 
-  const [processing, setProcessing] = useState(false);
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  });
+
+  const handleOnMessagePress = () => {
+    onMessagePress(favoriteUser);
+  };
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
@@ -61,8 +72,7 @@ function AddContactCard({
   const handleAddPress = useCallback(
     debounce(
       async () => {
-        setApiProcessing(true);
-        setProcessing(true);
+        setApiProcessing(favoriteUser._id);
 
         const { ok, data, problem } = await usersApi.addFavorite(
           favoriteUser._id
@@ -71,13 +81,12 @@ function AddContactCard({
         if (ok) {
           await storeDetails(data.user);
           setUser(data.user);
-          setProcessing(false);
-          return setApiProcessing(false);
+          return setApiProcessing("");
         }
-        setApiProcessing(false);
-        setProcessing(false);
-
-        tackleProblem(problem, data, setInfoAlert);
+        setApiProcessing("");
+        if (!isUnmounting) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -88,8 +97,7 @@ function AddContactCard({
   const handleRemovePress = useCallback(
     debounce(
       async () => {
-        setApiProcessing(true);
-        setProcessing(true);
+        setApiProcessing(favoriteUser._id);
 
         const { ok, data, problem } = await usersApi.removeFavorite(
           favoriteUser._id
@@ -98,12 +106,13 @@ function AddContactCard({
         if (ok) {
           await storeDetails(data.user);
           setUser(data.user);
-          setApiProcessing(false);
-          return setProcessing(false);
+          return setApiProcessing("");
         }
-        setProcessing(false);
-        setApiProcessing(false);
-        tackleProblem(problem, data, setInfoAlert);
+
+        setApiProcessing("");
+        if (!isUnmounting) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -137,41 +146,37 @@ function AddContactCard({
         </AppText>
       </View>
       <View style={styles.actionContainer}>
-        <ActionSelector
-          processing={processing}
-          style={styles.actionSelectionStyle}
-          plusAction={!inFavourites}
+        <ApiProcessingContainer
+          processing={apiProcessing === favoriteUser._id}
+          style={[
+            styles.buttonContainer,
+            {
+              backgroundColor: inFavourites
+                ? defaultStyles.colors.dark_Variant
+                : defaultStyles.colors.secondary,
+            },
+          ]}
         >
-          <ApiProcessingContainer
-            processing={processing}
-            style={styles.buttonContainer}
-          >
-            <AppButton
-              disabled={apiProcessing || !isConnected ? true : false}
-              title={inFavourites ? "Remove" : "Add"}
-              style={styles.addButton}
-              subStyle={[
-                styles.addButtonSub,
-                {
-                  color: inFavourites
-                    ? defaultStyles.colors.yellow_Variant
-                    : defaultStyles.colors.white,
-                },
-              ]}
-              onPress={!inFavourites ? handleAddPress : handleRemovePress}
-            />
-          </ApiProcessingContainer>
-        </ActionSelector>
+          <Ionicons
+            name={
+              inFavourites
+                ? "ios-remove-circle-outline"
+                : "ios-add-circle-outline"
+            }
+            size={scale(22)}
+            color={defaultStyles.colors.white}
+            onPress={!inFavourites ? handleAddPress : handleRemovePress}
+          />
+        </ApiProcessingContainer>
         <TouchableOpacity
           underlayColor={defaultStyles.colors.yellow}
-          // activeOpacity={0.5}
-          onPress={onMessagePress}
+          onPress={handleOnMessagePress}
           style={styles.favoriteMessageIconContainer}
         >
           <AntDesign
             color={defaultStyles.colors.secondary}
             name="message1"
-            onPress={onMessagePress}
+            onPress={handleOnMessagePress}
             size={scale(18)}
           />
         </TouchableOpacity>
@@ -198,10 +203,12 @@ const styles = ScaledSheet.create({
   },
   buttonContainer: {
     alignItems: "center",
+    flexDirection: "row",
     height: "32@s",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     overflow: "hidden",
-    width: "60@s",
+    paddingLeft: "10@s",
+    width: "55@s",
   },
   addButton: {
     backgroundColor: defaultStyles.colors.secondary,
@@ -267,4 +274,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default AddContactCard;
+export default memo(AddFavoriteCard);

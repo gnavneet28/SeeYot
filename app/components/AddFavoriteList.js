@@ -11,7 +11,6 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 import defaultStyles from "../config/styles";
 
 import AppTextInput from "./AppTextInput";
-import AppText from "./AppText";
 import AddFavoriteCard from "./AddFavoriteCard";
 import Icon from "./Icon";
 
@@ -25,7 +24,7 @@ const defaultListItemWhenEmpty = [
   },
 ];
 
-class AddContactList extends React.Component {
+class AddFavoriteList extends React.Component {
   constructor(props) {
     super(props);
 
@@ -108,7 +107,7 @@ class AddContactList extends React.Component {
             isConnected={this.props.isConnected}
             favoriteUser={data}
             name={data.name}
-            onMessagePress={() => this.props.onMessagePress(data)}
+            onMessagePress={this.props.onMessagePress}
           />
         );
       default:
@@ -119,7 +118,7 @@ class AddContactList extends React.Component {
   componentDidUpdate(prevProps) {
     if (
       prevProps.users != this.props.users ||
-      prevProps.isFocoused != this.props.isFocoused
+      prevProps.isFocused != this.props.isFocused
     ) {
       return this.setState({
         ...this.state,
@@ -240,4 +239,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default AddContactList;
+export default AddFavoriteList;

@@ -237,10 +237,10 @@ function AddFavoritesScreen({ navigation }) {
 
   // MESSAGGIN FAVORITES ACTION
 
-  const handleMessagePress = (recipient) => {
+  const handleMessagePress = useCallback((recipient) => {
     setRecipient(recipient);
     setIsVisible(true);
-  };
+  }, []);
 
   const handleOnAllRepliesPress = useCallback(
     () =>

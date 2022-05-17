@@ -1,4 +1,4 @@
-import React, { useState, memo } from "react";
+import React, { useState } from "react";
 import { View } from "react-native";
 import { scale, ScaledSheet } from "react-native-size-matters";
 import Animated, {
@@ -58,7 +58,7 @@ function ActionSelector({ style, plusAction, children, processing }) {
     }
   };
   return (
-    <Animated.View style={[styles.container, style, rStyle]}>
+    <Animated.View key={processing} style={[styles.container, style, rStyle]}>
       <View>
         {!expanded ? (
           <Ionicons
@@ -105,4 +105,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default memo(ActionSelector);
+export default ActionSelector;
