@@ -120,6 +120,7 @@ function GroupChatScreen({ navigation, route }) {
   // Inviting users
   const [invitedUsers, setInvitedUsers] = useState([]);
   const [invitedUser, setInvitedUser] = useState("");
+  const [canShowTyping, setCanShowTyping] = useState(false);
 
   // Close All modal on mount or if focused if open
 
@@ -288,6 +289,7 @@ function GroupChatScreen({ navigation, route }) {
     if (ok && !isUnmounting) {
       translateX.value = withTiming(800);
       getCurrentMessages();
+      setReply(defaultReply);
       return setDeletingMessage("");
     }
 
@@ -418,10 +420,19 @@ function GroupChatScreen({ navigation, route }) {
   }, [isFocused, appStateVisible]);
 
   const handleSetTyping = useCallback(async () => {
+    if (canShowTyping) return;
+
+    setCanShowTyping(true);
+    setTimeout(() => {
+      if (!isUnmounting) {
+        setCanShowTyping(false);
+      }
+    }, 2000);
+
     const { ok, problem } = await groupsApi.setTyping(group._id, user._id);
     if (ok) return;
     if (problem) return;
-  }, [group._id]);
+  }, [group._id, canShowTyping]);
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(

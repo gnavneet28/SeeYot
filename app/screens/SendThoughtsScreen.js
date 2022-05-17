@@ -117,6 +117,7 @@ function SendThoughtsScreen({ navigation, route }) {
   });
   const [message, setMessage] = useState("");
   const [hint, setHint] = useState("");
+  const [canShowTyping, setCanShowTyping] = useState(false);
 
   let isRecipientActive = activeFor.filter((u) => u == recipient._id)[0];
 
@@ -679,11 +680,19 @@ function SendThoughtsScreen({ navigation, route }) {
 
   const handleSetTyping = useCallback(async () => {
     if (!isRecipientActive && !activeChat) return;
+    if (canShowTyping) return;
+
+    setCanShowTyping(true);
+    setTimeout(() => {
+      if (!isUnmounting) {
+        setCanShowTyping(false);
+      }
+    }, 2000);
 
     const { ok, problem } = await usersApi.setTyping(recipient._id);
     if (ok) return;
     if (problem) return;
-  }, [recipient._id, isFocused, isRecipientActive]);
+  }, [recipient._id, isFocused, isRecipientActive, canShowTyping]);
 
   const placeholder = useMemo(() => {
     return activeChat ? `Send direct messages...` : `Send your thoughts...`;
