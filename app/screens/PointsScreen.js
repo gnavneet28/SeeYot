@@ -6,6 +6,7 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 import { showMessage } from "react-native-flash-message";
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 
 import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppButton from "../components/AppButton";
@@ -28,7 +29,7 @@ import apiActivity from "../utilities/apiActivity";
 import asyncStorage from "../utilities/cache";
 import DataConstants from "../utilities/DataConstants";
 import authorizeAds, {
-  showAdsSeenInLastTenMinutes,
+  showAdsSeenInLastTwoMinutes,
   showAdsSeenInLastTwentyFourHours,
   showAccountDays,
 } from "../utilities/authorizeAds";
@@ -46,6 +47,11 @@ const Points = {
   totalPoints: 0,
 };
 
+const optionsVibrate = {
+  enableVibrateFallback: true,
+  ignoreAndroidSystemSettings: true,
+};
+
 function PointsScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;
@@ -55,7 +61,7 @@ function PointsScreen({ navigation }) {
 
   // STATES
   const [currentAdsStats, setCurrentAdsStats] = useState({
-    seenInLastTenMinutes: 0,
+    seenInLastTwoMinutes: 0,
     seenInLastTwentyFourHours: 0,
     accountLife: 0,
   });
@@ -86,12 +92,12 @@ function PointsScreen({ navigation }) {
 
   // TODO:
   const calculateAdsStats = async () => {
-    let seenInLastTenMinutes = await showAdsSeenInLastTenMinutes();
+    let seenInLastTwoMinutes = await showAdsSeenInLastTwoMinutes();
     let seenInLastTwentyFourHours = await showAdsSeenInLastTwentyFourHours();
     let accountLife = showAccountDays(user);
 
     setCurrentAdsStats({
-      seenInLastTenMinutes,
+      seenInLastTwoMinutes,
       seenInLastTwentyFourHours,
       accountLife,
     });
@@ -126,6 +132,7 @@ function PointsScreen({ navigation }) {
   const updatePoints = async () => {
     const { ok, problem, data } = await usersApi.updatePoints();
     if (ok) {
+      ReactNativeHapticFeedback.trigger("impactMedium", optionsVibrate);
       let newAdStats = await asyncStorage.get(DataConstants.ADSSTATS);
       newAdStats.numberOfAdsSeen.push(new Date());
 
@@ -216,6 +223,7 @@ function PointsScreen({ navigation }) {
       setRedeeming(true);
       const { ok, data, problem } = await usersApi.redeemPoints(pointsToRedeem);
       if (ok) {
+        ReactNativeHapticFeedback.trigger("impactMedium", optionsVibrate);
         setPointsToRedeem(0);
         await storeDetails(data.user);
         setUser(data.user);
@@ -360,9 +368,9 @@ function PointsScreen({ navigation }) {
                   IconCategory={MaterialCommunityIcon}
                   iconName="google-ads"
                   iconSize={scale(25)}
-                  data={currentAdsStats.seenInLastTenMinutes}
-                  information="Ads seen in last 5 minutes"
-                  infoDetails="You can watch only 1 ad within 5 minutes. (successful watch)"
+                  data={currentAdsStats.seenInLastTwoMinutes}
+                  information="Ads seen in last 2 minutes"
+                  infoDetails="You can watch only 1 ad within 2 minutes. (successful watch)"
                 />
                 <Information
                   IconCategory={MaterialCommunityIcon}

@@ -215,7 +215,7 @@ function AppNavigator(props) {
 
         for (let key in params) {
           if (key == "a") {
-            name = params[key];
+            name = params[key].replace("+", " ");
           } else if (key == "b") {
             password = params[key];
           }
@@ -257,7 +257,7 @@ function AppNavigator(props) {
 
             for (let key in params) {
               if (key == "a") {
-                name = params[key];
+                name = params[key].replace("+", " ");
               } else if (key == "b") {
                 password = params[key];
               }

@@ -13,7 +13,7 @@ const authorizeAds = async () => {
   dayjs.extend(relativeTime);
 
   const DAY_LIMIT = 15;
-  const TIME_LIMIT = 5;
+  const TIME_LIMIT = 2;
   const ADS_NUMBER_LIMIT = 8;
 
   const { joinedAt, numberOfAdsSeen } = await currentAdsStats();
@@ -39,11 +39,11 @@ const authorizeAds = async () => {
   return true;
 };
 
-const showAdsSeenInLastTenMinutes = async () => {
+const showAdsSeenInLastTwoMinutes = async () => {
   let currentDate = new Date();
   const adsStats = await asyncStorage.get(DataConstants.ADSSTATS);
   return adsStats.numberOfAdsSeen.filter(
-    (a) => dayjs(currentDate).diff(a, "minutes") < 10
+    (a) => dayjs(currentDate).diff(a, "minutes") < 2
   ).length;
 };
 
@@ -63,7 +63,7 @@ const showAccountDays = (user) => {
 export default authorizeAds;
 
 export {
-  showAdsSeenInLastTenMinutes,
+  showAdsSeenInLastTwoMinutes,
   showAdsSeenInLastTwentyFourHours,
   showAccountDays,
 };

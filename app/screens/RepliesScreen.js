@@ -15,7 +15,6 @@ import debounce from "../utilities/debounce";
 
 import messagesApi from "../api/messages";
 
-import useMountedRef from "../hooks/useMountedRef";
 import useConnection from "../hooks/useConnection";
 
 import defaultStyles from "../config/styles";
@@ -25,10 +24,10 @@ import apiActivity from "../utilities/apiActivity";
 function RepliesScreen({ navigation }) {
   const [replies, setReplies] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const mounted = useMountedRef().current;
   const isConnected = useConnection();
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
+  let isUnmounting = false;
 
   const [message, setMessage] = useState({
     isVisible: false,
@@ -68,8 +67,10 @@ function RepliesScreen({ navigation }) {
   const handleDeletePress = async () => {
     let originalList = [...replies];
     let newListOfMessages = replies.filter((r) => r._id != messageToDelete);
-    setReplies(newListOfMessages);
-    setShowAlert(false);
+    if (!isUnmounting) {
+      setReplies(newListOfMessages);
+      setShowAlert(false);
+    }
 
     const { ok, data, problem } = await messagesApi.deleteMessage(
       messageToDelete
@@ -77,55 +78,59 @@ function RepliesScreen({ navigation }) {
     if (ok) {
       return;
     }
-    setReplies(originalList);
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isUnmounting) {
+      setReplies(originalList);
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   const allReplies = async () => {
     if (isReady) return;
     let { ok, data, problem } = await messagesApi.getAllRepliedMessages();
     if (ok) {
-      if (!isReady || mounted) {
+      if (!isReady || !isUnmounting) {
         setIsReady(true);
         return setReplies(data.allReplies);
       }
       return;
     }
-    if (!isReady || mounted) {
+    if (!isReady || !isUnmounting) {
       setIsReady(true);
       tackleProblem(problem, data, setInfoAlert);
     }
   };
 
   useEffect(() => {
-    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: false,
         showInfoAlert: false,
       });
     }
-  }, [isFocused, mounted]);
+
+    return () => (isUnmounting = true);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && message.isVisible === true) {
+    if (!isFocused && !isUnmounting && message.isVisible === true) {
       setMessage({
         message: defaultProps.defaultMessage,
         isVisible: false,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && showAlert === true) {
+    if (!isFocused && !isUnmounting && showAlert === true) {
       setShowAlert(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (isFocused && mounted) {
+    if (isFocused && !isUnmounting) {
       allReplies();
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);

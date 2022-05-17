@@ -141,7 +141,7 @@ function VipSearchScreen({ navigation }) {
         }
         setSearchResult([]);
       },
-      1000,
+      500,
       true
     ),
     [searchResult]

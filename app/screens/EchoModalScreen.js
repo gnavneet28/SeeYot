@@ -70,7 +70,7 @@ function EchoModalScreen({ route, navigation }) {
   let imageUri = recipient.picture;
 
   const handleBack = useCallback(
-    debounce(() => navigation.goBack(), 500, true),
+    debounce(() => navigation.goBack(), 1000, true),
     []
   );
   // PinchGesture Image Zoom

@@ -183,10 +183,13 @@ function GroupMessageInput({
     }
   }, [isFocused, mounted]);
 
-  const handleOnChangeText = useCallback((text) => {
-    setTyping();
-    setMessage(text);
-  }, []);
+  const handleOnChangeText = useCallback(
+    (text) => {
+      setTyping(text);
+      setMessage(text);
+    },
+    [setTyping]
+  );
 
   const handleFocusInput = () => {
     setFocused(true);
