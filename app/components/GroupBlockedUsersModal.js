@@ -1,30 +1,25 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useContext } from "react";
 import { FlatList } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 
 import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
 import AppText from "../components/AppText";
-import BlockedUserCard from "../components/BlockedUserCard";
 import ItemSeperatorComponent from "../components/ItemSeperatorComponent";
 
-import debounce from "../utilities/debounce";
 import ApiContext from "../utilities/apiContext";
-import apiActivity from "../utilities/apiActivity";
-
-import useAuth from "../auth/useAuth";
 
 import defaultStyles from "../config/styles";
 
 import ScreenSub from "../components/ScreenSub";
 import AppModal from "./AppModal";
+import GroupContext from "../utilities/groupContext";
+import GroupBlockedCard from "./GroupBlockedCard";
 
 function GroupBlockedUsersModal({ isVisible, handleCloseModal }) {
-  const { user, setUser } = useAuth();
-  const { tackleProblem } = apiActivity;
-
+  const { group, setGroup } = useContext(GroupContext);
   // STATES
-  const [apiProcessing, setApiProcessing] = useState(false);
+  const [apiProcessing, setApiProcessing] = useState("");
 
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
@@ -36,54 +31,37 @@ function GroupBlockedUsersModal({ isVisible, handleCloseModal }) {
     []
   );
 
-  // DATA NEEDED
-  const currentUser = {
-    blocked: user.blocked ? user.blocked : [],
-  };
-
-  const data = useMemo(
-    () => (typeof user.blocked !== "undefined" ? user.blocked : []),
-    [user.blocked.length]
-  );
-
-  // HAEDER ACTION
-  const handleBackPress = useCallback(
-    debounce(
-      () => {
-        navigation.goBack();
-      },
-      500,
-      true
-    ),
-    []
-  );
-
   // BLOCK LIST ACTION
 
   const renderItem = useCallback(
-    ({ item }) => <BlockedUserCard blockedUser={item} />,
-    []
+    ({ item }) => <GroupBlockedCard blockedUser={item} />,
+    [group._id]
   );
 
   const keyExtractor = useCallback((item) => item._id, []);
 
   return (
     <>
-      <AppModal style={styles.container}>
+      <AppModal
+        visible={isVisible}
+        animationType="slide"
+        onRequestClose={handleCloseModal}
+        style={styles.container}
+      >
         <AppHeader
           leftIcon="arrow-back"
-          onPressLeft={handleBackPress}
-          title="Blocklist"
+          onPressLeft={handleCloseModal}
+          title="Group Blocklist"
         />
         <ScreenSub>
-          {user && !currentUser.blocked.length ? (
+          {!group.blocked.length ? (
             <AppText style={styles.emptyBlocklistInfo}>
               Blocklist is empty.
             </AppText>
           ) : null}
           <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
             <FlatList
-              data={data}
+              data={group.blocked}
               ItemSeparatorComponent={ItemSeperatorComponent}
               keyExtractor={keyExtractor}
               renderItem={renderItem}

@@ -7,26 +7,35 @@ import LottieView from "lottie-react-native";
 import AppText from "./AppText";
 
 import { SocketContext } from "../api/socketClient";
+import GroupContext from "../utilities/groupContext";
 
 import defaultStyles from "../config/styles";
 import TotalActiveUsers from "./TotalActiveUsers";
+import GroupBlockedUsersModal from "./GroupBlockedUsersModal";
 
 function MyGroupCard({
   onPress,
-  group,
+  groupItem,
   onAddEchoPress,
   onSendThoughtsPress,
   user = { _id: "" },
-  onBlockedButtonPress = () => {},
 }) {
   const socket = useContext(SocketContext);
 
   const [activeUsers, setActiveUsers] = useState([]);
+  const [group, setGroup] = useState(groupItem);
+  const [showBlockedModal, setShowBlockedModal] = useState(false);
+
+  const handleCloseBlockedModal = () => {
+    setShowBlockedModal(false);
+  };
+
+  const handleOnBlockedButtonPress = () => setShowBlockedModal(true);
 
   let isUnmounting = false;
 
   const handleOnPress = () => {
-    onPress(group.name);
+    onPress(group);
   };
 
   useEffect(() => {
@@ -71,47 +80,60 @@ function MyGroupCard({
     );
 
   return (
-    <TouchableWithoutFeedback onPress={handleOnPress}>
-      <View style={styles.container}>
-        <ImageBackground
-          style={styles.imageBackground}
-          resizeMode={group.picture ? "cover" : "contain"}
-          source={{ uri: group.picture ? group.picture : "defaultgroupdp" }}
-        >
-          <View style={styles.groupHeader}>
-            <View style={styles.groupIconType}>
-              <MaterialIcons
-                size={scale(15)}
-                name={group.type == "Private" ? "person" : "public"}
-                color={defaultStyles.colors.dark}
-              />
-            </View>
-            <AppText style={styles.groupName}>{group.name}</AppText>
-            <TotalActiveUsers
-              onAddEchoPress={onAddEchoPress}
-              onSendThoughtsPress={onSendThoughtsPress}
-              containerStyle={styles.totalActiveCount}
-              totalActiveUsers={activeUsers}
-            />
-          </View>
-          <View style={styles.categoryContainer}>
-            <AppText style={styles.categoryText}>{group.category}</AppText>
-            <AppText style={styles.categoryText}>{group.subCategory}</AppText>
-          </View>
+    <GroupContext.Provider value={{ group, setGroup }}>
+      <>
+        <TouchableWithoutFeedback onPress={handleOnPress}>
+          <View style={styles.container}>
+            <ImageBackground
+              style={styles.imageBackground}
+              resizeMode={group.picture ? "cover" : "contain"}
+              source={{ uri: group.picture ? group.picture : "defaultgroupdp" }}
+            >
+              <View style={styles.groupHeader}>
+                <View style={styles.groupIconType}>
+                  <MaterialIcons
+                    size={scale(15)}
+                    name={group.type == "Private" ? "person" : "public"}
+                    color={defaultStyles.colors.dark}
+                  />
+                </View>
+                <AppText style={styles.groupName}>{group.name}</AppText>
+                <TotalActiveUsers
+                  onAddEchoPress={onAddEchoPress}
+                  onSendThoughtsPress={onSendThoughtsPress}
+                  containerStyle={styles.totalActiveCount}
+                  totalActiveUsers={activeUsers}
+                />
+              </View>
+              <View style={styles.categoryContainer}>
+                <AppText style={styles.categoryText}>{group.category}</AppText>
+                <AppText style={styles.categoryText}>
+                  {group.subCategory}
+                </AppText>
+              </View>
 
-          <View style={styles.groupFooter}>
-            {group.createdBy._id == user._id ? (
-              <AppText onPress={onBlockedButtonPress} style={styles.blocked}>
-                {group.blocked.length} Blocked
-              </AppText>
-            ) : null}
-            {/* <AppText onPress={handleOnPress} style={styles.visitGroupButton}>
+              <View style={styles.groupFooter}>
+                {group.createdBy._id == user._id ? (
+                  <AppText
+                    onPress={handleOnBlockedButtonPress}
+                    style={styles.blocked}
+                  >
+                    {group.blocked.length} Blocked
+                  </AppText>
+                ) : null}
+                {/* <AppText onPress={handleOnPress} style={styles.visitGroupButton}>
               Visit
             </AppText> */}
+              </View>
+            </ImageBackground>
           </View>
-        </ImageBackground>
-      </View>
-    </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
+        <GroupBlockedUsersModal
+          isVisible={showBlockedModal}
+          handleCloseModal={handleCloseBlockedModal}
+        />
+      </>
+    </GroupContext.Provider>
   );
 }
 const styles = ScaledSheet.create({

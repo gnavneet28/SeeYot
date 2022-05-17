@@ -103,10 +103,10 @@ class MyGroupsListPro extends React.Component {
       case ViewTypes.Full:
         return (
           <MyGroupCard
-            group={data}
+            groupItem={data}
             onAddEchoPress={this.props.onAddEchoPress}
             onSendThoughtsPress={this.props.onSendThoughtsPress}
-            onPress={() => this.props.onVisitGroupPress(data)}
+            onPress={this.props.onVisitGroupPress}
             user={this.props.user}
           />
         );
@@ -157,12 +157,12 @@ class MyGroupsListPro extends React.Component {
         </View>
         <View style={styles.listView}>
           <RecyclerListView
-            // refreshControl={
-            //   <RefreshControl
-            //     onRefresh={this.props.onRefresh}
-            //     refreshing={this.props.refreshing}
-            //   />
-            // }
+            refreshControl={
+              <RefreshControl
+                onRefresh={this.props.onRefresh}
+                refreshing={this.props.refreshing}
+              />
+            }
             scrollViewProps={{ showsVerticalScrollIndicator: false }}
             dataProvider={this.state.dataProvider}
             extendedState={this.state}
