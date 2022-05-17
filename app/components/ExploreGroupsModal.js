@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 
@@ -52,6 +52,7 @@ const ExploreGroupsModal = ({
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+  let [refreshing, setRefreshing] = useState(false);
 
   const handleCloseInfoAlert = () =>
     setInfoAlert({ showInfoAlert: "false", infoAlertMessage: "" });
@@ -97,6 +98,16 @@ const ExploreGroupsModal = ({
     setGroups(newGroupsList);
   };
 
+  const handleRefresh = useCallback(() => {
+    if (!isUnmounting) {
+      setRefreshing(true);
+    }
+    getGroups(category);
+    if (!isUnmounting) {
+      setRefreshing(false);
+    }
+  }, [category]);
+
   return (
     <>
       <AppModal
@@ -135,6 +146,8 @@ const ExploreGroupsModal = ({
               user={user}
               onVisitGroupPress={onGroupSelection}
               placeholder={"Search groups..."}
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
             />
           )}
         </View>

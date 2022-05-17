@@ -31,6 +31,7 @@ function MyGroupsModal({
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+  const [refreshing, setRefreshing] = useState(false);
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
@@ -50,11 +51,16 @@ function MyGroupsModal({
     }
   };
 
+  const handleRefresh = useCallback(() => {
+    getGroups();
+  }, []);
+
   useEffect(() => {
     if (visible) {
       getGroups();
     }
   }, [visible]);
+
   return (
     <>
       <AppModal
@@ -77,6 +83,8 @@ function MyGroupsModal({
               groups={myGroups}
               user={user}
               onVisitGroupPress={onGroupSelection}
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
             />
           ) : (
             <AppText style={styles.noGroupsInfo}>No groups to show!</AppText>
