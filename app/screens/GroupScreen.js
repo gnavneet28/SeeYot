@@ -14,6 +14,8 @@ import QRCode from "react-native-qrcode-svg";
 import dynamicLinks from "@react-native-firebase/dynamic-links";
 import * as Animatable from "react-native-animatable";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+import { showMessage } from "react-native-flash-message";
+import asyncStorage from "../utilities/cache";
 
 import Alert from "../components/Alert";
 import AppActivityIndicator from "../components/ActivityIndicator";
@@ -69,6 +71,10 @@ function GroupScreen({ navigation, route }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+  const [incognitoAlert, setIncognitoAlert] = useState({
+    incognitoAlertMessage: "",
+    showIncognitoAlert: false,
+  });
   const [deletingGroup, setDeletingGroup] = useState(false);
   const [openReportModal, setOpenReportModal] = useState(false);
   const [problemDescription, setProblemDescription] = useState("");
@@ -81,6 +87,14 @@ function GroupScreen({ navigation, route }) {
     isVisible: false,
     image: "",
   });
+
+  // Incognito actions
+
+  const handleCloseIncognitoAlert = async () => {
+    setIncognitoAlert({ incognitoAlertMessage: "", showIncognitoAlert: false });
+    await asyncStorage.store("incognito", "seen");
+    handleJoinIncognito();
+  };
 
   const handleCloseImageModal = () => {
     setImageModal({
@@ -343,7 +357,12 @@ function GroupScreen({ navigation, route }) {
     if (ok && !isUnmounting) {
       setGroup(data);
       setOpenPasswordModal(false);
-      return setIsLoading(false);
+      setIsLoading(false);
+      return showMessage({
+        ...defaultProps.alertMessageConfig,
+        type: "success",
+        message: "Password updated successfully.",
+      });
     }
     if (!isUnmounting) {
       setOpenPasswordModal(false);
@@ -397,7 +416,14 @@ function GroupScreen({ navigation, route }) {
       incognito: false,
     });
   };
-  const handleJoinIncognito = () => {
+  const handleJoinIncognito = async () => {
+    let seen = await asyncStorage.get("incognito");
+    if (!seen)
+      return setIncognitoAlert({
+        incognitoAlertMessage:
+          "Joining any conversation in incognito mode only hides you from active users list. When you send messages in the group, your profile will be visible.",
+        showIncognitoAlert: true,
+      });
     ReactNativeHapticFeedback.trigger("impactMedium", optionsVibrate);
     navigation.navigate(NavigationConstants.GROUP_CHAT_SCREEN, {
       group: {
@@ -605,6 +631,11 @@ Do not have permission to view group.
         description={infoAlert.infoAlertMessage}
         visible={infoAlert.showInfoAlert}
       />
+      <InfoAlert
+        leftPress={handleCloseIncognitoAlert}
+        description={incognitoAlert.incognitoAlertMessage}
+        visible={incognitoAlert.showIncognitoAlert}
+      />
       {openReportModal ||
       showImageEdit ||
       openGroupInfo ||
@@ -660,7 +691,7 @@ const styles = ScaledSheet.create({
     paddingVertical: "10@s",
     textAlign: "center",
     textAlignVertical: "center",
-    width: "90%",
+    width: "80%",
   },
   chatButtonIncognito: {
     alignSelf: "center",
@@ -669,11 +700,11 @@ const styles = ScaledSheet.create({
     color: defaultStyles.colors.white,
     elevation: 5,
     fontSize: "14@s",
-    marginBottom: "5@s",
+    marginBottom: "8@s",
     paddingVertical: "10@s",
     textAlign: "center",
     textAlignVertical: "center",
-    width: "90%",
+    width: "80%",
   },
   groupQrCodeContainer: {
     alignItems: "center",
@@ -781,7 +812,7 @@ const styles = ScaledSheet.create({
   },
   shareText: {
     color: defaultStyles.colors.white,
-    fontSize: "10@s",
+    fontSize: "13@s",
   },
   noGroupInfoContainerMain: {
     alignItems: "center",
