@@ -18,18 +18,16 @@ import debounce from "../utilities/debounce";
 import storeDetails from "../utilities/storeDetails";
 import apiActivity from "../utilities/apiActivity";
 
-import useConnection from "../hooks/useConnection";
-
 import usersApi from "../api/users";
 
-function AddContactCard({
+function BlockedUserCard({
   style,
   blockedUser = defaultProps.defaultBlockedUser,
 }) {
   const { user, setUser } = useAuth();
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
-  const isConnected = useConnection();
-  const [processing, setProcessing] = useState(false);
+  let isUnmounting = false;
+
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
@@ -39,9 +37,7 @@ function AddContactCard({
   const blockedUsers = user.blocked;
 
   useEffect(() => {
-    setProcessing(false);
-
-    return () => setProcessing(false);
+    return () => (isUnmounting = true);
   }, [blockedUser._id]);
 
   // INFO ALERT ACTIONS
@@ -52,23 +48,22 @@ function AddContactCard({
   const handleUnBlockPress = useCallback(
     debounce(
       async () => {
-        setApiProcessing(true);
-        setProcessing(true);
+        setApiProcessing(blockedUser._id);
 
         const { ok, data, problem } = await usersApi.unBlockContact(
           blockedUser._id
         );
 
         if (ok) {
-          setProcessing(false);
           await storeDetails(data.user);
           setUser(data.user);
-          return setApiProcessing(false);
+          return setApiProcessing("");
         }
 
-        setProcessing(false);
-        setApiProcessing(false);
-        tackleProblem(problem, data, setInfoAlert);
+        setApiProcessing("");
+        if (!isUnmounting) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       5000,
       true
@@ -93,10 +88,10 @@ function AddContactCard({
       </View>
       <ApiProcessingContainer
         style={styles.apiProcessingContainer}
-        processing={processing}
+        processing={apiProcessing == blockedUser._id}
       >
         <AppButton
-          disabled={isBlocked && isConnected && !apiProcessing ? false : true}
+          disabled={isBlocked && !apiProcessing ? false : true}
           onPress={handleUnBlockPress}
           style={styles.blockedButton}
           subStyle={styles.blockButtonSub}
@@ -170,4 +165,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default AddContactCard;
+export default BlockedUserCard;
