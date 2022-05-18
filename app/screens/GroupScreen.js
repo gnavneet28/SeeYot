@@ -16,6 +16,7 @@ import * as Animatable from "react-native-animatable";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 import { showMessage } from "react-native-flash-message";
 import asyncStorage from "../utilities/cache";
+import ImageModal from "react-native-image-modal";
 
 import Alert from "../components/Alert";
 import AppActivityIndicator from "../components/ActivityIndicator";
@@ -47,7 +48,6 @@ import useAuth from "../auth/useAuth";
 
 import groupsApi from "../api/groups";
 import usersApi from "../api/users";
-import ImageModal from "./ImageModal";
 
 const optionsVibrate = {
   enableVibrateFallback: true,
@@ -83,10 +83,6 @@ function GroupScreen({ navigation, route }) {
   const [showDeleteGroupAlert, setShowDeleteGroupAlert] = useState(false);
 
   const [openPasswordModal, setOpenPasswordModal] = useState(false);
-  const [imageModal, setImageModal] = useState({
-    isVisible: false,
-    image: "",
-  });
 
   // Incognito actions
 
@@ -94,20 +90,6 @@ function GroupScreen({ navigation, route }) {
     setIncognitoAlert({ incognitoAlertMessage: "", showIncognitoAlert: false });
     await asyncStorage.store("incognito", "seen");
     handleJoinIncognito();
-  };
-
-  const handleCloseImageModal = () => {
-    setImageModal({
-      isVisible: false,
-      image: "",
-    });
-  };
-
-  const handleShowGroupPicture = () => {
-    setImageModal({
-      image: group.picture,
-      isVisible: true,
-    });
   };
 
   const handleHideDeleteGroupAlert = useCallback(() => {
@@ -482,31 +464,30 @@ Do not have permission to view group.
               >
                 <View style={styles.scrollView}>
                   <View style={styles.groupDisplayPicture}>
-                    <Pressable onPress={handleShowGroupPicture}>
-                      <ImageBackground
-                        resizeMode={group.picture ? "cover" : "contain"}
-                        source={{
-                          uri: group.picture ? group.picture : "defaultgroupdp",
-                        }}
-                        style={styles.imageBackground}
-                      >
-                        <View style={styles.groupWallActionContainer}>
-                          {group.createdBy._id == user._id ? (
-                            <TouchableOpacity
-                              onPress={openGroupPictureEditOptions}
-                              style={styles.editPhoto}
-                              activeOpacity={0.7}
-                            >
-                              <MaterialIcons
-                                name="edit"
-                                size={scale(15)}
-                                color={defaultStyles.colors.yellow_Variant}
-                              />
-                            </TouchableOpacity>
-                          ) : null}
-                        </View>
-                      </ImageBackground>
-                    </Pressable>
+                    <ImageModal
+                      imageBackgroundColor={defaultStyles.colors.secondary}
+                      resizeMode={"contain"}
+                      source={{
+                        uri: group.picture ? group.picture : "defaultgroupdp",
+                      }}
+                      style={styles.imageBackground}
+                    >
+                      <View style={styles.groupWallActionContainer}>
+                        {group.createdBy._id == user._id ? (
+                          <TouchableOpacity
+                            onPress={openGroupPictureEditOptions}
+                            style={styles.editPhoto}
+                            activeOpacity={0.7}
+                          >
+                            <MaterialIcons
+                              name="edit"
+                              size={scale(15)}
+                              color={defaultStyles.colors.yellow_Variant}
+                            />
+                          </TouchableOpacity>
+                        ) : null}
+                      </View>
+                    </ImageModal>
                     <View style={styles.groupQrCodeContainer}>
                       <QRCode
                         value={
@@ -669,12 +650,6 @@ Do not have permission to view group.
         openPasswordModal={openPasswordModal}
         setOpenPasswordModal={setOpenPasswordModal}
       />
-      <ImageModal
-        handleCloseImageModal={handleCloseImageModal}
-        visible={imageModal.isVisible}
-        image={imageModal.image}
-        title="Group Display Picture"
-      />
     </>
   );
 }
@@ -762,7 +737,7 @@ const styles = ScaledSheet.create({
   },
   groupDisplayPicture: {
     backgroundColor: defaultStyles.colors.white,
-    height: "300@s",
+    height: "250@s",
     width: "100%",
   },
   groupInfo: {
@@ -781,8 +756,8 @@ const styles = ScaledSheet.create({
     borderTopWidth: 0,
   },
   imageBackground: {
-    width: "100%",
-    height: "250@s",
+    width: defaultStyles.width,
+    height: "200@s",
     backgroundColor: defaultStyles.colors.dark,
   },
   qrImage: {

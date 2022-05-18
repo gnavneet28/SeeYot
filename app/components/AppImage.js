@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, TouchableHighlight, Image } from "react-native";
 
 import defaultStyles from "../config/styles";
@@ -12,18 +12,25 @@ function AppImage({
   subStyle,
   onLongPress = () => null,
   delayLongPress = 500,
+  conditionalPress = false,
   ...props
 }) {
+  const [loaded, setLoaded] = useState(false);
+
+  const handleLoadComplete = () => setLoaded(true);
+
+  const doNull = () => {};
   return (
     <TouchableHighlight
       delayLongPress={delayLongPress}
-      onLongPress={onLongPress}
+      onLongPress={loaded || !conditionalPress ? onLongPress : doNull}
       underlayColor={defaultStyles.colors.white}
       activeOpacity={activeOpacity}
-      onPress={onPress}
+      onPress={loaded || !conditionalPress ? onPress : doNull}
       style={[styles.container, style]}
     >
       <Image
+        onLoad={handleLoadComplete}
         {...props}
         style={[styles.image, subStyle]}
         source={

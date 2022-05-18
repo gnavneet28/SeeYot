@@ -1,24 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
-  Image,
   ImageBackground,
   TouchableWithoutFeedback,
+  ScrollView,
 } from "react-native";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import { ScaledSheet, s } from "react-native-size-matters";
-import {
-  PinchGestureHandler,
-  GestureHandlerRootView,
-  ScrollView,
-} from "react-native-gesture-handler";
-import Animated, {
-  useAnimatedGestureHandler,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+
 import { SharedElement } from "react-navigation-shared-element";
+import ImageModal from "react-native-image-modal";
 
 import echosApi from "../api/echos";
 import usersApi from "../api/users";
@@ -34,6 +25,7 @@ import debounce from "../utilities/debounce";
 
 import defaultStyles from "../config/styles";
 import ScreenSub from "../components/ScreenSub";
+import ImageLoadingComponent from "../components/ImageLoadingComponent";
 
 const height = defaultStyles.height;
 const width = defaultStyles.width;
@@ -48,6 +40,7 @@ function EchoModalScreen({ route, navigation }) {
   let isUnmounting = false;
 
   const [echoMessage, setEchoMessage] = useState({ message: "" });
+  const [loaded, setLoaded] = useState(0);
 
   const getEchoMessage = async () => {
     if (user._id != recipient._id) {
@@ -73,40 +66,8 @@ function EchoModalScreen({ route, navigation }) {
     debounce(() => navigation.goBack(), 1000, true),
     []
   );
-  // PinchGesture Image Zoom
 
-  const AnimatedImage = Animated.createAnimatedComponent(Image);
-
-  const scaleImage = useSharedValue(1);
-  const focalX = useSharedValue(0);
-  const focalY = useSharedValue(0);
-
-  const pinchHandler = useAnimatedGestureHandler({
-    onActive: (event) => {
-      scaleImage.value = event.scale;
-      focalX.value = event.focalX;
-      focalY.value = event.focalY;
-    },
-    onEnd: () => {
-      scaleImage.value = withTiming(1);
-    },
-  });
-
-  const rStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateX: focalX.value },
-        { translateY: focalY.value },
-        { translateX: width < height ? -width / 2 : -height / 2 },
-        { translateY: width < height ? -width / 2 : -height / 2 },
-        { scale: scaleImage.value },
-        { translateX: -focalX.value },
-        { translateY: -focalY.value },
-        { translateX: width < height ? width / 2 : height / 2 },
-        { translateY: width < height ? width / 2 : height / 2 },
-      ],
-    };
-  });
+  const handleLoadComplete = () => setLoaded(1);
 
   return (
     <Screen style={styles.container}>
@@ -137,19 +98,25 @@ function EchoModalScreen({ route, navigation }) {
                   </AppText>
                 </View>
                 <SharedElement id={recipient._id}>
-                  <GestureHandlerRootView>
-                    <PinchGestureHandler onGestureEvent={pinchHandler}>
-                      <AnimatedImage
-                        activeOpacity={1}
-                        source={
-                          recipient.picture
-                            ? { uri: recipient.picture }
-                            : { uri: "user" }
-                        }
-                        style={[styles.inlargedImage, rStyle]}
-                      />
-                    </PinchGestureHandler>
-                  </GestureHandlerRootView>
+                  <View style={styles.inlargedImage}>
+                    <ImageModal
+                      onLoad={handleLoadComplete}
+                      onProgress={(e) =>
+                        setLoaded(e.nativeEvent.loaded / e.nativeEvent.total)
+                      }
+                      imageBackgroundColor={defaultStyles.colors.dark_Variant}
+                      resizeMode="contain"
+                      style={styles.inlargedImage}
+                      source={{
+                        uri: recipient.picture ? recipient.picture : "user",
+                      }}
+                    />
+                    <ImageLoadingComponent
+                      image={recipient.picture}
+                      defaultImage={"user"}
+                      progress={loaded}
+                    />
+                  </View>
                 </SharedElement>
                 {echoMessage ? (
                   <EchoMessage

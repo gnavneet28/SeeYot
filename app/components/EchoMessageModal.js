@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import {
   View,
   Modal,
@@ -19,9 +19,11 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
+import ImageModal from "react-native-image-modal";
 
 import AppText from "./AppText";
 import EchoMessage from "./EchoMessage";
+import ImageLoadingComponent from "./ImageLoadingComponent";
 
 import defaultStyles from "../config/styles";
 import defaultProps from "../utilities/defaultProps";
@@ -40,6 +42,9 @@ function EchoMessageModal({
   },
 }) {
   let imageUri = state.recipient.picture;
+  const [loaded, setLoaded] = useState(0);
+
+  const handleLoadComplete = () => setLoaded(1);
   // PinchGesture Image Zoom
 
   const AnimatedImage = Animated.createAnimatedComponent(Image);
@@ -106,19 +111,25 @@ function EchoMessageModal({
                   {state.recipient.name}
                 </AppText>
               </View>
-              <GestureHandlerRootView>
-                <PinchGestureHandler onGestureEvent={pinchHandler}>
-                  <AnimatedImage
-                    activeOpacity={1}
-                    source={
-                      state.recipient.picture
-                        ? { uri: state.recipient.picture }
-                        : { uri: "user" }
-                    }
-                    style={[styles.inlargedImage, rStyle]}
-                  />
-                </PinchGestureHandler>
-              </GestureHandlerRootView>
+              <View style={styles.inlargedImage}>
+                <ImageModal
+                  onLoad={handleLoadComplete}
+                  onProgress={(e) =>
+                    setLoaded(e.nativeEvent.loaded / e.nativeEvent.total)
+                  }
+                  imageBackgroundColor={defaultStyles.colors.dark_Variant}
+                  resizeMode="contain"
+                  style={styles.inlargedImage}
+                  source={{
+                    uri: imageUri ? imageUri : "user",
+                  }}
+                />
+                <ImageLoadingComponent
+                  image={imageUri}
+                  defaultImage={"user"}
+                  progress={loaded}
+                />
+              </View>
               <EchoMessage
                 style={styles.echoMessage}
                 echoMessage={state.echoMessage.message}

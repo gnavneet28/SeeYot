@@ -17,7 +17,6 @@ import messagesApi from "../api/messages";
 
 import useConnection from "../hooks/useConnection";
 
-import defaultStyles from "../config/styles";
 import defaultProps from "../utilities/defaultProps";
 import apiActivity from "../utilities/apiActivity";
 
@@ -88,14 +87,18 @@ function RepliesScreen({ navigation }) {
     if (isReady) return;
     let { ok, data, problem } = await messagesApi.getAllRepliedMessages();
     if (ok) {
-      if (!isReady || !isUnmounting) {
+      if (!isReady && !isUnmounting) {
         setIsReady(true);
+      }
+      if (!isUnmounting) {
         return setReplies(data.allReplies);
       }
       return;
     }
-    if (!isReady || !isUnmounting) {
+    if (!isReady && !isUnmounting) {
       setIsReady(true);
+    }
+    if (!isUnmounting) {
       tackleProblem(problem, data, setInfoAlert);
     }
   };
@@ -144,6 +147,10 @@ function RepliesScreen({ navigation }) {
     []
   );
 
+  const handleCloseAlert = () => setShowAlert(false);
+
+  const doNull = () => {};
+
   return (
     <>
       <Screen style={styles.container}>
@@ -172,12 +179,12 @@ function RepliesScreen({ navigation }) {
         visible={infoAlert.showInfoAlert}
       />
       <Alert
-        onRequestClose={() => setShowAlert(false)}
+        onRequestClose={handleCloseAlert}
         description="Are you sure you want to delete this message?"
-        leftPress={() => setShowAlert(false)}
+        leftPress={handleCloseAlert}
         leftOption="Cancel"
         rightOption="Ok"
-        rightPress={isConnected ? handleDeletePress : null}
+        rightPress={isConnected ? handleDeletePress : doNull}
         setVisible={setShowAlert}
         title="Delete this Message"
         visible={showAlert}

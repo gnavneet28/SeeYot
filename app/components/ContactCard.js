@@ -42,6 +42,7 @@ function ContactCard({
     <View style={[styles.container, style]}>
       <SharedElement id={user._id}>
         <AppImage
+          conditionalPress={true}
           imageUrl={user.picture}
           onPress={handleImagePress}
           style={styles.image}
