@@ -360,6 +360,7 @@ const styles = ScaledSheet.create({
   },
   optionSelectionContainer: {
     flexDirection: "row",
+    minHeight: "30@s",
     width: "90%",
   },
   qrCodeContainer: {

@@ -170,6 +170,7 @@ const styles = ScaledSheet.create({
   categorySelectorContainer: {
     backgroundColor: defaultStyles.colors.light,
     flexDirection: "row",
+    height: "40@s",
     paddingBottom: "2@s",
     paddingHorizontal: "10@s",
     paddingTop: "10@s",

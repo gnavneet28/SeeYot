@@ -29,4 +29,5 @@ export default {
     color: colors.white,
     opacity: 1,
   },
+  searchBoxRadius: "7@s",
 };

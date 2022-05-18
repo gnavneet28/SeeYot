@@ -259,6 +259,8 @@ function AddEchoScreen({ navigation, route }) {
     setMessage(echoMessageOption.message);
     if (checkFileType(echoMessageOption.message)) {
       setRecordAudio(true);
+    } else if (!checkFileType(echoMessageOption.message)) {
+      setRecordAudio(false);
     }
     setIsVisible(false);
   }, [message, echoMessageOption]);

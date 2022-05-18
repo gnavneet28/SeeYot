@@ -15,7 +15,6 @@ function GroupNavigator(props) {
       initialRouteName={Constant.FIND_GROUP_SCREEN}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { display: "none" },
         animation: "slide_from_right",
       }}
     >

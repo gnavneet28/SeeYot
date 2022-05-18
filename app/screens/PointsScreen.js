@@ -289,7 +289,7 @@ function PointsScreen({ navigation }) {
                   value={pointsToRedeem.toString()}
                 />
                 <ApiProcessingContainer
-                  style={styles.apiProcessingContainer}
+                  style={styles.redeeButtonContainer}
                   processing={redeeming}
                 >
                   <AppButton
@@ -356,14 +356,6 @@ function PointsScreen({ navigation }) {
                 <AppText style={styles.adsTermAndConditionInfo}>
                   Terms to use Ads to avail SeeYot Vip membership.
                 </AppText>
-                {/* <Information
-                  IconCategory={MaterialCommunityIcon}
-                  iconName="account"
-                  iconSize={scale(25)}
-                  data={currentAdsStats.accountLife}
-                  information="Account Life (Days)"
-                  infoDetails="You account should be minimum 15 days old."
-                /> */}
                 <Information
                   IconCategory={MaterialCommunityIcon}
                   iconName="google-ads"
@@ -434,8 +426,8 @@ const styles = ScaledSheet.create({
     textAlignVertical: "center",
     width: "100%",
   },
-  apiProcessingContainer: {
-    borderColor: defaultStyles.colors.tomato,
+  redeeButtonContainer: {
+    borderColor: defaultStyles.colors.secondary,
     borderRadius: "5@s",
     borderWidth: 1,
     height: "35@s",
@@ -455,7 +447,7 @@ const styles = ScaledSheet.create({
     zIndex: 222,
   },
   collectPointsApiProcessingContainer: {
-    borderColor: defaultStyles.colors.tomato,
+    borderColor: defaultStyles.colors.secondary,
     borderRadius: "15@s",
     borderWidth: "1@s",
     height: "30@s",
@@ -464,7 +456,7 @@ const styles = ScaledSheet.create({
     width: "120@s",
   },
   collectPointsButton: {
-    backgroundColor: defaultStyles.colors.tomato,
+    backgroundColor: defaultStyles.colors.secondary,
     borderRadius: "15@s",
     height: "30@s",
     paddingHorizontal: "10@s",
@@ -532,7 +524,7 @@ const styles = ScaledSheet.create({
     textAlign: "left",
   },
   redeemButton: {
-    backgroundColor: defaultStyles.colors.tomato,
+    backgroundColor: defaultStyles.colors.secondary,
     height: "35@s",
     width: "100%",
   },

@@ -12,8 +12,6 @@ import FavoriteTabButton from "../components/FavoriteTabButton";
 import HomeNavigator from "./HomeNavigator";
 import NotificationNavigator from "./NotificationNavigator";
 import TabButton from "../components/TabButton";
-import VipNavigator from "./VipNavigator";
-import QrScannerScreen from "../screens/QrScannerScreen";
 
 import defaultstyles from "../config/styles";
 import GroupNavigator from "./GroupNavigator";

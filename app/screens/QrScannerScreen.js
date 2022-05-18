@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { Linking, View, PermissionsAndroid, Platform } from "react-native";
+import { Linking, View, PermissionsAndroid } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 import QRCodeScanner from "react-native-qrcode-scanner";
@@ -18,6 +18,8 @@ import ScannerTopContent from "../components/ScannerTopContent";
 import Screen from "../components/Screen";
 import ScreenSub from "../components/ScreenSub";
 
+import runIfNotConnected from "../utilities/runIfNotConnected";
+
 import defaultStyles from "../config/styles";
 
 import NavigationConstants from "../navigation/NavigationConstants";
@@ -29,17 +31,18 @@ import apiActivity from "../utilities/apiActivity";
 import useAuth from "../auth/useAuth";
 import usersApi from "../api/users";
 import storeDetails from "../utilities/storeDetails";
+import useConnection from "../hooks/useConnection";
 
 function QrScannerScreen({ navigation, route }) {
   const isFocused = useIsFocused();
   const cameraRef = useRef(null);
   const { tackleProblem } = apiActivity;
   const { user, setUser } = useAuth();
+  let isConnected = useConnection();
 
   let isUnmounting = false;
 
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
-  let svg = useRef();
 
   const [permitted, setPermitted] = useState(false);
   const [deletingGroupFromHistory, setDeletingGroupFromHistory] =
@@ -155,20 +158,25 @@ function QrScannerScreen({ navigation, route }) {
   };
 
   const enterGroup = async (name, password) => {
-    setCheckingGroupName(true);
+    // runIfNotConnected(isConnected, setInfoAlert);
+    if (!isUnmounting) {
+      setCheckingGroupName(true);
+    }
     const { ok, data, problem } = await groupsApi.getGroupByName(
       name,
       password
     );
-    if (ok) {
+    if (ok && !isUnmounting) {
       setCheckingGroupName(false);
       return navigation.navigate(NavigationConstants.GROUP_INFO_SCREEN, {
         groupName: data.group.name,
         password: data.group.password ? data.group.password : "",
       });
     }
-    setCheckingGroupName(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isUnmounting) {
+      setCheckingGroupName(false);
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   const handleShowMyGroupsModal = () => {
