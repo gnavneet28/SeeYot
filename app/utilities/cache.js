@@ -1,6 +1,6 @@
-import Bugsnag from "@bugsnag/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import dayjs from "dayjs";
+import crashlytics from "@react-native-firebase/crashlytics";
 
 const prefix = "cache";
 
@@ -18,7 +18,9 @@ const store = async (key, value) => {
   try {
     await AsyncStorage.setItem(prefix + key, JSON.stringify(item));
   } catch (error) {
-    Bugsnag.notify(error);
+    if (typeof error === "string") {
+      crashlytics().recordError(new Error(error));
+    }
   }
 };
 const storeWithExpiry = async (key, value, expiryInDays) => {
@@ -30,7 +32,9 @@ const storeWithExpiry = async (key, value, expiryInDays) => {
   try {
     await AsyncStorage.setItem(prefix + key, JSON.stringify(item));
   } catch (error) {
-    Bugsnag.notify(error);
+    if (typeof error === "string") {
+      crashlytics().recordError(new Error(error));
+    }
   }
 };
 
@@ -48,7 +52,9 @@ const get = async (key) => {
 
     return item.value;
   } catch (error) {
-    Bugsnag.notify(error);
+    if (typeof error === "string") {
+      crashlytics().recordError(new Error(error));
+    }
   }
 };
 const getWithExpiry = async (key) => {
@@ -65,7 +71,9 @@ const getWithExpiry = async (key) => {
 
     return item;
   } catch (error) {
-    Bugsnag.notify(error);
+    if (typeof error === "string") {
+      crashlytics().recordError(new Error(error));
+    }
   }
 };
 

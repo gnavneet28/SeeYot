@@ -22,7 +22,7 @@ import {
 import defaultStyles from "../config/styles";
 
 import verifyApi from "../api/verify";
-import Bugsnag from "@bugsnag/react-native";
+import crashlytics from "@react-native-firebase/crashlytics";
 
 export default function VerifyOtpScreen({ navigation, route }) {
   const { phoneNumber, verificationId } = route.params;
@@ -64,13 +64,17 @@ export default function VerifyOtpScreen({ navigation, route }) {
   const otpListener = () =>
     OtpAutocomplete.getOtp()
       .then((p) => OtpAutocomplete.addListener(otpHandler))
-      .catch((p) => Bugsnag.notify(p));
+      .catch((error) => {
+        if (typeof error === "string") {
+          crashlytics().recordError(new Error(error));
+        }
+      });
 
   useEffect(() => {
     otpListener();
     // OtpAutocomplete.getOtp()
     //   .then((p) => OtpAutocomplete.addListener(otpHandler))
-    //   .catch((p) => Bugsnag.notify(p));
+    //   .catch((p) => {});
 
     return () => OtpAutocomplete.removeListener();
   }, [otpListener]);

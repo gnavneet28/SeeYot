@@ -1,5 +1,5 @@
 import * as SecureStore from "expo-secure-store";
-import Bugsnag from "@bugsnag/react-native";
+import crashlytics from "@react-native-firebase/crashlytics";
 
 const key = "authToken";
 
@@ -7,7 +7,9 @@ const storeToken = async (authToken) => {
   try {
     await SecureStore.setItemAsync(key, authToken);
   } catch (error) {
-    Bugsnag.notify(error);
+    if (typeof error === "string") {
+      crashlytics().recordError(new Error(error));
+    }
   }
 };
 
@@ -15,7 +17,9 @@ const getToken = async () => {
   try {
     return await SecureStore.getItemAsync(key);
   } catch (error) {
-    Bugsnag.notify(error);
+    if (typeof error === "string") {
+      crashlytics().recordError(new Error(error));
+    }
   }
 };
 
@@ -28,7 +32,9 @@ const removeToken = async () => {
   try {
     await SecureStore.deleteItemAsync(key);
   } catch (error) {
-    Bugsnag.notify(error);
+    if (typeof error === "string") {
+      crashlytics().recordError(new Error(error));
+    }
   }
 };
 

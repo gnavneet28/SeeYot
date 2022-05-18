@@ -86,8 +86,6 @@ project.ext.react = [
 
 apply from: new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), "../react.gradle")
 
-// bugsnag
-apply plugin: "com.bugsnag.android.gradle"
 
 
 

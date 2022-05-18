@@ -26,13 +26,6 @@
     <string>This identifier will be used to deliver personalized ads to you.</string>
 
 
-	<key>bugsnag</key>
-     <dict>
-    <key>apiKey</key>
-    <string>9f3d26c96a5f08efc1b513c64fb6a637</string>
-    </dict>
-
-
 
 	<key>NSContactsUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your contacts</string>

@@ -4,7 +4,7 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 import FontAwesome5 from "../../node_modules/react-native-vector-icons/FontAwesome5";
 import OtpAutocomplete from "react-native-otp-autocomplete";
-import Bugsnag from "@bugsnag/react-native";
+import crashlytics from "@react-native-firebase/crashlytics";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
@@ -49,8 +49,10 @@ function SendOtpScreen({ navigation }) {
     if (mounted) {
       OtpAutocomplete.getHash()
         .then((hash) => setAppHash(hash))
-        .catch((err) => {
-          Bugsnag.notify(err);
+        .catch((error) => {
+          if (typeof error === "string") {
+            crashlytics().recordError(new Error(error));
+          }
         });
     }
   }, [mounted]);

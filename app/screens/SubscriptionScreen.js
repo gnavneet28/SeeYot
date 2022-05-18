@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, View, Platform } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
-import Bugsnag from "@bugsnag/react-native";
 import * as IAP from "expo-in-app-purchases";
+import crashlytics from "@react-native-firebase/crashlytics";
 
 import AppButton from "../components/AppButton";
 import AppHeader from "../components/AppHeader";
@@ -72,15 +72,21 @@ function SubscriptionScreen({ navigation, route }) {
 
   const connectToTheAppStore = () => {
     IAP.connectAsync()
-      .catch((err) => {
-        Bugsnag.notify(err);
+      .catch((error) => {
+        if (typeof error === "string") {
+          crashlytics().recordError(new Error(error));
+        }
       })
       .then(() => {
         IAP.getProductsAsync(items).then(({ responseCode, results }) =>
           setProducts(results)
         );
       })
-      .catch((err) => Bugsnag.notify(err));
+      .catch((error) => {
+        if (typeof error === "string") {
+          crashlytics().recordError(new Error(error));
+        }
+      });
   };
 
   useEffect(() => {
@@ -98,7 +104,9 @@ function SubscriptionScreen({ navigation, route }) {
         try {
           return await IAP.purchaseItemAsync(id);
         } catch (error) {
-          console.log(error);
+          if (typeof error === "string") {
+            crashlytics().recordError(new Error(error));
+          }
         }
       }
       setCheckingVip("");

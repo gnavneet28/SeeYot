@@ -24,7 +24,7 @@ import com.swmansion.reanimated.ReanimatedJSIModulePackage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import com.bugsnag.android.Bugsnag;
+
 import com.oblador.vectoricons.VectorIconsPackage;
 
 
@@ -72,7 +72,6 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public void onCreate() {
     super.onCreate();
-    Bugsnag.start(this);
     SoLoader.init(this, /* native exopackage */ false);
     long size = 50L * 1024L * 1024L; // 50 MB
     com.facebook.react.modules.storage.ReactDatabaseSupplier.getInstance(getApplicationContext()).setMaximumSize(size);
