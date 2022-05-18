@@ -7,6 +7,7 @@ import Option from "./Option";
 import ApiOption from "./ApiOption";
 
 import defaultStyles from "../config/styles";
+import ModalBackDrop from "./ModalBackDrop";
 
 function EchoScreenOptions({
   echoMessageOption,
@@ -17,35 +18,41 @@ function EchoScreenOptions({
   recipient,
   removingEcho,
 }) {
+  const onCloseModal = () => {
+    if (removingEcho) return;
+    handleCloseModal();
+  };
   return (
     <Modal
       animationType="none"
-      onRequestClose={handleCloseModal}
+      onRequestClose={onCloseModal}
       transparent={true}
       visible={isVisible}
     >
-      <View style={[styles.echoOptionMainContainer]}>
-        <Animatable.View
-          useNativeDriver={true}
-          animation="pulse"
-          style={styles.optionsContainer}
-        >
-          <Option
-            onPress={handleCloseModal}
-            title="Close"
-            titleStyle={styles.optionClose}
-          />
+      <ModalBackDrop onPress={onCloseModal}>
+        <View style={[styles.echoOptionMainContainer]}>
+          <Animatable.View
+            useNativeDriver={true}
+            animation="pulse"
+            style={styles.optionsContainer}
+          >
+            <Option
+              onPress={onCloseModal}
+              title="Close"
+              titleStyle={styles.optionClose}
+            />
 
-          <ApiOption
-            onPress={handleDeleteEchoPress}
-            processing={removingEcho}
-            title="Delete"
-          />
-          {recipient._id == echoMessageOption.messageFor ? null : (
-            <Option title="Use this echo" onPress={handleUseThisEchoPress} />
-          )}
-        </Animatable.View>
-      </View>
+            <ApiOption
+              onPress={handleDeleteEchoPress}
+              processing={removingEcho}
+              title="Delete"
+            />
+            {recipient._id == echoMessageOption.messageFor ? null : (
+              <Option title="Use this echo" onPress={handleUseThisEchoPress} />
+            )}
+          </Animatable.View>
+        </View>
+      </ModalBackDrop>
     </Modal>
   );
 }
@@ -61,15 +68,13 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: "20@s",
+    borderRadius: "15@s",
     borderWidth: 1,
     overflow: "hidden",
     width: "60%",
   },
   optionClose: {
-    backgroundColor: defaultStyles.colors.dark_Variant,
-    color: defaultStyles.colors.white,
-    opacity: 1,
+    ...defaultStyles.closeIcon,
   },
 });
 

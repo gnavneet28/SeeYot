@@ -8,6 +8,7 @@ import AppModal from "./AppModal";
 import Option from "./Option";
 
 import defaultStyles from "../config/styles";
+import ModalBackDrop from "./ModalBackDrop";
 
 const optionsVibrate = {
   enableVibrateFallback: true,
@@ -55,18 +56,22 @@ const DropdownAlbumSelect = ({
         {selected ? selected : defaultPlaceholder}
       </AppText>
       <AppModal visible={openModal} onRequestClose={handleCloseModal}>
-        <View style={styles.listContainer}>
-          <Option
-            onPress={handleCloseModal}
-            title="Close"
-            titleStyle={styles.optionClose}
-          />
-          <FlatList
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-          />
-        </View>
+        <ModalBackDrop onPress={handleCloseModal}>
+          <View style={styles.modalContentContainer}>
+            <View style={styles.listContainer}>
+              <Option
+                onPress={handleCloseModal}
+                title="Close"
+                titleStyle={styles.optionClose}
+              />
+              <FlatList
+                data={data}
+                renderItem={renderItem}
+                keyExtractor={keyExtractor}
+              />
+            </View>
+          </View>
+        </ModalBackDrop>
       </AppModal>
     </>
   );
@@ -95,6 +100,12 @@ const styles = ScaledSheet.create({
     maxHeight: "60%",
     overflow: "hidden",
     width: "60%",
+  },
+  modalContentContainer: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    width: "100%",
   },
   optionClose: {
     backgroundColor: defaultStyles.colors.dark_Variant,

@@ -11,6 +11,7 @@ import defaultProps from "../utilities/defaultProps";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
+import ModalBackDrop from "./ModalBackDrop";
 
 function GroupChatUserOptions({
   handleCloseModal,
@@ -34,55 +35,62 @@ function GroupChatUserOptions({
     return user.blocked.filter((b) => b._id == interestedUser._id).length;
   }, [group, user]);
 
+  const onCloseModal = () => {
+    if (blockedFromGroup || blockedPersonally) return;
+    handleCloseModal();
+  };
+
   return (
     <Modal
       animationType="none"
-      onRequestClose={handleCloseModal}
+      onRequestClose={onCloseModal}
       transparent={true}
       visible={isVisible}
     >
-      <View style={[styles.groupOptionMainContainer]}>
-        <Animatable.View
-          useNativeDriver={true}
-          animation="pulse"
-          style={styles.optionsContainer}
-        >
-          <Option
-            onPress={handleCloseModal}
-            title="Close"
-            titleStyle={styles.optionClose}
-          />
+      <ModalBackDrop onPress={onCloseModal}>
+        <View style={[styles.groupOptionMainContainer]}>
+          <Animatable.View
+            useNativeDriver={true}
+            animation="pulse"
+            style={styles.optionsContainer}
+          >
+            <Option
+              onPress={onCloseModal}
+              title="Close"
+              titleStyle={styles.optionClose}
+            />
 
-          <View style={styles.userInfoContainer}>
-            <AppImage
-              imageUrl={interestedUser.picture}
-              style={styles.image}
-              subStyle={styles.image}
-            />
-            <AppText style={styles.userName}>{interestedUser.name}</AppText>
-          </View>
+            <View style={styles.userInfoContainer}>
+              <AppImage
+                imageUrl={interestedUser.picture}
+                style={styles.image}
+                subStyle={styles.image}
+              />
+              <AppText style={styles.userName}>{interestedUser.name}</AppText>
+            </View>
 
-          <ApiOption onPress={onAddEchoPress} title="Add Echo" />
-          <ApiOption onPress={onSendThoughtsPress} title="Send Thoughts" />
-          {!blockedFromGroup && interestedUser._id != user._id ? (
-            <ApiOption
-              processing={blockingFromGroup}
-              onPress={onBlockFromGroupPress}
-              title="Block from Group"
-            />
-          ) : null}
-          {!blockedPersonally && interestedUser._id != user._id ? (
-            <ApiOption
-              processing={blockingPersonally}
-              onPress={onBlockFromPersonalAccountPress}
-              title="Block from Personal account"
-            />
-          ) : null}
-          {interestedUser._id != user._id ? (
-            <ApiOption onPress={onReportUserPress} title="Report profile" />
-          ) : null}
-        </Animatable.View>
-      </View>
+            <ApiOption onPress={onAddEchoPress} title="Add Echo" />
+            <ApiOption onPress={onSendThoughtsPress} title="Send Thoughts" />
+            {!blockedFromGroup && interestedUser._id != user._id ? (
+              <ApiOption
+                processing={blockingFromGroup}
+                onPress={onBlockFromGroupPress}
+                title="Block from Group"
+              />
+            ) : null}
+            {!blockedPersonally && interestedUser._id != user._id ? (
+              <ApiOption
+                processing={blockingPersonally}
+                onPress={onBlockFromPersonalAccountPress}
+                title="Block from Personal account"
+              />
+            ) : null}
+            {interestedUser._id != user._id ? (
+              <ApiOption onPress={onReportUserPress} title="Report profile" />
+            ) : null}
+          </Animatable.View>
+        </View>
+      </ModalBackDrop>
     </Modal>
   );
 }

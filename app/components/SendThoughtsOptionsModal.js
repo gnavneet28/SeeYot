@@ -7,6 +7,7 @@ import Option from "./Option";
 import ApiOption from "./ApiOption";
 
 import defaultStyles from "../config/styles";
+import ModalBackDrop from "./ModalBackDrop";
 
 function SendThoughtsOptionsModal({
   handleModalClose,
@@ -23,47 +24,55 @@ function SendThoughtsOptionsModal({
   inFavorites,
   inContacts,
 }) {
+  const onCloseModal = () => {
+    if (unfriendProcessing || blockProcessing || favoriteProcessing) return;
+    handleModalClose();
+  };
   return (
     <Modal
       animationType="none"
-      onRequestClose={handleModalClose}
+      onRequestClose={onCloseModal}
       transparent={true}
       visible={isVisible}
     >
-      <View style={[styles.modalMainContainer]}>
-        <Animatable.View
-          useNativeDriver={true}
-          animation="pulse"
-          style={styles.optionsContainer}
-        >
-          <Option
-            title="Close"
-            titleStyle={styles.closeOption}
-            onPress={handleModalClose}
-          />
-
-          {inContacts ? (
-            <ApiOption
-              title="Unfriend"
-              onPress={handleUnfriendPress}
-              processing={unfriendProcessing}
+      <ModalBackDrop onPress={onCloseModal}>
+        <View style={[styles.modalMainContainer]}>
+          <Animatable.View
+            useNativeDriver={true}
+            animation="pulse"
+            style={styles.optionsContainer}
+          >
+            <Option
+              title="Close"
+              titleStyle={styles.closeOption}
+              onPress={onCloseModal}
             />
-          ) : null}
 
-          <ApiOption
-            title={inFavorites ? "Remove from Favorites" : "Add to Favorites"}
-            onPress={
-              !inFavorites ? handleAddFavoritePress : handleRemoveFavoritePress
-            }
-            processing={favoriteProcessing}
-          />
-          <ApiOption
-            title={isBlocked ? "Unblock" : "Block"}
-            onPress={!isBlocked ? handleBlockPress : handleUnblockPress}
-            processing={blockProcessing}
-          />
-        </Animatable.View>
-      </View>
+            {inContacts ? (
+              <ApiOption
+                title="Unfriend"
+                onPress={handleUnfriendPress}
+                processing={unfriendProcessing}
+              />
+            ) : null}
+
+            <ApiOption
+              title={inFavorites ? "Remove from Favorites" : "Add to Favorites"}
+              onPress={
+                !inFavorites
+                  ? handleAddFavoritePress
+                  : handleRemoveFavoritePress
+              }
+              processing={favoriteProcessing}
+            />
+            <ApiOption
+              title={isBlocked ? "Unblock" : "Block"}
+              onPress={!isBlocked ? handleBlockPress : handleUnblockPress}
+              processing={blockProcessing}
+            />
+          </Animatable.View>
+        </View>
+      </ModalBackDrop>
     </Modal>
   );
 }

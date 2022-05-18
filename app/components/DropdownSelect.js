@@ -7,6 +7,7 @@ import AppModal from "./AppModal";
 import Option from "./Option";
 
 import defaultStyles from "../config/styles";
+import ModalBackDrop from "./ModalBackDrop";
 
 const DropdownSelect = ({
   selected,
@@ -42,18 +43,22 @@ const DropdownSelect = ({
         {selected ? selected : defaultPlaceholder}
       </AppText>
       <AppModal visible={openModal} onRequestClose={handleCloseModal}>
-        <View style={styles.listContainer}>
-          <Option
-            onPress={handleCloseModal}
-            title="Close"
-            titleStyle={styles.optionClose}
-          />
-          <FlatList
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-          />
-        </View>
+        <ModalBackDrop onPress={handleCloseModal}>
+          <View style={styles.modalContentContainer}>
+            <View style={styles.listContainer}>
+              <Option
+                onPress={handleCloseModal}
+                title="Close"
+                titleStyle={styles.optionClose}
+              />
+              <FlatList
+                data={data}
+                renderItem={renderItem}
+                keyExtractor={keyExtractor}
+              />
+            </View>
+          </View>
+        </ModalBackDrop>
       </AppModal>
     </>
   );
@@ -68,9 +73,9 @@ const styles = ScaledSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     flexShrink: 1,
-    fontSize: "13.5@s",
+    fontSize: "13@s",
     justifyContent: "space-between",
-    paddingVertical: "8@s",
+    paddingVertical: "3@s",
     textAlign: "center",
     textAlignVertical: "center",
     width: "100%",
@@ -81,6 +86,12 @@ const styles = ScaledSheet.create({
     maxHeight: "60%",
     overflow: "hidden",
     width: "60%",
+  },
+  modalContentContainer: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    width: "100%",
   },
   optionClose: {
     backgroundColor: defaultStyles.colors.dark_Variant,

@@ -7,6 +7,7 @@ import Option from "./Option";
 import ApiOption from "./ApiOption";
 
 import defaultStyles from "../config/styles";
+import ModalBackDrop from "./ModalBackDrop";
 
 function GroupScreenOptions({
   handleCloseModal = () => {},
@@ -20,48 +21,54 @@ function GroupScreenOptions({
   onRemovePress = () => {},
   onChangePasswordOptionPress = () => {},
 }) {
+  const onCloseModal = () => {
+    if (removingFromHistory) return;
+    handleCloseModal();
+  };
   return (
     <Modal
       animationType="none"
-      onRequestClose={handleCloseModal}
+      onRequestClose={onCloseModal}
       transparent={true}
       visible={isVisible}
     >
-      <View style={[styles.groupOptionMainContainer]}>
-        <Animatable.View
-          useNativeDriver={true}
-          animation="pulse"
-          style={styles.optionsContainer}
-        >
-          <Option
-            onPress={handleCloseModal}
-            title="Close"
-            titleStyle={styles.optionClose}
-          />
-
-          {group.createdBy._id == user._id ? (
-            <ApiOption onPress={onDeletePress} title="Delete this Group" />
-          ) : null}
-
-          {inHistory ? (
-            <ApiOption
-              processing={removingFromHistory}
-              onPress={onRemovePress}
-              title="Remove from History"
+      <ModalBackDrop onPress={onCloseModal}>
+        <View style={[styles.groupOptionMainContainer]}>
+          <Animatable.View
+            useNativeDriver={true}
+            animation="pulse"
+            style={styles.optionsContainer}
+          >
+            <Option
+              onPress={onCloseModal}
+              title="Close"
+              titleStyle={styles.optionClose}
             />
-          ) : null}
 
-          {group.createdBy._id != user._id ? (
-            <ApiOption onPress={onReportPress} title="Report this Group" />
-          ) : null}
-          {group.type == "Private" && group.createdBy._id == user._id ? (
-            <ApiOption
-              onPress={onChangePasswordOptionPress}
-              title="Change Password"
-            />
-          ) : null}
-        </Animatable.View>
-      </View>
+            {group.createdBy._id == user._id ? (
+              <ApiOption onPress={onDeletePress} title="Delete this Group" />
+            ) : null}
+
+            {inHistory ? (
+              <ApiOption
+                processing={removingFromHistory}
+                onPress={onRemovePress}
+                title="Remove from History"
+              />
+            ) : null}
+
+            {group.createdBy._id != user._id ? (
+              <ApiOption onPress={onReportPress} title="Report this Group" />
+            ) : null}
+            {group.type == "Private" && group.createdBy._id == user._id ? (
+              <ApiOption
+                onPress={onChangePasswordOptionPress}
+                title="Change Password"
+              />
+            ) : null}
+          </Animatable.View>
+        </View>
+      </ModalBackDrop>
     </Modal>
   );
 }

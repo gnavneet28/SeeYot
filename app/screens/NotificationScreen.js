@@ -41,6 +41,7 @@ import myApi from "../api/my";
 
 import useAuth from "../auth/useAuth";
 import ScreenSub from "../components/ScreenSub";
+import ModalBackDrop from "../components/ModalBackDrop";
 
 function NotificationScreen({ navigation }) {
   const { user, setUser } = useAuth();
@@ -176,10 +177,6 @@ function NotificationScreen({ navigation }) {
     setShowClearAllModal(true);
   }, []);
 
-  const handleCloseClearAllModal = useCallback(() => {
-    setShowClearAllModal(false);
-  }, []);
-
   // NOTIFICATION ACTION
   const handleClearAllPress = useCallback(async () => {
     if (!user.notifications.length) return setShowClearAllModal(false);
@@ -269,6 +266,11 @@ function NotificationScreen({ navigation }) {
     [user.notifications, notificationCategory]
   );
 
+  const onCloseClearAllModal = () => {
+    if (clearNotification) return;
+    setShowClearAllModal(false);
+  };
+
   return (
     <>
       <Screen style={styles.container}>
@@ -276,7 +278,7 @@ function NotificationScreen({ navigation }) {
           leftIcon="arrow-back"
           onPressLeft={handleBack}
           onPressRight={handleRightHeaderPress}
-          rightIcon="more-vert"
+          rightIcon={data.length ? "more-vert" : ""}
           title="Notifications"
         />
         <ScreenSub>
@@ -309,25 +311,29 @@ function NotificationScreen({ navigation }) {
       <AppModal
         animationType="none"
         visible={showClearAllModal}
-        onRequestClose={handleCloseClearAllModal}
+        onRequestClose={onCloseClearAllModal}
       >
-        <Animatable.View
-          animation="pulse"
-          useNativeDriver={true}
-          ref={modalRef}
-          style={[styles.clearAllActionContainer]}
-        >
-          <Option
-            title="Close"
-            titleStyle={styles.closeOption}
-            onPress={handleCloseClearAllModal}
-          />
-          <ApiOption
-            title="Clear all notifications"
-            onPress={isConnected ? handleClearAllPress : () => null}
-            processing={clearNotification}
-          />
-        </Animatable.View>
+        <ModalBackDrop onPress={onCloseClearAllModal}>
+          <View style={styles.clearAllActionContainerMain}>
+            <Animatable.View
+              animation="pulse"
+              useNativeDriver={true}
+              ref={modalRef}
+              style={[styles.clearAllActionContainer]}
+            >
+              <Option
+                title="Close"
+                titleStyle={styles.closeOption}
+                onPress={onCloseClearAllModal}
+              />
+              <ApiOption
+                title="Clear all notifications"
+                onPress={isConnected ? handleClearAllPress : () => null}
+                processing={clearNotification}
+              />
+            </Animatable.View>
+          </View>
+        </ModalBackDrop>
       </AppModal>
       <SeeThought
         visible={visible}
@@ -349,19 +355,23 @@ const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
   },
+  clearAllActionContainerMain: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    width: "100%",
+  },
   clearAllActionContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.white,
     borderColor: defaultStyles.colors.dark_Variant,
-    borderRadius: "20@s",
+    borderRadius: "15@s",
     borderWidth: 1,
     overflow: "hidden",
     width: "60%",
   },
   closeOption: {
-    backgroundColor: defaultStyles.colors.dark_Variant,
-    color: defaultStyles.colors.white,
-    opacity: 1,
+    ...defaultStyles.closeIcon,
   },
   modalFallback: {
     backgroundColor: "rgba(0,0,0,0.7)",
