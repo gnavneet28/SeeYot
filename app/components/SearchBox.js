@@ -57,7 +57,7 @@ const styles = ScaledSheet.create({
   container: {
     backgroundColor: defaultStyles.colors.light,
     borderColor: defaultStyles.colors.light,
-    borderRadius: "25@s",
+    borderRadius: defaultStyles.searchBoxRadius,
     borderWidth: 1,
     marginVertical: "8@s",
     overflow: "hidden",

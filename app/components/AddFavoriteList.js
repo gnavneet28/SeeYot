@@ -187,8 +187,8 @@ const styles = ScaledSheet.create({
   allReplies: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.secondary_Variant,
-    borderBottomRightRadius: "20@s",
-    borderTopRightRadius: "20@s",
+    borderBottomRightRadius: defaultStyles.searchBoxRadius,
+    borderTopRightRadius: defaultStyles.searchBoxRadius,
     height: "32@s",
     justifyContent: "center",
     width: "17%",
@@ -196,7 +196,7 @@ const styles = ScaledSheet.create({
   container: {
     backgroundColor: defaultStyles.colors.light,
     borderColor: defaultStyles.colors.light,
-    borderRadius: "25@s",
+    borderRadius: defaultStyles.searchBoxRadius,
     borderWidth: 1,
     flexDirection: "row",
     marginVertical: "8@s",
