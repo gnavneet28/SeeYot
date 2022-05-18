@@ -7,7 +7,7 @@ let auth_token = __DEV__ ? apiUrl.DEV_AUTH_TOKEN : apiUrl.PROD_AUTH_TOKEN;
 
 const apiClient = create({
   baseURL: api_url + "api",
-  timeout: 30000,
+  timeout: 15000,
   timeoutErrorMessage: "Connection Timed-Out",
 });
 
