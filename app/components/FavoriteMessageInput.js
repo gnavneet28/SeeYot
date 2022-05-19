@@ -32,6 +32,7 @@ function FavoriteMessageInput({
   textInputRef,
 }) {
   const [height, setHeight] = useState(0);
+
   const checkSendButtonDisability = () => {
     if (!isConnected) return true;
     if (optionalAnswer.length) {
@@ -53,10 +54,12 @@ function FavoriteMessageInput({
       return false;
     }
   };
+
+  const doNull = () => {};
   return (
     <Modal
       visible={isVisible}
-      onRequestClose={processing === true ? () => null : handleCloseMessage}
+      onRequestClose={processing === true ? doNull : handleCloseMessage}
       transparent
       animationType="slide"
     >
@@ -67,11 +70,11 @@ function FavoriteMessageInput({
           contentContainerStyle={styles.scrollView}
         >
           <Backdrop
-            onPress={processing === true ? () => null : handleCloseMessage}
+            onPress={processing === true ? doNull : handleCloseMessage}
           />
           <View style={styles.closeMessageIconContainer}>
             <AntDesign
-              onPress={processing === true ? () => null : handleCloseMessage}
+              onPress={processing === true ? doNull : handleCloseMessage}
               name="downcircle"
               color={defaultStyles.colors.white}
               size={scale(28)}
@@ -90,6 +93,9 @@ function FavoriteMessageInput({
           >
             <AppText style={styles.favoriteMessaggingTitle}>
               Favorite Messaging
+            </AppText>
+            <AppText style={styles.favoriteMessaggingRecipient}>
+              {recipient.name}
             </AppText>
             <View style={styles.contentContainer}>
               <View style={styles.inputBoxContainerMain}>
@@ -137,7 +143,7 @@ function FavoriteMessageInput({
                       isSelected={message.mood === d.mood ? true : false}
                       onPress={
                         processing === true
-                          ? () => null
+                          ? doNull
                           : () => handleSetMood(d.mood)
                       }
                     />
@@ -156,7 +162,7 @@ function FavoriteMessageInput({
                         answer={d}
                         onPress={
                           processing === true
-                            ? () => null
+                            ? doNull
                             : () => handleRemoveOptionalAnswer(d)
                         }
                       />
@@ -166,9 +172,7 @@ function FavoriteMessageInput({
               ) : null}
               {optionalAnswer.length < 4 ? (
                 <AppButton
-                  onPress={
-                    processing === true ? () => null : handleAddOptionPress
-                  }
+                  onPress={processing === true ? doNull : handleAddOptionPress}
                   title="Add Options"
                   style={styles.addOptions}
                   subStyle={styles.addOptionsSub}
@@ -199,7 +203,7 @@ function FavoriteMessageInput({
                   ]}
                   title="Send"
                   onPress={
-                    processing === true ? () => null : handleSendMessagePress
+                    processing === true ? doNull : handleSendMessagePress
                   }
                 />
               </ApiProcessingContainer>
@@ -247,9 +251,16 @@ const styles = ScaledSheet.create({
   favoriteMessaggingTitle: {
     backgroundColor: modalHeaderColor,
     color: defaultStyles.colors.white,
-    marginBottom: "5@s",
     textAlign: "center",
     width: "100%",
+  },
+  favoriteMessaggingRecipient: {
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "10@s",
+    color: defaultStyles.colors.secondary,
+    fontSize: "13@s",
+    marginBottom: "5@s",
+    textAlign: "center",
   },
   messageBackground: {
     flex: 1,
