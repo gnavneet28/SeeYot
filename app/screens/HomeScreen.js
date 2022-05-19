@@ -23,7 +23,6 @@ import messagesApi from "../api/messages";
 import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
-import useConnection from "../hooks/useConnection";
 
 import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
@@ -39,11 +38,11 @@ import ScreenSub from "../components/ScreenSub";
 
 function HomeScreen({ navigation }) {
   // console.log(usersData);
+
   dayjs.extend(relativeTime);
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
-  const isConnected = useConnection();
   const { tackleProblem } = apiActivity;
 
   const [infoAlert, setInfoAlert] = useState({
@@ -350,7 +349,6 @@ function HomeScreen({ navigation }) {
       <FavoriteMessageReplyModal
         handleCloseMessage={handleCloseMessage}
         handleMessageReply={handleMessageReply}
-        isConnected={isConnected}
         isVisible={isVisible}
         message={message}
         messageCreator={messageCreator}

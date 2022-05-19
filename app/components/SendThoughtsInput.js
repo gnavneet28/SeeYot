@@ -35,7 +35,6 @@ import localThoughts from "../utilities/localThoughts";
 import thoughtsApi from "../api/thoughts";
 
 import useMountedRef from "../hooks/useMountedRef";
-import useConnection from "../hooks/useConnection";
 import useAuth from "../auth/useAuth";
 
 import defaultStyles from "../config/styles";
@@ -71,7 +70,6 @@ function SendThoughtsInput({
 
   const { sendingMedia } = useContext(ApiContext);
 
-  const isConnected = useConnection();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [previousThoughts, setPreviousThoughts] = useState([]);
   const [isReady, setIsReady] = useState(false);
@@ -336,12 +334,9 @@ function SendThoughtsInput({
           />
           <TouchableOpacity
             disabled={
-              (!activeChat &&
-                message.replace(/\s/g, "").length >= 1 &&
-                isConnected) ||
+              (!activeChat && message.replace(/\s/g, "").length >= 1) ||
               (activeChat &&
                 message.replace(/\s/g, "").length >= 1 &&
-                isConnected &&
                 isRecipientActive)
                 ? false
                 : true
@@ -351,12 +346,9 @@ function SendThoughtsInput({
           >
             <Icon
               color={
-                (!activeChat &&
-                  message.replace(/\s/g, "").length >= 1 &&
-                  isConnected) ||
+                (!activeChat && message.replace(/\s/g, "").length >= 1) ||
                 (activeChat &&
                   message.replace(/\s/g, "").length >= 1 &&
-                  isConnected &&
                   isRecipientActive)
                   ? defaultStyles.colors.secondary
                   : defaultStyles.colors.lightGrey

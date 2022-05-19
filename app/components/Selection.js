@@ -6,13 +6,11 @@ import Feather from "../../node_modules/react-native-vector-icons/Feather";
 import AppText from "./AppText";
 import ApiProcessingContainer from "./ApiProcessingContainer";
 
-import useConnection from "../hooks/useConnection";
-
 import defaultStyles from "../config/styles";
 
 function Selection({
   style,
-  onPress,
+  onPress = () => {},
   opted,
   containerStyle,
   value = "",
@@ -20,14 +18,13 @@ function Selection({
   fontStyle,
   processing,
   loadingIndicatorSize = scale(16),
+  disabled = false,
 }) {
-  const isConnected = useConnection();
-  const doNull = () => {};
   return (
     <View style={[styles.container, style]}>
       <TouchableOpacity
-        disabled={!isConnected}
-        onPress={isConnected ? onPress : doNull}
+        disabled={disabled}
+        onPress={onPress}
         style={[[styles.checkBox, containerStyle]]}
       >
         <ApiProcessingContainer
@@ -45,10 +42,7 @@ function Selection({
         </ApiProcessingContainer>
       </TouchableOpacity>
       {value ? (
-        <AppText
-          style={[styles.value, fontStyle]}
-          onPress={isConnected ? onPress : doNull}
-        >
+        <AppText style={[styles.value, fontStyle]} onPress={onPress}>
           {value}
         </AppText>
       ) : null}

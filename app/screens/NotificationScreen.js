@@ -35,7 +35,6 @@ import authorizeUpdates from "../utilities/authorizeUpdates";
 import defaultStyles from "../config/styles";
 
 import useMountedRef from "../hooks/useMountedRef";
-import useConnection from "../hooks/useConnection";
 
 import myApi from "../api/my";
 
@@ -46,7 +45,6 @@ import ModalBackDrop from "../components/ModalBackDrop";
 function NotificationScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;
-  const isConnected = useConnection();
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
 
@@ -292,7 +290,6 @@ function NotificationScreen({ navigation }) {
           />
           <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
             <NotificationListPro
-              isConnected={isConnected}
               onTapToSendMessage={handleSendMessage}
               onTapToSeeMessage={handleOpenModal}
               onTapToSeePress={handleTapToSeeThought}
@@ -328,7 +325,7 @@ function NotificationScreen({ navigation }) {
               />
               <ApiOption
                 title="Clear all notifications"
-                onPress={isConnected ? handleClearAllPress : () => null}
+                onPress={handleClearAllPress}
                 processing={clearNotification}
               />
             </Animatable.View>

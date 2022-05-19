@@ -26,7 +26,6 @@ import Screen from "../components/Screen";
 import Selection from "../components/Selection";
 
 import useMountedRef from "../hooks/useMountedRef";
-import useConnection from "../hooks/useConnection";
 import storeDetails from "../utilities/storeDetails";
 
 import debounce from "../utilities/debounce";
@@ -48,7 +47,6 @@ import onBoarding from "../utilities/onBoarding";
 
 function AddEchoScreen({ navigation, route }) {
   const { recipient, from } = route.params;
-  const isConnected = useConnection();
   const { tackleProblem } = apiActivity;
   const textModeRef = useRef(null);
   const audioModeRef = useRef(null);
@@ -456,9 +454,7 @@ function AddEchoScreen({ navigation, route }) {
                 >
                   <AppButton
                     disabled={
-                      message.replace(/\s/g, "").length >= 1 &&
-                      !savingEcho &&
-                      isConnected
+                      message.replace(/\s/g, "").length >= 1 && !savingEcho
                         ? false
                         : true
                     }

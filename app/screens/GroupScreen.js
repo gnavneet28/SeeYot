@@ -42,10 +42,7 @@ import apiActivity from "../utilities/apiActivity";
 import defaultProps from "../utilities/defaultProps";
 import storeDetails from "../utilities/storeDetails";
 
-import useConnection from "../hooks/useConnection";
-
 import useAuth from "../auth/useAuth";
-
 import groupsApi from "../api/groups";
 import usersApi from "../api/users";
 
@@ -57,7 +54,6 @@ const optionsVibrate = {
 function GroupScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
   const { tackleProblem } = apiActivity;
-  const isConnected = useConnection();
   let isUnmounting = false;
 
   const [group, setGroup] = useState(defaultProps.defaultGroup);
@@ -630,11 +626,9 @@ Do not have permission to view group.
         setOpenReport={setOpenReportModal}
         problemDescription={problemDescription}
         setProblemDescription={setProblemDescription}
-        isConnected={isConnected}
       />
       <EditGroupInfoModal
         key={group.information + new Date().toString()}
-        isConnected={isConnected}
         handleSubmitInfoChange={handleUpdateGroupInfo}
         openGroupInfo={openGroupInfo}
         setOpenGroupInfo={setOpenGroupInfo}
@@ -643,7 +637,6 @@ Do not have permission to view group.
       />
       <EditGroupPasswordModal
         key={group.password ? group.password : ""}
-        isConnected={isConnected}
         isLoading={isLoading}
         handleSubmitPassword={handleSubmitPassword}
         group={group}

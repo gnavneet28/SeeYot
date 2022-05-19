@@ -15,15 +15,12 @@ import debounce from "../utilities/debounce";
 
 import messagesApi from "../api/messages";
 
-import useConnection from "../hooks/useConnection";
-
 import defaultProps from "../utilities/defaultProps";
 import apiActivity from "../utilities/apiActivity";
 
 function RepliesScreen({ navigation }) {
   const [replies, setReplies] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const isConnected = useConnection();
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
   let isUnmounting = false;
@@ -184,7 +181,7 @@ function RepliesScreen({ navigation }) {
         leftPress={handleCloseAlert}
         leftOption="Cancel"
         rightOption="Ok"
-        rightPress={isConnected ? handleDeletePress : doNull}
+        rightPress={handleDeletePress}
         setVisible={setShowAlert}
         title="Delete this Message"
         visible={showAlert}

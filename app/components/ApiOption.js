@@ -2,20 +2,24 @@ import React from "react";
 import { View, ActivityIndicator } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
-import useConnection from "../hooks/useConnection";
 import Option from "../components/Option";
 
 import defaultStyles from "../config/styles";
 
-function ApiOption({ processing, onPress, title }) {
-  const isConnected = useConnection();
+function ApiOption({
+  processing,
+  onPress,
+  title,
+  disabled = false,
+  indicatorSize = scale(16),
+}) {
   return (
     <View style={styles.container}>
       {!processing ? (
-        <Option title={title} onPress={onPress} disabled={!isConnected} />
+        <Option title={title} onPress={onPress} disabled={disabled} />
       ) : (
         <ActivityIndicator
-          size={scale(16)}
+          size={indicatorSize}
           color={defaultStyles.colors.tomato}
         />
       )}

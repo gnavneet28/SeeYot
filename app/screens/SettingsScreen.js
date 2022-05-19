@@ -19,7 +19,6 @@ import apiActivity from "../utilities/apiActivity";
 import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
-import useConnection from "../hooks/useConnection";
 
 import defaultStyles from "../config/styles";
 import defaultProps from "../utilities/defaultProps";
@@ -28,7 +27,6 @@ function SettingsScreen({ navigation }) {
   const { setUser } = useAuth();
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
-  const isConnected = useConnection();
   const { tackleProblem } = apiActivity;
 
   const [infoAlert, setInfoAlert] = useState({
@@ -141,7 +139,7 @@ function SettingsScreen({ navigation }) {
         leftPress={() => setContactAlert(false)}
         leftOption="Cancel"
         rightOption="Ok"
-        rightPress={isConnected ? deletePhoneContacts : () => null}
+        rightPress={deletePhoneContacts}
         setVisible={setContactAlert}
         title="Delete this Message"
         visible={contactAlert}

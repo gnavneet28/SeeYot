@@ -104,9 +104,7 @@ class AddFavoriteList extends React.Component {
       case ViewTypes.Full:
         return (
           <AddFavoriteCard
-            isConnected={this.props.isConnected}
             favoriteUser={data}
-            name={data.name}
             onMessagePress={this.props.onMessagePress}
           />
         );

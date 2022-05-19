@@ -17,7 +17,6 @@ import Backdrop from "./Backdrop";
 
 function EditGroupPasswordModal({
   handleSubmitPassword,
-  isConnected,
   isLoading,
   openPasswordModal,
   setOpenPasswordModal,
@@ -66,9 +65,7 @@ function EditGroupPasswordModal({
               </AppText>
               <AppButton
                 disabled={
-                  password.replace(/\s/g, "").length >= 8 &&
-                  isConnected &&
-                  !isLoading
+                  password.replace(/\s/g, "").length >= 8 && !isLoading
                     ? false
                     : true
                 }
@@ -77,9 +74,7 @@ function EditGroupPasswordModal({
                   styles.submitGroupInfoButton,
                   {
                     backgroundColor:
-                      password.replace(/\s/g, "").length >= 1 &&
-                      isConnected &&
-                      !isLoading
+                      password.replace(/\s/g, "").length >= 1 && !isLoading
                         ? defaultStyles.colors.yellow_Variant
                         : defaultStyles.colors.light,
                   },

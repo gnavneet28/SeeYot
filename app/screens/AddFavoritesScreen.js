@@ -17,8 +17,6 @@ import messagesApi from "../api/messages";
 import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
-import useConnection from "../hooks/useConnection";
-
 import Constants from "../navigation/NavigationConstants";
 
 import debounce from "../utilities/debounce";
@@ -46,7 +44,6 @@ function AddFavoritesScreen({ navigation }) {
   const { user } = useAuth();
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
-  const isConnected = useConnection();
   const { tackleProblem } = apiActivity;
   const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
   // STATES
@@ -133,7 +130,7 @@ function AddFavoritesScreen({ navigation }) {
   }, []);
 
   // TODO:
-  const handleAddOptionalReplyPress = () => {
+  const handleAddOptionalReplyPress = useCallback(() => {
     // check if there is already a option with the given option to add and then add
     if (optionalAnswer.length < 4) {
       let newList = [...optionalAnswer];
@@ -143,19 +140,23 @@ function AddFavoritesScreen({ navigation }) {
     }
     setOptionalMessage("");
     setShowAddOption(false);
-  };
+  }, [optionalAnswer, optionalMessage]);
 
-  const handleRemoveOptionalAnswer = (answer) => {
-    let currentList = [...optionalAnswer];
-    let newList = currentList.filter((a) => a != answer);
-    setOptionalAnswer(newList);
-  };
+  const handleRemoveOptionalAnswer = useCallback(
+    (answer) => {
+      let currentList = [...optionalAnswer];
+      let newList = currentList.filter((a) => a != answer);
+      setOptionalAnswer(newList);
+    },
+    [optionalAnswer]
+  );
 
   //MESSAGE MODAL ACTION
 
   const handleCloseMessage = useCallback(() => {
     setRecipient(defaultRecipient);
     setMessage({ textMessage: "", mood: "Happy" });
+    // setOptionalAnswer([]);
     setIsVisible(false);
   }, []);
 
@@ -202,12 +203,15 @@ function AddFavoritesScreen({ navigation }) {
     [message, recipient._id, user.messages, optionalAnswer]
   );
 
-  const handleSetMood = (mood) => {
-    setMessage({
-      ...message,
-      mood: mood,
-    });
-  };
+  const handleSetMood = useCallback(
+    (mood) => {
+      setMessage({
+        ...message,
+        mood: mood,
+      });
+    },
+    [message]
+  );
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
@@ -229,10 +233,6 @@ function AddFavoritesScreen({ navigation }) {
 
   const handleHelpPress = useCallback(() => {
     setShowHelp(true);
-  }, []);
-
-  const handleCloseHelp = useCallback(() => {
-    setShowHelp(false);
   }, []);
 
   // MESSAGGIN FAVORITES ACTION
@@ -269,15 +269,11 @@ function AddFavoritesScreen({ navigation }) {
           ) : (
             <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
               <AddFavoriteList
-                isConnected={isConnected}
                 isFocused={isFocused}
                 onAllRepliesPress={handleOnAllRepliesPress}
                 onMessagePress={handleMessagePress}
                 users={users}
                 style={styles.list}
-                // showTip={showReplyHelp}
-                // setShowTip={setShowReplyHelp}
-                // tip="Tap to see all the replies of favorite messages."
               />
             </ApiContext.Provider>
           )}
@@ -289,7 +285,6 @@ function AddFavoritesScreen({ navigation }) {
         handleCloseMessage={handleCloseMessage}
         handleSendMessagePress={handleSendMessagePress}
         handleSetMood={handleSetMood}
-        isConnected={isConnected}
         isVisible={isVisible}
         message={message}
         moodData={moodData}

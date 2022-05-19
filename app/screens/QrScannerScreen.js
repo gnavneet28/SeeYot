@@ -18,8 +18,6 @@ import ScannerTopContent from "../components/ScannerTopContent";
 import Screen from "../components/Screen";
 import ScreenSub from "../components/ScreenSub";
 
-import runIfNotConnected from "../utilities/runIfNotConnected";
-
 import defaultStyles from "../config/styles";
 
 import NavigationConstants from "../navigation/NavigationConstants";
@@ -31,14 +29,12 @@ import apiActivity from "../utilities/apiActivity";
 import useAuth from "../auth/useAuth";
 import usersApi from "../api/users";
 import storeDetails from "../utilities/storeDetails";
-import useConnection from "../hooks/useConnection";
 
 function QrScannerScreen({ navigation, route }) {
   const isFocused = useIsFocused();
   const cameraRef = useRef(null);
   const { tackleProblem } = apiActivity;
   const { user, setUser } = useAuth();
-  let isConnected = useConnection();
 
   let isUnmounting = false;
 
@@ -158,7 +154,6 @@ function QrScannerScreen({ navigation, route }) {
   };
 
   const enterGroup = async (name, password) => {
-    // runIfNotConnected(isConnected, setInfoAlert);
     if (!isUnmounting) {
       setCheckingGroupName(true);
     }

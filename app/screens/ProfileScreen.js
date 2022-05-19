@@ -33,7 +33,6 @@ import problemsApi from "../api/problems";
 import usersApi from "../api/users";
 
 import useMountedRef from "../hooks/useMountedRef";
-import useConnection from "../hooks/useConnection";
 
 import defaultStyles from "../config/styles";
 import ScreenSub from "../components/ScreenSub";
@@ -43,7 +42,6 @@ function ProfileScreen({ navigation }) {
   const { user, setUser, logOut } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
-  const isConnected = useConnection();
   const { tackleProblem } = apiActivity;
   // STATES
   const [name, setName] = useState(user.name.trim());
@@ -352,7 +350,7 @@ function ProfileScreen({ navigation }) {
                 <Selection
                   processing={changingEcho}
                   onPress={
-                    isConnected && !changingEcho && !changingTapEcho
+                    !changingEcho && !changingTapEcho
                       ? handleMessageSelection
                       : doNull
                   }
@@ -362,7 +360,7 @@ function ProfileScreen({ navigation }) {
                 <Selection
                   processing={changingTapEcho}
                   onPress={
-                    isConnected && !changingTapEcho && !changingEcho
+                    !changingTapEcho && !changingEcho
                       ? handlePhotoTapSelection
                       : doNull
                   }
@@ -395,7 +393,6 @@ function ProfileScreen({ navigation }) {
       />
       <ReportModal
         handleProblemSubmitPress={handleProblemSubmitPress}
-        isConnected={isConnected}
         isLoading={isLoading}
         openReport={openReport}
         problemDescription={problemDescription}
@@ -410,7 +407,6 @@ function ProfileScreen({ navigation }) {
         openEditName={openEditName}
         setOpenEditName={setOpenEditName}
         user={user}
-        isConnected={isConnected}
       />
       <Alert
         visible={showLogOut}
@@ -420,7 +416,7 @@ function ProfileScreen({ navigation }) {
         leftOption="Cancel"
         rightOption="Yes"
         leftPress={handleCloseLogout}
-        rightPress={isConnected ? handleLogOutPress : null}
+        rightPress={handleLogOutPress}
       />
       <LoadingIndicator visible={isLoading} />
       <InfoAlert

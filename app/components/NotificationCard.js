@@ -46,7 +46,6 @@ function NotificationCard({
   tapToSeeMatchedThought,
   onLongPress,
   index,
-  isConnected,
   tapToVisitGroup,
 }) {
   dayjs.extend(relativeTime);
@@ -200,19 +199,11 @@ function NotificationCard({
     return 0.7;
   };
 
+  const doNull = () => {};
+
   return (
     <>
-      <View
-        style={[
-          styles.container,
-          // {
-          //   backgroundColor:
-          //     index % 2 === 0
-          //       ? defaultStyles.colors.light
-          //       : defaultStyles.colors.white,
-          // },
-        ]}
-      >
+      <View style={styles.container}>
         <AppImage
           activeOpacity={1}
           style={styles.image}
@@ -272,9 +263,7 @@ function NotificationCard({
             }}
             apiAction={"true"}
             processing={processing}
-            onPress={
-              apiProcessing || !isConnected ? () => null : handleDeletePress
-            }
+            onPress={apiProcessing ? doNull : handleDeletePress}
           />
         )}
       </View>

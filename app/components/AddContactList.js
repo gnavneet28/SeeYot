@@ -107,7 +107,6 @@ class AddContactList extends React.Component {
       case ViewTypes.Full:
         return (
           <AddContactCard
-            isConnected={this.props.isConnected}
             contact={data}
             onInvitePress={this.props.onInvitePress}
           />
@@ -122,8 +121,7 @@ class AddContactList extends React.Component {
       this.registeredUsersLength(prevProps.users) !=
         this.registeredUsersLength(this.props.users) ||
       prevProps.users != this.props.users ||
-      prevProps.isFocused != this.props.isFocused ||
-      this.props.isConnected != prevProps.isConnected
+      prevProps.isFocused != this.props.isFocused
     ) {
       return this.setState({
         ...this.state,

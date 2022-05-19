@@ -21,7 +21,6 @@ function FavoriteMessageInput({
   handleRemoveOptionalAnswer,
   handleSendMessagePress,
   handleSetMood,
-  isConnected,
   isVisible,
   message,
   moodData,
@@ -34,7 +33,6 @@ function FavoriteMessageInput({
   const [height, setHeight] = useState(0);
 
   const checkSendButtonDisability = () => {
-    if (!isConnected) return true;
     if (optionalAnswer.length) {
       if (
         message.textMessage.replace(/\s/g, "").length >= 1 &&

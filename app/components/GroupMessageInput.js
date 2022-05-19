@@ -25,8 +25,6 @@ import Icon from "./Icon";
 import debounce from "../utilities/debounce";
 
 import useMountedRef from "../hooks/useMountedRef";
-import useConnection from "../hooks/useConnection";
-import useAuth from "../auth/useAuth";
 
 import defaultStyles from "../config/styles";
 import MediaGalleryModal from "./MediaGalleryModal";
@@ -63,7 +61,6 @@ function GroupMessageInput({
 
   const { sendingMedia } = useContext(ApiContext);
 
-  const isConnected = useConnection();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [focused, setFocused] = useState(false);
   const [height, setHeight] = useState(0);
@@ -256,9 +253,7 @@ function GroupMessageInput({
           />
           <TouchableOpacity
             disabled={
-              message.replace(/\s/g, "").length >= 1 &&
-              isConnected &&
-              !messageLoading
+              message.replace(/\s/g, "").length >= 1 && !messageLoading
                 ? false
                 : true
             }
@@ -267,9 +262,7 @@ function GroupMessageInput({
           >
             <Icon
               color={
-                message.replace(/\s/g, "").length >= 1 &&
-                isConnected &&
-                !messageLoading
+                message.replace(/\s/g, "").length >= 1 && !messageLoading
                   ? defaultStyles.colors.secondary
                   : defaultStyles.colors.lightGrey
               }

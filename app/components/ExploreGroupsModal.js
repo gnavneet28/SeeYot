@@ -70,6 +70,7 @@ const ExploreGroupsModal = ({
     }
     const { ok, data, problem } = await groupsApi.exploreGroups(category);
     if (!isUnmounting && ok) {
+      // let modifiedList = data.filter()
       setGroups(data);
       setDefaultGroups(data);
       return setIsReady(true);

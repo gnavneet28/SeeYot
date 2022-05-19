@@ -19,7 +19,7 @@ import ApiContext from "../utilities/apiContext";
 
 import defaultStyles from "../config/styles";
 
-function AddContactCard({ contact, onInvitePress, style, isConnected }) {
+function AddContactCard({ contact, onInvitePress, style }) {
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
   const { user, setUser } = useAuth();
   const [infoAlert, setInfoAlert] = useState({
@@ -70,13 +70,6 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
     [user, contact]
   );
 
-  const showInternetNotConnected = useCallback(() => {
-    setInfoAlert({
-      infoAlertMessage: "No internet connection.",
-      showInfoAlert: true,
-    });
-  }, []);
-
   if (!contact.name)
     return (
       <View style={styles.emptyData}>
@@ -126,7 +119,7 @@ function AddContactCard({ contact, onInvitePress, style, isConnected }) {
                     : defaultStyles.colors.white,
                 },
               ]}
-              onPress={isConnected ? handleAddPress : showInternetNotConnected}
+              onPress={handleAddPress}
             />
           </ApiProcessingContainer>
         </View>

@@ -6,7 +6,7 @@ import { ScaledSheet } from "react-native-size-matters";
 import AppText from "./AppText";
 import useConnection from "../hooks/useConnection";
 
-import colors from "../config/colors";
+import defaultStyles from "../config/styles";
 
 function OfflineNotice(props) {
   const isConnected = useConnection();
@@ -19,6 +19,8 @@ function OfflineNotice(props) {
           switching on and off your internet connection if you think you have
           active internet connection.
         </AppText>
+
+        <AppText style={styles.retry}>Retry</AppText>
       </View>
     );
 
@@ -28,9 +30,9 @@ const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: colors.danger,
-    borderBottomLeftRadius: "20@s",
-    borderBottomRightRadius: "20@s",
+    backgroundColor: defaultStyles.colors.primary,
+    borderBottomLeftRadius: "15@s",
+    borderBottomRightRadius: "15@s",
     elevation: Platform.OS === "android" ? 1 : 0,
     justifyContent: "center",
     paddingVertical: "3@s",
@@ -39,9 +41,19 @@ const styles = ScaledSheet.create({
     width: "100%",
     zIndex: 1,
   },
+  retry: {
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: "5@s",
+    color: defaultStyles.colors.dark,
+    marginBottom: "10@s",
+    marginTop: "5@s",
+    paddingHorizontal: "10@s",
+    paddingVertical: "5@s",
+  },
   text: {
-    color: colors.white,
+    color: defaultStyles.colors.white,
     fontSize: "13@s",
+    marginTop: "10@s",
     textAlign: "center",
   },
 });

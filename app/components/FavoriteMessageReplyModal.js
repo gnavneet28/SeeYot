@@ -37,7 +37,6 @@ function FavoriteMessageReplyModal({
   handleMessageReply,
   selectedMessageId,
   setSelectedMessageId,
-  isConnected,
   onSendThoughtPress,
   user,
 }) {
@@ -48,10 +47,12 @@ function FavoriteMessageReplyModal({
 
   let isRecipientActive = activeFor.filter((u) => u == user._id)[0];
 
+  const doNull = () => {};
+
   return (
     <Modal
       visible={isVisible}
-      onRequestClose={sendingReply ? () => null : handleCloseMessage}
+      onRequestClose={sendingReply ? doNull : handleCloseMessage}
       transparent
       animationType="slide"
     >
@@ -61,10 +62,10 @@ function FavoriteMessageReplyModal({
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.scrollView}
         >
-          <Backdrop onPress={sendingReply ? () => null : handleCloseMessage} />
+          <Backdrop onPress={sendingReply ? doNull : handleCloseMessage} />
           <View style={styles.closeMessageIconContainer}>
             <AntDesign
-              onPress={sendingReply ? () => null : handleCloseMessage}
+              onPress={sendingReply ? doNull : handleCloseMessage}
               name="downcircle"
               color={defaultStyles.colors.white}
               size={scale(28)}
@@ -95,7 +96,7 @@ function FavoriteMessageReplyModal({
                   <TouchableOpacity
                     onPress={
                       sendingReply
-                        ? () => null
+                        ? doNull
                         : () => onSendThoughtPress(messageCreator)
                     }
                     style={[
@@ -110,7 +111,7 @@ function FavoriteMessageReplyModal({
                     <Feather
                       onPress={
                         sendingReply
-                          ? () => null
+                          ? doNull
                           : () => onSendThoughtPress(messageCreator)
                       }
                       color={
@@ -138,7 +139,7 @@ function FavoriteMessageReplyModal({
                         option={d}
                         onPress={
                           sendingReply
-                            ? () => null
+                            ? doNull
                             : () => setSelectedMessageId(d._id)
                         }
                       />
@@ -181,22 +182,14 @@ function FavoriteMessageReplyModal({
                   value={reply}
                 />
                 <TouchableOpacity
-                  disabled={
-                    reply.replace(/\s/g, "").length >= 1 && isConnected
-                      ? false
-                      : true
-                  }
-                  onPress={
-                    sendingReply || !isConnected ? null : handleMessageReply
-                  }
+                  disabled={reply.replace(/\s/g, "").length >= 1 ? false : true}
+                  onPress={sendingReply ? doNull : handleMessageReply}
                   style={styles.send}
                 >
                   <ApiProcessingContainer processing={sendingReply}>
                     <Icon
                       color={
-                        reply.replace(/\s/g, "").length >= 1 &&
-                        !sendingReply &&
-                        isConnected
+                        reply.replace(/\s/g, "").length >= 1 && !sendingReply
                           ? defaultStyles.colors.secondary
                           : defaultStyles.colors.lightGrey
                       }

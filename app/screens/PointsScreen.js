@@ -35,7 +35,6 @@ import authorizeAds, {
 } from "../utilities/authorizeAds";
 
 import useMountedRef from "../hooks/useMountedRef";
-import useConnection from "../hooks/useConnection";
 
 import usersApi from "../api/users";
 import ModalFallback from "../components/ModalFallback";
@@ -56,7 +55,6 @@ function PointsScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
-  const isConnected = useConnection();
   const { tackleProblem } = apiActivity;
 
   // STATES
@@ -294,8 +292,7 @@ function PointsScreen({ navigation }) {
                 >
                   <AppButton
                     disabled={
-                      pointsToRedeem.toString().replace(/\s/g, "").length >=
-                        2 && isConnected
+                      pointsToRedeem.toString().replace(/\s/g, "").length >= 2
                         ? false
                         : true
                     }
@@ -312,7 +309,6 @@ function PointsScreen({ navigation }) {
               processing={collectingPoints}
             >
               <AppButton
-                disabled={!isConnected}
                 onPress={handleShowAd}
                 style={styles.collectPointsButton}
                 subStyle={styles.collectPointsButtonSub}

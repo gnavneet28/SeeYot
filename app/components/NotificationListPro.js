@@ -62,7 +62,6 @@ class NotificationListPro extends React.Component {
       case ViewTypes.Full:
         return (
           <NotificationCard
-            isConnected={this.props.isConnected}
             index={index}
             tapToSeeMessage={this.props.onTapToSeeMessage}
             onTapToSeePress={this.props.onTapToSeePress}

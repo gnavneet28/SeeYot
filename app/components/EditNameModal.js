@@ -17,7 +17,6 @@ function EditNameModal({
   setName,
   name,
   user,
-  isConnected,
   handleNameChange,
 }) {
   const handleHideEditName = () => {
@@ -73,7 +72,6 @@ function EditNameModal({
                   disabled={
                     name &&
                     name.replace(/\s/g, "").length >= 4 &&
-                    isConnected &&
                     !savingName &&
                     name !== user.name
                       ? false
@@ -86,7 +84,6 @@ function EditNameModal({
                       backgroundColor:
                         name &&
                         name.replace(/\s/g, "").length >= 4 &&
-                        isConnected &&
                         !savingName &&
                         name !== user.name
                           ? defaultStyles.colors.yellow_Variant

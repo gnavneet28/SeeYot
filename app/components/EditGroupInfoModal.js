@@ -17,7 +17,6 @@ import Backdrop from "./Backdrop";
 
 function EditGroupInfoModal({
   handleSubmitInfoChange,
-  isConnected,
   isLoading,
   openGroupInfo,
   setOpenGroupInfo,
@@ -75,15 +74,14 @@ function EditGroupInfoModal({
                 {groupInfo.length}/500
               </AppText>
               <AppButton
-                disabled={isConnected && !isLoading ? false : true}
+                disabled={!isLoading ? false : true}
                 onPress={onSubmit}
                 style={[
                   styles.submitGroupInfoButton,
                   {
-                    backgroundColor:
-                      isConnected && !isLoading
-                        ? defaultStyles.colors.yellow_Variant
-                        : defaultStyles.colors.light,
+                    backgroundColor: !isLoading
+                      ? defaultStyles.colors.yellow_Variant
+                      : defaultStyles.colors.light,
                   },
                 ]}
                 subStyle={styles.submitGroupInfoButtonSub}

@@ -17,7 +17,6 @@ import Backdrop from "./Backdrop";
 
 function ReportModal({
   handleProblemSubmitPress,
-  isConnected,
   isLoading,
   openReport,
   problemDescription,
@@ -69,7 +68,6 @@ function ReportModal({
               <AppButton
                 disabled={
                   problemDescription.replace(/\s/g, "").length >= 1 &&
-                  isConnected &&
                   !isLoading
                     ? false
                     : true
@@ -80,7 +78,6 @@ function ReportModal({
                   {
                     backgroundColor:
                       problemDescription.replace(/\s/g, "").length >= 1 &&
-                      isConnected &&
                       !isLoading
                         ? defaultStyles.colors.yellow_Variant
                         : defaultStyles.colors.light,

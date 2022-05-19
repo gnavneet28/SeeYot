@@ -25,7 +25,6 @@ import apiActivity from "../utilities/apiActivity";
 import authorizeUpdates from "../utilities/authorizeUpdates";
 import createShortInviteLink from "../utilities/createDynamicLinks";
 import ScreenSub from "../components/ScreenSub";
-import useConnection from "../hooks/useConnection";
 import NavigationConstants from "../navigation/NavigationConstants";
 
 function AddContactsScreen({ navigation }) {
@@ -33,7 +32,6 @@ function AddContactsScreen({ navigation }) {
   const isFocused = useIsFocused();
   const mounted = useMountedRef().current;
   const { tackleProblem } = apiActivity;
-  const isConnected = useConnection();
 
   const permission = async () => {
     const { granted } = await Contacts.getPermissionsAsync();
@@ -279,7 +277,6 @@ function AddContactsScreen({ navigation }) {
           ) : (
             <ApiContext.Provider value={{ apiProcessing, setApiProcessing }}>
               <AddContactList
-                isConnected={isConnected}
                 isFocused={isFocused}
                 onRefresh={handleRefresh}
                 refreshing={refreshing}
