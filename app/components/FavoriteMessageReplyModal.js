@@ -92,7 +92,7 @@ function FavoriteMessageReplyModal({
                     {dayjs(message.createdAt).fromNow()}
                   </AppText>
                 </View>
-                {message.replied ? (
+                {message.replied && messageCreator.name ? (
                   <TouchableOpacity
                     onPress={
                       sendingReply
