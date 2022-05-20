@@ -12,6 +12,7 @@ import GroupContext from "../utilities/groupContext";
 import defaultStyles from "../config/styles";
 import TotalActiveUsers from "./TotalActiveUsers";
 import GroupBlockedUsersModal from "./GroupBlockedUsersModal";
+import ImageLoadingComponent from "./ImageLoadingComponent";
 
 function MyGroupCard({
   onPress,
@@ -19,12 +20,16 @@ function MyGroupCard({
   onAddEchoPress,
   onSendThoughtsPress,
   user = { _id: "" },
+  showBlocked = false,
 }) {
   const socket = useContext(SocketContext);
 
   const [activeUsers, setActiveUsers] = useState([]);
   const [group, setGroup] = useState(groupItem);
   const [showBlockedModal, setShowBlockedModal] = useState(false);
+  const [loaded, setLoaded] = useState(1);
+
+  const handleLoadComplete = () => setLoaded(1);
 
   const handleCloseBlockedModal = () => {
     setShowBlockedModal(false);
@@ -85,6 +90,10 @@ function MyGroupCard({
         <TouchableWithoutFeedback onPress={handleOnPress}>
           <View style={styles.container}>
             <ImageBackground
+              onLoad={handleLoadComplete}
+              onProgress={(e) =>
+                setLoaded(e.nativeEvent.loaded / e.nativeEvent.total)
+              }
               style={styles.imageBackground}
               resizeMode={group.picture ? "cover" : "contain"}
               source={{ uri: group.picture ? group.picture : "defaultgroupdp" }}
@@ -112,26 +121,32 @@ function MyGroupCard({
                 </AppText>
               </View>
 
-              <View style={styles.groupFooter}>
-                {group.createdBy._id == user._id ? (
-                  <AppText
-                    onPress={handleOnBlockedButtonPress}
-                    style={styles.blocked}
-                  >
-                    {group.blocked.length} Blocked
-                  </AppText>
-                ) : null}
-                {/* <AppText onPress={handleOnPress} style={styles.visitGroupButton}>
-              Visit
-            </AppText> */}
-              </View>
+              {showBlocked ? (
+                <View style={styles.groupFooter}>
+                  {group.createdBy._id == user._id ? (
+                    <AppText
+                      onPress={handleOnBlockedButtonPress}
+                      style={styles.blocked}
+                    >
+                      {group.blocked ? group.blocked.length : 0} Blocked
+                    </AppText>
+                  ) : null}
+                </View>
+              ) : null}
             </ImageBackground>
+            <ImageLoadingComponent
+              progress={loaded}
+              image={"defaultgroupdp"}
+              defaultImage={"defaultgroupdp"}
+            />
           </View>
         </TouchableWithoutFeedback>
-        <GroupBlockedUsersModal
-          isVisible={showBlockedModal}
-          handleCloseModal={handleCloseBlockedModal}
-        />
+        {group.blocked ? (
+          <GroupBlockedUsersModal
+            isVisible={showBlockedModal}
+            handleCloseModal={handleCloseBlockedModal}
+          />
+        ) : null}
       </>
     </GroupContext.Provider>
   );
@@ -141,19 +156,20 @@ const styles = ScaledSheet.create({
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.white,
     borderRadius: "5@s",
+    elevation: 5,
     height: "135@s",
     marginBottom: "3@s",
-    width: "95%",
     overflow: "hidden",
-    elevation: 5,
+    width: "95%",
   },
   groupName: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "5@s",
+    color: defaultStyles.colors.dark,
+    fontSize: "13@s",
     maxWidth: "80%",
     paddingHorizontal: "6@s",
     textAlign: "center",
-    fontSize: "13@s",
   },
   totalActiveCount: {
     backgroundColor: "rgba(0,0,0,0.8)",
@@ -184,9 +200,11 @@ const styles = ScaledSheet.create({
     paddingHorizontal: "5@s",
   },
   categoryText: {
-    backgroundColor: defaultStyles.colors.secondary,
+    backgroundColor: defaultStyles.colors.white,
+    borderColor: defaultStyles.colors.secondary,
     borderRadius: "5@s",
-    color: defaultStyles.colors.white,
+    borderWidth: 1,
+    color: defaultStyles.colors.dark,
     fontSize: "12@s",
     marginBottom: "2@s",
     paddingHorizontal: "5@s",

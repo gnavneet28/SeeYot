@@ -103,11 +103,13 @@ class MyGroupsListPro extends React.Component {
       case ViewTypes.Full:
         return (
           <MyGroupCard
+            key={data._id}
             groupItem={data}
             onAddEchoPress={this.props.onAddEchoPress}
             onSendThoughtsPress={this.props.onSendThoughtsPress}
             onPress={this.props.onVisitGroupPress}
             user={this.props.user}
+            showBlocked={this.props.showBlocked}
           />
         );
       default:

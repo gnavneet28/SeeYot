@@ -47,7 +47,7 @@ const ExploreGroupsModal = ({
   const [groups, setGroups] = useState([]);
   const [defaultGroups, setDefaultGroups] = useState([]);
   const [category, setCategory] = useState("Entertainment");
-  const [subCategory, setSubCategory] = useState("");
+  const [subCategory, setSubCategory] = useState("All");
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
@@ -59,10 +59,6 @@ const ExploreGroupsModal = ({
 
   let isUnmounting = false;
 
-  useEffect(() => {
-    return () => (isUnmounting = false);
-  }, []);
-
   const getGroups = async (category) => {
     if (!isUnmounting) {
       setCategory(category);
@@ -70,7 +66,6 @@ const ExploreGroupsModal = ({
     }
     const { ok, data, problem } = await groupsApi.exploreGroups(category);
     if (!isUnmounting && ok) {
-      // let modifiedList = data.filter()
       setGroups(data);
       setDefaultGroups(data);
       return setIsReady(true);
@@ -88,6 +83,8 @@ const ExploreGroupsModal = ({
       setSubCategories(filterSubCategory(category));
       setSubCategory("All");
     }
+
+    return () => (isUnmounting = true);
   }, [category]);
 
   const filterGroups = (subCategory) => {
@@ -99,11 +96,17 @@ const ExploreGroupsModal = ({
     setGroups(newGroupsList);
   };
 
+  useEffect(() => {
+    filterGroups(subCategory);
+  }, [subCategory]);
+
   const handleRefresh = useCallback(() => {
     if (!isUnmounting) {
       setRefreshing(true);
     }
     getGroups(category);
+    setSubCategories(filterSubCategory(category));
+    setSubCategory("All");
     if (!isUnmounting) {
       setRefreshing(false);
     }
@@ -131,7 +134,7 @@ const ExploreGroupsModal = ({
             />
             <DropdownSelect
               selected={subCategory}
-              onOptionSelection={filterGroups}
+              onOptionSelection={setSubCategory}
               data={subCategories}
               defaultPlaceholder={"Select Subcategory"}
             />

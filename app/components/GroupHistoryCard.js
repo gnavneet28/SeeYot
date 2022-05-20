@@ -42,19 +42,19 @@ const styles = ScaledSheet.create({
   },
   groupName: {
     fontSize: "12@s",
-    marginRight:"10@s",
+    marginRight: "10@s",
     maxWidth: "80@s",
     paddingVertical: 0,
     textAlign: "center",
     textAlignVertical: "center",
   },
   iconContainer: {
-    alignItems:"center",
+    alignItems: "center",
     backgroundColor: defaultStyles.colors.lightGrey,
     borderRadius: "5@s",
-    height:"18@s",
-    justifyContent:"center",
-    width:"18@s",
+    height: "18@s",
+    justifyContent: "center",
+    width: "18@s",
   },
 });
 

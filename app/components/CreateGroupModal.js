@@ -98,6 +98,7 @@ function CreateGroupModal({ visible, onRequestClose, onCreate }) {
   useEffect(() => {
     if (!isUnmounting) {
       setSubCategories(filterSubCategory(category));
+      setSubCategory("");
     }
 
     return () => (isUnmounting = true);

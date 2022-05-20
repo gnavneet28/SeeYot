@@ -85,6 +85,7 @@ function MyGroupsModal({
               onVisitGroupPress={onGroupSelection}
               refreshing={refreshing}
               onRefresh={handleRefresh}
+              showBlocked={true}
             />
           ) : (
             <AppText style={styles.noGroupsInfo}>No groups to show!</AppText>
