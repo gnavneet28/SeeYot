@@ -1,12 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from "react";
-import {
-  View,
-  TouchableOpacity,
-  ScrollView,
-  ImageBackground,
-  Share,
-  Pressable,
-} from "react-native";
+import { View, TouchableOpacity, ScrollView, Share } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import ImagePicker from "react-native-image-crop-picker";
@@ -32,6 +25,7 @@ import ModalFallback from "../components/ModalFallback";
 import ReportModal from "../components/ReportModal";
 import Screen from "../components/Screen";
 import ScreenSub from "../components/ScreenSub";
+import ImageLoadingComponent from "../components/ImageLoadingComponent";
 
 import debounce from "../utilities/debounce";
 
@@ -75,6 +69,7 @@ function GroupScreen({ navigation, route }) {
   const [openReportModal, setOpenReportModal] = useState(false);
   const [problemDescription, setProblemDescription] = useState("");
   const [removingFromHistory, setRemovingFromHistory] = useState(false);
+  const [loaded, setLoaded] = useState(0);
 
   const [showDeleteGroupAlert, setShowDeleteGroupAlert] = useState(false);
 
@@ -418,6 +413,8 @@ function GroupScreen({ navigation, route }) {
     });
   };
 
+  const handleLoadComplete = () => setLoaded(1);
+
   if (!group._id && isReady)
     return (
       <Screen style={styles.noGroupInfoContainerMain}>
@@ -459,31 +456,42 @@ Do not have permission to view group.
                 keyboardShouldPersistTaps="handled"
               >
                 <View style={styles.scrollView}>
-                  <View style={styles.groupDisplayPicture}>
-                    <ImageModal
-                      imageBackgroundColor={defaultStyles.colors.secondary}
-                      resizeMode={"contain"}
-                      source={{
-                        uri: group.picture ? group.picture : "defaultgroupdp",
-                      }}
-                      style={styles.imageBackground}
-                    >
-                      <View style={styles.groupWallActionContainer}>
-                        {group.createdBy._id == user._id ? (
-                          <TouchableOpacity
-                            onPress={openGroupPictureEditOptions}
-                            style={styles.editPhoto}
-                            activeOpacity={0.7}
-                          >
-                            <MaterialIcons
-                              name="edit"
-                              size={scale(15)}
-                              color={defaultStyles.colors.yellow_Variant}
-                            />
-                          </TouchableOpacity>
-                        ) : null}
-                      </View>
-                    </ImageModal>
+                  <View style={styles.groupDisplayPictureContainerMain}>
+                    <View style={styles.groupDisplayContainer}>
+                      <ImageModal
+                        onLoad={handleLoadComplete}
+                        onProgress={(e) =>
+                          setLoaded(e.nativeEvent.loaded / e.nativeEvent.total)
+                        }
+                        imageBackgroundColor={defaultStyles.colors.dark_Variant}
+                        resizeMode={"contain"}
+                        source={{
+                          uri: group.picture ? group.picture : "defaultgroupdp",
+                        }}
+                        style={styles.imageBackground}
+                      >
+                        <View style={styles.groupWallActionContainer}>
+                          {group.createdBy._id == user._id ? (
+                            <TouchableOpacity
+                              onPress={openGroupPictureEditOptions}
+                              style={styles.editPhoto}
+                              activeOpacity={0.7}
+                            >
+                              <MaterialIcons
+                                name="edit"
+                                size={scale(15)}
+                                color={defaultStyles.colors.yellow_Variant}
+                              />
+                            </TouchableOpacity>
+                          ) : null}
+                        </View>
+                      </ImageModal>
+                      <ImageLoadingComponent
+                        progress={loaded}
+                        image={group.picture}
+                        defaultImage={"defaultgroupdp"}
+                      />
+                    </View>
                     <View style={styles.groupQrCodeContainer}>
                       <QRCode
                         value={
@@ -728,7 +736,7 @@ const styles = ScaledSheet.create({
     elevation: 1,
     borderColor: defaultStyles.colors.light,
   },
-  groupDisplayPicture: {
+  groupDisplayPictureContainerMain: {
     backgroundColor: defaultStyles.colors.white,
     height: "250@s",
     width: "100%",
@@ -747,6 +755,11 @@ const styles = ScaledSheet.create({
   imageEditOptionSelector: {
     backgroundColor: defaultStyles.colors.primary,
     borderTopWidth: 0,
+  },
+  groupDisplayContainer: {
+    width: defaultStyles.width,
+    height: "200@s",
+    backgroundColor: defaultStyles.colors.dark,
   },
   imageBackground: {
     width: defaultStyles.width,
