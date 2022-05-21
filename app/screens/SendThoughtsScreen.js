@@ -57,7 +57,6 @@ import usersApi from "../api/users";
 
 import { SocketContext } from "../api/socketClient";
 
-import useMountedRef from "../hooks/useMountedRef";
 import useAppState from "../hooks/useAppState";
 
 const defaultReply = {
@@ -73,7 +72,6 @@ function SendThoughtsScreen({ navigation, route }) {
   let isUnmounting = false;
 
   const { activeFor, setActiveFor } = useContext(ActiveForContext);
-  const mounted = useMountedRef().current;
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
   const appStateVisible = useAppState();
@@ -202,9 +200,14 @@ function SendThoughtsScreen({ navigation, route }) {
     if (problem) return;
   };
 
+  // OnUnmount
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
   // SETTING ACTIVECHATMESSAGES, ACTIVE CHAT TO NULL AND REMOVING THE ACTIVECHAT FOR USER
   useEffect(() => {
-    if (mounted) {
+    if (!isUnmounting) {
       setReply(defaultReply);
       if (activeMessages.length) {
         setActiveMessages([]);
@@ -217,7 +220,7 @@ function SendThoughtsScreen({ navigation, route }) {
     }
 
     if (!isFocused || appStateVisible !== "active") {
-      if (mounted) {
+      if (!isUnmounting) {
         handleSetChatInActive();
         if (activeMessages.length) {
           setActiveMessages([]);
@@ -228,35 +231,31 @@ function SendThoughtsScreen({ navigation, route }) {
         }
       }
     }
-  }, [isFocused, appStateVisible, mounted]);
+  }, [isFocused, appStateVisible]);
 
   useEffect(() => {
-    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: true,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    return () => (isUnmounting = true);
-  }, []);
-
-  useEffect(() => {
-    if (!isFocused && mounted && isVisible === true) {
+    if (!isFocused && !isUnmounting && isVisible === true) {
       setIsVisible(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && showAlert === true) {
+    if (!isFocused && !isUnmounting && showAlert === true) {
       setShowAlert(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && messageActivity.visible === true) {
+    if (!isFocused && !isUnmounting && messageActivity.visible === true) {
       setMessageActivity({
         message: "",
         processing: true,
@@ -265,13 +264,13 @@ function SendThoughtsScreen({ navigation, route }) {
         echoMessage: null,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (mounted && isRecipientActive) {
+    if (!isUnmounting && isRecipientActive) {
       setShowAlert(false);
     }
-  }, [isRecipientActive, mounted, isFocused]);
+  }, [isRecipientActive, isFocused]);
   // HEADER ACTIONS
   const handleBack = useCallback(
     debounce(
@@ -410,7 +409,7 @@ function SendThoughtsScreen({ navigation, route }) {
         listRef.current.scrollToOffset({ offset: -300, animated: true });
       }
       stopCurrentUserTyping();
-      if (!isRecipientActive && mounted) {
+      if (!isRecipientActive && !isUnmounting) {
         return setShowAlert(true);
       }
       let newId =
@@ -436,7 +435,7 @@ function SendThoughtsScreen({ navigation, route }) {
             seen: false,
             reply: reply,
           };
-      if (mounted) {
+      if (!isUnmounting) {
         activeMessages.push(newMessage);
         setActiveMessages([...activeMessages]);
         if (reply.createdBy) {
@@ -456,7 +455,7 @@ function SendThoughtsScreen({ navigation, route }) {
           return setActiveFor(newActiveList);
         }
       }
-      if (mounted) {
+      if (!isUnmounting) {
         tackleProblem(problem, data, setInfoAlert);
       }
     },
@@ -464,7 +463,6 @@ function SendThoughtsScreen({ navigation, route }) {
       recipient._id,
       activeMessages,
       activeFor,
-      mounted,
       isRecipientActive,
       reply,
       mediaImage,
@@ -518,7 +516,7 @@ function SendThoughtsScreen({ navigation, route }) {
         handleSetChatActive();
       }
     }
-  }, [isFocused, mounted, isRecipientActive]);
+  }, [isFocused, isRecipientActive]);
 
   // OPTIONS MODAL ACTIONS
   const handleModalClose = useCallback(() => setIsVisible(false), []);
@@ -653,7 +651,7 @@ function SendThoughtsScreen({ navigation, route }) {
   const handleSetChatActive = useCallback(async () => {
     if (activeChat && isRecipientActive) return;
     setActiveChat(true);
-    if (!isRecipientActive && mounted) {
+    if (!isRecipientActive && !isUnmounting) {
       setShowAlert(true);
     }
     const { ok } = await usersApi.makeCurrentUserActiveFor(
@@ -663,7 +661,7 @@ function SendThoughtsScreen({ navigation, route }) {
 
     if (ok) return;
     return;
-  }, [activeChat, recipient._id, mounted, isFocused, isRecipientActive]);
+  }, [activeChat, recipient._id, isFocused, isRecipientActive]);
 
   const handleSetChatInActive = async () => {
     if (!activeChat) return;

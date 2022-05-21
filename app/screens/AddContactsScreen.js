@@ -11,7 +11,6 @@ import Alert from "../components/Alert";
 import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
 import Screen from "../components/Screen";
-import useMountedRef from "../hooks/useMountedRef";
 
 import usersApi from "../api/users";
 import useAuth from "../auth/useAuth";
@@ -30,7 +29,7 @@ import NavigationConstants from "../navigation/NavigationConstants";
 function AddContactsScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
-  const mounted = useMountedRef().current;
+  let isUnmounting = false;
   const { tackleProblem } = apiActivity;
 
   const permission = async () => {
@@ -94,17 +93,17 @@ function AddContactsScreen({ navigation }) {
           });
         }
         await syncContacts(contacts);
-        if (!isReady || mounted) {
+        if (!isReady || !isUnmounting) {
           setIsReady(true);
         }
       } else {
-        if (!isReady || mounted) {
+        if (!isReady || !isUnmounting) {
           setIsReady(true);
           return setContactsAccessDeniedAlertVisibility(true);
         }
       }
     } catch (error) {
-      if (!isReady || mounted) {
+      if (!isReady || !isUnmounting) {
         setIsReady(true);
         return setInfoAlert({
           infoAlertMessage: `${error}`,
@@ -133,7 +132,7 @@ function AddContactsScreen({ navigation }) {
       await authorizeUpdates.updatePhoneContactsUpdate();
       await storeDetails(data.user);
       setUser(data.user);
-      if (!isReady || mounted) {
+      if (!isReady || !isUnmounting) {
         return setUsers(
           data.user.phoneContacts
             .sort((a, b) => a.name < b.name)
@@ -141,7 +140,7 @@ function AddContactsScreen({ navigation }) {
         );
       }
     }
-    if (!isReady || mounted) {
+    if (!isReady || !isUnmounting) {
       tackleProblem(problem, data, setInfoAlert);
     }
   };
@@ -149,7 +148,7 @@ function AddContactsScreen({ navigation }) {
   const setUpPage = async () => {
     if (await permission()) {
       if (user.phoneContacts.length) {
-        if (!isReady || mounted) {
+        if (!isReady || !isUnmounting) {
           setUsers(
             user.phoneContacts
               .sort((a, b) => a.name < b.name)
@@ -167,6 +166,11 @@ function AddContactsScreen({ navigation }) {
     return requestPermission();
   };
 
+  // OnUnmount
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
   useEffect(() => {
     if (isFocused) {
       setUpPage();
@@ -174,22 +178,22 @@ function AddContactsScreen({ navigation }) {
   }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   // REFRESH ACTION
   const handleRefresh = useCallback(async () => {
-    if (mounted) {
+    if (!isUnmounting) {
       setRefreshing(true);
       await requestPermission();
       return setRefreshing(false);
     }
-  }, [mounted]);
+  }, [isUnmounting]);
 
   // HEADER ACTIONS
   const handleBack = useCallback(

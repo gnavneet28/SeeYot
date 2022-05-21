@@ -15,8 +15,6 @@ import Constant from "../navigation/NavigationConstants";
 
 import usersApi from "../api/users";
 
-import useMountedRef from "../hooks/useMountedRef";
-
 import debounce from "../utilities/debounce";
 import storeDetails from "../utilities/storeDetails";
 import apiActivity from "../utilities/apiActivity";
@@ -30,7 +28,7 @@ let defaultSearchHistory = [];
 
 function VipSearchScreen({ navigation }) {
   const { user, setUser } = useAuth();
-  const mounted = useMountedRef().current;
+  let isUnmounting = false;
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
   const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
@@ -64,28 +62,30 @@ function VipSearchScreen({ navigation }) {
 
   useEffect(() => {
     showOnboarding();
+
+    return () => (isUnmounting = true);
   }, []);
 
   useEffect(() => {
-    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && isVisible === true) {
+    if (!isFocused && !isUnmounting && isVisible === true) {
       setIsVisible(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && echoModal.visible === true) {
+    if (!isFocused && !isUnmounting && echoModal.visible === true) {
       setEchoModal({ ...echoModal, visible: false });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   // DATA NEEDED
   const searchHistory = useMemo(

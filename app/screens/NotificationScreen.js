@@ -34,8 +34,6 @@ import authorizeUpdates from "../utilities/authorizeUpdates";
 
 import defaultStyles from "../config/styles";
 
-import useMountedRef from "../hooks/useMountedRef";
-
 import myApi from "../api/my";
 
 import useAuth from "../auth/useAuth";
@@ -44,7 +42,7 @@ import ModalBackDrop from "../components/ModalBackDrop";
 
 function NotificationScreen({ navigation }) {
   const { user, setUser } = useAuth();
-  const mounted = useMountedRef().current;
+  let isUnmounting = false;
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
 
@@ -91,35 +89,40 @@ function NotificationScreen({ navigation }) {
     }
   };
 
+  // OnUnmount
   useEffect(() => {
-    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
+    return () => (isUnmounting = true);
+  }, []);
+
+  useEffect(() => {
+    if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && message.isVisible === true) {
+    if (!isFocused && !isUnmounting && message.isVisible === true) {
       setMessage({
         message: "",
         isVisible: false,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && visible === true) {
+    if (!isFocused && !isUnmounting && visible === true) {
       setVisible(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && showClearAllModal === true) {
+    if (!isFocused && !isUnmounting && showClearAllModal === true) {
       setShowClearAllModal(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   // MODAL MESSAGE ACTION
 
@@ -145,10 +148,10 @@ function NotificationScreen({ navigation }) {
       return;
     }
 
-    if (mounted) {
+    if (!isUnmounting) {
       tackleProblem(problem, data, setInfoAlert);
     }
-  }, [user, mounted]);
+  }, [user]);
 
   useEffect(() => {
     if (

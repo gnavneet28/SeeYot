@@ -74,6 +74,11 @@ function SendOtpScreen({ navigation }) {
   });
   const { otpFailed, setOtpFailed } = useContext(OtpContext);
 
+  // OnUnmount
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
   useEffect(() => {
     if (!isUnmounting) {
       OtpAutocomplete.getHash()
@@ -90,10 +95,6 @@ function SendOtpScreen({ navigation }) {
           }
         });
     }
-
-    return () => {
-      isUnmounting = true;
-    };
   }, [isFocused]);
 
   // TODO: google verification

@@ -34,8 +34,6 @@ import authorizeAds, {
   showAccountDays,
 } from "../utilities/authorizeAds";
 
-import useMountedRef from "../hooks/useMountedRef";
-
 import usersApi from "../api/users";
 import ModalFallback from "../components/ModalFallback";
 import ScreenSub from "../components/ScreenSub";
@@ -53,7 +51,7 @@ const optionsVibrate = {
 
 function PointsScreen({ navigation }) {
   const { user, setUser } = useAuth();
-  const mounted = useMountedRef().current;
+  let isUnmounting = false;
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
 
@@ -74,19 +72,19 @@ function PointsScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && isLoading === true) {
+    if (!isFocused && !isUnmounting && isLoading === true) {
       setIsLoading(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   // TODO:
   const calculateAdsStats = async () => {
@@ -179,7 +177,10 @@ function PointsScreen({ navigation }) {
       subscription3();
     }
 
-    return () => removeAllListeners();
+    return () => {
+      removeAllListeners();
+      isUnmounting = true;
+    };
   }, []);
 
   const handleShowAd = debounce(

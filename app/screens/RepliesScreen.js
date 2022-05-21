@@ -42,6 +42,11 @@ function RepliesScreen({ navigation }) {
 
   // MODAL MESSAGE ACTION
 
+  // OnUnmount
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
   const handleCloseModal = useCallback(() => {
     setMessage({ message: defaultProps.defaultMessage, isVisible: false });
   }, []);
@@ -107,8 +112,6 @@ function RepliesScreen({ navigation }) {
         showInfoAlert: false,
       });
     }
-
-    return () => (isUnmounting = true);
   }, [isFocused]);
 
   useEffect(() => {
@@ -145,8 +148,6 @@ function RepliesScreen({ navigation }) {
   );
 
   const handleCloseAlert = () => setShowAlert(false);
-
-  const doNull = () => {};
 
   return (
     <>

@@ -18,15 +18,13 @@ import apiActivity from "../utilities/apiActivity";
 
 import usersApi from "../api/users";
 
-import useMountedRef from "../hooks/useMountedRef";
-
 import defaultStyles from "../config/styles";
 import defaultProps from "../utilities/defaultProps";
 
 function SettingsScreen({ navigation }) {
   const { setUser } = useAuth();
   const isFocused = useIsFocused();
-  const mounted = useMountedRef().current;
+  let isUnmounting = false;
   const { tackleProblem } = apiActivity;
 
   const [infoAlert, setInfoAlert] = useState({
@@ -45,19 +43,23 @@ function SettingsScreen({ navigation }) {
   );
 
   useEffect(() => {
-    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
+    return () => (isUnmounting = true);
+  }, []);
+
+  useEffect(() => {
+    if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && contactAlert === true) {
+    if (!isFocused && !isUnmounting && contactAlert === true) {
       setContactAlert(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   const deletePhoneContacts = async () => {
     setContactAlert(false);

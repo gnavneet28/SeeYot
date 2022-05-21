@@ -22,8 +22,6 @@ import myApi from "../api/my";
 import messagesApi from "../api/messages";
 import usersApi from "../api/users";
 
-import useMountedRef from "../hooks/useMountedRef";
-
 import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
 import apiActivity from "../utilities/apiActivity";
@@ -41,7 +39,7 @@ function HomeScreen({ navigation }) {
 
   dayjs.extend(relativeTime);
   const { user, setUser } = useAuth();
-  const mounted = useMountedRef().current;
+  let isUnmounting = false;
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
 
@@ -83,6 +81,8 @@ function HomeScreen({ navigation }) {
   useEffect(() => {
     clearJunkData();
     updateCurrentUser();
+
+    return () => (isUnmounting = true);
   }, []);
 
   const userMessages = useMemo(() => {
@@ -90,35 +90,35 @@ function HomeScreen({ navigation }) {
   }, [user]);
 
   useEffect(() => {
-    if (!isFocused && mounted && isVisible) {
+    if (!isFocused && !isUnmounting && isVisible) {
       setIsVisible(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && messageCreator.picture) {
+    if (!isFocused && !isUnmounting && messageCreator.picture) {
       setMessageCreator({
         name: "************",
         picture: "",
         _id: "",
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (mounted && selectedMessageId) {
+    if (!isUnmounting && selectedMessageId) {
       setSelectedMessageId("");
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   const handleImagePress = useCallback(
     debounce(

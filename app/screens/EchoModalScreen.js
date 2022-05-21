@@ -19,7 +19,6 @@ import EchoMessage from "../components/EchoMessage";
 import Screen from "../components/Screen";
 
 import useAuth from "../auth/useAuth";
-import useMountedRef from "../hooks/useMountedRef";
 
 import debounce from "../utilities/debounce";
 
@@ -35,7 +34,6 @@ const GAP = 30;
 function EchoModalScreen({ route, navigation }) {
   let { recipient } = route.params;
   const { user } = useAuth();
-  const mounted = useMountedRef();
 
   let isUnmounting = false;
 
@@ -47,23 +45,23 @@ function EchoModalScreen({ route, navigation }) {
       usersApi.updatePhotoTapsCount(recipient._id);
     }
     const { data, problem, ok } = await echosApi.getEcho(recipient._id);
-    if (ok && mounted && !isUnmounting) {
+    if (ok && !isUnmounting) {
       setEchoMessage(data);
     }
   };
 
   useEffect(() => {
-    if (mounted && !isUnmounting) {
+    if (!isUnmounting) {
       getEchoMessage();
     }
 
     return () => (isUnmounting = true);
-  }, [mounted]);
+  }, []);
 
   let imageUri = recipient.picture;
 
   const handleBack = useCallback(
-    debounce(() => navigation.goBack(), 1000, true),
+    debounce(() => navigation.goBack(), 500, true),
     []
   );
 

@@ -32,15 +32,13 @@ import expoPushTokensApi from "../api/expoPushTokens";
 import problemsApi from "../api/problems";
 import usersApi from "../api/users";
 
-import useMountedRef from "../hooks/useMountedRef";
-
 import defaultStyles from "../config/styles";
 import ScreenSub from "../components/ScreenSub";
 import defaultProps from "../utilities/defaultProps";
 
 function ProfileScreen({ navigation }) {
   const { user, setUser, logOut } = useAuth();
-  const mounted = useMountedRef().current;
+  let isUnmounting = false;
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
   // STATES
@@ -59,26 +57,31 @@ function ProfileScreen({ navigation }) {
   const [changingEcho, setChangingEcho] = useState(false);
   const [changingTapEcho, setChangingTapEcho] = useState(false);
 
+  // OnUnmount
   useEffect(() => {
-    if (!isFocused && mounted && isLoading === true) {
-      setIsLoading(false);
-    }
-  }, [isFocused, mounted]);
+    return () => (isUnmounting = true);
+  }, []);
 
   useEffect(() => {
-    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && !isUnmounting && isLoading === true) {
+      setIsLoading(false);
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && showLogOut === true) {
+    if (!isFocused && !isUnmounting && showLogOut === true) {
       setShowLogOut(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   //LOG OUT ACTION
   const handleCloseLogout = useCallback(() => setShowLogOut(false), []);

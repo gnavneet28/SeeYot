@@ -25,7 +25,6 @@ import InfoAlert from "../components/InfoAlert";
 import Screen from "../components/Screen";
 import Selection from "../components/Selection";
 
-import useMountedRef from "../hooks/useMountedRef";
 import storeDetails from "../utilities/storeDetails";
 
 import debounce from "../utilities/debounce";
@@ -54,7 +53,6 @@ function AddEchoScreen({ navigation, route }) {
 
   const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
-  const mounted = useMountedRef().current;
   let isUnmounting = false;
 
   const [savingEcho, setSavingEcho] = useState(false);
@@ -121,7 +119,7 @@ function AddEchoScreen({ navigation, route }) {
 
   const setUpPage = () => {
     const echoMessage = setEchoMessage();
-    if (!isReady || mounted) {
+    if (!isReady || !isUnmounting) {
       setMessage(echoMessage ? echoMessage.message : "");
       setInitialMessage(echoMessage ? echoMessage.message : "");
       if (echoMessage) {
@@ -135,6 +133,11 @@ function AddEchoScreen({ navigation, route }) {
     }
   };
 
+  // OnUnmount
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
   useEffect(() => {
     if (isFocused) {
       setUpPage();
@@ -144,19 +147,19 @@ function AddEchoScreen({ navigation, route }) {
   }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && isVisible) {
+    if (!isFocused && !isUnmounting && isVisible) {
       setIsVisible(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && infoAlert.showInfoAlert === true) {
+    if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
         showInfoAlert: false,
       });
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   // ECHO_MESSAGE LIST DATA AND ACTION
   const data = useMemo(

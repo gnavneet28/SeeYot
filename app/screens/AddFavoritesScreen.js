@@ -16,7 +16,6 @@ import useAuth from "../auth/useAuth";
 import messagesApi from "../api/messages";
 import usersApi from "../api/users";
 
-import useMountedRef from "../hooks/useMountedRef";
 import Constants from "../navigation/NavigationConstants";
 
 import debounce from "../utilities/debounce";
@@ -43,7 +42,7 @@ const moodData = [
 function AddFavoritesScreen({ navigation }) {
   const { user } = useAuth();
   const isFocused = useIsFocused();
-  const mounted = useMountedRef().current;
+  let isUnmounting = false;
   const { tackleProblem } = apiActivity;
   const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
   // STATES
@@ -80,6 +79,11 @@ function AddFavoritesScreen({ navigation }) {
     showOnboarding();
   }, []);
 
+  // OnUnmount
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
   // ON PAGE FOCUS ACTION
   const setUsersList = () => {
     let finalList = [];
@@ -94,7 +98,7 @@ function AddFavoritesScreen({ navigation }) {
         finalList.push(user);
       }
     }
-    if (!isReady || mounted) {
+    if (!isReady || !isUnmounting) {
       setUsers(finalList.sort((a, b) => a.name > b.name));
       setIsReady(true);
     }
@@ -107,16 +111,16 @@ function AddFavoritesScreen({ navigation }) {
   }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && isVisible) {
+    if (!isFocused && !isUnmounting && isVisible) {
       setIsVisible(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused && mounted && showAddoption) {
+    if (!isFocused && !isUnmounting && showAddoption) {
       setShowAddOption(false);
     }
-  }, [isFocused, mounted]);
+  }, [isFocused]);
 
   // ADD OPTION MODAL ACTION
 

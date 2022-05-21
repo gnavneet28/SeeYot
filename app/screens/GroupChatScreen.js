@@ -124,6 +124,11 @@ function GroupChatScreen({ navigation, route }) {
 
   // Close All modal on mount or if focused if open
 
+  // OnUnmount
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
   useEffect(() => {
     if (isFocused) {
       if (infoAlert.showInfoAlert) {
@@ -309,7 +314,7 @@ function GroupChatScreen({ navigation, route }) {
       setIsReady(true);
       tackleProblem(problem, data, setInfoAlert);
     }
-  }, [groupMessages, isUnmounting]);
+  }, [groupMessages]);
 
   useEffect(() => {
     const listener1 = (data) => {
