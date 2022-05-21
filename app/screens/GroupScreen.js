@@ -1,4 +1,10 @@
-import React, { useCallback, useState, useEffect, useMemo } from "react";
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { View, TouchableOpacity, ScrollView, Share } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
@@ -39,6 +45,7 @@ import storeDetails from "../utilities/storeDetails";
 import useAuth from "../auth/useAuth";
 import groupsApi from "../api/groups";
 import usersApi from "../api/users";
+import { useIsFocused } from "@react-navigation/native";
 
 const optionsVibrate = {
   enableVibrateFallback: true,
@@ -48,7 +55,9 @@ const optionsVibrate = {
 function GroupScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
   const { tackleProblem } = apiActivity;
+  const isFocused = useIsFocused();
   let isUnmounting = false;
+  const imageModalRef = useRef(null);
 
   const [group, setGroup] = useState(defaultProps.defaultGroup);
   const [openGroupInfo, setOpenGroupInfo] = useState(false);
@@ -109,6 +118,51 @@ function GroupScreen({ navigation, route }) {
   useEffect(() => {
     return () => (isUnmounting = true);
   }, []);
+
+  // close all modal on unfocus
+  useEffect(() => {
+    if (!isFocused && !isUnmounting) {
+      if (showOptions) {
+        setShowOptions(false);
+      }
+      if (showImageEdit) {
+        setShowImageEdit(false);
+      }
+      if (showAlert) {
+        setShowAlert(false);
+      }
+      if (showDeleteGroupAlert) {
+        setShowDeleteGroupAlert(false);
+      }
+      if (isLoading) {
+        setIsLoading(false);
+      }
+      if (infoAlert.showInfoAlert) {
+        setInfoAlert({ infoAlertMessage: "", showInfoAlert: false });
+      }
+      if (incognitoAlert.showIncognitoAlert) {
+        setIncognitoAlert({
+          incognitoAlertMessage: "",
+          showIncognitoAlert: false,
+        });
+      }
+      if (openGroupInfo) {
+        setOpenGroupInfo(false);
+      }
+      if (openReportModal) {
+        setOpenReportModal(false);
+      }
+      if (openPasswordModal) {
+        setOpenPasswordModal(false);
+      }
+
+      if (imageModalRef.current) {
+        if (imageModalRef.current.props.isOpen) {
+          imageModalRef.current.close();
+        }
+      }
+    }
+  }, [isFocused]);
 
   // ON PAGE LOAD
   const getGroupDetails = async () => {
@@ -459,6 +513,7 @@ Do not have permission to view group.
                   <View style={styles.groupDisplayPictureContainerMain}>
                     <View style={styles.groupDisplayContainer}>
                       <ImageModal
+                        modalRef={imageModalRef}
                         onLoad={handleLoadComplete}
                         onProgress={(e) =>
                           setLoaded(e.nativeEvent.loaded / e.nativeEvent.total)

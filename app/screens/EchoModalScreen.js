@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   ImageBackground,
@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
 import { ScaledSheet, s } from "react-native-size-matters";
+import { useIsFocused } from "@react-navigation/native";
 
 import { SharedElement } from "react-navigation-shared-element";
 import ImageModal from "react-native-image-modal";
@@ -34,6 +35,8 @@ const GAP = 30;
 function EchoModalScreen({ route, navigation }) {
   let { recipient } = route.params;
   const { user } = useAuth();
+  const isFocused = useIsFocused();
+  const imageModalRef = useRef(null);
 
   let isUnmounting = false;
 
@@ -57,6 +60,14 @@ function EchoModalScreen({ route, navigation }) {
 
     return () => (isUnmounting = true);
   }, []);
+
+  useEffect(() => {
+    if (!isFocused && imageModalRef.current) {
+      if (imageModalRef.current.props.isOpen) {
+        handleBack();
+      }
+    }
+  }, [isFocused]);
 
   let imageUri = recipient.picture;
 
@@ -98,6 +109,7 @@ function EchoModalScreen({ route, navigation }) {
                 <SharedElement id={recipient._id}>
                   <View style={styles.inlargedImage}>
                     <ImageModal
+                      modalRef={imageModalRef}
                       onLoad={handleLoadComplete}
                       onProgress={(e) =>
                         setLoaded(e.nativeEvent.loaded / e.nativeEvent.total)

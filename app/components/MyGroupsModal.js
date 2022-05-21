@@ -22,6 +22,7 @@ function MyGroupsModal({
   groups,
   onAddEchoPress,
   onSendThoughtsPress,
+  isFocused,
 }) {
   const { tackleProblem } = apiActivity;
   const { user } = useAuth();
@@ -77,6 +78,7 @@ function MyGroupsModal({
         {isReady ? (
           myGroups.length ? (
             <MyGroupsListPro
+              isFocused={isFocused}
               inputBoxStyle={styles.inputBoxStyle}
               onAddEchoPress={onAddEchoPress}
               onSendThoughtsPress={onSendThoughtsPress}

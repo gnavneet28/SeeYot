@@ -123,6 +123,31 @@ function QrScannerScreen({ navigation, route }) {
   }, [route.params, isFocused]);
 
   useEffect(() => {
+    if (!isFocused && !isUnmounting) {
+      if (checkingGroupName) {
+        setCheckingGroupName(false);
+      }
+      if (infoAlert.showInfoAlert) {
+        setInfoAlert({
+          ...infoAlert,
+          showInfoAlert: false,
+        });
+      }
+
+      if (showCreateGroupModal) {
+        setShowCreateGroupModal(false);
+      }
+
+      if (showMyGroupsModal) {
+        setShowMyGroupsModal(false);
+      }
+      if (showExplore) {
+        setShowExplore(false);
+      }
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
     return () => (isUnmounting = true);
   }, []);
 
@@ -320,6 +345,7 @@ function QrScannerScreen({ navigation, route }) {
         onCreate={handleVisitGroup}
       />
       <MyGroupsModal
+        isFocused={isFocused}
         onAddEchoPress={handleAddEchoPress}
         onSendThoughtsPress={handleSendThoughtsPress}
         visible={showMyGroupsModal}
@@ -327,6 +353,7 @@ function QrScannerScreen({ navigation, route }) {
         setVisible={setShowMyGroupsModal}
       />
       <ExploreGroupsModal
+        isFocused={isFocused}
         visible={showExplore}
         handleCloseModal={handleCloseExploreModal}
         onAddEchoPress={handleAddEchoPress}

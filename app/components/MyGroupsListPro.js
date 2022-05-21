@@ -110,6 +110,7 @@ class MyGroupsListPro extends React.Component {
             onPress={this.props.onVisitGroupPress}
             user={this.props.user}
             showBlocked={this.props.showBlocked}
+            isFocused={this.props.isFocused}
           />
         );
       default:

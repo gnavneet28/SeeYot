@@ -28,6 +28,7 @@ function GroupChatHeader({
   },
   onAddEchoPress,
   onSendThoughtsPress,
+  isFocused,
 }) {
   const [typing, setTyping] = useState(false);
   const { user } = useAuth();
@@ -106,6 +107,7 @@ function GroupChatHeader({
         </AppText>
       </View>
       <TotalActiveUsers
+        isFocused={isFocused}
         onAddEchoPress={onAddEchoPress}
         onSendThoughtsPress={onSendThoughtsPress}
         totalActiveUsers={totalActiveUsers}

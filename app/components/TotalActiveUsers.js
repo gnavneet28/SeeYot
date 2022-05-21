@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import MaterialIcons from "../../node_modules/react-native-vector-icons/MaterialIcons";
@@ -28,9 +28,25 @@ function TotalActiveUsers({
   containerStyle,
   onSendThoughtsPress,
   onAddEchoPress,
+  isFocused,
 }) {
   const [showList, setShowList] = useState(false);
   const { user } = useAuth();
+
+  let isUnmounting = false;
+
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
+  useEffect(() => {
+    if (!isUnmounting && !isFocused && showList) {
+      setShowList(false);
+    }
+    if (!isUnmounting && !isFocused && echoState.visible) {
+      setEchoState(defaultEchoState);
+    }
+  }, [isFocused]);
 
   const handleListHeaderLeftPress = () => setShowList(false);
   const handleOpenList = () => setShowList(true);

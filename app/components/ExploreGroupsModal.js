@@ -38,6 +38,7 @@ const ExploreGroupsModal = ({
   onAddEchoPress,
   onSendThoughtsPress,
   onGroupSelection,
+  isFocused,
 }) => {
   const { tackleProblem } = apiActivity;
   const { user } = useAuth();
@@ -152,6 +153,7 @@ const ExploreGroupsModal = ({
               placeholder={"Search groups..."}
               refreshing={refreshing}
               onRefresh={handleRefresh}
+              isFocused={isFocused}
             />
           )}
         </View>

@@ -21,6 +21,7 @@ function MyGroupCard({
   onSendThoughtsPress,
   user = { _id: "" },
   showBlocked = false,
+  isFocused,
 }) {
   const socket = useContext(SocketContext);
 
@@ -29,6 +30,18 @@ function MyGroupCard({
   const [showBlockedModal, setShowBlockedModal] = useState(false);
   const [loaded, setLoaded] = useState(1);
 
+  let isUnmounting = false;
+
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
+  useEffect(() => {
+    if (!isUnmounting && !isFocused && showBlockedModal) {
+      setShowBlockedModal(false);
+    }
+  }, [isFocused]);
+
   const handleLoadComplete = () => setLoaded(1);
 
   const handleCloseBlockedModal = () => {
@@ -36,8 +49,6 @@ function MyGroupCard({
   };
 
   const handleOnBlockedButtonPress = () => setShowBlockedModal(true);
-
-  let isUnmounting = false;
 
   const handleOnPress = () => {
     onPress(group);
@@ -66,7 +77,6 @@ function MyGroupCard({
     socket.on(`removeActive${group._id}`, listener2);
 
     return () => {
-      isUnmounting = true;
       socket.off(`addActive${group._id}`, listener);
       socket.off(`removeActive${group._id}`, listener2);
     };
@@ -108,6 +118,7 @@ function MyGroupCard({
                 </View>
                 <AppText style={styles.groupName}>{group.name}</AppText>
                 <TotalActiveUsers
+                  isFocused={isFocused}
                   onAddEchoPress={onAddEchoPress}
                   onSendThoughtsPress={onSendThoughtsPress}
                   containerStyle={styles.totalActiveCount}

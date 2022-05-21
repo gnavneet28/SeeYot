@@ -130,7 +130,7 @@ function GroupChatScreen({ navigation, route }) {
   }, []);
 
   useEffect(() => {
-    if (isFocused) {
+    if (!isFocused && !isUnmounting) {
       if (infoAlert.showInfoAlert) {
         setInfoAlert({ ...infoAlert, showInfoAlert: false });
       }
@@ -587,6 +587,7 @@ function GroupChatScreen({ navigation, route }) {
     <>
       <Screen style={styles.container}>
         <GroupChatHeader
+          isFocused={isFocused}
           onAddEchoPress={handleAddEchoPress}
           onSendThoughtsPress={handleSendThoughtsPress}
           totalActiveUsers={activeUsers}

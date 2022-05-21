@@ -147,6 +147,7 @@ function AddFavoriteCard({
       </View>
       <View style={styles.actionContainer}>
         <ApiProcessingContainer
+          color={defaultStyles.colors.white}
           processing={apiProcessing === favoriteUser._id}
           style={[
             styles.buttonContainer,
