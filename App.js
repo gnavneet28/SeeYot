@@ -28,6 +28,7 @@ import OnboardingContext from "./app/utilities/onboardingContext";
 import useJailBreak from "./app/hooks/useJailBreak";
 
 import Onboarding from "./app/components/Onboarding";
+import OtpContext from "./app/utilities/otpContext";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -35,6 +36,7 @@ export default function App() {
     fontLoaded: false,
     isReady: false,
   });
+  const [otpFailed, setOtpFailed] = useState(false);
   const jailBroken = useJailBreak();
   const [onboarded, setOnboarded] = useState(false);
 
@@ -80,22 +82,24 @@ export default function App() {
       ) : (
         <AuthContext.Provider value={{ user, setUser }}>
           <OnboardingContext.Provider value={{ onboarded, setOnboarded }}>
-            <OfflineNotice />
-            {onboarded ? (
-              <NavigationContainer ref={navigationRef}>
-                {user ? (
-                  <SocketContext.Provider value={socket}>
-                    <AppNavigator />
-                  </SocketContext.Provider>
-                ) : (
-                  <AuthNavigator />
-                )}
-              </NavigationContainer>
-            ) : (
-              <Onboarding />
-            )}
-            <StatusBar style="light" />
-            <FlashMessage position="top" />
+            <OtpContext.Provider value={{ otpFailed, setOtpFailed }}>
+              <OfflineNotice />
+              {onboarded ? (
+                <NavigationContainer ref={navigationRef}>
+                  {user ? (
+                    <SocketContext.Provider value={socket}>
+                      <AppNavigator />
+                    </SocketContext.Provider>
+                  ) : (
+                    <AuthNavigator />
+                  )}
+                </NavigationContainer>
+              ) : (
+                <Onboarding />
+              )}
+              <StatusBar style="light" />
+              <FlashMessage position="top" />
+            </OtpContext.Provider>
           </OnboardingContext.Provider>
         </AuthContext.Provider>
       )}

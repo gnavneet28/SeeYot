@@ -14,6 +14,7 @@ function AppTextInput({
   style,
   subStyle,
   value,
+  inputRef,
   ...otherProps
 }) {
   return (
@@ -28,6 +29,7 @@ function AppTextInput({
       ) : null}
       <TextInput
         value={value}
+        ref={inputRef}
         {...otherProps}
         multiline={multiline}
         numberOfLines={numberOfLines}

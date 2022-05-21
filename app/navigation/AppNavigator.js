@@ -38,6 +38,7 @@ function AppNavigator(props) {
   const [activeMessages, setActiveMessages] = useState([]);
   const [typing, setTyping] = useState(false);
   const socket = useContext(SocketContext);
+  const [disconnected, setDisconnected] = useState(false);
 
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
 
@@ -134,9 +135,13 @@ function AppNavigator(props) {
       try {
         subscription.remove();
       } catch (error) {}
-      try {
-        IAP.disconnectAsync();
-      } catch (error) {}
+      if (!disconnected) {
+        IAP.disconnectAsync()
+          .then(() => {
+            setDisconnected(true);
+          })
+          .catch((err) => {});
+      }
     };
   }, [purchaseSuccess]);
 

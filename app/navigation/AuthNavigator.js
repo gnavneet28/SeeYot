@@ -1,28 +1,22 @@
 import React from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import RegisterDetailsScreen from "../screens/RegisterDetailsScreen";
 import SendOtpScreen from "../screens/SendOtpScreen";
-import VerifyOtpScreen from "../screens/VerifyOtpScreen";
 import Constant from "./NavigationConstants";
 
-const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 function AuthNavigator(props) {
   return (
-    <Tab.Navigator
-      screenOptions={{ headerShown: false, tabBarStyle: { display: "none" } }}
+    <Stack.Navigator
+      screenOptions={{ headerShown: false, animation: "slide_from_right" }}
     >
-      <Tab.Screen name={Constant.SEND_OTP_SCREEN} component={SendOtpScreen} />
-      <Tab.Screen
-        name={Constant.VERIFY_OTP_SCREEN}
-        component={VerifyOtpScreen}
+      <Stack.Screen
+        options={{ animationTypeForReplace: "pop" }}
+        name={Constant.SEND_OTP_SCREEN}
+        component={SendOtpScreen}
       />
-      <Tab.Screen
-        name={Constant.PROFILE_DETAILS_SCREEN}
-        component={RegisterDetailsScreen}
-      />
-    </Tab.Navigator>
+    </Stack.Navigator>
   );
 }
 

@@ -72,9 +72,6 @@ export default function VerifyOtpScreen({ navigation, route }) {
 
   useEffect(() => {
     otpListener();
-    // OtpAutocomplete.getOtp()
-    //   .then((p) => OtpAutocomplete.addListener(otpHandler))
-    //   .catch((p) => {});
 
     return () => OtpAutocomplete.removeListener();
   }, [otpListener]);
