@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { View, ScrollView, Modal } from "react-native";
 import { AdMobRewarded } from "expo-ads-admob";
 import MaterialCommunityIcon from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
@@ -52,6 +52,7 @@ const optionsVibrate = {
 function PointsScreen({ navigation }) {
   const { user, setUser } = useAuth();
   let isUnmounting = false;
+  let canShowOnPointsScreen = useRef(true);
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
 
@@ -70,6 +71,16 @@ function PointsScreen({ navigation }) {
   });
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  // on page mount and unmount
+
+  useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnPointsScreen.current) {
+      canShowOnPointsScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnPointsScreen.current = false;
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
@@ -157,10 +168,12 @@ function PointsScreen({ navigation }) {
   const subscription2 = async () =>
     await AdMobRewarded.addEventListener("rewardedVideoDidFailToLoad", () => {
       setCollectingPoints(false);
-      return setInfoAlert({
-        infoAlertMessage: "Something went wrong! Please try again.",
-        showInfoAlert: true,
-      });
+      if (canShowOnPointsScreen.current) {
+        return setInfoAlert({
+          infoAlertMessage: "Something went wrong! Please try again.",
+          showInfoAlert: true,
+        });
+      }
     });
 
   const subscription3 = async () => {
@@ -199,11 +212,13 @@ function PointsScreen({ navigation }) {
         await AdMobRewarded.showAdAsync();
       } catch (error) {
         setCollectingPoints(false);
-        setInfoAlert({
-          infoAlertMessage:
-            "Problem has occured while loading the ad. Please try again.",
-          showInfoAlert: true,
-        });
+        if (canShowOnPointsScreen.current) {
+          return setInfoAlert({
+            infoAlertMessage:
+              "Problem has occured while loading the ad. Please try again.",
+            showInfoAlert: true,
+          });
+        }
       }
     },
     1000,
@@ -237,7 +252,9 @@ function PointsScreen({ navigation }) {
       }
       setPointsToRedeem(0);
       setRedeeming(false);
-      tackleProblem(problem, data, setInfoAlert);
+      if (canShowOnPointsScreen.current) {
+        tackleProblem(problem, data, setInfoAlert);
+      }
     },
     1000,
     true

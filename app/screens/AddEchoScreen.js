@@ -47,6 +47,7 @@ import onBoarding from "../utilities/onBoarding";
 function AddEchoScreen({ navigation, route }) {
   const { recipient, from } = route.params;
   const { tackleProblem } = apiActivity;
+  let canShowOnAddEchoScreen = useRef(true);
   const textModeRef = useRef(null);
   const audioModeRef = useRef(null);
   const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
@@ -86,7 +87,7 @@ function AddEchoScreen({ navigation, route }) {
 
   const showOnboarding = async () => {
     const isShown = await isInfoSeen(onboardingKeys.ECHO);
-    if (!isShown) {
+    if (!isShown && canShowOnAddEchoScreen.current) {
       setShowHelp(true);
       updateInfoSeen(onboardingKeys.ECHO);
     }
@@ -96,8 +97,6 @@ function AddEchoScreen({ navigation, route }) {
     if (!isUnmounting && isFocused) {
       setSendNotification(false);
     }
-
-    return () => (isUnmounting = true);
   }, [isFocused]);
 
   useEffect(() => {
@@ -137,6 +136,14 @@ function AddEchoScreen({ navigation, route }) {
   useEffect(() => {
     return () => (isUnmounting = true);
   }, []);
+
+  useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnAddEchoScreen.current) {
+      canShowOnAddEchoScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnAddEchoScreen.current = false;
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     if (isFocused) {
@@ -196,7 +203,9 @@ function AddEchoScreen({ navigation, route }) {
           });
         }
         setSavingEcho(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnAddEchoScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -227,7 +236,9 @@ function AddEchoScreen({ navigation, route }) {
           });
         }
         setSavingEcho(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnAddEchoScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -286,7 +297,9 @@ function AddEchoScreen({ navigation, route }) {
         setRemovingEcho(false);
         setIsVisible(false);
         setEchoMessageOption(defaultProps.defaultEchoMessageOption);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnAddEchoScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true

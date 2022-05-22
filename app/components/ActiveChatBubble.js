@@ -49,6 +49,10 @@ function ActiveChatBubble({
 
   const translateX = useSharedValue(-20);
 
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
   const rStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -77,7 +81,6 @@ function ActiveChatBubble({
 
     return () => {
       socket.off(`${thought.secondaryId}`, listener);
-      isUnmounting = true;
     };
   }, [thought]);
 

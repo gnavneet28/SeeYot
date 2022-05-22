@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from "react";
 import { View } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
@@ -29,6 +35,7 @@ let defaultSearchHistory = [];
 function VipSearchScreen({ navigation }) {
   const { user, setUser } = useAuth();
   let isUnmounting = false;
+  let canShowOnVipSearchScreen = useRef(true);
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
   const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
@@ -65,6 +72,14 @@ function VipSearchScreen({ navigation }) {
 
     return () => (isUnmounting = true);
   }, []);
+
+  useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnVipSearchScreen.current) {
+      canShowOnVipSearchScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnVipSearchScreen.current = false;
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
@@ -137,7 +152,9 @@ function VipSearchScreen({ navigation }) {
             return setSearchResult(data);
           }
           setIsLoading(false);
-          tackleProblem(problem, data, setInfoAlert);
+          if (canShowOnVipSearchScreen.current) {
+            tackleProblem(problem, data, setInfoAlert);
+          }
         }
         setSearchResult([]);
       },
@@ -257,7 +274,9 @@ function VipSearchScreen({ navigation }) {
         }
         setApiProcessing(false);
         setIsVisible(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnVipSearchScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       5000,
       true

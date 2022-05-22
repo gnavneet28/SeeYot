@@ -149,7 +149,7 @@ function SendThoughtsInput({
         });
       })
       .catch((err) => {
-        console.log(err);
+        // console.log(err);
         //Error Loading Images
       });
   };
@@ -175,7 +175,7 @@ function SendThoughtsInput({
         });
       })
       .catch((err) => {
-        console.log(err);
+        // console.log(err);
         //Error Loading Images
       });
   };

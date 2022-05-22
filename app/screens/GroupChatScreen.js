@@ -90,6 +90,7 @@ function GroupChatScreen({ navigation, route }) {
   const { tackleProblem } = apiActivity;
 
   let isUnmounting = false;
+  let canUpdate = useRef(true);
 
   const [isReady, setIsReady] = useState(false);
   const [group, setGroup] = useState(route.params.group);
@@ -124,10 +125,20 @@ function GroupChatScreen({ navigation, route }) {
 
   // Close All modal on mount or if focused if open
 
-  // OnUnmount
+  //OnUnmount;
   useEffect(() => {
-    return () => (isUnmounting = true);
+    return () => {
+      isUnmounting = true;
+    };
   }, []);
+
+  useEffect(() => {
+    if (!isFocused) {
+      canUpdate.current = false;
+    } else if (isFocused) {
+      canUpdate.current = true;
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     if (!isFocused && !isUnmounting) {
@@ -168,15 +179,22 @@ function GroupChatScreen({ navigation, route }) {
       if (ok && !isUnmounting) {
         setIsLoading(false);
         setOpenUserReport(false);
-        return setInfoAlert({
-          infoAlertMessage:
-            "Thank you for reporting the profile. We will look into this as soon as possible.",
-          showInfoAlert: true,
-        });
+
+        if (canUpdate.current) {
+          setInfoAlert({
+            infoAlertMessage:
+              "Thank you for reporting the profile. We will look into this as soon as possible.",
+            showInfoAlert: true,
+          });
+        }
+
+        return;
       }
 
       if (!isUnmounting) {
         setIsLoading(false);
+      }
+      if (!isUnmounting && canUpdate.current) {
         tackleProblem(problem, data, setInfoAlert);
       }
     },
@@ -228,6 +246,8 @@ function GroupChatScreen({ navigation, route }) {
 
     if (!isUnmounting) {
       setBlockingFromGroup(false);
+    }
+    if (!isUnmounting && canUpdate.current) {
       tackleProblem(problem, data, setInfoAlert);
     }
   }, [interestedUser, group]);
@@ -247,6 +267,8 @@ function GroupChatScreen({ navigation, route }) {
 
     if (!isUnmounting) {
       setBlockingPersonally(false);
+    }
+    if (!isUnmounting && canUpdate.current) {
       tackleProblem(problem, data, setInfoAlert);
     }
   }, [interestedUser, group]);
@@ -300,21 +322,29 @@ function GroupChatScreen({ navigation, route }) {
 
     if (!isUnmounting) {
       setDeletingMessage("");
+    }
+    if (!isUnmounting && canUpdate.current) {
       tackleProblem(problem, data, setInfoAlert);
     }
   }, [reply]);
 
-  const getCurrentMessages = useCallback(async () => {
+  const getCurrentMessages = async () => {
     const { ok, data, problem } = await groupsApi.getMessages(group._id);
-    if (ok && !isUnmounting) {
-      setGroupMessages(data.messages);
-      return setIsReady(true);
+    if (ok) {
+      if (!isUnmounting && canUpdate.current) {
+        setGroupMessages(data.messages);
+      }
+      if (!isUnmounting && canUpdate.current) {
+        return setIsReady(true);
+      }
     }
     if (!isUnmounting) {
       setIsReady(true);
+    }
+    if (!isUnmounting && canUpdate.current) {
       tackleProblem(problem, data, setInfoAlert);
     }
-  }, [groupMessages]);
+  };
 
   useEffect(() => {
     const listener1 = (data) => {
@@ -405,7 +435,7 @@ function GroupChatScreen({ navigation, route }) {
         addMeToActiveList();
         intervalId = setInterval(() => {
           addMeToActiveList();
-        }, 20000);
+        }, 15000);
       }
     }
 
@@ -416,7 +446,6 @@ function GroupChatScreen({ navigation, route }) {
     }
 
     return () => {
-      isUnmounting = true;
       removeMeFromActiveList();
       if (intervalId) {
         clearInterval(intervalId);
@@ -424,14 +453,18 @@ function GroupChatScreen({ navigation, route }) {
     };
   }, [isFocused, appStateVisible]);
 
+  const resetTypeTime = () => {
+    if (!isUnmounting) {
+      setCanShowTyping(false);
+    }
+  };
+
   const handleSetTyping = useCallback(async () => {
     if (canShowTyping) return;
 
     setCanShowTyping(true);
     setTimeout(() => {
-      if (!isUnmounting) {
-        setCanShowTyping(false);
-      }
+      resetTypeTime();
     }, 2000);
 
     const { ok, problem } = await groupsApi.setTyping(group._id, user._id);
@@ -508,7 +541,7 @@ function GroupChatScreen({ navigation, route }) {
       if (ok) {
         return;
       }
-      if (!isUnmounting) {
+      if (!isUnmounting && canUpdate.current) {
         tackleProblem(problem, data, setInfoAlert);
       }
     },
@@ -533,6 +566,8 @@ function GroupChatScreen({ navigation, route }) {
       }
       if (!isUnmounting) {
         setSendingMedia(false);
+      }
+      if (!isUnmounting && canUpdate.current) {
         tackleProblem(problem, data, setInfoAlert);
       }
     },
@@ -579,6 +614,8 @@ function GroupChatScreen({ navigation, route }) {
 
     if (!isUnmounting) {
       setChangingInvitePermission(false);
+    }
+    if (!isUnmounting && canUpdate.current) {
       tackleProblem(problem, data, setInfoAlert);
     }
   }, [group]);

@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useRef } from "react";
 import { FlatList } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import { useIsFocused } from "@react-navigation/native";
 
 import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
@@ -22,6 +23,9 @@ import ScreenSub from "../components/ScreenSub";
 function BlockedUsersScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const { tackleProblem } = apiActivity;
+  let canShowOnBlockedScreen = useRef(true);
+  let isUnmounting = false;
+  const isFocused = useIsFocused();
 
   // STATES
   const [apiProcessing, setApiProcessing] = useState(false);
@@ -46,6 +50,20 @@ function BlockedUsersScreen({ navigation }) {
     [user.blocked.length]
   );
 
+  // on mount and unmount
+
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
+  useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnBlockedScreen.current) {
+      canShowOnBlockedScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnBlockedScreen.current = false;
+    }
+  }, [isFocused]);
+
   // HAEDER ACTION
   const handleBackPress = useCallback(
     debounce(
@@ -63,14 +81,16 @@ function BlockedUsersScreen({ navigation }) {
     setRefreshing(true);
 
     const { ok, data, problem } = await myApi.getBlockList();
-    if (ok) {
+    if (ok && !isUnmounting) {
       await storeDetails(data.user);
       setUser(data.user);
       return setRefreshing(false);
     }
 
     setRefreshing(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (canShowOnBlockedScreen.current) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   const renderItem = useCallback(

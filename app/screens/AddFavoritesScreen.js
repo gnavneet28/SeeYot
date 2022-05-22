@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
 import { showMessage } from "react-native-flash-message";
@@ -43,6 +43,7 @@ function AddFavoritesScreen({ navigation }) {
   const { user } = useAuth();
   const isFocused = useIsFocused();
   let isUnmounting = false;
+  let canShowOnFavoritesScreen = useRef(true);
   const { tackleProblem } = apiActivity;
   const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
   // STATES
@@ -83,6 +84,14 @@ function AddFavoritesScreen({ navigation }) {
   useEffect(() => {
     return () => (isUnmounting = true);
   }, []);
+
+  useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnFavoritesScreen.current) {
+      canShowOnFavoritesScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnFavoritesScreen.current = false;
+    }
+  }, [isFocused]);
 
   // ON PAGE FOCUS ACTION
   const setUsersList = () => {
@@ -199,7 +208,9 @@ function AddFavoritesScreen({ navigation }) {
           });
         }
         setProcessing(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnFavoritesScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true

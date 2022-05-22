@@ -43,6 +43,7 @@ import ModalBackDrop from "../components/ModalBackDrop";
 function NotificationScreen({ navigation }) {
   const { user, setUser } = useAuth();
   let isUnmounting = false;
+  let canShowOnNotificationScreen = useRef(true);
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
 
@@ -93,6 +94,14 @@ function NotificationScreen({ navigation }) {
   useEffect(() => {
     return () => (isUnmounting = true);
   }, []);
+
+  useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnNotificationScreen.current) {
+      canShowOnNotificationScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnNotificationScreen.current = false;
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
@@ -148,7 +157,7 @@ function NotificationScreen({ navigation }) {
       return;
     }
 
-    if (!isUnmounting) {
+    if (!isUnmounting && canShowOnNotificationScreen.current) {
       tackleProblem(problem, data, setInfoAlert);
     }
   }, [user]);
@@ -191,7 +200,9 @@ function NotificationScreen({ navigation }) {
       return setClearNotification(false);
     }
     setClearNotification(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (canShowOnNotificationScreen.current) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   }, [user]);
 
   const handleSendMessage = (notification) => {
@@ -242,7 +253,9 @@ function NotificationScreen({ navigation }) {
           await storeDetails(data.user);
           return setUser(data.user);
         }
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnNotificationScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       5000,
       true

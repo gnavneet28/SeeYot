@@ -128,7 +128,7 @@ function GroupMessageInput({
         });
       })
       .catch((err) => {
-        console.log(err);
+        // console.log(err);
         //Error Loading Images
       });
   };
@@ -154,7 +154,7 @@ function GroupMessageInput({
         });
       })
       .catch((err) => {
-        console.log(err);
+        // console.log(err);
         //Error Loading Images
       });
   };

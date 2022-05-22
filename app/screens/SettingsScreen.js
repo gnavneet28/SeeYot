@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 import { Linking } from "react-native";
@@ -24,6 +24,7 @@ import defaultProps from "../utilities/defaultProps";
 function SettingsScreen({ navigation }) {
   const { setUser } = useAuth();
   const isFocused = useIsFocused();
+  let canShowOnSettingsScreen = useRef(true);
   let isUnmounting = false;
   const { tackleProblem } = apiActivity;
 
@@ -47,6 +48,14 @@ function SettingsScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnSettingsScreen.current) {
+      canShowOnSettingsScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnSettingsScreen.current = false;
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
     if (!isFocused && !isUnmounting && infoAlert.showInfoAlert === true) {
       setInfoAlert({
         infoAlertMessage: "",
@@ -66,7 +75,7 @@ function SettingsScreen({ navigation }) {
     setRemovingContact(true);
 
     const { ok, data, problem } = await usersApi.removeUserPhoneContacts();
-    if (ok) {
+    if (ok && !isUnmounting) {
       await storeDetails(data.user);
       setUser(data.user);
       setRemovingContact(false);
@@ -78,7 +87,9 @@ function SettingsScreen({ navigation }) {
     }
 
     setRemovingContact(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isUnmounting && canShowOnSettingsScreen.current) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
   // HEADER ACTIONS
   const handleBack = useCallback(

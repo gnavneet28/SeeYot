@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from "react";
 import { View, Linking } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -40,6 +46,7 @@ function HomeScreen({ navigation }) {
   dayjs.extend(relativeTime);
   const { user, setUser } = useAuth();
   let isUnmounting = false;
+  let canShowOnHomeScreen = useRef(true);
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
 
@@ -78,12 +85,21 @@ function HomeScreen({ navigation }) {
     if (problem) return;
   }, []);
 
+  // on page mount and unmount
   useEffect(() => {
     clearJunkData();
     updateCurrentUser();
 
     return () => (isUnmounting = true);
   }, []);
+
+  useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnHomeScreen.current) {
+      canShowOnHomeScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnHomeScreen.current = false;
+    }
+  }, [isFocused]);
 
   const userMessages = useMemo(() => {
     return user.messages ? user.messages : [];
@@ -286,7 +302,12 @@ function HomeScreen({ navigation }) {
             });
           }
           setSendingReply(false);
-          return tackleProblem(problem, data, setInfoAlert);
+
+          if (canShowOnHomeScreen.current) {
+            tackleProblem(problem, data, setInfoAlert);
+          }
+
+          return;
         }
 
         const { data, ok, problem } = await messagesApi.reply(
@@ -310,7 +331,9 @@ function HomeScreen({ navigation }) {
           });
         }
         setSendingReply(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnHomeScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true

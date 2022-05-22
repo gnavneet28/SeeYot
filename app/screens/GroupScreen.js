@@ -195,20 +195,28 @@ function GroupScreen({ navigation, route }) {
   };
 
   const handleRemoveFromMyGroupHistory = async () => {
-    setRemovingFromHistory(true);
+    if (!isUnmounting) {
+      setRemovingFromHistory(true);
+    }
     const { ok, data, problem } = await usersApi.removeGroupFromHistory(
       group._id
     );
-    if (ok) {
+    if (ok && !isUnmounting) {
       await storeDetails(data.user);
       setUser(data.user);
       setRemovingFromHistory(false);
       return setShowOptions(false);
     }
 
-    setRemovingFromHistory(false);
-    setShowOptions(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isUnmounting) {
+      setRemovingFromHistory(false);
+    }
+    if (!isUnmounting) {
+      setShowOptions(false);
+    }
+    if (!isUnmounting) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   useEffect(() => {
@@ -240,30 +248,42 @@ function GroupScreen({ navigation, route }) {
 
   // UPDATE GROUP PICTURE API ACTIONS
   const changeGroupPicture = async (picture) => {
-    setIsLoading(true);
+    if (!isUnmounting) {
+      setIsLoading(true);
+    }
     const { ok, data, problem } = await groupsApi.updateGroupPicture(
       picture,
       group._id
     );
-    if (ok) {
+    if (ok && !isUnmounting) {
       setGroup(data.group);
       return setIsLoading(false);
     }
 
-    setIsLoading(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isUnmounting) {
+      setIsLoading(false);
+    }
+    if (!isUnmounting) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   const removeGroupPicture = async () => {
-    setIsLoading(true);
+    if (!isUnmounting) {
+      setIsLoading(true);
+    }
     const { ok, data, problem } = await groupsApi.removeGroupPicture(group._id);
-    if (ok) {
+    if (ok && !isUnmounting) {
       setGroup(data.group);
       return setIsLoading(false);
     }
 
-    setIsLoading(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isUnmounting) {
+      setIsLoading(false);
+    }
+    if (!isUnmounting) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   const selectImage = () => {
@@ -301,13 +321,15 @@ function GroupScreen({ navigation, route }) {
   };
 
   const handleReportGroup = async () => {
-    setIsLoading(true);
+    if (!isUnmounting) {
+      setIsLoading(true);
+    }
 
     const { ok, data, problem } = await groupsApi.reportGroup(
       problemDescription,
       group._id
     );
-    if (ok) {
+    if (ok && !isUnmounting) {
       setIsLoading(false);
       setOpenReportModal(false);
       return setInfoAlert({
@@ -315,9 +337,15 @@ function GroupScreen({ navigation, route }) {
         showInfoAlert: true,
       });
     }
-    setIsLoading(false);
-    setOpenReportModal(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isUnmounting) {
+      setIsLoading(false);
+    }
+    if (!isUnmounting) {
+      setOpenReportModal(false);
+    }
+    if (!isUnmounting) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   const handleDeleteGroup = async () => {
@@ -333,7 +361,11 @@ function GroupScreen({ navigation, route }) {
 
     if (!isUnmounting) {
       setDeletingGroup(false);
+    }
+    if (!isUnmounting) {
       setShowDeleteGroupAlert(false);
+    }
+    if (!isUnmounting) {
       tackleProblem(problem, data, setInfoAlert);
     }
   };
@@ -341,18 +373,24 @@ function GroupScreen({ navigation, route }) {
   const handleOpenGroupInfoEditModal = () => setOpenGroupInfo(true);
 
   const handleUpdateGroupInfo = async (groupInfo) => {
-    setIsLoading(true);
+    if (!isUnmounting) {
+      setIsLoading(true);
+    }
     const { ok, data, problem } = await groupsApi.updateGroupInformation(
       groupInfo,
       group._id
     );
-    if (ok) {
+    if (ok && !isUnmounting) {
       setGroup(data.group);
       setOpenGroupInfo(false);
       return setIsLoading(false);
     }
-    setIsLoading(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isUnmounting) {
+      setIsLoading(false);
+    }
+    if (!isUnmounting) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   const createGroupInviteLink = (group) => {
@@ -393,7 +431,11 @@ function GroupScreen({ navigation, route }) {
     }
     if (!isUnmounting) {
       setOpenPasswordModal(false);
+    }
+    if (!isUnmounting) {
       setIsLoading(false);
+    }
+    if (!isUnmounting) {
       tackleProblem(problem, data, setInfoAlert);
     }
   };
@@ -714,7 +756,7 @@ const styles = ScaledSheet.create({
   chatButton: {
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.secondary,
-    borderRadius: "8@s",
+    borderRadius: "25@s",
     color: defaultStyles.colors.white,
     elevation: 5,
     fontSize: "14@s",
@@ -727,7 +769,7 @@ const styles = ScaledSheet.create({
   chatButtonIncognito: {
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.dark,
-    borderRadius: "8@s",
+    borderRadius: "25@s",
     color: defaultStyles.colors.white,
     elevation: 5,
     fontSize: "14@s",

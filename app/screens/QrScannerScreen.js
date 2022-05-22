@@ -33,6 +33,7 @@ import storeDetails from "../utilities/storeDetails";
 function QrScannerScreen({ navigation, route }) {
   const isFocused = useIsFocused();
   const cameraRef = useRef(null);
+  let canShowOnQrScreen = useRef(true);
   const { tackleProblem } = apiActivity;
   const { user, setUser } = useAuth();
 
@@ -147,9 +148,18 @@ function QrScannerScreen({ navigation, route }) {
     }
   }, [isFocused]);
 
+  // on page mount and unmount
   useEffect(() => {
     return () => (isUnmounting = true);
   }, []);
+
+  useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnQrScreen.current) {
+      canShowOnQrScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnQrScreen.current = false;
+    }
+  }, [isFocused]);
 
   const onSuccess = async (e) => {
     if (!checkingGroupName) {
@@ -193,8 +203,8 @@ function QrScannerScreen({ navigation, route }) {
         password: data.group.password ? data.group.password : "",
       });
     }
-    if (!isUnmounting) {
-      setCheckingGroupName(false);
+    setCheckingGroupName(false);
+    if (!isUnmounting && canShowOnQrScreen.current) {
       tackleProblem(problem, data, setInfoAlert);
     }
   };
@@ -246,8 +256,8 @@ function QrScannerScreen({ navigation, route }) {
       return setDeletingGroupFromHistory(false);
     }
 
-    if (!isUnmounting) {
-      setDeletingGroupFromHistory(false);
+    setDeletingGroupFromHistory(false);
+    if (!isUnmounting && canShowOnQrScreen.current) {
       tackleProblem(problem, data, setInfoAlert);
     }
   };

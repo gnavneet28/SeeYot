@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Share, Linking } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as SMS from "expo-sms";
@@ -29,6 +29,7 @@ import NavigationConstants from "../navigation/NavigationConstants";
 function AddContactsScreen({ navigation }) {
   const { user, setUser } = useAuth();
   const isFocused = useIsFocused();
+  let canShowOnAddContactsScreen = useRef(true);
   let isUnmounting = false;
   const { tackleProblem } = apiActivity;
 
@@ -99,16 +100,20 @@ function AddContactsScreen({ navigation }) {
       } else {
         if (!isReady || !isUnmounting) {
           setIsReady(true);
-          return setContactsAccessDeniedAlertVisibility(true);
+          if (canShowOnAddContactsScreen.current) {
+            return setContactsAccessDeniedAlertVisibility(true);
+          }
         }
       }
     } catch (error) {
       if (!isReady || !isUnmounting) {
         setIsReady(true);
-        return setInfoAlert({
-          infoAlertMessage: `${error}`,
-          showInfoAlert: true,
-        });
+        if (canShowOnAddContactsScreen.current) {
+          return setInfoAlert({
+            infoAlertMessage: `${error}`,
+            showInfoAlert: true,
+          });
+        }
       }
     }
   };
@@ -141,7 +146,9 @@ function AddContactsScreen({ navigation }) {
       }
     }
     if (!isReady || !isUnmounting) {
-      tackleProblem(problem, data, setInfoAlert);
+      if (canShowOnAddContactsScreen.current) {
+        tackleProblem(problem, data, setInfoAlert);
+      }
     }
   };
 
@@ -172,6 +179,14 @@ function AddContactsScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnAddContactsScreen.current) {
+      canShowOnAddContactsScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnAddContactsScreen.current = false;
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
     if (isFocused) {
       setUpPage();
     }
@@ -193,7 +208,7 @@ function AddContactsScreen({ navigation }) {
       await requestPermission();
       return setRefreshing(false);
     }
-  }, [isUnmounting]);
+  }, []);
 
   // HEADER ACTIONS
   const handleBack = useCallback(
@@ -253,9 +268,7 @@ function AddContactsScreen({ navigation }) {
           } else if (result.action === Share.dismissedAction) {
             // dismissed
           }
-        } catch (error) {
-          alert(error.message);
-        }
+        } catch (error) {}
       },
       5000,
       true

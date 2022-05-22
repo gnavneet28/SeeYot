@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { ScrollView, View, Platform } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import * as IAP from "expo-in-app-purchases";
 import crashlytics from "@react-native-firebase/crashlytics";
+import { useIsFocused } from "@react-navigation/native";
 
 import AppButton from "../components/AppButton";
 import AppHeader from "../components/AppHeader";
@@ -40,12 +41,36 @@ const plans = defaultProps.plans;
 
 function SubscriptionScreen({ navigation, route }) {
   const { tackleProblem } = apiActivity;
+  const isFocused = useIsFocused();
+  let isUnmounting = false;
+  let canShowOnVipSubscriptionScreen = useRef(true);
   const [products, setProducts] = useState([]);
   const [checkingVip, setCheckingVip] = useState("");
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
   });
+
+  // on page mount and unmount
+
+  useEffect(() => {
+    return () => (isUnmounting = true);
+  }, []);
+
+  useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnVipSubscriptionScreen.current) {
+      canShowOnVipSubscriptionScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnVipSubscriptionScreen.current = false;
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (!isFocused && !isUnmounting && infoAlert.showInfoAlert) {
+      setInfoAlert({ ...infoAlert, showInfoAlert: false });
+    }
+  }, [isFocused]);
+
   // HEADER ACTION
   const hanldeHeaderLeftPress = useCallback(
     debounce(
@@ -110,7 +135,9 @@ function SubscriptionScreen({ navigation, route }) {
         }
       }
       setCheckingVip("");
-      tackleProblem(problem, data, setInfoAlert);
+      if (!isUnmounting && canShowOnVipSubscriptionScreen.current) {
+        tackleProblem(problem, data, setInfoAlert);
+      }
     },
     5000,
     true
@@ -137,10 +164,6 @@ function SubscriptionScreen({ navigation, route }) {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.scrollView}>
-              {/* <DescriptionItem
-                description="You can search people outside your contacts."
-                name="account-search"
-              /> */}
               <DescriptionItem
                 description="You can send your thoughts to anyone outside your contacts."
                 name="thought-bubble"

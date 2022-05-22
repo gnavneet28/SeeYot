@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import { ScrollView, RefreshControl } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
@@ -32,6 +32,7 @@ let defaultStats = {
 function InsightsScreen({ navigation }) {
   const { user } = useAuth();
   const { tackleProblem } = apiActivity;
+  let canShowOnInsightsScreen = useRef(true);
   const isFocused = useIsFocused();
   // SUBSCRIPTION DETAILS
   let subscription = user.vip.subscription ? "Active" : "Inactive";
@@ -101,6 +102,14 @@ function InsightsScreen({ navigation }) {
     ],
   });
 
+  useEffect(() => {
+    if (isFocused && !canShowOnInsightsScreen.current) {
+      canShowOnInsightsScreen.current = true;
+    } else if (!isFocused) {
+      canShowOnInsightsScreen.current = false;
+    }
+  }, [isFocused]);
+
   const setUpPage = async () => {
     if (subscription !== "Active") return;
     const { ok, data, problem } = await usersApi.getMyStats();
@@ -112,7 +121,9 @@ function InsightsScreen({ navigation }) {
       return setIsReady(true);
     }
     setIsReady(true);
-    tackleProblem(problem, data, setInfoAlert);
+    if (canShowOnInsightsScreen.current) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   };
 
   const handleRefresh = () => {

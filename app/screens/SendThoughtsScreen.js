@@ -68,8 +68,9 @@ const defaultReply = {
 function SendThoughtsScreen({ navigation, route }) {
   const { user, setUser } = useAuth();
   const { recipient, from } = route.params;
-
   let isUnmounting = false;
+
+  let canShowOnThoughtsScreen = useRef(true);
 
   const { activeFor, setActiveFor } = useContext(ActiveForContext);
   const isFocused = useIsFocused();
@@ -80,7 +81,6 @@ function SendThoughtsScreen({ navigation, route }) {
   const { onboardingKeys, isInfoSeen, updateInfoSeen } = onBoarding;
 
   // STATES
-
   const [showHelp, setShowHelp] = useState(false);
   const [sendingMedia, setSendingMedia] = useState(false);
   const [mediaImage, setMediaImage] = useState("");
@@ -177,8 +177,10 @@ function SendThoughtsScreen({ navigation, route }) {
         });
       }
 
-      setShowAlert(false);
-      tackleProblem(problem, data, setInfoAlert);
+      if (canShowOnThoughtsScreen.current && !isUnmounting) {
+        setShowAlert(false);
+        tackleProblem(problem, data, setInfoAlert);
+      }
     },
     5000,
     true
@@ -200,10 +202,21 @@ function SendThoughtsScreen({ navigation, route }) {
     if (problem) return;
   };
 
-  // OnUnmount
+  //OnUnmount;
+
   useEffect(() => {
-    return () => (isUnmounting = true);
+    return () => {
+      isUnmounting = true;
+    };
   }, []);
+
+  useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnThoughtsScreen.current) {
+      canShowOnThoughtsScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnThoughtsScreen.current = false;
+    }
+  }, [isFocused]);
 
   // SETTING ACTIVECHATMESSAGES, ACTIVE CHAT TO NULL AND REMOVING THE ACTIVECHAT FOR USER
   useEffect(() => {
@@ -327,6 +340,7 @@ function SendThoughtsScreen({ navigation, route }) {
     [activeMessages.length, activeMessages, recipient._id]
   );
 
+  //TODO
   // SENDING THOUGHTS ACTION
   const handleSendThought = useCallback(
     debounce(
@@ -352,7 +366,7 @@ function SendThoughtsScreen({ navigation, route }) {
           isVip,
           hintProvided
         );
-        if (ok) {
+        if (ok && !isUnmounting && canShowOnThoughtsScreen.current) {
           if (recipient._id != user._id) {
             usersApi.updateReceivedThoughtsCount(recipient._id);
           }
@@ -379,7 +393,7 @@ function SendThoughtsScreen({ navigation, route }) {
           });
         }
 
-        if (data) {
+        if (data && !isUnmounting && canShowOnThoughtsScreen.current) {
           return setMessageActivity({
             message: data.message,
             processing: false,
@@ -388,13 +402,15 @@ function SendThoughtsScreen({ navigation, route }) {
             visible: true,
           });
         }
-        return setMessageActivity({
-          message: problem,
-          processing: false,
-          success: false,
-          echoMessage: null,
-          visible: true,
-        });
+        if (!isUnmounting && canShowOnThoughtsScreen.current) {
+          return setMessageActivity({
+            message: problem,
+            processing: false,
+            success: false,
+            echoMessage: null,
+            visible: true,
+          });
+        }
       },
       1000,
       true
@@ -409,7 +425,11 @@ function SendThoughtsScreen({ navigation, route }) {
         listRef.current.scrollToOffset({ offset: -300, animated: true });
       }
       stopCurrentUserTyping();
-      if (!isRecipientActive && !isUnmounting) {
+      if (
+        !isRecipientActive &&
+        !isUnmounting &&
+        canShowOnThoughtsScreen.current
+      ) {
         return setShowAlert(true);
       }
       let newId =
@@ -449,13 +469,13 @@ function SendThoughtsScreen({ navigation, route }) {
       const { ok, data, problem } = await usersApi.sendNewActiveMessage(
         newMessage
       );
-      if (ok) {
+      if (ok && !isUnmounting) {
         if (!data.isRecipientActive) {
           let newActiveList = activeFor.filter((u) => u != recipient._id);
           return setActiveFor(newActiveList);
         }
       }
-      if (!isUnmounting) {
+      if (!isUnmounting && canShowOnThoughtsScreen) {
         tackleProblem(problem, data, setInfoAlert);
       }
     },
@@ -501,7 +521,9 @@ function SendThoughtsScreen({ navigation, route }) {
       isVisible: false,
       deletingMessage: false,
     });
-    tackleProblem(problem, data, setInfoAlert);
+    if (canShowOnThoughtsScreen.current) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   }, [user, recipient._id, deleteMessageOption.messageToDelete]);
 
   //ON FOCUS PAGE ACTION
@@ -537,7 +559,9 @@ function SendThoughtsScreen({ navigation, route }) {
         }
 
         setUnfriendProcessing(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnThoughtsScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -560,7 +584,9 @@ function SendThoughtsScreen({ navigation, route }) {
           return setBlockProcessing(false);
         }
         setBlockProcessing(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnThoughtsScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -584,7 +610,9 @@ function SendThoughtsScreen({ navigation, route }) {
         }
 
         setBlockProcessing(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnThoughtsScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -606,7 +634,9 @@ function SendThoughtsScreen({ navigation, route }) {
         }
 
         setFavoriteProcessing(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnThoughtsScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -630,7 +660,9 @@ function SendThoughtsScreen({ navigation, route }) {
         }
 
         setFavoriteProcessing(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnThoughtsScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -665,7 +697,9 @@ function SendThoughtsScreen({ navigation, route }) {
 
   const handleSetChatInActive = async () => {
     if (!activeChat) return;
-    setActiveChat(false);
+    if (!isUnmounting) {
+      setActiveChat(false);
+    }
 
     const { ok } = await usersApi.makeCurrentUserInActiveFor(
       recipient._id,
@@ -676,15 +710,21 @@ function SendThoughtsScreen({ navigation, route }) {
     return;
   };
 
+  const resetTypeTime = () => {
+    if (!isUnmounting) {
+      setCanShowTyping(false);
+    }
+  };
+
   const handleSetTyping = useCallback(async () => {
     if (!isRecipientActive && !activeChat) return;
     if (canShowTyping) return;
 
     setCanShowTyping(true);
+
+    // This will not work when the page actually unmounts
     setTimeout(() => {
-      if (!isUnmounting) {
-        setCanShowTyping(false);
-      }
+      resetTypeTime();
     }, 2000);
 
     const { ok, problem } = await usersApi.setTyping(recipient._id);
@@ -714,9 +754,10 @@ function SendThoughtsScreen({ navigation, route }) {
         return setSendingMedia(false);
       }
       setSendingMedia(false);
-      if (problem) tackleProblem(problem, data, setInfoAlert);
+      if (problem && canShowOnThoughtsScreen.current)
+        tackleProblem(problem, data, setInfoAlert);
     },
-    [activeMessages, mediaImage]
+    [activeMessages, mediaImage, isUnmounting]
   );
 
   return (

@@ -39,6 +39,7 @@ import defaultProps from "../utilities/defaultProps";
 function ProfileScreen({ navigation }) {
   const { user, setUser, logOut } = useAuth();
   let isUnmounting = false;
+  let canShowOnProfileScreen = useRef(true);
   const isFocused = useIsFocused();
   const { tackleProblem } = apiActivity;
   // STATES
@@ -61,6 +62,14 @@ function ProfileScreen({ navigation }) {
   useEffect(() => {
     return () => (isUnmounting = true);
   }, []);
+
+  useEffect(() => {
+    if (isFocused && !isUnmounting && !canShowOnProfileScreen.current) {
+      canShowOnProfileScreen.current = true;
+    } else if (!isFocused && !isUnmounting) {
+      canShowOnProfileScreen.current = false;
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     if (!isFocused && !isUnmounting && isLoading === true) {
@@ -138,14 +147,19 @@ function ProfileScreen({ navigation }) {
     if (ok) {
       setIsLoading(false);
       setProblemDescription("");
-      return setInfoAlert({
-        infoAlertMessage: data.message,
-        showInfoAlert: true,
-      });
+      if (canShowOnProfileScreen.current) {
+        setInfoAlert({
+          infoAlertMessage: data.message,
+          showInfoAlert: true,
+        });
+      }
+      return;
     }
 
     setIsLoading(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (!isUnmounting && canShowOnProfileScreen.current) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   }, [problemDescription]);
 
   const handleLogOutPress = useCallback(async () => {
@@ -188,7 +202,10 @@ function ProfileScreen({ navigation }) {
             return setIsLoading(false);
           }
           setIsLoading(false);
-          tackleProblem(problem, data, setInfoAlert);
+          if (canShowOnProfileScreen.current) {
+            tackleProblem(problem, data, setInfoAlert);
+          }
+          return;
         }
 
         const { ok, data, problem } = await usersApi.removeCurrentUserPhoto();
@@ -198,7 +215,9 @@ function ProfileScreen({ navigation }) {
           return setIsLoading(false);
         }
         setIsLoading(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnProfileScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -221,7 +240,9 @@ function ProfileScreen({ navigation }) {
         }
 
         setChangingEcho(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnProfileScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -243,7 +264,9 @@ function ProfileScreen({ navigation }) {
         }
 
         setChangingTapEcho(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (canShowOnProfileScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       2000,
       true
@@ -272,7 +295,9 @@ function ProfileScreen({ navigation }) {
     }
     setOpenEditName(false);
     setSavingName(false);
-    tackleProblem(problem, data, setInfoAlert);
+    if (canShowOnProfileScreen.current) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
   }, [user, name]);
 
   // INVITE ACTION
