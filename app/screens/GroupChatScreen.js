@@ -47,6 +47,30 @@ import NavigationConstants from "../navigation/NavigationConstants";
 import echosApi from "../api/echos";
 import useAppState from "../hooks/useAppState";
 
+const notifyMessageCreatorIfNotActive = (
+  id,
+  groupName,
+  groupPassword,
+  messageMedia,
+  messageText,
+  replyMedia,
+  replyText,
+  activeUsers,
+  messageCreator
+) => {
+  if (!activeUsers.filter((u) => u._id == messageCreator._id).length) {
+    return groupsApi.replyMessageCreator(
+      id,
+      groupName,
+      groupPassword,
+      messageMedia,
+      messageText,
+      replyMedia,
+      replyText
+    );
+  }
+};
+
 const optionsVibrate = {
   enableVibrateFallback: true,
   ignoreAndroidSystemSettings: true,
@@ -539,13 +563,26 @@ function GroupChatScreen({ navigation, route }) {
         newMessage
       );
       if (ok) {
+        if (reply._id) {
+          notifyMessageCreatorIfNotActive(
+            reply.createdBy._id,
+            group.name,
+            group.password,
+            reply.media ? reply.media : "",
+            reply.message ? reply.message : "",
+            newMessage.media ? newMessage.media : "",
+            newMessage.message ? newMessage.message : "",
+            activeUsers,
+            reply.createdBy
+          );
+        }
         return;
       }
       if (!isUnmounting && canUpdate.current) {
         tackleProblem(problem, data, setInfoAlert);
       }
     },
-    [group._id, groupMessages, reply]
+    [group._id, groupMessages, reply, activeUsers]
   );
 
   const handleOpenInviteModal = useCallback(() => {

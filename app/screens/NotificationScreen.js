@@ -21,6 +21,10 @@ import ReplyModal from "../components/ReplyModal";
 import Screen from "../components/Screen";
 import SeeThought from "../components/SeeThought";
 import VipAdCard from "../components/VipAdCard";
+import GroupReplyModal from "../components/GroupReplyModal";
+import ScreenSub from "../components/ScreenSub";
+import ModalBackDrop from "../components/ModalBackDrop";
+import ModalFallBack from "../components/ModalFallback";
 
 import Constant from "../navigation/NavigationConstants";
 
@@ -37,8 +41,19 @@ import defaultStyles from "../config/styles";
 import myApi from "../api/my";
 
 import useAuth from "../auth/useAuth";
-import ScreenSub from "../components/ScreenSub";
-import ModalBackDrop from "../components/ModalBackDrop";
+
+let defaultGroupReply = {
+  createdBy: { _id: "", name: "", picture: "" },
+  data: {
+    groupName: "",
+    messageMedia: "",
+    messageText: "",
+    replyMedia: "",
+    replyText: "",
+    groupPassword: "",
+  },
+  isVisible: false,
+};
 
 function NotificationScreen({ navigation }) {
   const { user, setUser } = useAuth();
@@ -58,8 +73,10 @@ function NotificationScreen({ navigation }) {
     infoAlertMessage: "",
     showInfoAlert: false,
   });
-  const [apiProcessing, setApiProcessing] = useState(false);
+  const [apiProcessing, setApiProcessing] = useState("");
   const [showClearAllModal, setShowClearAllModal] = useState(false);
+  const [showGroupReplyModal, setShowGroupReplyModal] =
+    useState(defaultGroupReply);
 
   const [message, setMessage] = useState({
     isVisible: false,
@@ -130,6 +147,16 @@ function NotificationScreen({ navigation }) {
   useEffect(() => {
     if (!isFocused && !isUnmounting && showClearAllModal === true) {
       setShowClearAllModal(false);
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (!isFocused && !isUnmounting && showGroupReplyModal.isVisible) {
+      setShowGroupReplyModal({
+        createdBy: { _id: "", name: "", picture: "" },
+        data: { groupName: "", message: "", reply: "" },
+        isVisible: false,
+      });
     }
   }, [isFocused]);
 
@@ -218,11 +245,23 @@ function NotificationScreen({ navigation }) {
   }, []);
 
   const handleNotificationTapToVisitGroup = useCallback((notification) => {
+    setShowGroupReplyModal({});
     navigation.navigate(Constant.GROUP_NAVIGATOR, {
       screen: Constant.FIND_GROUP_SCREEN,
       params: {
         name: notification.data.name,
         password: notification.data.password ? notification.data.password : "",
+      },
+    });
+  }, []);
+
+  const handleVisitGroup = useCallback((name, password) => {
+    setShowGroupReplyModal(defaultGroupReply);
+    navigation.navigate(Constant.GROUP_NAVIGATOR, {
+      screen: Constant.FIND_GROUP_SCREEN,
+      params: {
+        name: name,
+        password: password,
       },
     });
   }, []);
@@ -236,6 +275,22 @@ function NotificationScreen({ navigation }) {
     return navigation.navigate(Constant.SEND_THOUGHT_SCREEN, {
       recipient: notification.createdBy,
       from: "",
+    });
+  }, []);
+
+  const handleTapToSeeGroupReply = useCallback((notification) => {
+    setShowGroupReplyModal({
+      isVisible: true,
+      data: notification.data,
+      createdBy: notification.createdBy,
+    });
+  }, []);
+
+  const handleSendThoughtsPress = useCallback((user) => {
+    setShowGroupReplyModal(defaultGroupReply);
+    navigation.navigate(Constant.SEND_THOUGHT_SCREEN, {
+      recipient: user,
+      from: "Notification",
     });
   }, []);
 
@@ -285,6 +340,10 @@ function NotificationScreen({ navigation }) {
     setShowClearAllModal(false);
   };
 
+  const handleCloseGroupReplyModal = useCallback(() => {
+    setShowGroupReplyModal(defaultGroupReply);
+  }, []);
+
   return (
     <>
       <Screen style={styles.container}>
@@ -314,12 +373,11 @@ function NotificationScreen({ navigation }) {
               onRefresh={handleRefresh}
               refreshing={refreshing}
               tapToVisitGroup={handleNotificationTapToVisitGroup}
-              //style={styles.list}
+              tapToSeeGroupReply={handleTapToSeeGroupReply}
             />
           </ApiContext.Provider>
         </ScreenSub>
       </Screen>
-      {message.isVisible ? <View style={styles.modalFallback} /> : null}
       <ReplyModal message={message} handleCloseModal={handleCloseModal} />
       <AppModal
         animationType="none"
@@ -348,11 +406,23 @@ function NotificationScreen({ navigation }) {
           </View>
         </ModalBackDrop>
       </AppModal>
+
       <SeeThought
         visible={visible}
         onClose={handleCloseThoughtModal}
         thought={thought}
       />
+      <GroupReplyModal
+        onVisitGroup={handleVisitGroup}
+        onClose={handleCloseGroupReplyModal}
+        data={showGroupReplyModal.data}
+        visible={showGroupReplyModal.isVisible}
+        createdBy={showGroupReplyModal.createdBy}
+        onSendThoughtPress={handleSendThoughtsPress}
+      />
+      {visible || showGroupReplyModal.isVisible || message.isVisible ? (
+        <ModalFallBack />
+      ) : null}
       <InfoAlert
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}

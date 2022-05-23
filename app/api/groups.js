@@ -98,6 +98,27 @@ const updatePassword = (id, password, qrCodeLink) =>
 const deleteMessage = (id, _id) =>
   apiClient.delete(endPoint + "/deleteMessage/" + id, { _id });
 
+const notifyForNewVisitor = (id, groupName) =>
+  apiClient.put(endPoint + "/notify/creator/newVisitor/" + id, { groupName });
+
+const replyMessageCreator = (
+  id,
+  groupName,
+  groupPassword,
+  messageMedia,
+  messageText,
+  replyMedia,
+  replyText
+) =>
+  apiClient.put(endPoint + "/notify/replied/" + id, {
+    groupName,
+    groupPassword,
+    messageMedia,
+    messageText,
+    replyMedia,
+    replyText,
+  });
+
 export default {
   addActive,
   blockUser,
@@ -112,8 +133,10 @@ export default {
   getMyGroups,
   inviteUser,
   modifyInvitePermission,
+  notifyForNewVisitor,
   removeActive,
   removeGroupPicture,
+  replyMessageCreator,
   reportGroup,
   sendNewGroupMessage,
   setTyping,

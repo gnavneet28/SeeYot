@@ -30,6 +30,7 @@ import defaultStyles from "../config/styles";
 import ApiProcessingContainer from "./ApiProcessingContainer";
 
 let defaultNotification = {
+  _id: "",
   type: "",
   message: "",
   createdAt: Date.now(),
@@ -39,14 +40,15 @@ let defaultNotification = {
 };
 
 function NotificationCard({
-  onTapToSeePress,
+  onTapToSeePress = () => {},
   notification = defaultNotification,
-  tapToSeeMessage,
-  tapToSendMessage,
-  tapToSeeMatchedThought,
-  onLongPress,
+  tapToSeeMessage = () => {},
+  tapToSendMessage = () => {},
+  tapToSeeMatchedThought = () => {},
+  tapToSeeGroupReply = () => {},
+  onLongPress = () => {},
   index,
-  tapToVisitGroup,
+  tapToVisitGroup = () => {},
 }) {
   dayjs.extend(relativeTime);
   let currentDate = new Date();
@@ -55,8 +57,8 @@ function NotificationCard({
   const { apiProcessing, setApiProcessing } = useContext(ApiContext);
   const [addingUser, setAddingUser] = useState(false);
   const { tackleProblem } = apiActivity;
+  let isUnmounting = false;
 
-  const [processing, setProcessing] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
     showInfoAlert: false,
@@ -83,16 +85,16 @@ function NotificationCard({
   }
 
   useEffect(() => {
-    setProcessing(false);
-
-    return () => setProcessing(false);
-  }, [notification._id]);
+    return () => (isUnmounting = true);
+  }, []);
 
   // ADD CONTACTS ACTION
   const handleAddPress = useCallback(
     debounce(
       async () => {
-        setAddingUser(true);
+        if (!isUnmounting) {
+          setAddingUser(true);
+        }
         const { ok, data, problem } = await usersApi.addContact(
           notification.data.phoneNumber,
           savedName
@@ -101,10 +103,15 @@ function NotificationCard({
         if (ok) {
           await storeDetails(data.user);
           setUser(data.user);
-          return setAddingUser(false);
+          if (!isUnmounting) {
+            setAddingUser(false);
+          }
+          return;
         }
-        setAddingUser(false);
-        tackleProblem(problem, data, setInfoAlert);
+        if (!isUnmounting) {
+          setAddingUser(false);
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -121,7 +128,9 @@ function NotificationCard({
     return notification.type == "Matched" ||
       notification.type == "Replied" ||
       notification.type == "ActiveChat" ||
-      notification.type == "Add"
+      notification.type == "Add" ||
+      (notification.type == "GroupChatInvite" && notification.createdBy) ||
+      notification.type == "GroupReply"
       ? notification.createdBy.picture
         ? notification.createdBy.picture
         : "user"
@@ -131,23 +140,22 @@ function NotificationCard({
   const handleDeletePress = useCallback(
     debounce(
       async () => {
-        setApiProcessing(true);
-        setProcessing(true);
+        setApiProcessing(notification._id);
 
         const { ok, data, problem } = await myApi.deleteNotification(
           notification._id
         );
 
         if (ok) {
-          setProcessing(false);
           await storeDetails(data.user);
           setUser(data.user);
-          return setApiProcessing(false);
+          return setApiProcessing("");
         }
 
-        setProcessing(false);
-        setApiProcessing(false);
-        tackleProblem(problem, data, setInfoAlert);
+        setApiProcessing("");
+        if (!isUnmounting) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
       },
       1000,
       true
@@ -182,6 +190,9 @@ function NotificationCard({
     if (notification.type == "GroupChatInvite") {
       return () => tapToVisitGroup(notification);
     }
+    if (notification.type == "GroupReply") {
+      return () => tapToSeeGroupReply(notification);
+    }
 
     return () => null;
   };
@@ -193,7 +204,8 @@ function NotificationCard({
       notification.type == "ActiveChat" ||
       notification.type == "Matched" ||
       notification.type == "Add" ||
-      notification.type == "Unmatched"
+      notification.type == "Unmatched" ||
+      notification.type == "GroupReply"
     )
       return 0.9;
     return 0.7;
@@ -262,7 +274,7 @@ function NotificationCard({
               marginLeft: 0,
             }}
             apiAction={"true"}
-            processing={processing}
+            processing={apiProcessing == notification._id}
             onPress={apiProcessing ? doNull : handleDeletePress}
           />
         )}
