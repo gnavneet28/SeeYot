@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -8,6 +8,7 @@ import AccessDeniedScreen from "./app/screens/AccessDeniedScreen";
 import FlashMessage from "react-native-flash-message";
 import jwtDecode from "jwt-decode";
 import { SocketContext, socket } from "./app/api/socketClient";
+import crashlytics from "@react-native-firebase/crashlytics";
 
 import getDetails from "./app/utilities/getDetails";
 
@@ -30,6 +31,13 @@ import useJailBreak from "./app/hooks/useJailBreak";
 import Onboarding from "./app/components/Onboarding";
 import OtpContext from "./app/utilities/otpContext";
 
+async function onSignIn(user) {
+  return Promise.all([
+    crashlytics().setUserId(user._id),
+    crashlytics().setAttribute("phoneNumber", user.phoneNumber.toString()),
+  ]);
+}
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [state, setState] = useState({
@@ -39,6 +47,10 @@ export default function App() {
   const [otpFailed, setOtpFailed] = useState(false);
   const jailBroken = useJailBreak();
   const [onboarded, setOnboarded] = useState(false);
+
+  useEffect(() => {
+    crashlytics().log("App mounted.");
+  }, []);
 
   const checkOnBoard = async () => {
     let userOnboarded = await cache.get("onboarded");
@@ -50,8 +62,10 @@ export default function App() {
     if (token) {
       let decodedToken = jwtDecode(token);
       const cachedUser = await getDetails();
-      if (cachedUser && cachedUser._id == decodedToken._id)
+      if (cachedUser && cachedUser._id == decodedToken._id) {
+        onSignIn(cachedUser);
         return setUser(cachedUser);
+      }
       return setUser(null);
     }
     return setUser(null);
