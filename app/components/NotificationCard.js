@@ -37,6 +37,11 @@ let defaultNotification = {
   data: {
     phoneNumber: parseInt(""),
   },
+  createdBy: {
+    _id: "",
+    name: "",
+    picture: "",
+  },
 };
 
 function NotificationCard({

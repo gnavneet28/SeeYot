@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+} from "react";
 import { FlatList } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
