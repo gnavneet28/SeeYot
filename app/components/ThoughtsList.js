@@ -52,7 +52,7 @@ function ThoughtsList({
         inverted={true}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
+        // removeClippedSubviews={true}
         maxToRenderPerBatch={15}
         windowSize={7}
         decelerationRate={0.78}

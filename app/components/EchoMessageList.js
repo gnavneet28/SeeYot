@@ -1,5 +1,5 @@
 import React, { useCallback, memo, useRef } from "react";
-import { View, FlatList, Animated } from "react-native";
+import { View, Animated } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import EchoMessageCard from "./EchoMessageCard";
@@ -54,7 +54,7 @@ function EchoMessageList({ echoMessages = [], onEchoMessagePress, style }) {
         data={getData()}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
-        removeClippedSubviews={true}
+        // removeClippedSubviews={true}
         getItemLayout={getItemLayout}
         showsVerticalScrollIndicator={false}
         maxToRenderPerBatch={15}

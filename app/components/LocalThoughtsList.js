@@ -42,7 +42,7 @@ function LocalThoughtsList({
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
+        // removeClippedSubviews={true}
         maxToRenderPerBatch={15}
         windowSize={10}
       />
