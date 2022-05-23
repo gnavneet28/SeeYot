@@ -8,7 +8,12 @@ import ApiProcessingContainer from "./ApiProcessingContainer";
 
 import defaultStyles from "../config/styles";
 
-function GroupHistoryCard({ group, onPress, onDeletePress, deletingGroup }) {
+function GroupHistoryCard({
+  group = { name: "", _id: "" },
+  onPress,
+  onDeletePress,
+  deletingGroup,
+}) {
   return (
     <View style={styles.container}>
       <AppText onPress={onPress} numberOfLines={2} style={styles.groupName}>
@@ -16,7 +21,7 @@ function GroupHistoryCard({ group, onPress, onDeletePress, deletingGroup }) {
       </AppText>
       <ApiProcessingContainer
         style={styles.iconContainer}
-        processing={deletingGroup}
+        processing={deletingGroup == group._id}
         size={scale(12)}
       >
         <AntDesign

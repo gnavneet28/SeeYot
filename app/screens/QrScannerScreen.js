@@ -246,17 +246,17 @@ function QrScannerScreen({ navigation, route }) {
 
   const removeFromGroupHistory = async (h) => {
     if (!isUnmounting) {
-      setDeletingGroupFromHistory(true);
+      setDeletingGroupFromHistory(h._id);
     }
 
     const { ok, data, problem } = await usersApi.removeGroupFromHistory(h._id);
     if (ok && !isUnmounting) {
       await storeDetails(data.user);
       setUser(data.user);
-      return setDeletingGroupFromHistory(false);
+      return setDeletingGroupFromHistory("");
     }
 
-    setDeletingGroupFromHistory(false);
+    setDeletingGroupFromHistory("");
     if (!isUnmounting && canShowOnQrScreen.current) {
       tackleProblem(problem, data, setInfoAlert);
     }
