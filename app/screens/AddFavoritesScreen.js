@@ -103,7 +103,7 @@ function AddFavoritesScreen({ navigation }) {
     let newList = [...userContacts, ...userFavorites];
 
     for (let user of newList) {
-      if (!finalList.filter((i) => i._id == user._id)[0]) {
+      if (!finalList.filter((i) => i._id == user._id).length) {
         finalList.push(user);
       }
     }

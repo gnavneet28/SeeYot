@@ -70,7 +70,7 @@ function GroupBlockedCard({
     [blockedUser._id, group]
   );
 
-  const isBlocked = blockedUsers.filter((b) => b._id == blockedUser._id)[0];
+  const isBlocked = blockedUsers.filter((b) => b._id == blockedUser._id).length;
 
   return (
     <View style={[styles.container, style]}>

@@ -117,7 +117,7 @@ function SendThoughtsScreen({ navigation, route }) {
   const [hint, setHint] = useState("");
   const [canShowTyping, setCanShowTyping] = useState(false);
 
-  let isRecipientActive = activeFor.filter((u) => u == recipient._id)[0];
+  let isRecipientActive = activeFor.filter((u) => u == recipient._id).length;
 
   useEffect(() => {
     const listener = async (data) => {
@@ -315,17 +315,17 @@ function SendThoughtsScreen({ navigation, route }) {
   // INFORMATION IN NEED
 
   let isBlocked = useMemo(
-    () => user.blocked.filter((b) => b._id == recipient._id)[0],
+    () => user.blocked.filter((b) => b._id == recipient._id).length,
     [recipient._id, user, isFocused]
   );
 
   let inFavorites = useMemo(
-    () => user.favorites.filter((f) => f._id == recipient._id)[0],
+    () => user.favorites.filter((f) => f._id == recipient._id).length,
     [recipient._id, user, isFocused]
   );
 
   let inContacts = useMemo(
-    () => user.contacts.filter((c) => c._id == recipient._id)[0],
+    () => user.contacts.filter((c) => c._id == recipient._id).length,
     [recipient._id, user, isFocused]
   );
 

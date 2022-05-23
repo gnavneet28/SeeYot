@@ -45,7 +45,7 @@ function FavoriteMessageReplyModal({
 
   const { activeFor } = useContext(ActiveForContext);
 
-  let isRecipientActive = activeFor.filter((u) => u == user._id)[0];
+  let isRecipientActive = activeFor.filter((u) => u == user._id).length;
 
   const doNull = () => {};
 

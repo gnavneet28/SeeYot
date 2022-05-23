@@ -36,7 +36,7 @@ function ContactCard({
 
   if (!user.name) return <View style={styles.emptyContacts} />;
 
-  let isRecipientActive = activeFor.filter((u) => u == user._id)[0];
+  let isRecipientActive = activeFor.filter((u) => u == user._id).length;
 
   return (
     <View style={[styles.container, style]}>

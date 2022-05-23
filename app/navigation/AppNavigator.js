@@ -180,7 +180,7 @@ function AppNavigator(props) {
     socket.on(`deletedThought${user._id}`, listener4);
 
     const listener5 = (data) => {
-      if (activeFor.filter((u) => u == data._id)[0]) return;
+      if (activeFor.filter((u) => u == data._id).length) return;
       setActiveFor([...activeFor, data._id]);
     };
 

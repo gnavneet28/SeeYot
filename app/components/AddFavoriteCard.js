@@ -61,7 +61,7 @@ function AddFavoriteCard({
   const inFavourites =
     favorites &&
     favorites.length > 0 &&
-    favorites.filter((f) => f._id == favoriteUser._id)[0];
+    favorites.filter((f) => f._id == favoriteUser._id).length;
 
   // INFO ALERT ACTIONS
   const handleCloseInfoAlert = useCallback(async () => {

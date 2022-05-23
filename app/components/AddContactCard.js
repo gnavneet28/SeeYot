@@ -37,7 +37,7 @@ function AddContactCard({ contact, onInvitePress, style }) {
   const inContacts =
     contacts &&
     contacts.length > 0 &&
-    contacts.filter((c) => c.phoneNumber == contact.phoneNumber)[0];
+    contacts.filter((c) => c.phoneNumber == contact.phoneNumber).length;
 
   // INFO ALERT ACTIONS
   const handleCloseInfoAlert = useCallback(async () => {

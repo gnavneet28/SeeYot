@@ -81,7 +81,8 @@ function NotificationCard({
     inContacts =
       contacts &&
       contacts.length > 0 &&
-      contacts.filter((c) => c.phoneNumber == notification.data.phoneNumber)[0];
+      contacts.filter((c) => c.phoneNumber == notification.data.phoneNumber)
+        .length;
   }
 
   useEffect(() => {
