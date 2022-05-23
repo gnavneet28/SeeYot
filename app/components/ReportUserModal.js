@@ -85,7 +85,7 @@ function ReportUserModal({
                   },
                 ]}
                 subStyle={styles.submitGroupInfoButtonSub}
-                title="Save"
+                title="Report"
               />
             </View>
           </View>

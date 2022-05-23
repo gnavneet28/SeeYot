@@ -126,7 +126,11 @@ function MyGroupCard({
                 />
               </View>
               <View style={styles.categoryContainer}>
-                <AppText style={styles.categoryText}>{group.category}</AppText>
+                <AppText
+                  style={[styles.categoryText, { marginRight: scale(5) }]}
+                >
+                  {group.category}
+                </AppText>
                 <AppText style={styles.categoryText}>
                   {group.subCategory}
                 </AppText>
@@ -172,6 +176,7 @@ const styles = ScaledSheet.create({
     marginBottom: "3@s",
     overflow: "hidden",
     width: "95%",
+    // justifyContent: "space-between",
   },
   groupName: {
     backgroundColor: defaultStyles.colors.yellow_Variant,
@@ -209,23 +214,24 @@ const styles = ScaledSheet.create({
     alignItems: "flex-start",
     marginTop: "10@s",
     paddingHorizontal: "5@s",
+    flexDirection: "row",
   },
   categoryText: {
-    backgroundColor: defaultStyles.colors.white,
-    borderColor: defaultStyles.colors.secondary,
+    backgroundColor: defaultStyles.colors.dark_Variant,
+    borderColor: defaultStyles.colors.light,
     borderRadius: "5@s",
     borderWidth: 1,
-    color: defaultStyles.colors.dark,
+    color: defaultStyles.colors.white,
     fontSize: "12@s",
     marginBottom: "2@s",
     paddingHorizontal: "5@s",
   },
   groupFooter: {
-    alignItems: "center",
-    flexDirection: "row",
+    alignItems: "flex-start",
+    flex: 1,
     height: "35@s",
-    justifyContent: "flex-start",
-    marginTop: "10@s",
+    justifyContent: "flex-end",
+    paddingBottom: "5@s",
     paddingHorizontal: "5@s",
   },
   visitGroupButton: {

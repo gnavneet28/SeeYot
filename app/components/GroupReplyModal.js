@@ -157,8 +157,11 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   groupName: {
-    backgroundColor: defaultStyles.colors.yellow_Variant,
+    backgroundColor: defaultStyles.colors.dark,
+    borderColor: defaultStyles.colors.yellow_Variant,
     borderRadius: "15@s",
+    borderWidth: 1,
+    color: defaultStyles.colors.white,
     fontSize: "13@s",
     marginBottom: "5@s",
     maxWidth: "90%",
@@ -183,6 +186,7 @@ const styles = ScaledSheet.create({
   },
   replyCreatorDetailsContainer: {
     flexDirection: "row",
+    marginBottom: "10@s",
     paddingHorizontal: "10@s",
     paddingLeft: "40@s",
     paddingVertical: "5@s",

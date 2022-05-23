@@ -228,7 +228,7 @@ function SendOtpScreen({ navigation }) {
             iterationDelay={2}
           >
             <FontAwesome5
-              color={defaultStyles.colors.white}
+              color={defaultStyles.colors.secondary}
               name="mobile-alt"
               size={scale(40)}
             />
@@ -436,7 +436,7 @@ const styles = ScaledSheet.create({
   },
   headerIconContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.tomato,
+    backgroundColor: defaultStyles.colors.yellow_Variant,
     borderBottomLeftRadius: "50@s",
     borderBottomRightRadius: "50@s",
     borderTopLeftRadius: "5@s",

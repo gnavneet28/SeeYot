@@ -84,7 +84,7 @@ function ReportModal({
                   },
                 ]}
                 subStyle={styles.submitProblemButtonSub}
-                title="Submit"
+                title="Report"
               />
             </View>
           </View>
