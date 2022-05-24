@@ -52,7 +52,7 @@ const authorizePhoneContactsUpdate = async () => {
   let currentDate = Date.now();
   dayjs.extend(relativeTime);
 
-  const TIME_LIMIT = 12;
+  const TIME_LIMIT = 48;
 
   let phoneContactsUpdate = await asyncStorage.get(
     DataConstants.PHONE_CONTACTS_UPDATE
