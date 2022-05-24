@@ -1,26 +1,66 @@
-import React from "react";
+import React, { useState, useEffect, memo } from "react";
 import { View, Platform } from "react-native";
 import Constants from "expo-constants";
 import { ScaledSheet } from "react-native-size-matters";
+import NetInfo from "@react-native-community/netinfo";
 
 import AppText from "./AppText";
-import useConnection from "../hooks/useConnection";
+import AppButton from "./AppButton";
 
 import defaultStyles from "../config/styles";
 
 function OfflineNotice(props) {
-  const isConnected = useConnection();
+  const [isConnected, setIsConnected] = useState(true);
+
+  let timeIntervalId;
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      if (state.isConnected && state.isInternetReachable === true) {
+        setIsConnected(true);
+      } else {
+        setIsConnected(false);
+      }
+    });
+
+    // Unsubscribe
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!isConnected) {
+      timeIntervalId = setInterval(() => {
+        handleRefresh();
+      }, 2000);
+    }
+
+    return () => clearInterval(timeIntervalId);
+  }, [isConnected]);
+
+  const handleRefresh = () =>
+    NetInfo.fetch().then((state) => {
+      if (state.isConnected && state.isInternetReachable === true) {
+        setIsConnected(true);
+      } else {
+        setIsConnected(false);
+      }
+    });
 
   if (!isConnected)
     return (
       <View style={styles.container}>
         <AppText style={styles.text}>
-          Internet connection is either not available or not reachable! Try
-          switching on and off your internet connection if you think you have
-          active internet connection.
+          Internet connection is either not available or not reachable!
         </AppText>
 
-        <AppText style={styles.retry}>Retry</AppText>
+        <AppButton
+          onPress={handleRefresh}
+          subStyle={styles.retrySub}
+          title="Retry"
+          style={styles.retry}
+        >
+          Retry
+        </AppButton>
       </View>
     );
 
@@ -31,8 +71,8 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     alignSelf: "center",
     backgroundColor: defaultStyles.colors.primary,
-    borderBottomLeftRadius: "15@s",
-    borderBottomRightRadius: "15@s",
+    borderBottomLeftRadius: "5@s",
+    borderBottomRightRadius: "5@s",
     elevation: Platform.OS === "android" ? 1 : 0,
     justifyContent: "center",
     paddingVertical: "3@s",
@@ -44,11 +84,13 @@ const styles = ScaledSheet.create({
   retry: {
     backgroundColor: defaultStyles.colors.white,
     borderRadius: "5@s",
-    color: defaultStyles.colors.dark,
+    height: "25@s",
     marginBottom: "10@s",
     marginTop: "5@s",
-    paddingHorizontal: "10@s",
-    paddingVertical: "5@s",
+    width: "70@s",
+  },
+  retrySub: {
+    color: defaultStyles.colors.dark,
   },
   text: {
     color: defaultStyles.colors.white,
@@ -58,4 +100,4 @@ const styles = ScaledSheet.create({
   },
 });
 
-export default OfflineNotice;
+export default memo(OfflineNotice);
