@@ -220,7 +220,7 @@ function AppNavigator(props) {
 
         for (let key in params) {
           if (key == "a") {
-            name = params[key].replace("+", " ");
+            name = params[key].replace(new RegExp("\\+", "g"), " ");
           } else if (key == "b") {
             password = params[key];
           }
@@ -262,12 +262,11 @@ function AppNavigator(props) {
 
             for (let key in params) {
               if (key == "a") {
-                name = params[key].replace("+", " ");
+                name = params[key].replace(new RegExp("\\+", "g"), " ");
               } else if (key == "b") {
                 password = params[key];
               }
             }
-
             return navigation.navigate(Constant.GROUP_NAVIGATOR, {
               screen: Constant.FIND_GROUP_SCREEN,
               params: {

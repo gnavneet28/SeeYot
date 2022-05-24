@@ -92,7 +92,9 @@ function CreateGroupModal({ visible, onRequestClose, onCreate }) {
     if (nameRequestInfo) {
       setNameRequestInfo("");
     }
-    setNameInput(text);
+    if (/^[^!-\/:-@\[-`{-~]+$/.test(text) || text === "") {
+      setNameInput(text.replace(/[^a-zA-Z0-9 ]/gm, ""));
+    }
   };
 
   useEffect(() => {
@@ -177,8 +179,8 @@ function CreateGroupModal({ visible, onRequestClose, onCreate }) {
                 interact within. You can create public as well as private
                 groups. Joining any group will share your name and display
                 picture with people in that group. Every group has a recycle
-                period of 24 hours, means anything shared within the group will
-                be auto deleted after every 24 hours.
+                period of 1 week, means anything shared within the group will be
+                auto deleted at the end of every week.
               </AppText>
               <View style={styles.selectNameContainer}>
                 <TextInput

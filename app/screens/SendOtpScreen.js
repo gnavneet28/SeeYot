@@ -97,6 +97,12 @@ function SendOtpScreen({ navigation }) {
     }
   }, [isFocused]);
 
+  const handleInputName = (text) => {
+    if (/^[^!-\/:-@\[-`{-~]+$/.test(text) || text === "") {
+      setName(text.replace(/[^a-zA-Z0-9 ]/gm, ""));
+    }
+  };
+
   // TODO: google verification
 
   // const setAuthToken = async () => {
@@ -167,7 +173,7 @@ function SendOtpScreen({ navigation }) {
       setIsLoading(false);
       return logIn(data);
     }
-
+    setValue("");
     setIsLoading(false);
     tackleProblem(problem, data, setInfoAlert);
   };
@@ -256,7 +262,7 @@ function SendOtpScreen({ navigation }) {
                   },
                 ]}
                 placeholderTextColor={defaultStyles.colors.placeholder}
-                onChangeText={setName}
+                onChangeText={handleInputName}
                 value={name}
                 textContentType="name"
               />
