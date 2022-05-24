@@ -370,6 +370,10 @@ function GroupChatScreen({ navigation, route }) {
     }
   };
 
+  const stopCurrentUserTyping = useCallback(async () => {
+    groupsApi.stopTyping(group._id, user._id);
+  }, [group._id, isFocused]);
+
   useEffect(() => {
     const listener1 = (data) => {
       if (data.newMessage.createdBy._id != user._id) {
@@ -526,7 +530,7 @@ function GroupChatScreen({ navigation, route }) {
         translateX.value = withTiming(800);
         listRef.current.scrollToOffset({ offset: -300, animated: true });
       }
-
+      stopCurrentUserTyping();
       let newId =
         Date.now().toString(36) + Math.random().toString(36).substring(2);
       let newMessage = media
