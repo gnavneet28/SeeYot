@@ -27,7 +27,8 @@
       "releaseChannel": "production",
       "env": {
         "PROD_API_URL": "https://seeyot-backend.herokuapp.com/",
-        "PROD_AUTH_TOKEN": "x-auth-token"
+        "PROD_AUTH_TOKEN": "x-auth-token",
+        "PROD_AD_ID": "ca-app-pub-3410683473491694/6456893959"
       }
     }
   },
