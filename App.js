@@ -48,10 +48,6 @@ export default function App() {
   const jailBroken = useJailBreak();
   const [onboarded, setOnboarded] = useState(false);
 
-  useEffect(() => {
-    crashlytics().log("App mounted.");
-  }, []);
-
   const checkOnBoard = async () => {
     let userOnboarded = await cache.get("onboarded");
     if (userOnboarded) return setOnboarded(true);

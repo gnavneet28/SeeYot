@@ -23,7 +23,7 @@
       "releaseChannel": "staging"
     },
     "production": {
-      "node": "16.14.0",
+      "node": "16.15.0",
       "releaseChannel": "production",
       "env": {
         "PROD_API_URL": "https://seeyot-backend.herokuapp.com/",
