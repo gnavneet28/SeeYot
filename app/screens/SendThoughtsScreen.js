@@ -6,12 +6,7 @@ import React, {
   useState,
   useRef,
 } from "react";
-import {
-  Keyboard,
-  TouchableWithoutFeedback,
-  View,
-  TextInput,
-} from "react-native";
+import { View, TextInput } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { ScaledSheet } from "react-native-size-matters";
 import { showMessage } from "react-native-flash-message";
@@ -120,11 +115,10 @@ function SendThoughtsScreen({ navigation, route }) {
   let isRecipientActive = activeFor.filter((u) => u == recipient._id).length;
 
   useEffect(() => {
-    const listener = async (data) => {
+    const listener = (data) => {
       let modifiedMessage = { ...data.newMessage, seen: true };
-      activeMessages.push(modifiedMessage);
-      setActiveMessages([...activeMessages]);
-      await usersApi.setSeen(data.newMessage.secondaryId);
+      setActiveMessages([...activeMessages, modifiedMessage]);
+      usersApi.setSeen(data.newMessage.secondaryId);
     };
     socket.on(`newActiveMessage${user._id}`, listener);
 
@@ -762,98 +756,94 @@ function SendThoughtsScreen({ navigation, route }) {
 
   return (
     <>
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <Screen style={styles.container}>
-          <ThoughtsScreenHeader
-            activeChat={activeChat}
-            imageUrl={recipient.picture}
-            isRecipientActive={isRecipientActive}
-            name={recipient.name}
-            onActiveChatModePress={handleSetChatActive}
-            onOptionPress={handleOptionsPress}
-            onPress={handleBack}
-            onThoughtsModePress={handleSetChatInActive}
-          />
-          <ScreenSub style={styles.screenSub}>
-            <ChatBackgroundSelector activeChat={activeChat}>
-              <ThoughtsList
-                listRef={listRef}
-                onLongPress={
-                  activeChat ? doNullFunction : handleThoughtLongPress
-                }
-                activeChat={activeChat}
-                thoughts={activeChat ? activeMessagesList : thoughts}
-                recipient={recipient}
-                onSelectReply={handleOnSelectReply}
-              />
-              {activeChat && !activeMessagesList.length ? (
-                <AppText style={styles.activeChatInfoText}>
-                  Send direct messages to{" "}
-                  {recipient.savedName ? recipient.savedName : recipient.name}{" "}
-                  and have an active conversation. These are temporary messages
-                  and are not stored anywhere, except your device until you
-                  refresh this chat, visit another one, leave this screen or the
-                  app becomes inactive.
-                </AppText>
-              ) : null}
-              {!activeChat && thoughts.length < 5 ? (
-                <AppText style={styles.thoughtInfoText}>
-                  Send your thoughts to{" "}
-                  {recipient.savedName ? recipient.savedName : recipient.name},
-                  and within 10 minutes if{" "}
-                  {recipient.savedName ? recipient.savedName : recipient.name}{" "}
-                  does the same for you, your thoughts will match. You can see
-                  all your matched thoughts here. You can send only one Thought
-                  within 10 minutes to a single person.
-                </AppText>
-              ) : null}
-              {!activeChat && message.replace(/\s/g, "").length >= 1 ? (
-                <View style={styles.hintContainer}>
-                  <TextInput
-                    maxLength={100}
-                    onChangeText={setHint}
-                    placeholder="Add a hint..."
-                    placeholderTextColor={defaultStyles.colors.white}
-                    style={styles.hintInput}
-                    value={hint}
+      <Screen style={styles.container}>
+        <ThoughtsScreenHeader
+          activeChat={activeChat}
+          imageUrl={recipient.picture}
+          isRecipientActive={isRecipientActive}
+          name={recipient.name}
+          onActiveChatModePress={handleSetChatActive}
+          onOptionPress={handleOptionsPress}
+          onPress={handleBack}
+          onThoughtsModePress={handleSetChatInActive}
+        />
+        <ScreenSub style={styles.screenSub}>
+          <ChatBackgroundSelector activeChat={activeChat}>
+            <ThoughtsList
+              listRef={listRef}
+              onLongPress={activeChat ? doNullFunction : handleThoughtLongPress}
+              activeChat={activeChat}
+              thoughts={activeChat ? activeMessagesList : thoughts}
+              recipient={recipient}
+              onSelectReply={handleOnSelectReply}
+            />
+            {activeChat && !activeMessagesList.length ? (
+              <AppText style={styles.activeChatInfoText}>
+                Send direct messages to{" "}
+                {recipient.savedName ? recipient.savedName : recipient.name} and
+                have an active conversation. These are temporary messages and
+                are not stored anywhere, except your device until you refresh
+                this chat, visit another one, leave this screen or the app
+                becomes inactive.
+              </AppText>
+            ) : null}
+            {!activeChat && thoughts.length < 5 ? (
+              <AppText style={styles.thoughtInfoText}>
+                Send your thoughts to{" "}
+                {recipient.savedName ? recipient.savedName : recipient.name},
+                and within 10 minutes if{" "}
+                {recipient.savedName ? recipient.savedName : recipient.name}{" "}
+                does the same for you, your thoughts will match. You can see all
+                your matched thoughts here. You can send only one Thought within
+                10 minutes to a single person.
+              </AppText>
+            ) : null}
+            {!activeChat && message.replace(/\s/g, "").length >= 1 ? (
+              <View style={styles.hintContainer}>
+                <TextInput
+                  maxLength={100}
+                  onChangeText={setHint}
+                  placeholder="Add a hint..."
+                  placeholderTextColor={defaultStyles.colors.white}
+                  style={styles.hintInput}
+                  value={hint}
+                />
+              </View>
+            ) : null}
+            {isFocused ? (
+              <ApiContext.Provider value={{ sendingMedia, setSendingMedia }}>
+                <ImageContext.Provider value={{ mediaImage, setMediaImage }}>
+                  <SendThoughtsInput
+                    rStyle={rStyle}
+                    recipient={recipient}
+                    reply={reply}
+                    onRemoveReply={handleRemoveReply}
+                    onSendSelectedMedia={handleSendSelectedMedia}
+                    isFocused={isFocused}
+                    setTyping={handleSetTyping}
+                    message={message}
+                    setMessage={setMessage}
+                    placeholder={placeholder}
+                    activeChat={activeChat}
+                    isRecipientActive={isRecipientActive}
+                    onActiveChatSelection={
+                      activeChat ? handleSetChatInActive : handleSetChatActive
+                    }
+                    style={[styles.inputBox]}
+                    submit={
+                      activeChat ? handleSendActiveMessage : handleSendThought
+                    }
+                    historyTip="See sent thoughts that did not match or delete before getting matched."
+                    showTip={showHelp}
+                    setShowTip={setShowHelp}
+                    onCameraImageSelection={handleSendSelectedMedia}
                   />
-                </View>
-              ) : null}
-              {isFocused ? (
-                <ApiContext.Provider value={{ sendingMedia, setSendingMedia }}>
-                  <ImageContext.Provider value={{ mediaImage, setMediaImage }}>
-                    <SendThoughtsInput
-                      rStyle={rStyle}
-                      recipient={recipient}
-                      reply={reply}
-                      onRemoveReply={handleRemoveReply}
-                      onSendSelectedMedia={handleSendSelectedMedia}
-                      isFocused={isFocused}
-                      setTyping={handleSetTyping}
-                      message={message}
-                      setMessage={setMessage}
-                      placeholder={placeholder}
-                      activeChat={activeChat}
-                      isRecipientActive={isRecipientActive}
-                      onActiveChatSelection={
-                        activeChat ? handleSetChatInActive : handleSetChatActive
-                      }
-                      style={[styles.inputBox]}
-                      submit={
-                        activeChat ? handleSendActiveMessage : handleSendThought
-                      }
-                      historyTip="See sent thoughts that did not match or delete before getting matched."
-                      showTip={showHelp}
-                      setShowTip={setShowHelp}
-                      onCameraImageSelection={handleSendSelectedMedia}
-                    />
-                  </ImageContext.Provider>
-                </ApiContext.Provider>
-              ) : null}
-            </ChatBackgroundSelector>
-          </ScreenSub>
-        </Screen>
-      </TouchableWithoutFeedback>
+                </ImageContext.Provider>
+              </ApiContext.Provider>
+            ) : null}
+          </ChatBackgroundSelector>
+        </ScreenSub>
+      </Screen>
       <SendingThoughtActivity
         echoMessage={messageActivity.echoMessage}
         message={messageActivity.message}

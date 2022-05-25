@@ -24,7 +24,6 @@ import useAuth from "../auth/useAuth";
 import FavoritesNavigator from "./FavoritesNavigator";
 import ActiveForContext from "../utilities/activeForContext";
 import ActiveMessagesContext from "../utilities/activeMessagesContext";
-import TypingContext from "../utilities/typingContext";
 
 import defaultProps from "../utilities/defaultProps";
 import usersApi from "../api/users";
@@ -37,7 +36,6 @@ function AppNavigator(props) {
   const { user, setUser } = useAuth();
   const [activeFor, setActiveFor] = useState([]);
   const [activeMessages, setActiveMessages] = useState([]);
-  const [typing, setTyping] = useState(false);
   const socket = useContext(SocketContext);
   const [disconnected, setDisconnected] = useState(false);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
@@ -203,7 +201,7 @@ function AppNavigator(props) {
       socket.off(`setActiveFor${user._id}`, listener5);
       socket.off(`setInActiveFor${user._id}`, listener6);
     };
-  }, [user, activeFor, typing]);
+  }, [user, activeFor]);
 
   const handleDynamicLink = (link) => {
     // Handle dynamic link inside your own application
@@ -302,39 +300,34 @@ function AppNavigator(props) {
       <ActiveMessagesContext.Provider
         value={{ activeMessages, setActiveMessages }}
       >
-        <TypingContext.Provider value={{ typing, setTyping }}>
-          <Tab.Navigator
-            screenOptions={{
-              headerShown: false,
-              tabBarStyle: { display: "none" },
-            }}
-          >
-            <Tab.Screen
-              name={Constant.INDEX_NAVIGATOR}
-              component={IndexNavigator}
-            />
-            <Tab.Screen
-              name={Constant.VIP_NAVIGATOR}
-              component={VipNavigator}
-            />
-            <Tab.Screen
-              name={Constant.PROFILE_NAVIGATOR}
-              component={ProfileNavigator}
-            />
-            <Tab.Screen
-              name={Constant.SEND_THOUGHT_SCREEN}
-              component={SendThoughtsScreen}
-            />
-            <Tab.Screen
-              name={Constant.ADD_ECHO_SCREEN}
-              component={AddEchoScreen}
-            />
-            <Tab.Screen
-              name={Constant.FAVORITES_NAVIGATOR}
-              component={FavoritesNavigator}
-            />
-          </Tab.Navigator>
-        </TypingContext.Provider>
+        <Tab.Navigator
+          screenOptions={{
+            headerShown: false,
+            tabBarStyle: { display: "none" },
+          }}
+        >
+          <Tab.Screen
+            name={Constant.INDEX_NAVIGATOR}
+            component={IndexNavigator}
+          />
+          <Tab.Screen name={Constant.VIP_NAVIGATOR} component={VipNavigator} />
+          <Tab.Screen
+            name={Constant.PROFILE_NAVIGATOR}
+            component={ProfileNavigator}
+          />
+          <Tab.Screen
+            name={Constant.SEND_THOUGHT_SCREEN}
+            component={SendThoughtsScreen}
+          />
+          <Tab.Screen
+            name={Constant.ADD_ECHO_SCREEN}
+            component={AddEchoScreen}
+          />
+          <Tab.Screen
+            name={Constant.FAVORITES_NAVIGATOR}
+            component={FavoritesNavigator}
+          />
+        </Tab.Navigator>
       </ActiveMessagesContext.Provider>
     </ActiveForContext.Provider>
   );

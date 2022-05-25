@@ -384,6 +384,12 @@ function GroupChatScreen({ navigation, route }) {
     };
     socket.on(`newGroupMessage${group._id}`, listener1);
 
+    return () => {
+      socket.off(`newGroupMessage${group._id}`, listener1);
+    };
+  }, [groupMessages, group._id]);
+
+  useEffect(() => {
     const listener2 = (data) => {
       if (activeUsers.filter((u) => u._id == data.activeUser._id).length < 1) {
         if (!isUnmounting) {
@@ -394,6 +400,12 @@ function GroupChatScreen({ navigation, route }) {
 
     socket.on(`addActive${group._id}`, listener2);
 
+    return () => {
+      socket.off(`addActive${group._id}`, listener2);
+    };
+  }, [activeUsers, group._id]);
+
+  useEffect(() => {
     const listener3 = (data) => {
       let newActiveUsers = activeUsers.filter(
         (u) => u._id != data.activeUser._id
@@ -406,11 +418,9 @@ function GroupChatScreen({ navigation, route }) {
     socket.on(`removeActive${group._id}`, listener3);
 
     return () => {
-      socket.off(`newGroupMessage${group._id}`, listener1);
-      socket.off(`addActive${group._id}`, listener2);
       socket.off(`removeActive${group._id}`, listener3);
     };
-  }, [groupMessages, group._id, activeUsers]);
+  }, [activeUsers, group._id]);
 
   // Update group messages when someone deletes any message
   useEffect(() => {
