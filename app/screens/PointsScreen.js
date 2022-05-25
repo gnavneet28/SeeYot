@@ -7,6 +7,7 @@ import { useIsFocused } from "@react-navigation/native";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 import { showMessage } from "react-native-flash-message";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+import { PROD_AD_ID, DEV_AD_ID } from "@env";
 
 import ApiProcessingContainer from "../components/ApiProcessingContainer";
 import AppButton from "../components/AppButton";
@@ -43,6 +44,8 @@ import Backdrop from "../components/Backdrop";
 const Points = {
   totalPoints: 0,
 };
+
+let AD_ID = __DEV__ ? DEV_AD_ID : PROD_AD_ID;
 
 const optionsVibrate = {
   enableVibrateFallback: true,
@@ -205,9 +208,7 @@ function PointsScreen({ navigation }) {
         return setShowAdsInfo(true);
       }
       try {
-        await AdMobRewarded.setAdUnitID(
-          "ca-app-pub-3940256099942544/5224354917"
-        ); // Test admob ID
+        await AdMobRewarded.setAdUnitID(AD_ID);
         await AdMobRewarded.requestAdAsync();
         await AdMobRewarded.showAdAsync();
       } catch (error) {

@@ -111,7 +111,7 @@ function InsightsScreen({ navigation }) {
   }, [isFocused]);
 
   const setUpPage = async () => {
-    if (subscription !== "Active") return;
+    if (subscription !== "Active") return setIsReady(true);
     const { ok, data, problem } = await usersApi.getMyStats();
     if (ok) {
       setStats(data);

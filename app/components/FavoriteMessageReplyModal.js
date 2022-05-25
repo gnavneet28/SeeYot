@@ -85,14 +85,14 @@ function FavoriteMessageReplyModal({
                 />
                 <View style={styles.messageDetailsContainer}>
                   <AppText style={styles.creatorName}>
-                    {messageCreator.name}
+                    {messageCreator.name ? messageCreator.name : "***********"}
                   </AppText>
                   <AppText style={styles.message}>{message.message}</AppText>
                   <AppText style={styles.createdAt}>
                     {dayjs(message.createdAt).fromNow()}
                   </AppText>
                 </View>
-                {message.replied && messageCreator.name !== "**********" ? (
+                {message.replied && messageCreator.name ? (
                   <TouchableOpacity
                     onPress={
                       sendingReply

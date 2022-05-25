@@ -36,7 +36,7 @@ function GroupChatUserOptions({
   }, [group, user]);
 
   const onCloseModal = () => {
-    if (blockedFromGroup || blockedPersonally) return;
+    if (blockingFromGroup || blockingPersonally) return;
     handleCloseModal();
   };
 
@@ -71,7 +71,9 @@ function GroupChatUserOptions({
 
             <ApiOption onPress={onAddEchoPress} title="Add Echo" />
             <ApiOption onPress={onSendThoughtsPress} title="Send Thoughts" />
-            {!blockedFromGroup && interestedUser._id != user._id ? (
+            {!blockedFromGroup &&
+            interestedUser._id != user._id &&
+            group.createdBy._id == user._id ? (
               <ApiOption
                 processing={blockingFromGroup}
                 onPress={onBlockFromGroupPress}
