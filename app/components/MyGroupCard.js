@@ -22,6 +22,7 @@ function MyGroupCard({
   user = { _id: "" },
   showBlocked = false,
   isFocused,
+  showCategory = false,
 }) {
   const socket = useContext(SocketContext);
 
@@ -126,11 +127,13 @@ function MyGroupCard({
                 />
               </View>
               <View style={styles.categoryContainer}>
-                <AppText
-                  style={[styles.categoryText, { marginRight: scale(5) }]}
-                >
-                  {group.category}
-                </AppText>
+                {showCategory ? (
+                  <AppText
+                    style={[styles.categoryText, { marginRight: scale(5) }]}
+                  >
+                    {group.category}
+                  </AppText>
+                ) : null}
                 <AppText style={styles.categoryText}>
                   {group.subCategory}
                 </AppText>

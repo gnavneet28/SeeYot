@@ -111,6 +111,7 @@ class MyGroupsListPro extends React.Component {
             user={this.props.user}
             showBlocked={this.props.showBlocked}
             isFocused={this.props.isFocused}
+            showCategory={this.props.showCategory}
           />
         );
       default:

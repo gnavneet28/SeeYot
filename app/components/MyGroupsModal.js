@@ -88,6 +88,7 @@ function MyGroupsModal({
               refreshing={refreshing}
               onRefresh={handleRefresh}
               showBlocked={true}
+              showCategory={true}
             />
           ) : (
             <AppText style={styles.noGroupsInfo}>No groups to show!</AppText>
