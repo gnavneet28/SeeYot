@@ -22,4 +22,5 @@ export default DataConstants = {
   STATS: "statsPresent",
   THOUGHTS: "userThoughts",
   VIP: "vip",
+  GROUP_HISTORY: "groupHistory",
 };

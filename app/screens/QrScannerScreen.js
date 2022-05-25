@@ -278,7 +278,6 @@ function QrScannerScreen({ navigation, route }) {
           onSelectGroupFromHistory={enterGroup}
           checkingGroupName={checkingGroupName}
           onEnterGroupButtonPress={enterGroup}
-          onMyGroupsButtonPress={handleShowMyGroupsModal}
           deletingGroupFromHistory={deletingGroupFromHistory}
           onDeleteFromGroupHistoryPress={removeFromGroupHistory}
           user={user}
@@ -286,6 +285,9 @@ function QrScannerScreen({ navigation, route }) {
         <ScreenSub style={styles.screenSub}>
           {permitted ? (
             <QRCodeScanner
+              cameraStyle={styles.cameraStyle}
+              topViewStyle={{ height: 0 }}
+              bottomViewStyle={{ height: 0 }}
               reactivateTimeout={3000}
               fadeIn={false}
               cameraType={front ? "front" : "back"}
@@ -322,16 +324,16 @@ function QrScannerScreen({ navigation, route }) {
               </AppText>
             </View>
           )}
-
-          <ScannerBottomContent
-            onExplorePress={handleExplorePress}
-            permitted={permitted}
-            front={front}
-            flash={flash}
-            handleCameraChange={handleCameraChange}
-            handleFlashmode={handleFlashmode}
-          />
         </ScreenSub>
+        <ScannerBottomContent
+          onMyGroupsButtonPress={handleShowMyGroupsModal}
+          onExplorePress={handleExplorePress}
+          permitted={permitted}
+          front={front}
+          flash={flash}
+          handleCameraChange={handleCameraChange}
+          handleFlashmode={handleFlashmode}
+        />
       </Screen>
       <Alert
         visible={cameraAccessDeniedAlertVisibility}
@@ -374,6 +376,10 @@ function QrScannerScreen({ navigation, route }) {
   );
 }
 const styles = ScaledSheet.create({
+  cameraStyle: {
+    height: "100%",
+    flexShrink: 1,
+  },
   notAuthorizedViewContainer: {
     alignItems: "center",
     backgroundColor: defaultStyles.colors.light,
@@ -389,7 +395,11 @@ const styles = ScaledSheet.create({
     color: defaultStyles.colors.dark,
     padding: "10@s",
   },
-  screenSub: { backgroundColor: defaultStyles.colors.primary, borderRadius: 0 },
+  screenSub: {
+    backgroundColor: defaultStyles.colors.primary,
+    borderRadius: 0,
+    paddingTop: "10@s",
+  },
   scannerViews: {
     position: "absolute",
     top: -1500,

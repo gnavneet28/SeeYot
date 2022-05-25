@@ -51,13 +51,9 @@ function ScannerTopContent({
           />
         </ApiProcessingContainer>
       </View>
+
       <View style={styles.groupsContainer}>
-        <AppButton
-          title="My Groups"
-          style={styles.myGroupButton}
-          onPress={onMyGroupsButtonPress}
-        />
-        {user.groupHistory ? (
+        {user.groupHistory.length ? (
           <ScrollView
             keyboardShouldPersistTaps="handled"
             horizontal
@@ -82,13 +78,16 @@ function ScannerTopContent({
 const styles = ScaledSheet.create({
   buttonContainer: {
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: "5@s",
+    borderBottomRightRadius: "20@s",
+    borderTopRightRadius: "20@s",
     height: "35@s",
+    overflow: "hidden",
     width: "60@s",
   },
   button: {
     backgroundColor: defaultStyles.colors.light,
-    borderRadius: "5@s",
+    borderBottomRightRadius: "20@s",
+    borderTopRightRadius: "20@s",
     height: "35@s",
     width: "100%",
   },
@@ -97,17 +96,18 @@ const styles = ScaledSheet.create({
   },
   groupsInHistoryContainer: {
     alignItems: "center",
-    height: "50@s",
+    flexGrow: 1,
+    height: "40@s",
+    paddingHorizontal: "5@s",
   },
   groupsContainer: {
     alignItems: "center",
-    flexDirection: "row",
-    paddingVertical: "8@s",
     width: "100%",
   },
   inputBox: {
     backgroundColor: defaultStyles.colors.white,
-    borderRadius: "5@s",
+    borderTopLeftRadius: "20@s",
+    borderBottomLeftRadius: "20@s",
     flexShrink: 1,
     fontFamily: "ComicNeue-Bold",
     fontSize: "13@s",
@@ -117,18 +117,6 @@ const styles = ScaledSheet.create({
     marginRight: "5@s",
     paddingLeft: "15@s",
     width: "100%",
-  },
-  myGroupButton: {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: "20@s",
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: "20@s",
-    height: "35@s",
-    marginRight: "5@s",
-    width: "80@s",
-  },
-  myGroupButtonSub: {
-    fontSize: "12@s",
   },
   searchBox: {
     alignItems: "center",
@@ -140,7 +128,6 @@ const styles = ScaledSheet.create({
     width: "100%",
   },
   topContentContainer: {
-    backgroundColor: "red",
     backgroundColor: defaultStyles.colors.primary,
     flexShrink: 1,
     width: "100%",

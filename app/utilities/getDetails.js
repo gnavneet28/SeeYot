@@ -15,6 +15,7 @@ const getDetails = async () => {
   const favorites = await asyncStorage.get(DataConstants.FAVORITES);
   const messages = await asyncStorage.get(DataConstants.MESSAGES);
   const phoneContacts = await asyncStorage.get(DataConstants.PHONE_CONTACTS);
+  const groupHistory = await asyncStorage.get(DataConstants.GROUP_HISTORY);
   //const statsPresent = await asyncStorage.get(DataConstants.STATS);
   let cachedUser = {
     _id: currentUser ? currentUser._id : "",
@@ -33,6 +34,7 @@ const getDetails = async () => {
     searchHistory: searchHistory,
     thoughts: thoughts,
     vip,
+    groupHistory,
     //statsPresent,
   };
 
