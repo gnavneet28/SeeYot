@@ -71,7 +71,19 @@ function MediaGalleryModal({
       visible={visible}
       onRequestClose={onRequestClose}
     >
-      <View style={styles.scrollViewContainer}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={onRequestClose}
+          style={styles.backIconContainer}
+        >
+          <Ionicons
+            onPress={onRequestClose}
+            name="arrow-back"
+            size={scale(18)}
+            color={defaultStyles.colors.secondary}
+          />
+        </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={handleOpenCamera}
@@ -155,6 +167,16 @@ const styles = ScaledSheet.create({
     right: "20@s",
     width: "50@s",
   },
+  backIconContainer: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: defaultStyles.colors.white,
+    borderRadius: "5@s",
+    height: "30@s",
+    justifyContent: "center",
+    marginRight: "5@s",
+    width: "30@s",
+  },
   cameraIcon: {
     alignItems: "center",
     alignSelf: "center",
@@ -177,7 +199,7 @@ const styles = ScaledSheet.create({
     height: "48@s",
     paddingLeft: "5@s",
   },
-  scrollViewContainer: {
+  header: {
     alignItems: "center",
     flexDirection: "row",
     marginBottom: "5@s",

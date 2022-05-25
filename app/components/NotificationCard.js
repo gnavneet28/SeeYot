@@ -211,9 +211,10 @@ function NotificationCard({
       notification.type == "Matched" ||
       notification.type == "Add" ||
       notification.type == "Unmatched" ||
-      notification.type == "GroupReply"
+      notification.type == "GroupReply" ||
+      notification.type == "GroupChatInvite"
     )
-      return 0.9;
+      return 1;
     return 0.7;
   };
 

@@ -5,7 +5,6 @@ import { ScaledSheet } from "react-native-size-matters";
 import NetInfo from "@react-native-community/netinfo";
 
 import AppText from "./AppText";
-import AppButton from "./AppButton";
 
 import defaultStyles from "../config/styles";
 
@@ -46,21 +45,24 @@ function OfflineNotice(props) {
       }
     });
 
+  const handleHideAlert = () => setIsConnected(true);
+
   if (!isConnected)
     return (
       <View style={styles.container}>
         <AppText style={styles.text}>
-          Internet connection is either not available or not reachable!
+          Internet connection is either not available or not reachable! Try the
+          following:
         </AppText>
 
-        <AppButton
-          onPress={handleRefresh}
-          subStyle={styles.retrySub}
-          title="Retry"
-          style={styles.retry}
-        >
-          Retry
-        </AppButton>
+        <AppText style={styles.info}>
+          {`1. Reconnect to your Network.
+2. Switch between connections if connected to wifi.`}
+        </AppText>
+
+        <AppText onPress={handleHideAlert} style={styles.retry}>
+          Hide
+        </AppText>
       </View>
     );
 
@@ -70,7 +72,7 @@ const styles = ScaledSheet.create({
   container: {
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: defaultStyles.colors.primary,
+    backgroundColor: "rgba(0,0,0,0.9)",
     borderBottomLeftRadius: "5@s",
     borderBottomRightRadius: "5@s",
     elevation: Platform.OS === "android" ? 1 : 0,
@@ -87,16 +89,21 @@ const styles = ScaledSheet.create({
     height: "25@s",
     marginBottom: "10@s",
     marginTop: "5@s",
+    textAlign: "center",
     width: "70@s",
-  },
-  retrySub: {
-    color: defaultStyles.colors.dark,
   },
   text: {
     color: defaultStyles.colors.white,
     fontSize: "13@s",
     marginTop: "10@s",
     textAlign: "center",
+    width: "80%",
+  },
+  info: {
+    color: defaultStyles.colors.white,
+    fontSize: "13@s",
+    textAlign: "left",
+    width: "70%",
   },
 });
 

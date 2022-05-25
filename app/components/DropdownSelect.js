@@ -73,7 +73,7 @@ const styles = ScaledSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     flexShrink: 1,
-    fontSize: "13@s",
+    fontSize: "12@s",
     justifyContent: "space-between",
     paddingVertical: "3@s",
     textAlign: "center",

@@ -594,7 +594,7 @@ Do not have permission to view group.
                         value={
                           group.canInvite || group.createdBy._id == user._id
                             ? group.qrCodeLink
-                            : "notValid"
+                            : "Group admin has not enabled inviting others other than admin."
                         }
                         enableLinearGradient={true}
                         quietZone={10}

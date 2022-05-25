@@ -61,7 +61,7 @@ function HomeScreen({ navigation }) {
     defaultProps.defaultMessageVisibleToCurrentUserWithoutReplying
   );
   const [messageCreator, setMessageCreator] = useState({
-    name: "************",
+    name: "",
     picture: "",
     _id: "",
   });
@@ -114,7 +114,7 @@ function HomeScreen({ navigation }) {
   useEffect(() => {
     if (!isFocused && !isUnmounting && messageCreator.picture) {
       setMessageCreator({
-        name: "************",
+        name: "",
         picture: "",
         _id: "",
       });
@@ -269,7 +269,7 @@ function HomeScreen({ navigation }) {
   //MESSAGE MODAL ACTION
 
   const handleCloseMessage = useCallback(() => {
-    setMessageCreator({ name: "**********", picture: "", _id: "" });
+    setMessageCreator({ name: "", picture: "", _id: "" });
     setMessage(defaultProps.defaultMessageVisibleToCurrentUserWithoutReplying);
     setSelectedMessageId("");
     setIsVisible(false);

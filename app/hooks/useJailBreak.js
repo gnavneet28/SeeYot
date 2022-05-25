@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 const useJailBreak = () => {
   const [jaiBroken, setJailBroken] = useState(false);
 
-  const checkJailBreak = async () => {
-    if (await JailMonkey.isJailBroken()) {
+  const checkJailBreak = () => {
+    if (JailMonkey.isJailBroken()) {
       return setJailBroken(true);
     }
 
