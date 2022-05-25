@@ -1353,9 +1353,9 @@
     fastq "^1.6.0"
 
 "@react-native-async-storage/async-storage@^1.13.4":
-  version "1.17.3"
-  resolved "https://registry.yarnpkg.com/@react-native-async-storage/async-storage/-/async-storage-1.17.3.tgz#fa7010aa9b6a811ff653df3698a90d3c173dd6a6"
-  integrity sha512-2dxdlGwBjBP2qYu6F72U7cRRFshISYiNEWCaQNOJtxUERCMaYRWcniYqhL248KSbGUMpRhFCEtliztsiGoYYMA==
+  version "1.17.5"
+  resolved "https://registry.yarnpkg.com/@react-native-async-storage/async-storage/-/async-storage-1.17.5.tgz#8cc3edd305d09a3c252d88921f0d2846a0444f25"
+  integrity sha512-0XT5zZa3mh8XfAFYytq9hPyI6w0FJEBED4pjeLc17pkNF9tND86fsTX2pQFr15uV0nvfYeHisbd/mM7bpGrWKA==
   dependencies:
     merge-options "^3.0.4"
 
@@ -5818,13 +5818,6 @@ react-native-progress@^5.0.0:
   dependencies:
     prop-types "^15.7.2"
 
-react-native-qr-decode-image-camera@^1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/react-native-qr-decode-image-camera/-/react-native-qr-decode-image-camera-1.0.7.tgz#111394ca8bb370409d72439df7265b6aea44b60b"
-  integrity sha512-kM/SBIWS5Fz0kFpDbaaxGYscIPTUXAXmDmIDBoJlllBt/N8RVwZRrAs2WJ0Gj37tY5Jh1NF+Aj3eMHA1Mrxkjw==
-  dependencies:
-    prop-types "^15.7.2"
-
 react-native-qrcode-scanner@^1.5.5:
   version "1.5.5"
   resolved "https://registry.yarnpkg.com/react-native-qrcode-scanner/-/react-native-qrcode-scanner-1.5.5.tgz#0d20101712715da108742a2bbbd0397569031b01"
@@ -6887,7 +6880,7 @@ ts-object-utils@0.0.5:
   resolved "https://registry.yarnpkg.com/ts-object-utils/-/ts-object-utils-0.0.5.tgz#95361cdecd7e52167cfc5e634c76345e90a26077"
   integrity sha1-lTYc3s1+UhZ8/F5jTHY0XpCiYHc=
 
-tslib@^2.0.1, tslib@^2.3.0, tslib@^2.3.1:
+tslib@^2.0.1, tslib@^2.3.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
   integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
