@@ -1,11 +1,5 @@
 import React, { memo, useState } from "react";
-import {
-  View,
-  Modal,
-  TextInput,
-  TouchableWithoutFeedback,
-  Keyboard,
-} from "react-native";
+import { View, Modal, TextInput } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import * as Animatable from "react-native-animatable";
 
@@ -23,7 +17,11 @@ function FavoriteOptionsModal({
   showAddoption,
 }) {
   const [height, setHeight] = useState(0);
-  const handleKeyboardDismiss = () => Keyboard.dismiss();
+
+  const onAddOptionPress = () => {
+    setHeight(80);
+    handleAddOptionalReplyPress();
+  };
   return (
     <Modal
       visible={showAddoption}
@@ -31,61 +29,59 @@ function FavoriteOptionsModal({
       transparent
       animationType="fade"
     >
-      <TouchableWithoutFeedback onPress={handleKeyboardDismiss}>
-        <View style={styles.addoptionModalFallback}>
-          <Animatable.View
-            useNativeDriver={true}
-            animation="zoomInUp"
-            style={styles.addOptionContainer}
-          >
-            <AppText style={styles.addOptionTitle}>Add Option</AppText>
-            <AppText style={styles.addOptionInfo}>
-              Add optional replies that you expect {recipient.name} would most
-              likely to reply with. You can add a minimum of 2 and a maximum of
-              4 options. Options help you to get valid replies.
-            </AppText>
-            <TextInput
-              maxLength={100}
-              multiline={true}
-              onChangeText={setOptionalMessage}
-              placeholder="Add an expected reply..."
-              onContentSizeChange={(event) =>
-                setHeight(event.nativeEvent.contentSize.height)
-              }
-              style={[
-                styles.addOptionInput,
-                { height: Math.min(80, Math.max(40, height)) },
-              ]}
-              value={optionalMessage}
+      <View style={styles.addoptionModalFallback}>
+        <Animatable.View
+          useNativeDriver={true}
+          animation="zoomInUp"
+          style={styles.addOptionContainer}
+        >
+          <AppText style={styles.addOptionTitle}>Add Option</AppText>
+          <AppText style={styles.addOptionInfo}>
+            Add optional replies that you expect {recipient.name} would most
+            likely to reply with. You can add a minimum of 2 and a maximum of 4
+            options. Options help you to get valid replies.
+          </AppText>
+          <TextInput
+            maxLength={100}
+            multiline={true}
+            onChangeText={setOptionalMessage}
+            placeholder="Add an expected reply..."
+            onContentSizeChange={(event) =>
+              setHeight(event.nativeEvent.contentSize.height)
+            }
+            style={[
+              styles.addOptionInput,
+              { height: Math.min(80, Math.max(40, height)) },
+            ]}
+            value={optionalMessage}
+          />
+          <View style={styles.addOptionActionContainer}>
+            <AppButton
+              onPress={handleCloseAddOption}
+              title="Close"
+              style={styles.closeButton}
+              subStyle={styles.closeButtonSub}
             />
-            <View style={styles.addOptionActionContainer}>
-              <AppButton
-                onPress={handleCloseAddOption}
-                title="Close"
-                style={styles.closeButton}
-                subStyle={styles.closeButtonSub}
-              />
-              <AppButton
-                disabled={
-                  optionalMessage.replace(/\s/g, "").length >= 1 ? false : true
-                }
-                onPress={handleAddOptionalReplyPress}
-                title="Add"
-                style={[
-                  styles.addButton,
-                  {
-                    backgroundColor:
-                      optionalMessage.replace(/\s/g, "").length >= 1
-                        ? defaultStyles.colors.blue
-                        : defaultStyles.colors.lightGrey,
-                  },
-                ]}
-                subStyle={styles.addButtonSub}
-              />
-            </View>
-          </Animatable.View>
-        </View>
-      </TouchableWithoutFeedback>
+            <AppButton
+              disabled={
+                optionalMessage.replace(/\s/g, "").length >= 1 ? false : true
+              }
+              onPress={onAddOptionPress}
+              title="Add"
+              style={[
+                styles.addButton,
+                {
+                  backgroundColor:
+                    optionalMessage.replace(/\s/g, "").length >= 1
+                      ? defaultStyles.colors.blue
+                      : defaultStyles.colors.lightGrey,
+                },
+              ]}
+              subStyle={styles.addButtonSub}
+            />
+          </View>
+        </Animatable.View>
+      </View>
     </Modal>
   );
 }

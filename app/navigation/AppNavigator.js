@@ -29,6 +29,7 @@ import TypingContext from "../utilities/typingContext";
 import defaultProps from "../utilities/defaultProps";
 import usersApi from "../api/users";
 import debounce from "../utilities/debounce";
+import useKeyboard from "../hooks/useKeyboard";
 
 const Tab = createBottomTabNavigator();
 
@@ -39,8 +40,9 @@ function AppNavigator(props) {
   const [typing, setTyping] = useState(false);
   const socket = useContext(SocketContext);
   const [disconnected, setDisconnected] = useState(false);
-
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+
+  let keyboradVisible = useKeyboard();
 
   const purchaseItem = debounce(
     async (id) => {

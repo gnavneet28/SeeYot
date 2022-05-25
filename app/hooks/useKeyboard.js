@@ -12,7 +12,13 @@ export default function useKeyboard() {
       Keyboard.removeAllListeners("keyboardDidShow");
       Keyboard.removeAllListeners("keyboardDidHide");
     };
-  });
+  }, []);
+
+  useEffect(() => {
+    if (!keyboardShown) {
+      Keyboard.dismiss();
+    }
+  }, [keyboardShown]);
 
   return keyboardShown;
 }

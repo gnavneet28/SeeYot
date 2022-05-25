@@ -1,11 +1,5 @@
 import React, { memo, useState } from "react";
-import {
-  View,
-  Modal,
-  Keyboard,
-  TouchableWithoutFeedback,
-  TextInput,
-} from "react-native";
+import { View, Modal, TextInput } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
@@ -22,7 +16,6 @@ function ReportUserModal({
   setOpenUserReport,
 }) {
   const [userReportInfo, setUserReportInfo] = useState("");
-  const handleDismissKeyboard = () => Keyboard.dismiss();
   const [height, setHeight] = useState(0);
 
   const onSubmit = () => {
@@ -39,58 +32,54 @@ function ReportUserModal({
       transparent={true}
       visible={openUserReport}
     >
-      <TouchableWithoutFeedback onPress={handleDismissKeyboard}>
-        <View style={styles.groupInfoModal}>
-          <Backdrop onPress={handleCloseGroupInfo} />
-          <View style={styles.closeMessageIconContainer}>
-            <AntDesign
-              onPress={handleCloseGroupInfo}
-              name="downcircle"
-              color={defaultStyles.colors.secondary_Variant}
-              size={scale(28)}
-            />
-          </View>
-          <View style={styles.optionsContainerReport}>
-            <AppText style={styles.reportProblemTitle}>
-              Report this user
+      <View style={styles.groupInfoModal}>
+        <Backdrop onPress={handleCloseGroupInfo} />
+        <View style={styles.closeMessageIconContainer}>
+          <AntDesign
+            onPress={handleCloseGroupInfo}
+            name="downcircle"
+            color={defaultStyles.colors.secondary_Variant}
+            size={scale(28)}
+          />
+        </View>
+        <View style={styles.optionsContainerReport}>
+          <AppText style={styles.reportProblemTitle}>Report this user</AppText>
+          <TextInput
+            editable={!isLoading}
+            maxLength={500}
+            multiline={true}
+            onChangeText={setUserReportInfo}
+            placeholder="What is this about..."
+            value={userReportInfo}
+            style={[
+              styles.groupInfoInput,
+              { height: Math.min(100, Math.max(50, height)) },
+            ]}
+            onContentSizeChange={(event) =>
+              setHeight(event.nativeEvent.contentSize.height)
+            }
+          />
+          <View style={styles.actionContainer}>
+            <AppText style={styles.groupInfoLength}>
+              {userReportInfo.length}/500
             </AppText>
-            <TextInput
-              editable={!isLoading}
-              maxLength={500}
-              multiline={true}
-              onChangeText={setUserReportInfo}
-              placeholder="What is this about..."
-              value={userReportInfo}
+            <AppButton
+              disabled={!isLoading ? false : true}
+              onPress={onSubmit}
               style={[
-                styles.groupInfoInput,
-                { height: Math.min(100, Math.max(50, height)) },
+                styles.submitGroupInfoButton,
+                {
+                  backgroundColor: !isLoading
+                    ? defaultStyles.colors.yellow_Variant
+                    : defaultStyles.colors.light,
+                },
               ]}
-              onContentSizeChange={(event) =>
-                setHeight(event.nativeEvent.contentSize.height)
-              }
+              subStyle={styles.submitGroupInfoButtonSub}
+              title="Report"
             />
-            <View style={styles.actionContainer}>
-              <AppText style={styles.groupInfoLength}>
-                {userReportInfo.length}/500
-              </AppText>
-              <AppButton
-                disabled={!isLoading ? false : true}
-                onPress={onSubmit}
-                style={[
-                  styles.submitGroupInfoButton,
-                  {
-                    backgroundColor: !isLoading
-                      ? defaultStyles.colors.yellow_Variant
-                      : defaultStyles.colors.light,
-                  },
-                ]}
-                subStyle={styles.submitGroupInfoButtonSub}
-                title="Report"
-              />
-            </View>
           </View>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 }

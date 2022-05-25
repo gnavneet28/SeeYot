@@ -1,11 +1,5 @@
 import React, { memo, useState } from "react";
-import {
-  View,
-  Modal,
-  Keyboard,
-  TouchableWithoutFeedback,
-  TextInput,
-} from "react-native";
+import { View, Modal, TextInput } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
@@ -23,7 +17,6 @@ function EditGroupInfoModal({
   group = { information: "" },
 }) {
   const [groupInfo, setGroupInfo] = useState(group.information);
-  const handleDismissKeyboard = () => Keyboard.dismiss();
   const [height, setHeight] = useState(0);
 
   const onSubmit = () => {
@@ -39,58 +32,56 @@ function EditGroupInfoModal({
       transparent={true}
       visible={openGroupInfo}
     >
-      <TouchableWithoutFeedback onPress={handleDismissKeyboard}>
-        <View style={styles.groupInfoModal}>
-          <Backdrop onPress={handleCloseGroupInfo} />
-          <View style={styles.closeMessageIconContainer}>
-            <AntDesign
-              onPress={handleCloseGroupInfo}
-              name="downcircle"
-              color={defaultStyles.colors.secondary_Variant}
-              size={scale(28)}
-            />
-          </View>
-          <View style={styles.optionsContainerReport}>
-            <AppText style={styles.reportProblemTitle}>
-              Edit Group Information
+      <View style={styles.groupInfoModal}>
+        <Backdrop onPress={handleCloseGroupInfo} />
+        <View style={styles.closeMessageIconContainer}>
+          <AntDesign
+            onPress={handleCloseGroupInfo}
+            name="downcircle"
+            color={defaultStyles.colors.secondary_Variant}
+            size={scale(28)}
+          />
+        </View>
+        <View style={styles.optionsContainerReport}>
+          <AppText style={styles.reportProblemTitle}>
+            Edit Group Information
+          </AppText>
+          <TextInput
+            editable={!isLoading}
+            maxLength={500}
+            multiline={true}
+            onChangeText={setGroupInfo}
+            placeholder="A short description of group..."
+            value={groupInfo}
+            style={[
+              styles.groupInfoInput,
+              { height: Math.min(100, Math.max(60, height)) },
+            ]}
+            onContentSizeChange={(event) =>
+              setHeight(event.nativeEvent.contentSize.height)
+            }
+          />
+          <View style={styles.actionContainer}>
+            <AppText style={styles.groupInfoLength}>
+              {groupInfo.length}/500
             </AppText>
-            <TextInput
-              editable={!isLoading}
-              maxLength={500}
-              multiline={true}
-              onChangeText={setGroupInfo}
-              placeholder="A short description of group..."
-              value={groupInfo}
+            <AppButton
+              disabled={!isLoading ? false : true}
+              onPress={onSubmit}
               style={[
-                styles.groupInfoInput,
-                { height: Math.min(100, Math.max(60, height)) },
+                styles.submitGroupInfoButton,
+                {
+                  backgroundColor: !isLoading
+                    ? defaultStyles.colors.yellow_Variant
+                    : defaultStyles.colors.light,
+                },
               ]}
-              onContentSizeChange={(event) =>
-                setHeight(event.nativeEvent.contentSize.height)
-              }
+              subStyle={styles.submitGroupInfoButtonSub}
+              title="Save"
             />
-            <View style={styles.actionContainer}>
-              <AppText style={styles.groupInfoLength}>
-                {groupInfo.length}/500
-              </AppText>
-              <AppButton
-                disabled={!isLoading ? false : true}
-                onPress={onSubmit}
-                style={[
-                  styles.submitGroupInfoButton,
-                  {
-                    backgroundColor: !isLoading
-                      ? defaultStyles.colors.yellow_Variant
-                      : defaultStyles.colors.light,
-                  },
-                ]}
-                subStyle={styles.submitGroupInfoButtonSub}
-                title="Save"
-              />
-            </View>
           </View>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 }

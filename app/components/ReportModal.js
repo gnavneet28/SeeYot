@@ -1,11 +1,5 @@
 import React, { memo, useState } from "react";
-import {
-  View,
-  Modal,
-  Keyboard,
-  TouchableWithoutFeedback,
-  TextInput,
-} from "react-native";
+import { View, Modal, TextInput } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
@@ -23,7 +17,6 @@ function ReportModal({
   setOpenReport,
   setProblemDescription,
 }) {
-  const handleDismissKeyboard = () => Keyboard.dismiss();
   const [height, setHeight] = useState(0);
 
   return (
@@ -33,63 +26,60 @@ function ReportModal({
       transparent={true}
       visible={openReport}
     >
-      <TouchableWithoutFeedback onPress={handleDismissKeyboard}>
-        <View style={styles.reportModal}>
-          <Backdrop onPress={() => setOpenReport(false)} />
-          <View style={styles.closeMessageIconContainer}>
-            <AntDesign
-              onPress={() => setOpenReport(false)}
-              name="downcircle"
-              color={defaultStyles.colors.secondary_Variant}
-              size={scale(28)}
-            />
-          </View>
-          <View style={styles.optionsContainerReport}>
-            <AppText style={styles.reportProblemTitle}>Report Problem</AppText>
-            <TextInput
-              editable={!isLoading}
-              maxLength={250}
-              multiline={true}
-              onChangeText={setProblemDescription}
-              placeholder="Describe your problem..."
-              subStyle={styles.inputProblem}
-              style={[
-                styles.problemInput,
-                { height: Math.min(100, Math.max(60, height)) },
-              ]}
-              onContentSizeChange={(event) =>
-                setHeight(event.nativeEvent.contentSize.height)
+      <View style={styles.reportModal}>
+        <Backdrop onPress={() => setOpenReport(false)} />
+        <View style={styles.closeMessageIconContainer}>
+          <AntDesign
+            onPress={() => setOpenReport(false)}
+            name="downcircle"
+            color={defaultStyles.colors.secondary_Variant}
+            size={scale(28)}
+          />
+        </View>
+        <View style={styles.optionsContainerReport}>
+          <AppText style={styles.reportProblemTitle}>Report Problem</AppText>
+          <TextInput
+            editable={!isLoading}
+            maxLength={250}
+            multiline={true}
+            onChangeText={setProblemDescription}
+            placeholder="Describe your problem..."
+            subStyle={styles.inputProblem}
+            style={[
+              styles.problemInput,
+              { height: Math.min(100, Math.max(60, height)) },
+            ]}
+            onContentSizeChange={(event) =>
+              setHeight(event.nativeEvent.contentSize.height)
+            }
+          />
+          <View style={styles.actionContainer}>
+            <AppText style={styles.problemDescriptionLength}>
+              {problemDescription.length}/250
+            </AppText>
+            <AppButton
+              disabled={
+                problemDescription.replace(/\s/g, "").length >= 1 && !isLoading
+                  ? false
+                  : true
               }
+              onPress={handleProblemSubmitPress}
+              style={[
+                styles.submitProblemButton,
+                {
+                  backgroundColor:
+                    problemDescription.replace(/\s/g, "").length >= 1 &&
+                    !isLoading
+                      ? defaultStyles.colors.yellow_Variant
+                      : defaultStyles.colors.light,
+                },
+              ]}
+              subStyle={styles.submitProblemButtonSub}
+              title="Report"
             />
-            <View style={styles.actionContainer}>
-              <AppText style={styles.problemDescriptionLength}>
-                {problemDescription.length}/250
-              </AppText>
-              <AppButton
-                disabled={
-                  problemDescription.replace(/\s/g, "").length >= 1 &&
-                  !isLoading
-                    ? false
-                    : true
-                }
-                onPress={handleProblemSubmitPress}
-                style={[
-                  styles.submitProblemButton,
-                  {
-                    backgroundColor:
-                      problemDescription.replace(/\s/g, "").length >= 1 &&
-                      !isLoading
-                        ? defaultStyles.colors.yellow_Variant
-                        : defaultStyles.colors.light,
-                  },
-                ]}
-                subStyle={styles.submitProblemButtonSub}
-                title="Report"
-              />
-            </View>
           </View>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 }

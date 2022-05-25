@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { View, Modal, Keyboard, TouchableWithoutFeedback } from "react-native";
+import { View, Modal } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 
 import defaultStyles from "../config/styles";
@@ -23,8 +23,6 @@ function EditNameModal({
     setOpenEditName(false);
   };
 
-  const handleKeyboardDismiss = () => Keyboard.dismiss();
-
   const doNothing = () => null;
   return (
     <Modal
@@ -32,72 +30,70 @@ function EditNameModal({
       transparent={true}
       visible={openEditName}
     >
-      <TouchableWithoutFeedback onPress={handleKeyboardDismiss}>
-        <View style={styles.modal}>
-          <Backdrop onPress={savingName ? doNothing : handleHideEditName} />
-          <View style={styles.editContainer}>
-            <AppText style={styles.editName}>Edit your name</AppText>
-            <View style={styles.inputBoxContainer}>
-              <AppTextInput
-                editable={!savingName}
-                maxLength={30}
-                minLength={3}
-                onChangeText={(text) => setName(text)}
-                placeholder={user.name}
-                style={styles.inputBox}
-                subStyle={{ opacity: 0.8, paddingHorizontal: scale(5) }}
-                value={name}
-              />
-              <AppText style={styles.nameLength}>{name.length}/30</AppText>
-            </View>
-            <View style={styles.actionButtonContainer}>
+      <View style={styles.modal}>
+        <Backdrop onPress={savingName ? doNothing : handleHideEditName} />
+        <View style={styles.editContainer}>
+          <AppText style={styles.editName}>Edit your name</AppText>
+          <View style={styles.inputBoxContainer}>
+            <AppTextInput
+              editable={!savingName}
+              maxLength={30}
+              minLength={3}
+              onChangeText={(text) => setName(text)}
+              placeholder={user.name}
+              style={styles.inputBox}
+              subStyle={{ opacity: 0.8, paddingHorizontal: scale(5) }}
+              value={name}
+            />
+            <AppText style={styles.nameLength}>{name.length}/30</AppText>
+          </View>
+          <View style={styles.actionButtonContainer}>
+            <AppButton
+              disabled={savingName}
+              onPress={() => {
+                setOpenEditName(false);
+                setName(user.name);
+              }}
+              style={[
+                styles.button,
+                { backgroundColor: defaultStyles.colors.light },
+              ]}
+              subStyle={{ color: defaultStyles.colors.dark, opacity: 0.8 }}
+              title="Cancel"
+            />
+            <ApiProcessingContainer
+              processing={savingName}
+              style={styles.apiProcessingContainer}
+            >
               <AppButton
-                disabled={savingName}
-                onPress={() => {
-                  setOpenEditName(false);
-                  setName(user.name);
-                }}
+                disabled={
+                  name &&
+                  name.replace(/\s/g, "").length >= 4 &&
+                  !savingName &&
+                  name !== user.name
+                    ? false
+                    : true
+                }
+                onPress={handleNameChange}
                 style={[
                   styles.button,
-                  { backgroundColor: defaultStyles.colors.light },
+                  {
+                    backgroundColor:
+                      name &&
+                      name.replace(/\s/g, "").length >= 4 &&
+                      !savingName &&
+                      name !== user.name
+                        ? defaultStyles.colors.yellow_Variant
+                        : defaultStyles.colors.light,
+                  },
                 ]}
-                subStyle={{ color: defaultStyles.colors.dark, opacity: 0.8 }}
-                title="Cancel"
+                subStyle={styles.saveButtonSub}
+                title="Save"
               />
-              <ApiProcessingContainer
-                processing={savingName}
-                style={styles.apiProcessingContainer}
-              >
-                <AppButton
-                  disabled={
-                    name &&
-                    name.replace(/\s/g, "").length >= 4 &&
-                    !savingName &&
-                    name !== user.name
-                      ? false
-                      : true
-                  }
-                  onPress={handleNameChange}
-                  style={[
-                    styles.button,
-                    {
-                      backgroundColor:
-                        name &&
-                        name.replace(/\s/g, "").length >= 4 &&
-                        !savingName &&
-                        name !== user.name
-                          ? defaultStyles.colors.yellow_Variant
-                          : defaultStyles.colors.light,
-                    },
-                  ]}
-                  subStyle={styles.saveButtonSub}
-                  title="Save"
-                />
-              </ApiProcessingContainer>
-            </View>
+            </ApiProcessingContainer>
           </View>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 }

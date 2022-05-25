@@ -63,6 +63,7 @@ function SendThoughtsInput({
   message,
   setMessage,
   onCameraImageSelection,
+  inputRef,
 }) {
   dayjs.extend(relativeTime);
   let currentDate = new Date();
@@ -308,6 +309,7 @@ function SendThoughtsInput({
         )}
         <View style={[styles.container]}>
           <TextInput
+            ref={inputRef}
             onImageChange={
               focused && activeChat
                 ? (event) => submit("", event.nativeEvent.linkUri)

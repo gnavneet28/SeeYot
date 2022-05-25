@@ -1,11 +1,5 @@
 import React, { memo, useState } from "react";
-import {
-  View,
-  Modal,
-  Keyboard,
-  TouchableWithoutFeedback,
-  TextInput,
-} from "react-native";
+import { View, Modal, TextInput } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 
@@ -23,7 +17,6 @@ function EditGroupPasswordModal({
   group = { password: "" },
 }) {
   const [password, setPassword] = useState(group.password);
-  const handleDismissKeyboard = () => Keyboard.dismiss();
 
   const onSubmit = () => {
     handleSubmitPassword(password);
@@ -38,54 +31,52 @@ function EditGroupPasswordModal({
       transparent={true}
       visible={openPasswordModal}
     >
-      <TouchableWithoutFeedback onPress={handleDismissKeyboard}>
-        <View style={styles.groupInfoModal}>
-          <Backdrop onPress={handleClosePasswordModal} />
-          <View style={styles.closeMessageIconContainer}>
-            <AntDesign
-              onPress={handleClosePasswordModal}
-              name="downcircle"
-              color={defaultStyles.colors.secondary_Variant}
-              size={scale(28)}
+      <View style={styles.groupInfoModal}>
+        <Backdrop onPress={handleClosePasswordModal} />
+        <View style={styles.closeMessageIconContainer}>
+          <AntDesign
+            onPress={handleClosePasswordModal}
+            name="downcircle"
+            color={defaultStyles.colors.secondary_Variant}
+            size={scale(28)}
+          />
+        </View>
+        <View style={styles.optionsContainerReport}>
+          <AppText style={styles.reportProblemTitle}>Edit Password</AppText>
+          <TextInput
+            editable={!isLoading}
+            maxLength={30}
+            onChangeText={setPassword}
+            placeholder="Set Password"
+            value={password}
+            style={styles.groupInfoInput}
+          />
+          <View style={styles.actionContainer}>
+            <AppText style={styles.groupInfoLength}>
+              {password.length}/30
+            </AppText>
+            <AppButton
+              disabled={
+                password.replace(/\s/g, "").length >= 8 && !isLoading
+                  ? false
+                  : true
+              }
+              onPress={onSubmit}
+              style={[
+                styles.submitGroupInfoButton,
+                {
+                  backgroundColor:
+                    password.replace(/\s/g, "").length >= 1 && !isLoading
+                      ? defaultStyles.colors.yellow_Variant
+                      : defaultStyles.colors.light,
+                },
+              ]}
+              subStyle={styles.submitGroupInfoButtonSub}
+              title="Save"
             />
-          </View>
-          <View style={styles.optionsContainerReport}>
-            <AppText style={styles.reportProblemTitle}>Edit Password</AppText>
-            <TextInput
-              editable={!isLoading}
-              maxLength={30}
-              onChangeText={setPassword}
-              placeholder="Set Password"
-              value={password}
-              style={styles.groupInfoInput}
-            />
-            <View style={styles.actionContainer}>
-              <AppText style={styles.groupInfoLength}>
-                {password.length}/30
-              </AppText>
-              <AppButton
-                disabled={
-                  password.replace(/\s/g, "").length >= 8 && !isLoading
-                    ? false
-                    : true
-                }
-                onPress={onSubmit}
-                style={[
-                  styles.submitGroupInfoButton,
-                  {
-                    backgroundColor:
-                      password.replace(/\s/g, "").length >= 1 && !isLoading
-                        ? defaultStyles.colors.yellow_Variant
-                        : defaultStyles.colors.light,
-                  },
-                ]}
-                subStyle={styles.submitGroupInfoButtonSub}
-                title="Save"
-              />
-            </View>
           </View>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 }
