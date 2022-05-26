@@ -280,8 +280,27 @@ function AppNavigator(props) {
   }, []);
 
   useNotifications((data) => {
+    //console.log(data.notification.request.content);
     if (data.notification.request.content.title == "Echo") {
       return;
+    }
+    if (data.notification.request.content.title == "Group Reply") {
+      return navigation.navigate(Constant.GROUP_NAVIGATOR, {
+        screen: Constant.FIND_GROUP_SCREEN,
+        params: {
+          name: data.notification.request.content.data.groupName,
+          password: data.notification.request.content.data.groupPassword,
+        },
+      });
+    }
+    if (data.notification.request.content.title == "Group Chat Invite") {
+      return navigation.navigate(Constant.GROUP_NAVIGATOR, {
+        screen: Constant.FIND_GROUP_SCREEN,
+        params: {
+          name: data.notification.request.content.data.groupName,
+          password: data.notification.request.content.data.groupPassword,
+        },
+      });
     }
     if (
       data.notification.request.content.data.message !==
