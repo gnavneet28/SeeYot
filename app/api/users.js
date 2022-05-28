@@ -186,6 +186,8 @@ const removeGroupFromHistory = (id) =>
 const reportUser = (id, report) =>
   apiClient.put(endPoint + "/reportUser/" + id, { report });
 
+const updateLastSeen = () => apiClient.put(endPoint + "/update/lastSeen", {});
+
 export default {
   addContact,
   addFavorite,
@@ -224,6 +226,7 @@ export default {
   updateEcho,
   updateEchoWhenMessage,
   updateEchoWhenPhotoTap,
+  updateLastSeen,
   updatePhotoTapsCount,
   updatePoints,
   updateReceivedMessagesCount,

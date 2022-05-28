@@ -18,8 +18,6 @@ import HomeMessagesList from "../components/HomeMessagesList";
 import InfoAlert from "../components/InfoAlert";
 import Screen from "../components/Screen";
 
-import usersData from "../../PeculiarUserData";
-
 import Constant from "../navigation/NavigationConstants";
 
 import useAuth from "../auth/useAuth";
@@ -41,8 +39,6 @@ import defaultStyles from "../config/styles";
 import ScreenSub from "../components/ScreenSub";
 
 function HomeScreen({ navigation }) {
-  // console.log(usersData);
-
   dayjs.extend(relativeTime);
   const { user, setUser } = useAuth();
   let isUnmounting = false;
@@ -85,10 +81,15 @@ function HomeScreen({ navigation }) {
     if (problem) return;
   }, []);
 
+  const updateLastSeen = () => {
+    return usersApi.updateLastSeen();
+  };
+
   // on page mount and unmount
   useEffect(() => {
     clearJunkData();
     updateCurrentUser();
+    updateLastSeen();
 
     return () => (isUnmounting = true);
   }, []);
@@ -195,7 +196,7 @@ function HomeScreen({ navigation }) {
   }, []);
 
   const handleLeftPress = useCallback(() => {
-    Linking.openURL("http://www.seeyot.com/how_it_works");
+    Linking.openURL("https://seeyot.com/how_it_works");
   }, []);
 
   // EMPTY FRIENDLIST

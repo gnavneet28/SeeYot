@@ -25,15 +25,15 @@ function HelpScreen({ navigation }) {
   );
 
   const openPrivacyPage = () => {
-    Linking.openURL("http://www.seeyot.com/privacy_policy");
+    Linking.openURL("https://seeyot.com/privacy_policy");
   };
 
   const openTermsPage = () => {
-    Linking.openURL("http://www.seeyot.com/terms_of_service");
+    Linking.openURL("https://seeyot.com/terms_of_service");
   };
 
   const openHowItWorksPage = () => {
-    Linking.openURL("http://www.seeyot.com/how_it_works");
+    Linking.openURL("https://seeyot.com/how_it_works");
   };
 
   const handleOpenMail = () => {
