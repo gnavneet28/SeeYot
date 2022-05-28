@@ -9,13 +9,6 @@ const storeDetails = async (data) => {
     phoneNumber: data.phoneNumber,
   };
 
-  let prevAdsStats = await asyncStorage.get(DataConstants.ADSSTATS);
-
-  const adStats = {
-    joinedAt: data.joinedAt,
-    numberOfAdsSeen: prevAdsStats ? prevAdsStats.numberOfAdsSeen : [],
-  };
-
   await asyncStorage.store(DataConstants.VIP, data.vip);
   await asyncStorage.store(DataConstants.BLOCKED, data.blocked);
   await asyncStorage.store(DataConstants.CONTACTS, data.contacts);
@@ -29,9 +22,7 @@ const storeDetails = async (data) => {
   await asyncStorage.store(DataConstants.POINTS, data.points);
   await asyncStorage.store(DataConstants.FAVORITES, data.favorites);
   await asyncStorage.store(DataConstants.MESSAGES, data.messages);
-  await asyncStorage.store(DataConstants.ADSSTATS, adStats);
   await asyncStorage.store(DataConstants.GROUP_HISTORY, data.groupHistory);
-  //await asyncStorage.store(DataConstants.STATS, data.statsPresent);
 };
 
 export default storeDetails;

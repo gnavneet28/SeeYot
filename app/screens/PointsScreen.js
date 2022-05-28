@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import { View, ScrollView, Modal } from "react-native";
+import { View, ScrollView } from "react-native";
 import { AdMobRewarded } from "expo-ads-admob";
 import MaterialCommunityIcon from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
-import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
 import { showMessage } from "react-native-flash-message";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 import { PROD_AD_ID, DEV_AD_ID } from "@env";
@@ -16,7 +15,6 @@ import AppText from "../components/AppText";
 import AppTextInput from "../components/AppTextInput";
 import Details from "../components/Details";
 import InfoAlert from "../components/InfoAlert";
-import Information from "../components/Information";
 import LoadingIndicator from "../components/LoadingIndicator";
 import Screen from "../components/Screen";
 
@@ -27,19 +25,10 @@ import defaultStyles from "../config/styles";
 import debounce from "../utilities/debounce";
 import storeDetails from "../utilities/storeDetails";
 import apiActivity from "../utilities/apiActivity";
-import asyncStorage from "../utilities/cache";
-import DataConstants from "../utilities/DataConstants";
-import authorizeAds, {
-  showAdsSeenInLastTwoMinutes,
-  showAdsSeenInLastTwentyFourHours,
-  showAccountDays,
-} from "../utilities/authorizeAds";
 
 import usersApi from "../api/users";
-import ModalFallback from "../components/ModalFallback";
 import ScreenSub from "../components/ScreenSub";
 import defaultProps from "../utilities/defaultProps";
-import Backdrop from "../components/Backdrop";
 
 const Points = {
   totalPoints: 0,
@@ -60,13 +49,7 @@ function PointsScreen({ navigation }) {
   const { tackleProblem } = apiActivity;
 
   // STATES
-  const [currentAdsStats, setCurrentAdsStats] = useState({
-    seenInLastTwoMinutes: 0,
-    seenInLastTwentyFourHours: 0,
-    accountLife: 0,
-  });
   const [collectingPoints, setCollectingPoints] = useState(false);
-  const [showAdsInfo, setShowAdsInfo] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
   const [infoAlert, setInfoAlert] = useState({
     infoAlertMessage: "",
@@ -100,23 +83,6 @@ function PointsScreen({ navigation }) {
     }
   }, [isFocused]);
 
-  // TODO:
-  const calculateAdsStats = async () => {
-    let seenInLastTwoMinutes = await showAdsSeenInLastTwoMinutes();
-    let seenInLastTwentyFourHours = await showAdsSeenInLastTwentyFourHours();
-    let accountLife = showAccountDays(user);
-
-    setCurrentAdsStats({
-      seenInLastTwoMinutes,
-      seenInLastTwentyFourHours,
-      accountLife,
-    });
-  };
-
-  useEffect(() => {
-    calculateAdsStats();
-  }, [collectingPoints, showAdsInfo, user]);
-
   // HEADER ACTION
   const handleBack = useCallback(
     debounce(
@@ -143,10 +109,6 @@ function PointsScreen({ navigation }) {
     const { ok, problem, data } = await usersApi.updatePoints();
     if (ok) {
       ReactNativeHapticFeedback.trigger("impactMedium", optionsVibrate);
-      let newAdStats = await asyncStorage.get(DataConstants.ADSSTATS);
-      newAdStats.numberOfAdsSeen.push(new Date());
-
-      await asyncStorage.store(DataConstants.ADSSTATS, newAdStats);
       await storeDetails(data.user);
       setCollectingPoints(false);
       setUser(data.user);
@@ -202,11 +164,6 @@ function PointsScreen({ navigation }) {
   const handleShowAd = debounce(
     async () => {
       setCollectingPoints(true);
-      const canShowAd = await authorizeAds();
-      if (!canShowAd) {
-        setCollectingPoints(false);
-        return setShowAdsInfo(true);
-      }
       try {
         await AdMobRewarded.setAdUnitID(AD_ID);
         await AdMobRewarded.requestAdAsync();
@@ -346,50 +303,7 @@ function PointsScreen({ navigation }) {
                 Ad watch, you will get 5 points.
               </AppText>
             </View>
-            <AppText onPress={() => setShowAdsInfo(true)}>
-              Terms and Condition.
-            </AppText>
           </ScrollView>
-          {showAdsInfo ? <ModalFallback /> : null}
-          <Modal
-            visible={showAdsInfo}
-            onRequestClose={() => setShowAdsInfo(false)}
-            transparent={true}
-            animationType="slide"
-          >
-            <View style={styles.adsInfoContainerBackground}>
-              <Backdrop onPress={() => setShowAdsInfo(false)} />
-              <View style={styles.closeAdsInfoIconContainer}>
-                <AntDesign
-                  onPress={() => setShowAdsInfo(false)}
-                  name="downcircle"
-                  color={defaultStyles.colors.tomato}
-                  size={scale(28)}
-                />
-              </View>
-              <View style={styles.adsInfoContainer}>
-                <AppText style={styles.adsTermAndConditionInfo}>
-                  Terms to use Ads to avail SeeYot Vip membership.
-                </AppText>
-                <Information
-                  IconCategory={MaterialCommunityIcon}
-                  iconName="google-ads"
-                  iconSize={scale(25)}
-                  data={currentAdsStats.seenInLastTwoMinutes}
-                  information="Ads seen in last 2 minutes"
-                  infoDetails="You can watch only 1 ad within 2 minutes. (successful watch)"
-                />
-                <Information
-                  IconCategory={MaterialCommunityIcon}
-                  iconName="google-ads"
-                  iconSize={scale(25)}
-                  data={currentAdsStats.seenInLastTwentyFourHours}
-                  information="Ads seen in last 24 hours"
-                  infoDetails="You can watch only 8 ads within 24 hours. (successful watch)"
-                />
-              </View>
-            </View>
-          </Modal>
         </ScreenSub>
       </Screen>
       <InfoAlert

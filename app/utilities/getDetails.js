@@ -16,7 +16,6 @@ const getDetails = async () => {
   const messages = await asyncStorage.get(DataConstants.MESSAGES);
   const phoneContacts = await asyncStorage.get(DataConstants.PHONE_CONTACTS);
   const groupHistory = await asyncStorage.get(DataConstants.GROUP_HISTORY);
-  //const statsPresent = await asyncStorage.get(DataConstants.STATS);
   let cachedUser = {
     _id: currentUser ? currentUser._id : "",
     blocked,
@@ -35,7 +34,6 @@ const getDetails = async () => {
     thoughts: thoughts,
     vip,
     groupHistory,
-    //statsPresent,
   };
 
   return cachedUser;

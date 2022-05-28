@@ -117,7 +117,7 @@ function SubscriptionScreen({ navigation, route }) {
   useEffect(() => {
     connectToTheAppStore();
 
-    return;
+    return () => {};
   }, []);
 
   const handlePayment = debounce(
