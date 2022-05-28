@@ -400,6 +400,13 @@ function GroupScreen({ navigation, route }) {
         packageName: "com.seeyot",
         fallbackUrl: "https://play.google.com/store/apps/details?id=com.seeyot",
       },
+      social: {
+        descriptionText:
+          "Come on board and connect / re-connect with someone you think, you cannot find any other way to do so.",
+        imageUrl:
+          "https://seeyot-photos.s3.ap-south-1.amazonaws.com/link_logo.png",
+        title: "SeeYot",
+      },
       link: `https://seeyot.page.link/groupInvite?a=${group.name}&b=${
         group.password ? group.password : ""
       }`,

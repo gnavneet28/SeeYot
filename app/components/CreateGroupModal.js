@@ -115,6 +115,13 @@ function CreateGroupModal({ visible, onRequestClose, onCreate }) {
         packageName: "com.seeyot",
         fallbackUrl: "https://play.google.com/store/apps/details?id=com.seeyot",
       },
+      social: {
+        descriptionText:
+          "Come on board and connect / re-connect with someone you think, you cannot find any other way to do so.",
+        imageUrl:
+          "https://seeyot-photos.s3.ap-south-1.amazonaws.com/link_logo.png",
+        title: "SeeYot",
+      },
       link: `https://seeyot.page.link/groupInvite?a=${name}&b=${password}`,
       navigation: {
         forcedRedirectEnabled: false,
@@ -341,11 +348,10 @@ const styles = ScaledSheet.create({
     height: "40@s",
   },
   groupInfo: {
-    borderColor: defaultStyles.colors.light,
+    borderBottomColor: defaultStyles.colors.light,
+    borderBottomWidth: "1@s",
     borderRadius: "5@s",
-    borderWidth: 1,
     color: defaultStyles.colors.dark_Variant,
-    elevation: 1,
     fontSize: "13@s",
     marginTop: "5@s",
     padding: "5@s",
@@ -368,8 +374,9 @@ const styles = ScaledSheet.create({
   },
   qrCodeContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    borderColor: defaultStyles.colors.light,
     borderRadius: "5@s",
+    borderWidth: "1@s",
     justifyContent: "center",
     marginTop: "20@s",
     padding: "5@s",
@@ -385,7 +392,8 @@ const styles = ScaledSheet.create({
   },
   selectNameContainer: {
     alignItems: "center",
-    backgroundColor: defaultStyles.colors.light,
+    borderLeftColor: defaultStyles.colors.light,
+    borderLeftWidth: "1@s",
     borderRadius: "5@s",
     marginVertical: "10@s",
     paddingHorizontal: "10@s",
@@ -393,7 +401,7 @@ const styles = ScaledSheet.create({
     width: "90%",
   },
   textInput: {
-    backgroundColor: defaultStyles.colors.white,
+    backgroundColor: defaultStyles.colors.light,
     borderRadius: "5@s",
     fontFamily: "ComicNeue-Bold",
     fontSize: "14@s",
