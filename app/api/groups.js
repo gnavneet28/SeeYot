@@ -119,6 +119,15 @@ const replyMessageCreator = (
     replyText,
   });
 
+const requestActiveUsers = (id) =>
+  apiClient.put(endPoint + "/requestActiveUsersCount/" + id, {});
+
+const sendActiveUser = (id, totalActiveUsers, requestedBy) =>
+  apiClient.put(endPoint + "/sendActiveUsersCount/" + id, {
+    totalActiveUsers,
+    requestedBy,
+  });
+
 export default {
   addActive,
   blockUser,
@@ -138,6 +147,8 @@ export default {
   removeGroupPicture,
   replyMessageCreator,
   reportGroup,
+  requestActiveUsers,
+  sendActiveUser,
   sendNewGroupMessage,
   setTyping,
   stopTyping,

@@ -14,6 +14,8 @@ import TotalActiveUsers from "./TotalActiveUsers";
 import GroupBlockedUsersModal from "./GroupBlockedUsersModal";
 import ImageLoadingComponent from "./ImageLoadingComponent";
 
+import groupsApi from "../api/groups";
+
 function MyGroupCard({
   onPress,
   groupItem,
@@ -33,7 +35,12 @@ function MyGroupCard({
 
   let isUnmounting = false;
 
+  const requestCurrentGroupActiveUsers = async () => {
+    await groupsApi.requestActiveUsers(group._id);
+  };
+
   useEffect(() => {
+    requestCurrentGroupActiveUsers();
     return () => (isUnmounting = true);
   }, []);
 
@@ -82,6 +89,22 @@ function MyGroupCard({
       socket.off(`removeActive${group._id}`, listener2);
     };
   }, [activeUsers, group._id]);
+
+  // when groups appear for first time request total active users
+  useEffect(() => {
+    const listener = (data) => {
+      if (data.totalActiveUsers) {
+        if (data.totalActiveUsers.length && !isUnmounting) {
+          setActiveUsers(data.totalActiveUsers);
+        }
+      }
+    };
+    socket.on(`receiveTotalActiveUsers${group._id}${user._id}`, listener);
+
+    return () => {
+      socket.off(`receiveTotalActiveUsers${group._id}${user._id}`, listener);
+    };
+  }, [group._id]);
 
   if (!group.name)
     return (

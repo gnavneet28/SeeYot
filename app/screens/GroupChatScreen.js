@@ -317,14 +317,18 @@ function GroupChatScreen({ navigation, route }) {
   }, []);
 
   const handleRemoveReply = useCallback(() => {
-    translateX.value = withTiming(800);
-    setReply(defaultReply);
+    if (!isUnmounting) {
+      translateX.value = withTiming(800);
+      setReply(defaultReply);
+    }
   }, [reply]);
 
   const handleOnSelectReply = useCallback(
     (data) => {
-      translateX.value = withTiming(0);
-      setReply(data);
+      if (!isUnmounting) {
+        translateX.value = withTiming(0);
+        setReply(data);
+      }
     },
     [reply]
   );
@@ -490,6 +494,31 @@ function GroupChatScreen({ navigation, route }) {
       }
     };
   }, [isFocused, appStateVisible]);
+
+  // When somone from explore page or my groups page make a request
+  // to get total Active users
+
+  const sendTotalActiveUsers = (requestedBy) => {
+    if (activeUsers.length) {
+      if (activeUsers[0]._id == user._id && !isUnmounting) {
+        return groupsApi.sendActiveUser(group._id, activeUsers, requestedBy);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const listener = (data) => {
+      if (!isUnmounting) {
+        sendTotalActiveUsers(data.requestedBy);
+      }
+    };
+
+    socket.on(`requestTotalActiveUsers${group._id}`, listener);
+
+    return () => {
+      socket.off(`requestTotalActiveUsers${group._id}`, listener);
+    };
+  }, [group._id, activeUsers]);
 
   const resetTypeTime = () => {
     if (!isUnmounting) {
