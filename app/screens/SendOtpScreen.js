@@ -32,17 +32,12 @@ import Screen from "../components/Screen";
 import apiActivity from "../utilities/apiActivity";
 import OtpContext from "../utilities/otpContext";
 
-// TODO: For google verification
-// import usersApi from "../api/users";
-// import authStorage from "../auth/storage";
-// import storeDetails from "../utilities/storeDetails";
-
 import useAuth from "../auth/useAuth";
 import ApiProcessingContainer from "../components/ApiProcessingContainer";
 
 function SendOtpScreen({ navigation }) {
   // TODO: google verification
-  const { logIn, setUser } = useAuth();
+  const { logIn } = useAuth();
   const isFocused = useIsFocused();
 
   const nameInputRef = useRef(null);
@@ -178,6 +173,23 @@ function SendOtpScreen({ navigation }) {
     tackleProblem(problem, data, setInfoAlert);
   };
 
+  const handleSubmitOtpDemoAccount = async () => {
+    setIsLoading(true);
+
+    const { ok, data, problem, headers } = await verifyApi.signUpDemo();
+
+    if (ok) {
+      const authToken = headers["x-auth-token"];
+      await authStorage.storeToken(authToken);
+      await storeDetails(data);
+      setIsLoading(false);
+      return logIn(data);
+    }
+    setValue("");
+    setIsLoading(false);
+    tackleProblem(problem, data, setInfoAlert);
+  };
+
   // SUBMIT ACTION
   const handleSendOtp = async () => {
     setIsLoading(true);
@@ -208,21 +220,6 @@ function SendOtpScreen({ navigation }) {
     setOtpVisible(false);
     handleSendOtp();
   };
-
-  // TODO: for google verification
-  // const handleSubmitForm = async () => {
-  //   setIsLoading(true);
-
-  //   const { ok, problem, data } = await usersApi.getCurrentUser();
-
-  //   if (ok) {
-  //     await storeDetails(data);
-  //     setIsLoading(false);
-  //     return setUser(data);
-  //   }
-  //   setIsLoading(false);
-  //   tackleProblem(problem, data, setInfoAlert);
-  // };
 
   return (
     <>
@@ -315,7 +312,11 @@ function SendOtpScreen({ navigation }) {
                       ? false
                       : true
                   }
-                  onPress={handleSendOtp}
+                  onPress={
+                    number == 1234567890
+                      ? handleSubmitOtpDemoAccount
+                      : handleSendOtp
+                  }
                   style={[
                     styles.button,
                     {
