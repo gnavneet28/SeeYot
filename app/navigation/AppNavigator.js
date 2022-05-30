@@ -280,9 +280,14 @@ function AppNavigator(props) {
   }, []);
 
   useNotifications((data) => {
-    //console.log(data.notification.request.content);
     if (data.notification.request.content.title == "Echo") {
       return;
+    }
+    if (data.notification.request.content.title == "Active Chat") {
+      return navigation.navigate(Constant.SEND_THOUGHT_SCREEN, {
+        recipient: data.notification.request.content.data.recipient,
+        from: Constant.NOTIFICATION_SCREEN,
+      });
     }
     if (data.notification.request.content.title == "Group Reply") {
       return navigation.navigate(Constant.GROUP_NAVIGATOR, {
