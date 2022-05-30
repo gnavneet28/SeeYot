@@ -275,6 +275,13 @@ function ProfileScreen({ navigation }) {
   );
 
   // NAME CHANGE ACTION
+
+  const updateNameInput = (text) => {
+    if (/^[^!-\/:-@\[-`{-~]+$/.test(text) || text === "") {
+      setName(text.replace(/[^a-zA-Z0-9 ]/gm, ""));
+    }
+  };
+
   const handleNameChange = useCallback(async () => {
     setSavingName(true);
 
@@ -429,7 +436,7 @@ function ProfileScreen({ navigation }) {
       />
       <EditNameModal
         name={name}
-        setName={setName}
+        setName={updateNameInput}
         handleNameChange={handleNameChange}
         savingName={savingName}
         openEditName={openEditName}
