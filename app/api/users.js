@@ -120,7 +120,11 @@ const setPrivacyMessage = () =>
   apiClient.put(endPoint + "/me/privacy/message", {});
 
 const syncContacts = (phoneContacts) =>
-  apiClient.put(endPoint + "/sync/contacts", { phoneContacts });
+  apiClient.put(
+    endPoint + "/sync/contacts",
+    { phoneContacts }
+    // { maxBodyLength: "infinity", maxContentLength: "infinity" }
+  );
 
 const redeemPoints = (pointsToRedeem) =>
   apiClient.put(endPoint + "/me/redeem", { pointsToRedeem });

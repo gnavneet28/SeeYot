@@ -9,7 +9,7 @@ import { View, Linking } from "react-native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useIsFocused } from "@react-navigation/native";
-import { ScaledSheet } from "react-native-size-matters";
+import { ScaledSheet, scale } from "react-native-size-matters";
 import { showMessage } from "react-native-flash-message";
 
 import ContactList from "../components/ContactList";
@@ -195,6 +195,10 @@ function HomeScreen({ navigation }) {
     navigation.navigate(Constant.PROFILE_NAVIGATOR);
   }, []);
 
+  const handlePostPress = useCallback(() => {
+    navigation.navigate(Constant.POST_SCREEN);
+  }, []);
+
   const handleLeftPress = useCallback(() => {
     Linking.openURL("https://seeyot.com/how_it_works");
   }, []);
@@ -348,6 +352,7 @@ function HomeScreen({ navigation }) {
         <HomeAppHeader
           onPressLeft={handleLeftPress}
           onPressRight={handleRightPress}
+          onSeePostPress={handlePostPress}
           rightImageUrl={
             typeof user.picture !== "undefined" ? user.picture : ""
           }

@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import { ScaledSheet } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
-import { Linking } from "react-native";
+import { Linking, View } from "react-native";
 import { showMessage } from "react-native-flash-message";
 
 import Alert from "../components/Alert";
@@ -11,6 +11,7 @@ import Screen from "../components/Screen";
 import SettingsAction from "../components/SettingsAction";
 import ScreenSub from "../components/ScreenSub";
 import AppText from "../components/AppText";
+import Selection from "../components/Selection";
 
 import storeDetails from "../utilities/storeDetails";
 import debounce from "../utilities/debounce";
@@ -22,7 +23,7 @@ import defaultStyles from "../config/styles";
 import defaultProps from "../utilities/defaultProps";
 
 function SettingsScreen({ navigation }) {
-  const { setUser } = useAuth();
+  const { setUser, user } = useAuth();
   const isFocused = useIsFocused();
   let canShowOnSettingsScreen = useRef(true);
   let isUnmounting = false;
@@ -35,7 +36,11 @@ function SettingsScreen({ navigation }) {
 
   const [contactAlert, setContactAlert] = useState(false);
   const [removingContact, setRemovingContact] = useState(false);
+  const [changingEcho, setChangingEcho] = useState(false);
+  const [changingTapEcho, setChangingTapEcho] = useState(false);
   // const [accountAlert, setAccountAlert] = useState(false);
+
+  const doNull = useCallback(() => {}, []);
 
   // INFO ALERT ACTION
   const handleCloseInfoAlert = useCallback(
@@ -109,6 +114,55 @@ function SettingsScreen({ navigation }) {
 
   const handleChangePermission = async () => await Linking.openSettings();
 
+  // ECHO CONDITION ACTION
+  const handleMessageSelection = useCallback(
+    debounce(
+      async () => {
+        setChangingEcho(true);
+
+        const { data, ok, problem } = await usersApi.updateEchoWhenMessage();
+
+        if (ok) {
+          await storeDetails(data.user);
+          setUser(data.user);
+          return setChangingEcho(false);
+        }
+
+        setChangingEcho(false);
+        if (canShowOnSettingsScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
+      },
+      1000,
+      true
+    ),
+    [user]
+  );
+
+  const handlePhotoTapSelection = useCallback(
+    debounce(
+      async () => {
+        setChangingTapEcho(true);
+
+        const { data, ok, problem } = await usersApi.updateEchoWhenPhotoTap();
+
+        if (ok) {
+          await storeDetails(data.user);
+          setUser(data.user);
+          return setChangingTapEcho(false);
+        }
+
+        setChangingTapEcho(false);
+        if (canShowOnSettingsScreen.current) {
+          tackleProblem(problem, data, setInfoAlert);
+        }
+      },
+      2000,
+      true
+    ),
+    [user]
+  );
+
   return (
     <>
       <Screen style={styles.container}>
@@ -118,6 +172,29 @@ function SettingsScreen({ navigation }) {
           title="Settings"
         />
         <ScreenSub style={{ alignItems: "center" }}>
+          <View style={styles.echoBox}>
+            <AppText style={styles.echoWhen}>Echo when?</AppText>
+            <Selection
+              processing={changingEcho}
+              onPress={
+                !changingEcho && !changingTapEcho
+                  ? handleMessageSelection
+                  : doNull
+              }
+              opted={user.echoWhen.message}
+              value="Someone sends you their thoughts."
+            />
+            <Selection
+              processing={changingTapEcho}
+              onPress={
+                !changingTapEcho && !changingEcho
+                  ? handlePhotoTapSelection
+                  : doNull
+              }
+              opted={user.echoWhen.photoTap}
+              value="Someone taps on your profile picture."
+            />
+          </View>
           <SettingsAction
             processing={removingContact}
             title="Remove my Contacts from the server."
@@ -169,6 +246,20 @@ const styles = ScaledSheet.create({
     marginBottom: "10@s",
     textAlign: "left",
     width: "90%",
+  },
+  echoBox: {
+    alignItems: "center",
+    borderColor: defaultStyles.colors.light,
+    borderBottomWidth: 1,
+    marginTop: "5@s",
+    paddingTop: "10@s",
+    width: "95%",
+  },
+  echoWhen: {
+    alignSelf: "flex-start",
+    fontSize: "15@s",
+    paddingHorizontal: 10,
+    opacity: 0.8,
   },
 });
 

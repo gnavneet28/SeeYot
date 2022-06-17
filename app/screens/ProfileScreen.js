@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { ScrollView, Share, View, Text } from "react-native";
+import { ScrollView, Share, View } from "react-native";
 import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 import { showMessage } from "react-native-flash-message";
@@ -7,7 +7,6 @@ import { showMessage } from "react-native-flash-message";
 import AddPicture from "../components/AddPicture";
 import Alert from "../components/Alert";
 import AppHeader from "../components/AppHeader";
-import AppText from "../components/AppText";
 import EditNameModal from "../components/EditNameModal";
 import InfoAlert from "../components/InfoAlert";
 import LoadingIndicator from "../components/LoadingIndicator";
@@ -16,8 +15,10 @@ import ProfileOption from "../components/ProfileOption";
 import ProfileOptionsModal from "../components/ProfileOptionsModal";
 import ReportModal from "../components/ReportModal";
 import Screen from "../components/Screen";
-import Selection from "../components/Selection";
 import UserDetailsCard from "../components/UserDetailsCard";
+import AppText from "../components/AppText";
+import FavoritePostsList from "../components/FavoritePostsList";
+import AppActivityIndicator from "../components/ActivityIndicator";
 
 import Constant from "../navigation/NavigationConstants";
 
@@ -35,6 +36,7 @@ import usersApi from "../api/users";
 import defaultStyles from "../config/styles";
 import ScreenSub from "../components/ScreenSub";
 import defaultProps from "../utilities/defaultProps";
+import favoritePostsApi from "../api/favoritePosts";
 
 function ProfileScreen({ navigation }) {
   const { user, setUser, logOut } = useAuth();
@@ -55,8 +57,10 @@ function ProfileScreen({ navigation }) {
     showInfoAlert: false,
   });
   const [showLogOut, setShowLogOut] = useState(false);
-  const [changingEcho, setChangingEcho] = useState(false);
-  const [changingTapEcho, setChangingTapEcho] = useState(false);
+
+  const [postsAreReady, setPostsAreReady] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   // OnUnmount
   useEffect(() => {
@@ -225,55 +229,6 @@ function ProfileScreen({ navigation }) {
     [user]
   );
 
-  // ECHO CONDITION ACTION
-  const handleMessageSelection = useCallback(
-    debounce(
-      async () => {
-        setChangingEcho(true);
-
-        const { data, ok, problem } = await usersApi.updateEchoWhenMessage();
-
-        if (ok) {
-          await storeDetails(data.user);
-          setUser(data.user);
-          return setChangingEcho(false);
-        }
-
-        setChangingEcho(false);
-        if (canShowOnProfileScreen.current) {
-          tackleProblem(problem, data, setInfoAlert);
-        }
-      },
-      1000,
-      true
-    ),
-    [user]
-  );
-
-  const handlePhotoTapSelection = useCallback(
-    debounce(
-      async () => {
-        setChangingTapEcho(true);
-
-        const { data, ok, problem } = await usersApi.updateEchoWhenPhotoTap();
-
-        if (ok) {
-          await storeDetails(data.user);
-          setUser(data.user);
-          return setChangingTapEcho(false);
-        }
-
-        setChangingTapEcho(false);
-        if (canShowOnProfileScreen.current) {
-          tackleProblem(problem, data, setInfoAlert);
-        }
-      },
-      2000,
-      true
-    ),
-    [user]
-  );
-
   // NAME CHANGE ACTION
 
   const updateNameInput = (text) => {
@@ -339,9 +294,43 @@ function ProfileScreen({ navigation }) {
 
   const doNull = useCallback(() => {}, []);
 
+  // FavoritePosts
+
+  const getAllPosts = async () => {
+    const { ok, data, problem } = await favoritePostsApi.getAllMyPosts();
+    if (ok && !isUnmounting) {
+      setPosts(data.sort((a, b) => a.createdAt < b.createdAt));
+      return setPostsAreReady(true);
+    }
+    if (!isUnmounting) {
+      setPostsAreReady(true);
+    }
+    if (canShowOnProfileScreen.current) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
+  };
+
+  useEffect(() => {
+    if (isFocused) {
+      getAllPosts();
+    }
+  }, [isFocused]);
+
+  const handleSeeRepliesPress = useCallback((post) => {
+    navigation.navigate(Constant.POST_DETAILS_POFILE, {
+      id: post._id,
+    });
+  }, []);
+
+  const handleOnRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await getAllPosts();
+    setRefreshing(false);
+  }, []);
+
   return (
     <>
-      <Screen style={styles.container}>
+      <Screen>
         <AppHeader
           leftIcon="arrow-back"
           onPressLeft={handleBack}
@@ -350,67 +339,60 @@ function ProfileScreen({ navigation }) {
           title="Profile"
         />
         <ScreenSub>
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            style={{ width: "100%" }}
-            contentContainerStyle={{ flexGrow: 1 }}
-          >
-            <View style={styles.container}>
-              <AddPicture
-                icon={user.picture ? "edit" : "camera-alt"}
-                image={user.picture}
-                imageView={true}
-                onChangeImage={handleImageChange}
-                style={styles.addPicture}
-              />
-              <UserDetailsCard
-                data={user.name}
-                editable={true}
-                fw={true}
-                iconName="user-o"
-                size={scale(18)}
-                style={styles.userDetailsName}
-                title="Name"
-                onEditIconPress={() => setOpenEditName(true)}
-              />
-              <UserDetailsCard
-                data={user.phoneNumber.toString().slice(-10)}
-                fw={true}
-                iconName="phone"
-                size={scale(18)}
-                title="Phone Number"
-              />
-              <View style={styles.echoBox}>
-                <AppText style={styles.echoWhen}>Echo when?</AppText>
-                <Selection
-                  processing={changingEcho}
-                  onPress={
-                    !changingEcho && !changingTapEcho
-                      ? handleMessageSelection
-                      : doNull
-                  }
-                  opted={user.echoWhen.message}
-                  value="Someone sends you their thoughts."
-                />
-                <Selection
-                  processing={changingTapEcho}
-                  onPress={
-                    !changingTapEcho && !changingEcho
-                      ? handlePhotoTapSelection
-                      : doNull
-                  }
-                  opted={user.echoWhen.photoTap}
-                  value="Someone taps on your profile picture."
-                />
-              </View>
-              <ProfileOption
-                onPress={handleInvitePress}
-                title="Invite your friends"
-                icon="people"
-                style={styles.inviteOption}
-              />
+          <View style={styles.container}>
+            <AddPicture
+              icon={user.picture ? "edit" : "camera-alt"}
+              image={user.picture}
+              imageView={true}
+              onChangeImage={handleImageChange}
+              style={styles.addPicture}
+            />
+            <UserDetailsCard
+              data={user.name}
+              editable={true}
+              fw={true}
+              iconName="user-o"
+              size={scale(18)}
+              style={styles.userDetailsName}
+              title="Name"
+              onEditIconPress={() => setOpenEditName(true)}
+            />
+            <UserDetailsCard
+              data={user.phoneNumber.toString().slice(-10)}
+              fw={true}
+              iconName="phone"
+              size={scale(18)}
+              title="Phone Number"
+            />
+            <ProfileOption
+              onPress={handleInvitePress}
+              title="Invite your friends"
+              icon="people"
+              style={styles.inviteOption}
+            />
+            <AppText style={styles.allPostTitle}>All posts</AppText>
+            <View style={styles.listContainer}>
+              {!postsAreReady ? (
+                <AppActivityIndicator />
+              ) : (
+                <>
+                  {posts.length ? (
+                    <FavoritePostsList
+                      showReplyOption={false}
+                      posts={posts}
+                      onReplyPress={handleSeeRepliesPress}
+                      onRefresh={handleOnRefresh}
+                      refreshing={refreshing}
+                    />
+                  ) : (
+                    <AppText style={styles.noPostInfo}>
+                      No posts to show.
+                    </AppText>
+                  )}
+                </>
+              )}
             </View>
-          </ScrollView>
+          </View>
         </ScreenSub>
       </Screen>
 
@@ -463,6 +445,15 @@ function ProfileScreen({ navigation }) {
   );
 }
 const styles = ScaledSheet.create({
+  allPostTitle: {
+    width: "100%",
+    textAlign: "center",
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    color: defaultStyles.colors.dark,
+    paddingVertical: "7@s",
+    // borderTopRightRadius: "20@s",
+    // borderTopLeftRadius: "20@s",
+  },
   text: {},
   body: {},
   addPicture: {
@@ -471,21 +462,8 @@ const styles = ScaledSheet.create({
   },
   container: {
     alignItems: "center",
+    flex: 1,
     width: "100%",
-  },
-  echoBox: {
-    alignItems: "center",
-    borderColor: defaultStyles.colors.light,
-    borderTopWidth: 1,
-    marginTop: "5@s",
-    paddingTop: "10@s",
-    width: "95%",
-  },
-  echoWhen: {
-    alignSelf: "flex-start",
-    fontSize: "15@s",
-    paddingHorizontal: 10,
-    opacity: 0.8,
   },
   inviteOption: {
     borderColor: defaultStyles.colors.light,
@@ -495,6 +473,19 @@ const styles = ScaledSheet.create({
   },
   userDetailsName: {
     borderBottomWidth: 1,
+  },
+  listContainer: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.primary,
+    flex: 1,
+    width: "100%",
+  },
+  noPostInfo: {
+    alignSelf: "center",
+    color: defaultStyles.colors.white,
+    marginTop: "100@s",
+    textAlign: "center",
+    width: "60%",
   },
 });
 

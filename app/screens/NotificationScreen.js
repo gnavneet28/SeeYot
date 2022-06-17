@@ -286,6 +286,17 @@ function NotificationScreen({ navigation }) {
     });
   }, []);
 
+  const handleTapToSeePostReply = useCallback((notification) => {
+    navigation.navigate(Constant.POST_DETAILS, { id: notification.data._id });
+  }, []);
+
+  const handleTapToSeeReaction = useCallback((notification) => {
+    navigation.navigate(Constant.REACTION_DETAILS_SCREEN, {
+      post: notification.data.post,
+      reaction: notification.data.reaction,
+    });
+  }, []);
+
   const handleSendThoughtsPress = useCallback((user) => {
     setShowGroupReplyModal(defaultGroupReply);
     navigation.navigate(Constant.SEND_THOUGHT_SCREEN, {
@@ -374,6 +385,8 @@ function NotificationScreen({ navigation }) {
               refreshing={refreshing}
               tapToVisitGroup={handleNotificationTapToVisitGroup}
               tapToSeeGroupReply={handleTapToSeeGroupReply}
+              tapToSeePostReply={handleTapToSeePostReply}
+              tapToSeeReaction={handleTapToSeeReaction}
             />
           </ApiContext.Provider>
         </ScreenSub>

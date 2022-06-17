@@ -240,4 +240,11 @@ export default {
     ],
     jobsCategory: ["Online", "Offline", "Others"],
   },
+  favoritePost: {
+    _id: "",
+    open: true,
+    text: "",
+    createdAt: "",
+    suggestions: [],
+  },
 };

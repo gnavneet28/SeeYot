@@ -1,8 +1,13 @@
-import React, { memo, useEffect } from "react";
-import { View, TouchableHighlight } from "react-native";
-import { ScaledSheet } from "react-native-size-matters";
+import React, { memo } from "react";
+import {
+  View,
+  TouchableHighlight,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { ScaledSheet, scale } from "react-native-size-matters";
 import LottieView from "lottie-react-native";
 import * as Animatable from "react-native-animatable";
+import MaterialCommunityIcons from "../../node_modules/react-native-vector-icons/MaterialCommunityIcons";
 
 import AppImage from "./AppImage";
 import AppText from "./AppText";
@@ -14,6 +19,7 @@ function AppHeader({
   onPressRight = () => null,
   onPressLeft = () => null,
   rightImageUrl = "",
+  onSeePostPress = () => {},
 }) {
   return (
     <View style={[styles.container, style]}>
@@ -35,20 +41,34 @@ function AppHeader({
           </AppText>
         </Animatable.View>
       </View>
-      <TouchableHighlight onPress={onPressRight} style={styles.rightOption}>
-        <Animatable.View
-          useNativeDriver={true}
-          animation="zoomIn"
-          style={styles.rightOption}
-        >
-          <AppImage
-            imageUrl={rightImageUrl}
-            onPress={onPressRight}
-            style={styles.image}
-            subStyle={styles.imageSub}
-          />
-        </Animatable.View>
-      </TouchableHighlight>
+      <View style={styles.rightOptionContainer}>
+        <>
+          <TouchableHighlight style={styles.postIcon} onPress={onSeePostPress}>
+            <>
+              <MaterialCommunityIcons
+                name="post"
+                size={scale(20)}
+                color={defaultStyles.colors.white}
+              />
+              <View style={styles.notificationDot} />
+            </>
+          </TouchableHighlight>
+          <TouchableWithoutFeedback onPress={onPressRight}>
+            <Animatable.View
+              useNativeDriver={true}
+              animation="zoomIn"
+              style={styles.rightOption}
+            >
+              <AppImage
+                imageUrl={rightImageUrl}
+                onPress={onPressRight}
+                style={styles.image}
+                subStyle={styles.imageSub}
+              />
+            </Animatable.View>
+          </TouchableWithoutFeedback>
+        </>
+      </View>
     </View>
   );
 }
@@ -94,6 +114,22 @@ const styles = ScaledSheet.create({
     position: "absolute",
     width: "50@s",
   },
+  rightOptionContainer: {
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: "50@s",
+    width: "85@s",
+    flexDirection: "row",
+    paddingHorizontal: "5@s",
+  },
+  postIcon: {
+    alignItems: "center",
+    backgroundColor: defaultStyles.colors.yellow_Variant,
+    borderRadius: "25@s",
+    height: "32@s",
+    justifyContent: "center",
+    width: "32@s",
+  },
   rightOption: {
     alignItems: "center",
     justifyContent: "center",
@@ -107,6 +143,16 @@ const styles = ScaledSheet.create({
     fontSize: "20@s",
     letterSpacing: "0.3@s",
     textAlign: "left",
+  },
+  notificationDot: {
+    backgroundColor: defaultStyles.colors.danger,
+    borderRadius: "10@s",
+    height: "10@s",
+    position: "absolute",
+    right: 0,
+    top: 0,
+    width: "10@s",
+    zIndex: 200,
   },
 });
 

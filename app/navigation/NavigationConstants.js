@@ -37,4 +37,9 @@ export default Constant = {
   VIP_SEARCH_NAVIGATOR: "VipSearchNavigator",
   VIP_SEARCH_SCREEN: "VipSearch",
   VIP_SENDTHOUGHT_SCREEN: "VipSendThought",
+  POST_SCREEN: "PostScreen",
+  POST_DETAILS: "PostDetailsScreen",
+  POST_DETAILS_POFILE: "PostDetailsProfile",
+  POST_PROFILE_SCREEN: "PostProfileScreen",
+  REACTION_DETAILS_SCREEN: "ReactionDetailsScreen",
 };

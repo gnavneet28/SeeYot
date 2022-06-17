@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as IAP from "expo-in-app-purchases";
 import dynamicLinks from "@react-native-firebase/dynamic-links";
+import * as Notifications from "expo-notifications";
 
 import IndexNavigator from "./IndexNavigator";
 import ProfileNavigator from "./ProfileNavigator";
@@ -29,6 +30,9 @@ import defaultProps from "../utilities/defaultProps";
 import usersApi from "../api/users";
 import debounce from "../utilities/debounce";
 import useKeyboard from "../hooks/useKeyboard";
+import PostsScreen from "../screens/PostsScreen";
+import PostDetailsScreen from "../screens/PostDetailsScreen";
+import ReactionDetailsScreen from "../screens/ReactionDetailsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -279,6 +283,80 @@ function AppNavigator(props) {
       });
   }, []);
 
+  const getLastNotification = async () => {
+    let result = await Notifications.getLastNotificationResponseAsync();
+    if (result) {
+      let notification = result.notification.request.content;
+      // Echo Notification
+      if (notification.title == "Echo") {
+        return;
+      }
+
+      // Active Chat
+      if (notification.title == "Active Chat") {
+        return navigation.navigate(Constant.SEND_THOUGHT_SCREEN, {
+          recipient: notification.data.recipient,
+          from: Constant.NOTIFICATION_SCREEN,
+        });
+      }
+
+      // Group Reply
+      if (notification.title == "Group Reply") {
+        return navigation.navigate(Constant.GROUP_NAVIGATOR, {
+          screen: Constant.FIND_GROUP_SCREEN,
+          params: {
+            name: notification.data.groupName,
+            password: notification.data.groupPassword,
+          },
+        });
+      }
+
+      // Group chat invite
+
+      if (notification.title == "Group Chat Invite") {
+        return navigation.navigate(Constant.GROUP_NAVIGATOR, {
+          screen: Constant.FIND_GROUP_SCREEN,
+          params: {
+            name: notification.data.groupName,
+            password: notification.data.groupPassword,
+          },
+        });
+      }
+
+      // Post Reply
+
+      if (notification.title == "Post Reply") {
+        return navigation.navigate(Constant.POST_DETAILS, {
+          id: notification.data.id,
+        });
+      }
+
+      // Reply Reation
+      if (notification.title == "Reply Reaction") {
+        return navigation.navigate(Constant.REACTION_DETAILS_SCREEN, {
+          post: notification.data.post,
+          reaction: notification.data.reaction,
+        });
+      }
+
+      // Favorite message
+      if (
+        notification.data.message !==
+        "One of your favorites sent you a message!"
+      ) {
+        return navigation.navigate(Constant.NOTIFICATION_NAVIGATOR);
+      }
+
+      navigation.navigate(Constant.INDEX_NAVIGATOR, {
+        screen: Constant.HOME_NAVIGATOR,
+      });
+    }
+  };
+
+  useEffect(() => {
+    getLastNotification();
+  }, []);
+
   useNotifications((data) => {
     if (data.notification.request.content.title == "Echo") {
       return;
@@ -305,6 +383,17 @@ function AppNavigator(props) {
           name: data.notification.request.content.data.groupName,
           password: data.notification.request.content.data.groupPassword,
         },
+      });
+    }
+    if (data.notification.request.content.title == "Post Reply") {
+      return navigation.navigate(Constant.POST_DETAILS, {
+        id: data.notification.request.content.data.id,
+      });
+    }
+    if (data.notification.request.content.title == "Reply Reaction") {
+      return navigation.navigate(Constant.REACTION_DETAILS_SCREEN, {
+        post: data.notification.request.content.data.post,
+        reaction: data.notification.request.content.data.reaction,
       });
     }
     if (
@@ -350,6 +439,15 @@ function AppNavigator(props) {
           <Tab.Screen
             name={Constant.FAVORITES_NAVIGATOR}
             component={FavoritesNavigator}
+          />
+          <Tab.Screen name={Constant.POST_SCREEN} component={PostsScreen} />
+          <Tab.Screen
+            name={Constant.POST_DETAILS}
+            component={PostDetailsScreen}
+          />
+          <Tab.Screen
+            name={Constant.REACTION_DETAILS_SCREEN}
+            component={ReactionDetailsScreen}
           />
         </Tab.Navigator>
       </ActiveMessagesContext.Provider>

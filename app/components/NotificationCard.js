@@ -54,6 +54,8 @@ function NotificationCard({
   onLongPress = () => {},
   index,
   tapToVisitGroup = () => {},
+  tapToSeePostReply = () => {},
+  tapToSeeReaction = () => {},
 }) {
   dayjs.extend(relativeTime);
   let currentDate = new Date();
@@ -199,6 +201,12 @@ function NotificationCard({
     if (notification.type == "GroupReply") {
       return () => tapToSeeGroupReply(notification);
     }
+    if (notification.type == "RepliedPost") {
+      return () => tapToSeePostReply(notification);
+    }
+    if (notification.type == "ReplyReaction") {
+      return () => tapToSeeReaction(notification);
+    }
 
     return () => null;
   };
@@ -212,7 +220,9 @@ function NotificationCard({
       notification.type == "Add" ||
       notification.type == "Unmatched" ||
       notification.type == "GroupReply" ||
-      notification.type == "GroupChatInvite"
+      notification.type == "GroupChatInvite" ||
+      notification.type == "RepliedPost" ||
+      notification.type == "ReplyReaction"
     )
       return 1;
     return 0.7;

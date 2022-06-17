@@ -8,6 +8,7 @@ import HelpScreen from "../screens/HelpScreen";
 import Constant from "./NavigationConstants";
 import SettingsScreen from "../screens/SettingsScreen";
 import InsightsScreen from "../screens/InsightsScreen";
+import PostDetailsScreen from "../screens/PostDetailsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -28,6 +29,10 @@ function ProfileNavigator(props) {
       <Tab.Screen name={Constant.HELP_SCREEN} component={HelpScreen} />
       <Tab.Screen name={Constant.SETTINGS} component={SettingsScreen} />
       <Tab.Screen name={Constant.INSIGHTS_SCREEN} component={InsightsScreen} />
+      <Tab.Screen
+        name={Constant.POST_DETAILS_POFILE}
+        component={PostDetailsScreen}
+      />
     </Tab.Navigator>
   );
 }

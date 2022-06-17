@@ -340,7 +340,7 @@ function AddEchoScreen({ navigation, route }) {
           onPressLeft={handleBack}
           rightIcon="help-outline"
           onPressRight={handleHelpPress}
-          tip="Echo messages are flash messages and will only be displayed when a person interacts with you by either tapping on your profile picture or by sending you thoughts. You can set the type of interaction from your profile."
+          tip="Echo messages are flash messages and will only be displayed when a person interacts with you by either tapping on your profile picture or by sending you thoughts. You can set the type of interaction from the settings screen."
           showTip={showHelp}
           setShowTip={setShowHelp}
         />

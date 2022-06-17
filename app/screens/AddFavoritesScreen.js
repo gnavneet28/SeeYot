@@ -271,7 +271,7 @@ function AddFavoritesScreen({ navigation }) {
         <AppHeader
           leftIcon="arrow-back"
           onPressLeft={handleBack}
-          title={`Favorites (${user.favorites.length})`}
+          title={`Favorites (${user.favorites.length}/143)`}
           rightIcon="help-outline"
           onPressRight={handleHelpPress}
           showTip={showHelp}
