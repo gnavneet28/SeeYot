@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { TextInput, View, ScrollView } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 
@@ -8,18 +8,28 @@ import ApiProcessingContainer from "./ApiProcessingContainer";
 import AppButton from "./AppButton";
 import AppHeader from "./AppHeader";
 import InfoAlert from "./InfoAlert";
+import Selection from "./Selection";
+import SearchBox from "./SearchBox";
 
 import defaultStyles from "../config/styles";
 
 import favoritePostsApi from "../api/favoritePosts";
+import usersApi from "../api/users";
 
 import apiActivity from "../utilities/apiActivity";
+
+import debounce from "../utilities/debounce";
+import SearchUserCard from "./SearchUserCard";
 
 function CreateFavoritePostModal({ visible, onRequestClose, onCreate }) {
   const { tackleProblem } = apiActivity;
   let isUnmounting = false;
 
   const [nameInput, setNameInput] = useState("");
+  const [audience, setAudience] = useState("InFavorites");
+  const [searchList, setSearchList] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [selected, setSelected] = useState("");
 
   const [creatingPost, setCreatingPost] = useState(false);
 
@@ -30,6 +40,10 @@ function CreateFavoritePostModal({ visible, onRequestClose, onCreate }) {
     infoAlertMessage: "",
   });
 
+  const handleSetAudience = (category) => {
+    setAudience(category);
+  };
+
   const handleCloseInfoAlert = () => {
     setInfoAlert({ showInfoAlert: false, infoAlertMessage: "" });
   };
@@ -39,11 +53,16 @@ function CreateFavoritePostModal({ visible, onRequestClose, onCreate }) {
       setCreatingPost(true);
     }
     const { ok, data, problem } = await favoritePostsApi.createNewPost(
-      nameInput
+      nameInput,
+      audience,
+      selected
     );
     if (ok && !isUnmounting) {
       setCreatingPost(false);
       setNameInput("");
+      setSelected("");
+      setSearching([]);
+      setAudience("InFavorites");
       return onCreate();
     }
     if (!isUnmounting) {
@@ -51,6 +70,38 @@ function CreateFavoritePostModal({ visible, onRequestClose, onCreate }) {
       tackleProblem(problem, data, setInfoAlert);
     }
   };
+
+  // SEARCH ACTION
+  const handleSearchQuery = useCallback(
+    debounce(
+      async (searchQuery) => {
+        if (searchQuery && searchQuery.length >= 2) {
+          if (!isUnmounting) {
+            setSearching(true);
+          }
+          const { data, problem, ok } = await usersApi.searchUser(searchQuery);
+          if (ok && !isUnmounting) {
+            setSearching(false);
+            return setSearchList(data);
+          }
+          if (!isUnmounting) {
+            setSearching(false);
+            tackleProblem(problem, data, setInfoAlert);
+          }
+        }
+        setSearchList([]);
+      },
+      500,
+      true
+    ),
+    [searchList]
+  );
+
+  const handleSetSelected = (u) => {
+    setSelected(u._id);
+  };
+
+  const doNull = () => {};
 
   return (
     <>
@@ -74,8 +125,8 @@ function CreateFavoritePostModal({ visible, onRequestClose, onCreate }) {
           >
             <View style={styles.scrollViewContainer}>
               <AppText style={styles.groupInfo}>
-                Share what is on your mind with people in your favorites and
-                people who added you in their favorites, anonymously.
+                Share what is on your mind with your selected people,
+                anonymously.
               </AppText>
               <View style={styles.inputBoxContainer}>
                 <TextInput
@@ -94,6 +145,57 @@ function CreateFavoritePostModal({ visible, onRequestClose, onCreate }) {
                   value={nameInput}
                 />
               </View>
+              <AppText style={styles.selectAudienceTitle}>
+                Select your audience
+              </AppText>
+              <Selection
+                onPress={
+                  creatingPost ? doNull : () => handleSetAudience("InFavorites")
+                }
+                opted={audience === "InFavorites"}
+                value="People in your favorites"
+              />
+              <Selection
+                onPress={
+                  creatingPost
+                    ? doNull
+                    : () => handleSetAudience("ContainFavorites")
+                }
+                opted={audience === "ContainFavorites"}
+                value="People who have added you in their favorites hi there hbvahv advanvsdm"
+              />
+              <Selection
+                onPress={
+                  creatingPost ? doNull : () => handleSetAudience("Contacts")
+                }
+                opted={audience === "Contacts"}
+                value="People in your friends list"
+              />
+              <Selection
+                onPress={
+                  creatingPost ? doNull : () => handleSetAudience("Specific")
+                }
+                opted={audience === "Specific"}
+                value="A specific person"
+              />
+              {audience === "Specific" ? (
+                <View style={styles.searchContainer}>
+                  <SearchBox
+                    list={searchList}
+                    loading={searching}
+                    onChange={handleSearchQuery}
+                    placeholder="Search to select"
+                  />
+                  {searchList.map((u) => (
+                    <SearchUserCard
+                      user={u}
+                      selected={selected}
+                      key={u._id}
+                      onPress={handleSetSelected}
+                    />
+                  ))}
+                </View>
+              ) : null}
             </View>
           </ScrollView>
           <ApiProcessingContainer
@@ -209,6 +311,23 @@ const styles = ScaledSheet.create({
     paddingHorizontal: "10@s",
     paddingVertical: "5@s",
     width: "95%",
+  },
+  selectAudienceTitle: {
+    textAlign: "left",
+    width: "100%",
+    paddingLeft: "20@s",
+    marginTop: "10@s",
+  },
+  searchContainer: {
+    backgroundColor: defaultStyles.colors.light,
+    flex: 1,
+    width: "100%",
+  },
+  result: {
+    width: "100%",
+    paddingLeft: "15@s",
+
+    paddingVertical: "7@s",
   },
 });
 

@@ -13,6 +13,9 @@ function FavoritePostsList({
   showActionButton,
   showMoreOptions,
   showReplyOption,
+  deleting,
+  onDeletePress,
+  showDeleteOption,
 }) {
   const keyExtractor = useCallback((item) => item._id.toString(), []);
 
@@ -25,6 +28,9 @@ function FavoritePostsList({
         showMoreOptions={showMoreOptions}
         showActionButton={showActionButton}
         showReplyOption={showReplyOption}
+        deleting={deleting}
+        onDelete={onDeletePress}
+        showDeleteOption={showDeleteOption}
       />
     ),
     []

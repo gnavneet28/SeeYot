@@ -2,8 +2,8 @@ import apiClient from "./apiClient";
 
 const endPoint = "/favoritePosts";
 
-const createNewPost = (text) =>
-  apiClient.post(endPoint + "/new/post", { text });
+const createNewPost = (text, audience, _id) =>
+  apiClient.post(endPoint + "/new/post", { text, audience, _id });
 
 const getPosts = () => apiClient.get(endPoint + "/all/favoritePosts", {});
 
@@ -26,6 +26,9 @@ const enableReplies = (id) =>
 
 const deletePost = (id) => apiClient.delete(endPoint + "/post/" + id, {});
 
+const removeFromFeed = (id) =>
+  apiClient.put(endPoint + "/remove/fromFeed/" + id, {});
+
 export default {
   addReaction,
   createNewPost,
@@ -36,4 +39,5 @@ export default {
   getPostDetails,
   getPosts,
   postSuggestion,
+  removeFromFeed,
 };

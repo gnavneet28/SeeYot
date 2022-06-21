@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useContext } from "react";
 import { View, TouchableOpacity } from "react-native";
 import { scale, ScaledSheet } from "react-native-size-matters";
 import AntDesign from "../../node_modules/react-native-vector-icons/AntDesign";
@@ -9,6 +9,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import defaultStyles from "../config/styles";
 
 import AppText from "./AppText";
+import DeleteAction from "./DeleteAction";
 
 let defaultPost = {
   _id: "",
@@ -23,6 +24,9 @@ const FavoritePostCard = ({
   onMoreOptionsPress = () => {},
   showReplyOption = true,
   showActionButton = true,
+  deleting,
+  onDelete = () => {},
+  showDeleteOption,
 }) => {
   dayjs.extend(relativeTime);
   const raiseOnPressAction = () => {
@@ -31,6 +35,10 @@ const FavoritePostCard = ({
 
   const raiseMoreOptionsPressAction = () => {
     onMoreOptionsPress(post);
+  };
+
+  const raiseDeleteAction = () => {
+    onDelete(post);
   };
   return (
     <View style={styles.container}>
@@ -42,7 +50,9 @@ const FavoritePostCard = ({
           color={defaultStyles.colors.yellow_Variant}
         />
         <View style={styles.postContentContainer}>
-          <AppText style={styles.postText}>{post.text}</AppText>
+          <AppText numberOfLines={10} style={styles.postText}>
+            {post.text}
+          </AppText>
           <AppText style={styles.postDate}>
             {dayjs(post.createdAt).fromNow()}
           </AppText>
@@ -60,6 +70,14 @@ const FavoritePostCard = ({
               style={styles.actionIcon}
             />
           </TouchableOpacity>
+        ) : null}
+        {showDeleteOption === true ? (
+          <DeleteAction
+            onPress={raiseDeleteAction}
+            apiAction={true}
+            style={styles.deleteIcon}
+            processing={post._id == deleting}
+          />
         ) : null}
       </View>
       {showActionButton ? (
@@ -125,6 +143,9 @@ const styles = ScaledSheet.create({
   },
   icon: {
     marginLeft: "5@s",
+    marginTop: "5@s",
+  },
+  deleteIcon: {
     marginTop: "5@s",
   },
 });

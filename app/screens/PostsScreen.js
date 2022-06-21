@@ -3,6 +3,7 @@ import { ScaledSheet, scale } from "react-native-size-matters";
 import { useIsFocused } from "@react-navigation/native";
 
 import Screen from "../components/Screen";
+import Alert from "../components/Alert";
 import ScreenSub from "../components/ScreenSub";
 import AppHeader from "../components/AppHeader";
 import InfoAlert from "../components/InfoAlert";
@@ -46,6 +47,9 @@ const PostsScreen = ({ navigation }) => {
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [interestedPost, setInterestedPost] = useState(defaultPost);
 
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [deleting, setDeleting] = useState("");
+
   // OnUnmount
   useEffect(() => {
     return () => (isUnmounting = true);
@@ -62,6 +66,22 @@ const PostsScreen = ({ navigation }) => {
   useEffect(() => {
     if (!isFocused && showCreatePostModal && !isUnmounting) {
       setShowCreatePostModal(false);
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (!isFocused && showDeleteAlert && !isUnmounting) {
+      setShowDeleteAlert(false);
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (interestedPost._id && !isUnmounting) {
+      setInterestedPost(defaultPost);
+    }
+
+    if (reply && !isUnmounting) {
+      setReply("");
     }
   }, [isFocused]);
 
@@ -104,13 +124,13 @@ const PostsScreen = ({ navigation }) => {
   const getAllPosts = async () => {
     const { ok, data, problem } = await favoritePostsApi.getPosts();
     if (ok && !isUnmounting) {
-      let newList = [];
-      data.forEach((p) => {
-        if (!newList.filter((post) => post._id == p._id).length) {
-          newList.push(p);
-        }
-      });
-      setPosts(newList.sort((a, b) => a.createdAt < b.createdAt));
+      // let newList = [];
+      // data.forEach((p) => {
+      //   if (!newList.filter((post) => post._id == p._id).length) {
+      //     newList.push(p);
+      //   }
+      // });
+      setPosts(data.sort((a, b) => a.createdAt < b.createdAt));
       return setIsReady(true);
     }
     if (!isUnmounting) {
@@ -176,6 +196,37 @@ const PostsScreen = ({ navigation }) => {
     }
   };
 
+  const handleShowAlert = useCallback((post) => {
+    setInterestedPost(post);
+    setShowDeleteAlert(true);
+  }, []);
+
+  const handleHideDeleteAlert = () => {
+    setInterestedPost("");
+    setShowDeleteAlert(false);
+  };
+
+  const handleRemoveFromFeed = async () => {
+    if (!isUnmounting) {
+      setDeleting(true);
+    }
+
+    const { ok, data, problem } = await favoritePostsApi.removeFromFeed(
+      interestedPost._id
+    );
+    if (ok && !isUnmounting) {
+      setDeleting(false);
+      getAllPosts();
+      return setShowDeleteAlert(false);
+    }
+    if (!isUnmounting) {
+      setDeleting(false);
+    }
+    if (canShowOnPostScreen.current) {
+      tackleProblem(problem, data, setInfoAlert);
+    }
+  };
+
   return (
     <>
       <Screen style={styles.container}>
@@ -194,7 +245,7 @@ const PostsScreen = ({ navigation }) => {
               {posts.length ? null : (
                 <AppText style={styles.noPostInfo}>
                   No posts to show. Be the first to share what is on your mind
-                  with your favorite people anonymously.
+                  with your selected people anonymously.
                 </AppText>
               )}
               <FavoritePostsList
@@ -202,6 +253,9 @@ const PostsScreen = ({ navigation }) => {
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
                 onReplyPress={handleReplyPress}
+                deleting={deleting}
+                onDeletePress={handleShowAlert}
+                showDeleteOption={true}
               />
             </>
           ) : (
@@ -227,6 +281,18 @@ const PostsScreen = ({ navigation }) => {
         leftPress={handleCloseInfoAlert}
         description={infoAlert.infoAlertMessage}
         visible={infoAlert.showInfoAlert}
+      />
+      <Alert
+        onRequestClose={handleHideDeleteAlert}
+        description="Remove this post from feed."
+        leftPress={handleHideDeleteAlert}
+        leftOption="Cancel"
+        rightOption="Ok"
+        rightPress={handleRemoveFromFeed}
+        setVisible={setShowDeleteAlert}
+        title="Remove"
+        visible={showDeleteAlert}
+        apiProcessing={deleting}
       />
     </>
   );
